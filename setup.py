@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# test commit
 
 from setuptools.command.build_ext import build_ext as _build_ext
 from setuptools import setup, find_packages
