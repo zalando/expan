@@ -1,0 +1,13 @@
+#!/bin/bash
+#
+# NB: Make sure your py.test is installed in the virtual environment you have
+# the requirements for expan installed in - otherwise it will use the system 
+# versions which might be out of date and cause erroneous errors.
+
+if [ -z $1 ]; then
+	args=tests
+else
+	args=$*
+fi
+
+PYTHONPATH=".:$PYTHONPATH" py.test $args
