@@ -9,6 +9,15 @@ ExpAn: Experiment Analysis
         :target: https://pypi.python.org/pypi/expan
         :alt: Latest PyPI version
 
+.. image:: https://img.shields.io/pypi/status/expan.svg
+   :target: https://pypi.python.org/pypi/expan
+   :alt: Development Status
+
+.. image:: https://img.shields.io/pypi/pyversions/expan.svg
+   :target: https://pypi.python.org/pypi/expan
+   :alt: Python Versions
+
+
 .. image:: https://img.shields.io/pypi/dw/expan.svg
         :target: https://pypi.python.org/pypi/expan/
         :alt: PyPI Downloads
