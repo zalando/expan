@@ -1,6 +1,13 @@
 ExpAn: Experiment Analysis
 ==========================
 
+.. image:: https://img.shields.io/pypi/v/expan.svg
+        :target: https://pypi.python.org/pypi/expan
+
+.. image:: https://img.shields.io/travis/zalando/expan.svg
+        :target: https://travis-ci.org/zalando/expan
+
+
 A/B tests, or randomized controlled experiments, have been widely
 applied in different industries to optimize the business process and the
 user experience. ExpAn, or Experiment Analysis, is a Python library
