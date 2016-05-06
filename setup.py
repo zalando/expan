@@ -30,7 +30,7 @@ class build_ext(_build_ext):
 
 setup(
 	name='expan',
-	version='0.2.2',
+	version='0.2.3',
 	description="Experiment Analysis Library",
 	long_description=readme + '\n\n' + history,
 	author="Zalando SE",
