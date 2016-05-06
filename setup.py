@@ -10,10 +10,10 @@ with open('HISTORY.rst') as history_file:
 	history = history_file.read()
 
 requirements = [
+	"scipy >= 0.17.0",
 	"numpy >= 1.10.4",
 	"pandas >= 0.17.1",
-	"simplejson >= 3.8.2",
-	"scipy >= 0.17.0"
+	"simplejson >= 3.8.2"
 ]
 
 test_requirements = [
