@@ -13,7 +13,7 @@ ExpAn: Experiment Analysis
         :target: https://pypi.python.org/pypi/expan/
         :alt: PyPI Downloads
 
-.. image:: https://img.shields.io/pypi/l/zmon-cli.svg
+.. image:: https://img.shields.io/pypi/l/expan.svg
         :target: https://pypi.python.org/pypi/expan/
         :alt: License
 
