@@ -14,7 +14,7 @@ ExpAn: Experiment Analysis
         :alt: PyPI Downloads
 
 .. image:: https://img.shields.io/pypi/l/zmon-cli.svg
-        :target: https://pypi.python.org/pypi/zmon-cli/
+        :target: https://pypi.python.org/pypi/expan/
         :alt: License
 
 A/B tests, or randomized controlled experiments, have been widely
