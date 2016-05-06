@@ -101,7 +101,7 @@ Versioning
 when doing the analysis!**
 
 We use semantic versioning (http://semver.org), and the current version of
-ExpAn is: v0.2.0.
+ExpAn is: v0.2.1.
 
 The version is maintained in ``setup.cfg``, and propagated from there to various files
 by the ``bumpversion`` program. The most important propagation destination is
@@ -125,7 +125,7 @@ repository.
 
     >>> import core.binning
     >>> core.version()
-    'v0.2.0'
+    'v0.2.1'
     >>> core.version('{major}.{minor}..{commits}')
     '0.0..176'
     >>> core.version('{commit}')
