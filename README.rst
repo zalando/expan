@@ -43,7 +43,14 @@ Quick start
 Install
 -------
 
-To install simply run
+To install you can simply run (pip >= 8.1.1 and setuptools >= 21.0.0 are required):
+
+::
+
+	pip install expan
+
+
+An alternative way to install is it to clone the repo and run:
 
 ::
 
@@ -66,7 +73,7 @@ Some mock-up data
 
     exp = Experiment('B', *generate_random_data())
     exp.delta()
-	
+
 
 Further documentation
 =====================
