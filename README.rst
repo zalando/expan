@@ -1,12 +1,21 @@
 ExpAn: Experiment Analysis
 ==========================
 
-.. image:: https://img.shields.io/pypi/v/expan.svg
-        :target: https://pypi.python.org/pypi/expan
-
 .. image:: https://img.shields.io/travis/zalando/expan.svg
         :target: https://travis-ci.org/zalando/expan
+        :alt: Build status
 
+.. image:: https://img.shields.io/pypi/v/expan.svg
+        :target: https://pypi.python.org/pypi/expan
+        :alt: Latest PyPI version
+
+.. image:: https://img.shields.io/pypi/dw/expan.svg
+        :target: https://pypi.python.org/pypi/expan/
+        :alt: PyPI Downloads
+
+.. image:: https://img.shields.io/pypi/l/zmon-cli.svg
+        :target: https://pypi.python.org/pypi/zmon-cli/
+        :alt: License
 
 A/B tests, or randomized controlled experiments, have been widely
 applied in different industries to optimize the business process and the
