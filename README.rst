@@ -47,6 +47,7 @@ To install simply run
 
 ::
 
+    python2 setup.py build
     python2 setup.py install
 
 And to test run:
