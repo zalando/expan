@@ -70,7 +70,7 @@ Some mock-up data
 Further documentation
 =====================
 
-tbd
+`ExpAn Description <https://github.com/zalando/expan/blob/dev/ExpAn-Description.mediawiki>`__ - details about the concept of the library and data structures.
 
 How to contribute
 =================
