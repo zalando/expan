@@ -1,7 +1,0 @@
-
-## abba (https://github.com/thumbtack/abba)
-
-Not an alternative, for Python this is simply a collection of some functions to handle binomial distributions.
-
-## 
-
