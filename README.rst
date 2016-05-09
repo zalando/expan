@@ -1,6 +1,31 @@
 ExpAn: Experiment Analysis
 ==========================
 
+.. image:: https://img.shields.io/travis/zalando/expan.svg
+        :target: https://travis-ci.org/zalando/expan
+        :alt: Build status
+
+.. image:: https://img.shields.io/pypi/v/expan.svg
+        :target: https://pypi.python.org/pypi/expan
+        :alt: Latest PyPI version
+
+.. image:: https://img.shields.io/pypi/status/expan.svg
+   :target: https://pypi.python.org/pypi/expan
+   :alt: Development Status
+
+.. image:: https://img.shields.io/pypi/pyversions/expan.svg
+   :target: https://pypi.python.org/pypi/expan
+   :alt: Python Versions
+
+
+.. image:: https://img.shields.io/pypi/dw/expan.svg
+        :target: https://pypi.python.org/pypi/expan/
+        :alt: PyPI Downloads
+
+.. image:: https://img.shields.io/pypi/l/expan.svg
+        :target: https://pypi.python.org/pypi/expan/
+        :alt: License
+
 A/B tests, or randomized controlled experiments, have been widely
 applied in different industries to optimize the business process and the
 user experience. ExpAn, or Experiment Analysis, is a Python library
@@ -43,10 +68,18 @@ Quick start
 Install
 -------
 
-To install simply run
+To install you can simply run (pip >= 8.1.1 and setuptools >= 21.0.0 are required):
 
 ::
 
+	pip install expan
+
+
+An alternative way to install is it to clone the repo and run:
+
+::
+
+    python2 setup.py build
     python2 setup.py install
 
 And to test run:
@@ -65,7 +98,7 @@ Some mock-up data
 
     exp = Experiment('B', *generate_random_data())
     exp.delta()
-	
+
 
 Further documentation
 =====================
@@ -100,7 +133,7 @@ Versioning
 when doing the analysis!**
 
 We use semantic versioning (http://semver.org), and the current version of
-ExpAn is: v0.2.0.
+ExpAn is: v0.2.3.
 
 The version is maintained in ``setup.cfg``, and propagated from there to various files
 by the ``bumpversion`` program. The most important propagation destination is
@@ -124,7 +157,7 @@ repository.
 
     >>> import core.binning
     >>> core.version()
-    'v0.2.0'
+    'v0.2.3'
     >>> core.version('{major}.{minor}..{commits}')
     '0.0..176'
     >>> core.version('{commit}')
@@ -191,3 +224,4 @@ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
 CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+

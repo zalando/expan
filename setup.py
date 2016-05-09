@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# test commit
 
 from setuptools.command.build_ext import build_ext as _build_ext
 from setuptools import setup, find_packages
@@ -11,8 +10,8 @@ with open('HISTORY.rst') as history_file:
 	history = history_file.read()
 
 requirements = [
-	"numpy >= 1.10.4",
 	"scipy >= 0.17.0",
+	"numpy >= 1.10.4",
 	"pandas >= 0.17.1",
 	"simplejson >= 3.8.2"
 ]
@@ -20,7 +19,6 @@ requirements = [
 test_requirements = [
 	'pytest'
 ]
-
 
 class build_ext(_build_ext):
 	def finalize_options(self):
@@ -30,10 +28,9 @@ class build_ext(_build_ext):
 		import numpy
 		self.include_dirs.append(numpy.get_include())
 
-
 setup(
 	name='expan',
-	version='0.2.0',
+	version='0.2.3',
 	description="Experiment Analysis Library",
 	long_description=readme + '\n\n' + history,
 	author="Zalando SE",
