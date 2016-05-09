@@ -16,3 +16,8 @@ install: pip install -U tox
 language: python
 python: 2.7
 script: tox
+
+branches:
+  only:
+    - master
+    - dev
