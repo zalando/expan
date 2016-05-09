@@ -12,7 +12,10 @@ deploy:
 
 env:
 - TOXENV=py27
-install: pip install -U tox
+install:
+- pip install -U tox
+- pip install -r requirements.txt
 language: python
 python: 2.7
 script: tox
+cache: pip
