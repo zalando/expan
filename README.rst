@@ -223,7 +223,7 @@ We use Travis CI for testing builds and deploying our PyPI package. Currently, a
 
 If you wish to skip triggering a CI task, please include "[ci skip]" in your commit message.
 
-When a tagged commit to master is made this triggers a build this build will also deploy the created package to PyPI.
+When a tagged commit to master is made this triggers a build and this build will also deploy the created package to PyPI.
 
 TODO
 ----
