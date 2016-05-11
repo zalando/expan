@@ -59,6 +59,7 @@ Table of Contents
    -  `Branching / Release <#branching--release>`__
    -  `Versioning <#versioning>`__
    -  `Bumping Version <#bumping-version>`__
+   -  `Travis CI and PyPI deployment`__
    -  `TODO <#todo>`__
 
 -  `License <#license>`__
