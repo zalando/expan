@@ -206,12 +206,14 @@ repository with:
 
     $ git push --tags
 
-Travis CI
----------
+Travis CI and PyPI deployment
+-----------------------------
 
 We use Travis CI for testing builds and deploying our PyPI package. Currently, a build and test is triggered when a pull request or push to 'dev' or 'master' is made. When a tagged commit to master is made then a build, test and deploy is made.
 
 If you wish to skip triggering a CI task, please include "[ci skip]" in your commit message.
+
+When a tagged commit to master is made this triggers a build this build will also deploy the created package to PyPI.
 
 TODO
 ----
