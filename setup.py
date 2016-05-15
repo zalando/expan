@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import re
 from pip.req import parse_requirements
 from setuptools import setup, find_packages
 from setuptools.command.build_ext import build_ext as _build_ext
@@ -15,6 +16,13 @@ with open('README.rst') as readme_file:
 
 with open('HISTORY.rst') as history_file:
 	history = history_file.read()
+
+with open('expan/core/version.py', 'r') as fd:
+    version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
+                        fd.read(), re.MULTILINE).group(1)
+
+if not version:
+    raise RuntimeError('Cannot find version information')
 
 test_requirements = [
 	'pytest'
@@ -32,7 +40,7 @@ class build_ext(_build_ext):
 
 setup(
 	name='expan',
-	version='0.2.3',
+	version=version,
 	description="Experiment Analysis Library",
 	long_description=readme + '\n\n' + history,
 	author="Zalando SE",
