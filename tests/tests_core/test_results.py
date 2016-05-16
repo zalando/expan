@@ -90,4 +90,7 @@ class ResultsClassTestCase(ResultsTestCase):
 
 
 if __name__ == '__main__':
-	unittest.main()
+	#unittest.main()
+	np.random.seed(0)
+	exp = Experiment('B', *generate_random_data())
+	res = exp.delta(['normal_shifted'])

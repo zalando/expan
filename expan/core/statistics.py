@@ -445,6 +445,15 @@ def normal_difference(mean1, std1, n1, mean2, std2, n2, percentiles=[2.5, 97.5],
 		return dict([(p, mean + stats.t.ppf(p / 100.0, df=d_free) * st_error)
 					 for p in percentiles])
 
+def estimate_std(x, delta, pctile, n1, n2):
+	"""Estimate the standard deviation from a given percentile, according to
+	the formula:
+		x = mu + t * sigma / sqrt(n)
+	"""
+	sqrt_n = np.sqrt(1. / n1 + 1. / n2)
+	dof = n1 + n2 - 2
+	return (x - delta) / stats.t.ppf(pctile / 100.0, df=dof) * sqrt_n
+	
 
 if __name__ == '__main__':
 	# doctest.testmod()
