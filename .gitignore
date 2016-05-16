@@ -65,3 +65,7 @@ target/
 
 # PyCharm
 .idea/
+
+# ipython notebook
+.ipynb_checkpoints
+ExpAn-Intro.slides.html

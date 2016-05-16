@@ -26,12 +26,13 @@ ExpAn: Experiment Analysis
         :target: https://pypi.python.org/pypi/expan/
         :alt: License
 
-A/B tests, or randomized controlled experiments, have been widely
-applied in different industries to optimize the business process and the
-user experience. ExpAn, or Experiment Analysis, is a Python library
-developed for the advanced statistical analysis of A/B tests.
+A/B tests (a.k.a. Randomized Controlled Trials or Experiments) have been widely
+applied in different industries to optimize business processes and user
+experience. ExpAn (**Exp**\ eriment **An**\ alysis) is a Python library
+developed for the statistical analysis of such experiments and to standardise
+the data structures used.
 
-The data structures and functions here are generic such that they can be
+The data structures and functionality of ExpAn are generic such that they can be
 used by both data scientists optimizing a user interface and biologists
 running wet-lab experiments. The library is also standalone and can be
 imported and used from within other projects and from the command line.
@@ -104,7 +105,25 @@ Some mock-up data
 Further documentation
 =====================
 
-`ExpAn Description <https://github.com/zalando/expan/blob/dev/ExpAn-Description.mediawiki>`__ - details about the concept of the library and data structures.
+`ExpAn Description <https://github.com/zalando/expan/blob/master/ExpAn-Description.mediawiki>`__ - details about the concept of the library and data structures.
+
+`ExpAn Introduction <https://github.com/zalando/expan/blob/dev/ExpAn-Intro.ipynb>`__ - a full jupyter (iPython) notebook. You can view it as slides with `jupyter <http://jupyter.org>`__:
+
+::
+
+    sh serve_intro_slides
+
+Alternatives
+============
+
+There may be alternative libraries providing similar functionality, and these
+should be collected here. Very incomplete list so far...
+
+abba (https://github.com/thumbtack/abba)
+----
+
+Not an alternative, the Python part of this is simply a collection of some functions to handle binomial distributions.
+
 
 How to contribute
 =================
@@ -134,7 +153,7 @@ Versioning
 when doing the analysis!**
 
 We use semantic versioning (http://semver.org), and the current version of
-ExpAn is: v0.2.3.
+ExpAn is: v0.2.4.
 
 The version is maintained in ``setup.cfg``, and propagated from there to various files
 by the ``bumpversion`` program. The most important propagation destination is
@@ -158,7 +177,7 @@ repository.
 
     >>> import core.binning
     >>> core.version()
-    'v0.2.3'
+    'v0.2.4'
     >>> core.version('{major}.{minor}..{commits}')
     '0.0..176'
     >>> core.version('{commit}')
@@ -196,6 +215,15 @@ We use Travis CI for testing builds and deploying our PyPI package. Currently, a
 If you wish to skip triggering a CI task, please include "[ci skip]" in your commit message.
 
 When a tagged commit to master is made this triggers a build and this build will also deploy the created package to PyPI.    
+
+Travis CI and PyPI deployment
+-----------------------------
+
+We use Travis CI for testing builds and deploying our PyPI package. Currently, a build and test is triggered when a pull request or push to 'dev' or 'master' is made. When a tagged commit to master is made then a build, test and deploy is made.
+
+If you wish to skip triggering a CI task, please include "[ci skip]" in your commit message.
+
+When a tagged commit to master is made this triggers a build and this build will also deploy the created package to PyPI.
 
 TODO
 ----
