@@ -237,8 +237,8 @@ The bin associated with a subgroup in the results dataframe is referenced by the
 |<pre>'{lo},{hi}'</pre>
 |<pre>20-30</pre>
 |-
-|CLV
-|<pre><Binning Object Created on CLV data></pre>
+|profit_contribution_365
+|<pre><Binning Object Created on profit_contribution_365 data></pre>
 |<pre>'{standard}'</pre>
 |<pre>[102.0,144.5)</pre>
 
@@ -436,9 +436,9 @@ The bin associated with a subgroup in the results dataframe is referenced by the
 |-
 |KPI
 |Key Performance Indicator. Used here to describe the data measured after the start of the treatment. It is used to identify the variables which are expected to be influenced by the treatment.
-|profit_contribution accumulated after treatment start is a typical KPI for customer based experiments.
+|'''profit_contribution''' accumulated after treatment start is a typical KPI for customer based experiments.
 |-
 |Feature
 |A feature is data which is not expected to be influenced by the treatment. That includes but is not limited to all data that is known on an entity at the start of a treatment.
-|Age or gender are typical features in customer based experiments.
+|Age or gender are typical features in customer based experiments. Metrics accumulated ''before'' treatment ('''profit_contribution_365''') are also features.
 |}
