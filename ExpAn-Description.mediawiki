@@ -83,8 +83,8 @@ This is a dictionary of information describing the experiment to be analysed.
 !'''<span style="text-decoration: underline;">variant</span>'''
 !'''<span style="text-decoration: underline;">entity</span>'''
 !'''<span style="text-decoration: underline;">[time_since_treatment]</span>'''
-!'''number of orders'''
-!'''PCII'''
+!'''orders'''
+!'''profit_contribution'''
 |-
 |A
 |ec0231efh
@@ -115,7 +115,7 @@ This is a dictionary of information describing the experiment to be analysed.
 !'''<span style="color: rgb(0,0,0);text-decoration: underline;">entity</span>'''
 !'''treatment start time'''
 !'''age'''
-!'''PCII_365'''
+!'''profit_contribution_365'''
 |-
 |A
 |ec0231efh
@@ -169,7 +169,7 @@ This is a dictionary describing the results, some of which is derived directly f
 |Variant against which all results were computed.
 |-
 |primary_KPI
-|"PCII"
+|"profit_contribution"
 |The KPI used for OEC (Overall Evaluation Criteria).
 |-
 |metric_units
@@ -185,10 +185,10 @@ This is a dictionary describing the results, some of which is derived directly f
 |net_sales
 |€
 |-
-|PCII
+|profit_contribution
 |€
 |-
-|PCII_per_customer
+|profit_contribution_per_customer
 |€
 |-
 |Age
@@ -266,7 +266,7 @@ The bin associated with a subgroup in the results dataframe is referenced by the
 !  colspan="1" | "No Change"
 !  colspan="1" | subgroup_bin_index
 |- 
-|  rowspan="18" | <p>PCII</p>
+|  rowspan="18" | <p>profit_contribution</p>
 |  rowspan="18" | <p>Age</p>
 |  rowspan="18" | <p>20-30</p>
 |  rowspan="13" | <p>0</p>
@@ -436,7 +436,7 @@ The bin associated with a subgroup in the results dataframe is referenced by the
 |-
 |KPI
 |Key Performance Indicator. Used here to describe the data measured after the start of the treatment. It is used to identify the variables which are expected to be influenced by the treatment.
-|PCII accumulated after treatment start is a typical KPI for customer based experiments.
+|profit_contribution accumulated after treatment start is a typical KPI for customer based experiments.
 |-
 |Feature
 |A feature is data which is not expected to be influenced by the treatment. That includes but is not limited to all data that is known on an entity at the start of a treatment.
