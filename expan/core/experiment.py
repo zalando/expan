@@ -536,7 +536,7 @@ class Experiment(ExperimentData):
 		res = Results(None, metadata=self.metadata)
 		# Check if data exists
 		if self.kpis_time is None:
-			warnings.warn('Empty data set entered to analysis.'
+			warnings.warn('Empty data set entered to analysis. '
 						  + 'Returning empty result set')
 			res.metadata['warnings']['Experiment.trend'] = \
 				UserWarning('Empty data set entered to analysis.')
