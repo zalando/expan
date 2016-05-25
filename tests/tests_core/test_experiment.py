@@ -8,7 +8,7 @@ from expan.core.experiment import Experiment, subgroup_deltas, time_dependent_de
 from tests.tests_core.test_data import generate_random_data
 
 # raise the same warning multiple times
-warnings.simplefilter('always', UserWarning)
+#warnings.simplefilter('always', UserWarning)
 
 from expan.core.debugging import Dbg
 

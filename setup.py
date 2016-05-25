@@ -1,8 +1,15 @@
 #!/usr/bin/env python
-# test commit
 
-from setuptools.command.build_ext import build_ext as _build_ext
+import re
+from pip.req import parse_requirements
 from setuptools import setup, find_packages
+from setuptools.command.build_ext import build_ext as _build_ext
+
+try:
+	install_reqs = parse_requirements('requirements.txt', session=False)
+	requirements = [str(ir.req) for ir in install_reqs]
+except:
+	requirements = []
 
 with open('README.rst') as readme_file:
 	readme = readme_file.read()
@@ -10,12 +17,14 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
 	history = history_file.read()
 
-requirements = [
-	"numpy >= 1.10.4",
-	"scipy >= 0.17.0",
-	"pandas >= 0.17.1",
-	"simplejson >= 3.8.2"
-]
+with open('expan/core/version.py', 'r') as fd:
+	version = re.search(
+		r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
+		fd.read(),
+		re.MULTILINE).group(1)
+
+if not version:
+	raise RuntimeError('Cannot find version information')
 
 test_requirements = [
 	'pytest'
@@ -33,15 +42,14 @@ class build_ext(_build_ext):
 
 setup(
 	name='expan',
-	version='0.2.0',
+	version=version,
 	description="Experiment Analysis Library",
 	long_description=readme + '\n\n' + history,
 	author="Zalando SE",
 	author_email='octopus@zalando.de',
 	url='https://github.com/zalando/expan',
 	packages=find_packages(),
-	package_dir={'expan':
-					 'expan'},
+	package_dir={'expan': 'expan'},
 	include_package_data=True,
 	install_requires=requirements,
 	cmdclass={'build_ext': build_ext},

@@ -1,12 +1,38 @@
 ExpAn: Experiment Analysis
 ==========================
 
-A/B tests, or randomized controlled experiments, have been widely
-applied in different industries to optimize the business process and the
-user experience. ExpAn, or Experiment Analysis, is a Python library
-developed for the advanced statistical analysis of A/B tests.
+.. image:: https://img.shields.io/travis/zalando/expan.svg
+        :target: https://travis-ci.org/zalando/expan
+        :alt: Build status
 
-The data structures and functions here are generic such that they can be
+.. image:: https://img.shields.io/pypi/v/expan.svg
+        :target: https://pypi.python.org/pypi/expan
+        :alt: Latest PyPI version
+
+.. image:: https://img.shields.io/pypi/status/expan.svg
+   :target: https://pypi.python.org/pypi/expan
+   :alt: Development Status
+
+.. image:: https://img.shields.io/pypi/pyversions/expan.svg
+   :target: https://pypi.python.org/pypi/expan
+   :alt: Python Versions
+
+
+.. image:: https://img.shields.io/pypi/dw/expan.svg
+        :target: https://pypi.python.org/pypi/expan/
+        :alt: PyPI Downloads
+
+.. image:: https://img.shields.io/pypi/l/expan.svg
+        :target: https://pypi.python.org/pypi/expan/
+        :alt: License
+
+A/B tests (a.k.a. Randomized Controlled Trials or Experiments) have been widely
+applied in different industries to optimize business processes and user
+experience. ExpAn (**Exp**\ eriment **An**\ alysis) is a Python library
+developed for the statistical analysis of such experiments and to standardise
+the data structures used.
+
+The data structures and functionality of ExpAn are generic such that they can be
 used by both data scientists optimizing a user interface and biologists
 running wet-lab experiments. The library is also standalone and can be
 imported and used from within other projects and from the command line.
@@ -33,6 +59,7 @@ Table of Contents
    -  `Branching / Release <#branching--release>`__
    -  `Versioning <#versioning>`__
    -  `Bumping Version <#bumping-version>`__
+   -  `Travis CI and PyPI deployment <#travis-ci-and-pypi-deployment>`__
    -  `TODO <#todo>`__
 
 -  `License <#license>`__
@@ -43,10 +70,18 @@ Quick start
 Install
 -------
 
-To install simply run
+To install you can simply run (pip >= 8.1.1 and setuptools >= 21.0.0 are required):
 
 ::
 
+	pip install expan
+
+
+An alternative way to install is it to clone the repo and run:
+
+::
+
+    python2 setup.py build
     python2 setup.py install
 
 And to test run:
@@ -60,17 +95,35 @@ Some mock-up data
 
 ::
 
-    from expan.experiment import Experiment
-    from tests.test_data import generate_random_data
+    from expan.core.experiment import Experiment
+    from tests.tests_core.test_data import generate_random_data
 
     exp = Experiment('B', *generate_random_data())
     exp.delta()
-	
+
 
 Further documentation
 =====================
 
-tbd
+`ExpAn Description <https://github.com/zalando/expan/blob/master/ExpAn-Description.mediawiki>`__ - details about the concept of the library and data structures.
+
+`ExpAn Introduction <https://github.com/zalando/expan/blob/dev/ExpAn-Intro.ipynb>`__ - a full jupyter (iPython) notebook. You can view it as slides with `jupyter <http://jupyter.org>`__:
+
+::
+
+    sh serve_intro_slides
+
+Alternatives
+============
+
+There may be alternative libraries providing similar functionality, and these
+should be collected here. Very incomplete list so far...
+
+abba (https://github.com/thumbtack/abba)
+----
+
+Not an alternative, the Python part of this is simply a collection of some functions to handle binomial distributions.
+
 
 How to contribute
 =================
@@ -100,7 +153,7 @@ Versioning
 when doing the analysis!**
 
 We use semantic versioning (http://semver.org), and the current version of
-ExpAn is: v0.2.0.
+ExpAn is: v0.2.4.
 
 The version is maintained in ``setup.cfg``, and propagated from there to various files
 by the ``bumpversion`` program. The most important propagation destination is
@@ -124,7 +177,7 @@ repository.
 
     >>> import core.binning
     >>> core.version()
-    'v0.2.0'
+    'v0.2.4'
     >>> core.version('{major}.{minor}..{commits}')
     '0.0..176'
     >>> core.version('{commit}')
@@ -153,6 +206,24 @@ repository with:
 ::
 
     $ git push --tags
+    
+Travis CI and PyPI deployment
+-----------------------------
+
+We use Travis CI for testing builds and deploying our PyPI package. Currently, a build and test is triggered when a pull request or push to 'dev' or 'master' is made. When a tagged commit to master is made then a build, test and deploy is made.
+
+If you wish to skip triggering a CI task, please include "[ci skip]" in your commit message.
+
+When a tagged commit to master is made this triggers a build and this build will also deploy the created package to PyPI.    
+
+Travis CI and PyPI deployment
+-----------------------------
+
+We use Travis CI for testing builds and deploying our PyPI package. Currently, a build and test is triggered when a pull request or push to 'dev' or 'master' is made. When a tagged commit to master is made then a build, test and deploy is made.
+
+If you wish to skip triggering a CI task, please include "[ci skip]" in your commit message.
+
+When a tagged commit to master is made this triggers a build and this build will also deploy the created package to PyPI.
 
 TODO
 ----
@@ -191,3 +262,4 @@ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
 CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
