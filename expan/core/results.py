@@ -10,6 +10,7 @@ from scipy.stats import norm
 # from tests.tests_core.test_data import generate_random_data
 
 from debugging import Dbg
+from pdb import set_trace
 
 class Results(object):
 	"""
@@ -280,14 +281,14 @@ class Results(object):
 def prob_uplift_gt_zero_single_metric(result_df, baseline_variant):
 	"""Calculate the probability of uplift>0 for a single metric."""
 	n1,n2 = np.array(result_df.xs(('sample_size'),level=('statistic'))).flatten()
-	pctile = 2.5
+	pctile = 97.5 # result should be independent of the percentile that we choose
 	all_variants = set(result_df.columns.levels[1])
 	variant = (all_variants - set(baseline_variant)).pop()
 	mu = float(result_df.xs(('uplift'),level=('statistic'))[('value',variant)])
 	x = float(result_df.xs(('uplift_pctile',pctile),level=('statistic','pctile'))[('value',variant)])
-	sigma = estimate_std(x, mu, pctile, n1, n2)
-	
-	return 1 - norm.cdf(0, loc=, scale=sigma)
+	sigma = statx.estimate_std(x, mu, pctile, n1, n2)
+
+	return 1 - norm.cdf(0, loc=mu, scale=sigma)
 
 def from_hdf(fpath, dbg=None):
 	"""
@@ -418,7 +419,15 @@ def feature_check_to_dataframe(metric,
 	return df
 
 
-# if __name__ == '__main__':
+if __name__ == '__main__':
+	pass
+	
+	# from tests.tests_core.test_data import generate_random_data
+	# from expan.core.experiment import Experiment
+	# data = Experiment('B', *generate_random_data())
+	# res = data.delta(kpi_subset=['normal_same','normal_shifted'])
+	# p = res.df.groupby(level=['metric','subgroup_metric','subgroup']).agg(lambda x:prob_uplift_gt_zero_single_metric(x,'B'))
+
 	# from test_core.test_results import load_example_results
 	# aa = load_example_results()
 	# order_means = aa.means('orders').iloc[0]

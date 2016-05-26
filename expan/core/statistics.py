@@ -450,7 +450,7 @@ def estimate_std(x, delta, pctile, n1, n2):
 	the formula:
 		x = mu + t * sigma / sqrt(n)
 	"""
-	sqrt_n = np.sqrt(1. / n1 + 1. / n2)
+	sqrt_n = 1 / np.sqrt(1. / n1 + 1. / n2)
 	dof = n1 + n2 - 2
 	return (x - delta) / stats.t.ppf(pctile / 100.0, df=dof) * sqrt_n
 	
