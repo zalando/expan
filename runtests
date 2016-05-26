@@ -18,4 +18,4 @@ else
 	args=$* #if some unknown arguments are passed, just pass directly to py.test
 fi
 
-PYTHONPATH=".:$PYTHONPATH" py.test tests $args
+PYTHONPATH=".:$PYTHONPATH" python -m pytest tests $args
