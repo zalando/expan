@@ -212,7 +212,7 @@ Travis CI and PyPI deployment
 
 We use Travis CI for testing builds and deploying our PyPI package.
 
-A **build** and **test** is triggered when a commit is pushed to either:
+A **build** and **test** is triggered when a commit is pushed to either
  - **dev**,
  - **master**
  - or a **pull request branch to dev or master**.
