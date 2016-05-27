@@ -12,6 +12,13 @@ from scipy.stats import norm
 from debugging import Dbg
 from pdb import set_trace
 
+mandatory_index_levels = [
+	'metric',
+	'subgroup_metric',
+	'subgroup',
+	'statistic',
+	'pctile']
+
 class Results(object):
 	"""
 	A Results instance represents the results of a series of analyses such as
@@ -34,7 +41,6 @@ class Results(object):
 		'subgroup',
 		'statistic',
 		'pctile']
-	# TODO: explain
 	mandatory_column_levels = ['variant']
 
 	def __init__(self, df, metadata={}, dbg=None):
@@ -114,6 +120,18 @@ class Results(object):
 		# df.index.set_levels(['uplift_rel']*df.index.shape[0], level='statistic', inplace=True)
 
 		# TODO: do we return a data frame or a Results object here?
+		return df
+
+	def calculate_prob_uplift_over_zero(self):
+		# check if the subgroup index is NaN
+		# NB: this will NOT work if we store delta and SGA results in the same object
+		if len(self.df.index.levels[2]) == 0:
+			df = self.df.groupby(level=['metric']).apply(lambda x:prob_uplift_over_zero_single_metric(x,self.metadata['baseline_variant']))
+			df.reset_index(level=0,drop=True,inplace=True)
+		else:
+			df = self.df.groupby(level=['metric','subgroup_metric','subgroup']).apply(lambda x:prob_uplift_over_zero_single_metric(x,self.metadata['baseline_variant']))
+			df.reset_index(level=[0,1,2],drop=True,inplace=True)
+
 		return df
 
 	def delta_means(self, metric=None, subgroup_metric='-'):
@@ -278,7 +296,7 @@ class Results(object):
 		hfile.close()
 
 
-def prob_uplift_gt_zero_single_metric(result_df, baseline_variant):
+def prob_uplift_over_zero_single_metric(result_df, baseline_variant):
 	"""Calculate the probability of uplift>0 for a single metric."""
 	n1,n2 = np.array(result_df.xs(('sample_size'),level=('statistic'))).flatten()
 	pctile = 97.5 # result should be independent of the percentile that we choose
@@ -288,7 +306,22 @@ def prob_uplift_gt_zero_single_metric(result_df, baseline_variant):
 	x = float(result_df.xs(('uplift_pctile',pctile),level=('statistic','pctile'))[('value',variant)])
 	sigma = statx.estimate_std(x, mu, pctile, n1, n2)
 
-	return 1 - norm.cdf(0, loc=mu, scale=sigma)
+	prob = 1 - norm.cdf(0, loc=mu, scale=sigma)
+	prob_dict = {baseline_variant:np.nan, variant:prob}
+	prob_list = []
+	for v in result_df.columns.levels[1]:
+		prob_list.append(prob_dict[v])
+
+	# a prob df w/o multi-index
+	prob_df = pd.DataFrame([prob_list], columns=result_df.columns)
+	# reconstruct indices
+	for i in ['metric','subgroup_metric','subgroup']:
+		prob_df[i] = result_df.index.get_level_values(i)[0]
+	prob_df['statistic'] = 'prob_uplift_over_0'
+	prob_df['pctile'] = np.nan
+	prob_df.set_index(mandatory_index_levels, inplace=True)
+
+	return pd.concat((result_df,prob_df))
 
 def from_hdf(fpath, dbg=None):
 	"""
@@ -426,7 +459,7 @@ if __name__ == '__main__':
 	# from expan.core.experiment import Experiment
 	# data = Experiment('B', *generate_random_data())
 	# res = data.delta(kpi_subset=['normal_same','normal_shifted'])
-	# p = res.df.groupby(level=['metric','subgroup_metric','subgroup']).agg(lambda x:prob_uplift_gt_zero_single_metric(x,'B'))
+	# df = res.calculate_prob_uplift_over_zero()
 
 	# from test_core.test_results import load_example_results
 	# aa = load_example_results()
