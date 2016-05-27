@@ -212,8 +212,8 @@ Travis CI and PyPI deployment
 
 We use Travis CI for testing builds and deploying our PyPI package.
 
- - A **build** and **test** is triggered when a **pull request** or **push** to either *dev* or *master* is performed.
- - When a **tagged commit** to *master* is made then a **build**, **test** and **push to PyPI** is performed.
+ - A **build** and **test** is triggered when a commit is pushed to either *dev*, *master* or a *pull request branch to dev or master* is performed.
+ - A **build**, **test** and **push to PyPI** is triggered when a **tagged commit** is pushed to *master*.
 
 If you wish to skip triggering a CI task (for example when you only perform changes on documentation), please include ``[ci skip]`` in your commit message.
 
