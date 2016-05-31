@@ -445,14 +445,24 @@ def normal_difference(mean1, std1, n1, mean2, std2, n2, percentiles=[2.5, 97.5],
 		return dict([(p, mean + stats.t.ppf(p / 100.0, df=d_free) * st_error)
 					 for p in percentiles])
 
-def estimate_std(x, delta, pctile, n1, n2):
+def estimate_std(x, mu, pctile, n1, n2):
 	"""Estimate the standard deviation from a given percentile, according to
 	the formula:
 		x = mu + t * sigma / sqrt(n)
+
+	Args:
+		x (float): cumulated density at the given percentile
+		mu (float): mean of the distribution
+		pctile (float): percentile value (between 0 and 100)
+		n1 (int): sample size of the first variant
+		n2 (int): sample size of the second variant
+
+	Returns:
+		float: estimated standard deviation of the distribution
 	"""
 	sqrt_n = 1 / np.sqrt(1. / n1 + 1. / n2)
 	dof = n1 + n2 - 2
-	return (x - delta) / stats.t.ppf(pctile / 100.0, df=dof) * sqrt_n
+	return (x - mu) / stats.t.ppf(pctile / 100.0, df=dof) * sqrt_n
 	
 
 if __name__ == '__main__':

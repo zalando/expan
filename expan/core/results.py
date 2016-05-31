@@ -297,7 +297,15 @@ class Results(object):
 
 
 def prob_uplift_over_zero_single_metric(result_df, baseline_variant):
-	"""Calculate the probability of uplift>0 for a single metric."""
+	"""Calculate the probability of uplift>0 for a single metric.
+
+	Args:
+		result_df (DataFrame): result data frame of a single metric/subgroup
+		baseline_variant (str): name of the baseline variant
+
+	Returns:
+		DataFrame: result data frame with one additional statistic 'prob_uplift_over_0'
+	"""
 	n1,n2 = np.array(result_df.xs(('sample_size'),level=('statistic'))).flatten()
 	pctile = 97.5 # result should be independent of the percentile that we choose
 	all_variants = set(result_df.columns.levels[1])
@@ -321,7 +329,10 @@ def prob_uplift_over_zero_single_metric(result_df, baseline_variant):
 	prob_df['pctile'] = np.nan
 	prob_df.set_index(mandatory_index_levels, inplace=True)
 
-	return pd.concat((result_df,prob_df))
+	ret = pd.concat((result_df,prob_df))
+	ret.sort_index(inplace=True)
+
+	return ret
 
 def from_hdf(fpath, dbg=None):
 	"""
@@ -455,6 +466,7 @@ def feature_check_to_dataframe(metric,
 if __name__ == '__main__':
 	pass
 	
+	# np.random.seed(0)
 	# from tests.tests_core.test_data import generate_random_data
 	# from expan.core.experiment import Experiment
 	# data = Experiment('B', *generate_random_data())
