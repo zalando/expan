@@ -69,3 +69,6 @@ target/
 # ipython notebook
 .ipynb_checkpoints
 ExpAn-Intro.slides.html
+
+# log file
+test_debugging.*
