@@ -57,6 +57,11 @@ setup(
 	license="MIT",
 	zip_safe=False,
 	keywords='expan',
+	entry_points={
+        'console_scripts': [
+            'expan = expan.cli.cli:main'
+        ]
+    },
 	classifiers=[
 		'Development Status :: 2 - Pre-Alpha',
 		'Intended Audience :: Developers',

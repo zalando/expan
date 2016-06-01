@@ -153,7 +153,7 @@ Versioning
 when doing the analysis!**
 
 We use semantic versioning (http://semver.org), and the current version of
-ExpAn is: v0.2.4.
+ExpAn is: v0.2.5.
 
 The version is maintained in ``setup.cfg``, and propagated from there to various files
 by the ``bumpversion`` program. The most important propagation destination is
@@ -177,7 +177,7 @@ repository.
 
     >>> import core.binning
     >>> core.version()
-    'v0.2.4'
+    'v0.2.5'
     >>> core.version('{major}.{minor}..{commits}')
     '0.0..176'
     >>> core.version('{commit}')
@@ -206,24 +206,21 @@ repository with:
 ::
 
     $ git push --tags
-    
-Travis CI and PyPI deployment
------------------------------
-
-We use Travis CI for testing builds and deploying our PyPI package. Currently, a build and test is triggered when a pull request or push to 'dev' or 'master' is made. When a tagged commit to master is made then a build, test and deploy is made.
-
-If you wish to skip triggering a CI task, please include "[ci skip]" in your commit message.
-
-When a tagged commit to master is made this triggers a build and this build will also deploy the created package to PyPI.    
 
 Travis CI and PyPI deployment
 -----------------------------
 
-We use Travis CI for testing builds and deploying our PyPI package. Currently, a build and test is triggered when a pull request or push to 'dev' or 'master' is made. When a tagged commit to master is made then a build, test and deploy is made.
+We use Travis CI for testing builds and deploying our PyPI package.
 
-If you wish to skip triggering a CI task, please include "[ci skip]" in your commit message.
+A **build** and **test** is triggered when a commit is pushed to either
 
-When a tagged commit to master is made this triggers a build and this build will also deploy the created package to PyPI.
+- **dev**,
+- **master**
+- or a **pull request branch to dev or master**.
+ 
+A **build**, **test** and **push to PyPI** is triggered when a **tagged commit** is pushed to **master**.
+
+If you wish to skip triggering a CI task (for example when you only perform changes on documentation), please include ``[ci skip]`` in your commit message.
 
 TODO
 ----

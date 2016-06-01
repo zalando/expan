@@ -125,7 +125,7 @@ def _feature_check_all_variants(metric_df, baseline_variant, assume_normal=True,
 										  mu_variant=mean_x)
 
 	def do_delta_categorical(df):
-		pval = statx.chi_square(x=df.iloc[:, 2], y=baseline_metric)
+		pval = statx.chi_square(x=df.iloc[:, 2], y=baseline_metric)[0]
 		ss_x = statx.sample_size(df.iloc[:, 2])
 		return feature_check_to_dataframe(metric=df.columns[2],
 										  samplesize_variant=ss_x,
@@ -370,29 +370,29 @@ class Experiment(ExperimentData):
 					  min_observations=20, nruns=10000, relative=False):
 
 		"""
-    Compute feature check on all features, and return dataframe with column
-    telling if feature check passed.
+	    Compute feature check on all features, and return dataframe with column
+	    telling if feature check passed.
 
-    Args:
-        feature_subset (list): Features for which to perfom delta. If set to
-            None all metrics are used.
-        variant_subset (list): Variants to use compare against baseline. If
-            set to None all variants are used.
-        threshold (float): p-value used for dismissing null hypothesis (i.e.
-            no difference between features for variant and baseline).
+	    Args:
+	        feature_subset (list): Features for which to perfom delta. If set to
+	            None all metrics are used.
+	        variant_subset (list): Variants to use compare against baseline. If
+	            set to None all variants are used.
+	        threshold (float): p-value used for dismissing null hypothesis (i.e.
+	            no difference between features for variant and baseline).
 
-        assume_normal (boolean): specifies whether normal distribution
-            assumptions can be made
-        min_observations (integer): minimum observations necessary. If
-            less observations are given, then NaN is returned
-        nruns (integer): number of bootstrap runs to perform if assume
-            normal is set to False.
+	        assume_normal (boolean): specifies whether normal distribution
+	            assumptions can be made
+	        min_observations (integer): minimum observations necessary. If
+	            less observations are given, then NaN is returned
+	        nruns (integer): number of bootstrap runs to perform if assume
+	            normal is set to False.
 
-    Returns:
-        pd.DataFrame containing boolean column named 'ok' stating if
-            feature chek was ok for the feature and variant combination
-            specified in the corresponding columns.
-    """
+	    Returns:
+	        pd.DataFrame containing boolean column named 'ok' stating if
+	            feature chek was ok for the feature and variant combination
+	            specified in the corresponding columns.
+	    """
 		# TODO: this should return a results structure, like all the others?
 		# - can monkey patch it with a function to just get the 'ok' column
 
