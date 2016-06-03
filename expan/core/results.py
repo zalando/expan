@@ -125,14 +125,18 @@ class Results(object):
 	def calculate_prob_uplift_over_zero(self):
 		# check if the subgroup index is NaN
 		# NB: this will NOT work if we store delta and SGA results in the same object
+		# if the subgroup index contains only NaNs
 		if len(self.df.index.levels[2]) == 0:
 			df = self.df.groupby(level=['metric']).apply(lambda x:prob_uplift_over_zero_single_metric(x,self.metadata['baseline_variant']))
+			# remove redundant levels (coming from groupby)
 			df.reset_index(level=0,drop=True,inplace=True)
 		else:
 			df = self.df.groupby(level=['metric','subgroup_metric','subgroup']).apply(lambda x:prob_uplift_over_zero_single_metric(x,self.metadata['baseline_variant']))
+			# remove redundant levels (coming from groupby)
 			df.reset_index(level=[0,1,2],drop=True,inplace=True)
 
-		return df
+		self.df = df
+		#return df
 
 	def delta_means(self, metric=None, subgroup_metric='-'):
 		return self.statistic('delta', 'variant_mean', metric, subgroup_metric)

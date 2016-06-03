@@ -99,8 +99,8 @@ class ResultsClassTestCase(ResultsTestCase):
 	def test_prob_uplift_over_zero_multiple_metric(self):
 		"""Check if the conversion from confidence intervals to probability is correct for multiple metrics."""
 		res = self.data.delta(kpi_subset=['normal_same','normal_shifted'])
-		df = res.calculate_prob_uplift_over_zero()
-		np.testing.assert_almost_equal(df.loc[pd.IndexSlice[:,:,:,'prob_uplift_over_0'], 'value'],
+		res.calculate_prob_uplift_over_zero()
+		np.testing.assert_almost_equal(res.df.loc[pd.IndexSlice[:,:,:,'prob_uplift_over_0'], 'value'],
 									   np.array([[0.513189,np.nan],[0.159715,np.nan]]), decimal=5)
 
 if __name__ == '__main__':
