@@ -12,13 +12,6 @@ from scipy.stats import norm
 from debugging import Dbg
 from pdb import set_trace
 
-mandatory_index_levels = [
-	'metric',
-	'subgroup_metric',
-	'subgroup',
-	'statistic',
-	'pctile']
-
 class Results(object):
 	"""
 	A Results instance represents the results of a series of analyses such as
@@ -331,7 +324,7 @@ def prob_uplift_over_zero_single_metric(result_df, baseline_variant):
 		prob_df[i] = result_df.index.get_level_values(i)[0]
 	prob_df['statistic'] = 'prob_uplift_over_0'
 	prob_df['pctile'] = np.nan
-	prob_df.set_index(mandatory_index_levels, inplace=True)
+	prob_df.set_index(Results.mandatory_index_levels, inplace=True)
 
 	ret = pd.concat((result_df,prob_df))
 	ret.sort_index(inplace=True)
