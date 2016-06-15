@@ -313,7 +313,7 @@ def prob_uplift_over_zero_single_metric(result_df, baseline_variant):
 	n1,n2 = np.array(result_df.xs(('sample_size'),level=('statistic'))).flatten()
 	pctile = 97.5 # result should be independent of the percentile that we choose
 	all_variants = set(result_df.columns.levels[1])
-	variant = (all_variants - set(baseline_variant)).pop()
+	variant = (all_variants - set([baseline_variant])).pop()
 	mu = float(result_df.xs(('uplift'),level=('statistic'))[('value',variant)])
 	x = float(result_df.xs(('uplift_pctile',pctile),level=('statistic','pctile'))[('value',variant)])
 	sigma = statx.estimate_std(x, mu, pctile, n1, n2)
