@@ -3,11 +3,25 @@
 # NB: Make sure your py.test is installed in the virtual environment you have
 # the requirements for expan installed in - otherwise it will use the system 
 # versions which might be out of date and cause erroneous errors.
+#
+# Arguments:
+# cov - show coverage also
+# htmlcov - show coverage in a nice HTML report
 
-if [ -z $1 ]; then
-	args=tests
-else
-	args=$*
+#TODO: do proper getargs processing of this...
+args=""
+if [ X$1 == Xcov ]; then
+	args="$args --cov=."
+	shift
+elif [ X$1 == Xhtmlcov ]; then
+	args="$args --cov=. --cov-report=term --cov-report=html"
+	shift
 fi
 
-PYTHONPATH=".:$PYTHONPATH" py.test $args
+if [ -z $1 ]; then
+	args="$args tests"
+else
+	args="$args $*" #if some unknown arguments are passed, just pass directly to py.test
+fi
+
+PYTHONPATH=".:$PYTHONPATH" python -m pytest$args

@@ -1,6 +1,12 @@
 History
 =======
 
+0.2.5
+-----
+
+* Inclusion of cli in install
+* many other minor changes since open-sourcing...
+
 0.2.0 (2016-05-03)
 ------------------
 
