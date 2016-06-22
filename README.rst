@@ -220,7 +220,7 @@ A **build** and **test** is triggered when a commit is pushed to either
  
 A **build**, **test** and **push to PyPI** is triggered when a **tagged commit** is pushed to **master**.
 
-If you wish to skip triggering a CI task (for example when you only perform changes on documentation), please include ``[ci skip]`` in your commit message.
+If you wish to skip triggering a CI task (for example when you change documentation), please include ``[ci skip]`` in your commit message.
 
 TODO
 ----
