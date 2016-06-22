@@ -15,14 +15,14 @@ from expan.core.debugging import Dbg
 
 class ExperimentTestCase(unittest.TestCase):
 	"""
-  Defines the setUp() and tearDown() functions for the statistics test cases.
-  """
+	Defines the setUp() and tearDown() functions for the statistics test cases.
+	"""
 
 	def setUp(self):
 		"""
-    Load the needed datasets for all StatisticsTestCases and set the random
-    seed so that randomized algorithms show deterministic behaviour.
-    """
+	    Load the needed datasets for all StatisticsTestCases and set the random
+	    seed so that randomized algorithms show deterministic behaviour.
+	    """
 		np.random.seed(0)
 		self.data = Experiment('B', *generate_random_data(), dbg=Dbg(dbg_lvl=5))
 		# Create time column. TODO: Do this nicer
@@ -37,21 +37,21 @@ class ExperimentTestCase(unittest.TestCase):
 
 	def tearDown(self):
 		"""
-    Clean up after the test
-    """
+	    Clean up after the test
+	    """
 		# TODO: find out if we have to remove data manually
 		pass
 
 
 class ExperimentNonClassTestCases(ExperimentTestCase):
 	"""
-  Test cases for the non-class functions.
-  """
+	Test cases for the non-class functions.
+	"""
 
 	def test__subgroup_deltas__computation(self):
 		"""
-    Check if subgroup_deltas() functions properly
-    """
+	    Check if subgroup_deltas() functions properly
+	    """
 		# Calculate result
 		result = subgroup_deltas(self.data.metrics.reset_index()
 								 [['variant', 'feature', 'normal_shifted']], variants=['A', 'B'])
@@ -75,8 +75,8 @@ class ExperimentNonClassTestCases(ExperimentTestCase):
 
 	def test__time_dependent_deltas__computation(self):
 		"""
-    Check if time_dependent_deltas() functions properly
-    """
+	    Check if time_dependent_deltas() functions properly
+	    """
 		# Calculate result
 		result = time_dependent_deltas(self.data.metrics.reset_index()
 									   [['variant', 'time_since_treatment', 'normal_shifted']], variants=['A', 'B'])
@@ -108,13 +108,13 @@ class ExperimentNonClassTestCases(ExperimentTestCase):
 
 class ExperimentClassTestCases(ExperimentTestCase):
 	"""
-  Test cases for the Experiment class functions.
-  """
+	Test cases for the Experiment class functions.
+	"""
 
 	def test__feature_check__computation(self):
 		"""
-    Check if feature check is corectly performed on test data set
-    """
+	    Check if feature check is corectly performed on test data set
+	    """
 		# Perform feature check
 		result = self.data.feature_check()
 		# check delta
@@ -134,6 +134,11 @@ class ExperimentClassTestCases(ExperimentTestCase):
 		np.testing.assert_almost_equal(df.loc[:, 'value'],
 									   np.array([[4.493287, 4.516958]]), decimal=5)
 
+		# check chi-square p-values
+		df = result.statistic('fc', 'chi_square_p', 'feature')
+		np.testing.assert_almost_equal(df.loc[:, 'value'],
+									   np.array([[0.769093, 1]]), decimal=5)
+
 		# check metadata is preserved
 		np.testing.assert_equal(True, all(item in result.metadata.items()
 		                                for item in self.testmetadata.items()))
@@ -141,8 +146,8 @@ class ExperimentClassTestCases(ExperimentTestCase):
 
 	def test__sga__index_levels(self):
 		"""
-    Check if sga() returns the proper index levels
-    """
+	    Check if sga() returns the proper index levels
+	    """
 		# Perform sga()
 		result = self.data.sga()
 		# Check if all index levels are present
@@ -165,8 +170,8 @@ class ExperimentClassTestCases(ExperimentTestCase):
 
 	def test__sga__computation(self):
 		"""
-    Check if sga() performs proper computation
-    """
+	    Check if sga() performs proper computation
+	    """
 		# Perform sga()
 		result = self.data.sga()
 		# check uplift
@@ -193,8 +198,8 @@ class ExperimentClassTestCases(ExperimentTestCase):
 
 	def test__trend__index_levels(self):
 		"""
-    Check if trend() returns the proper index levels
-    """
+	    Check if trend() returns the proper index levels
+	    """
 		np.random.seed(0)
 		metrics, metadata = generate_random_data()
 		metrics['time_since_treatment'] = metrics['treatment_start_time']
@@ -222,8 +227,8 @@ class ExperimentClassTestCases(ExperimentTestCase):
 
 	def test__trend__computation(self):
 		"""
-    Check if trend() functions properly
-    """
+	    Check if trend() functions properly
+	    """
 		np.random.seed(0)
 		metrics, metadata = generate_random_data()
 		metrics['time_since_treatment'] = metrics['treatment_start_time']
@@ -272,8 +277,8 @@ class ExperimentClassTestCases(ExperimentTestCase):
 
 	def test_delta(self):
 		"""
-    Check if Experiment.delta() functions properly
-    """
+	    Check if Experiment.delta() functions properly
+	    """
 		# this should work
 		self.assertTrue(isinstance(self.data, Experiment))  # check that the subclassing works
 
@@ -304,8 +309,9 @@ class ExperimentClassTestCases(ExperimentTestCase):
 		                                for item in self.testmetadata.items()))
 
 	def test_unequal_variance_warning_in_results(self):
-		"""Check if the unequal variance warning message is persisted to the Results structure
-    """
+		"""
+		Check if the unequal variance warning message is persisted to the Results structure
+    	"""
 		result = self.data.delta(kpi_subset=['normal_unequal_variance'],
 								 variant_subset=['A'])
 		w = result.metadata['warnings']['Experiment.delta']

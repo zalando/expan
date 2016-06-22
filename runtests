@@ -8,14 +8,20 @@
 # cov - show coverage also
 # htmlcov - show coverage in a nice HTML report
 
-if [ -z $1 ]; then
-	args=""
-elif [ X$1 == Xcov ]; then
-	args="--cov=."
+#TODO: do proper getargs processing of this...
+args=""
+if [ X$1 == Xcov ]; then
+	args="$args --cov=."
+	shift
 elif [ X$1 == Xhtmlcov ]; then
-	args="--cov=. --cov-report=term --cov-report=html"
-else
-	args=$* #if some unknown arguments are passed, just pass directly to py.test
+	args="$args --cov=. --cov-report=term --cov-report=html"
+	shift
 fi
 
-PYTHONPATH=".:$PYTHONPATH" python -m pytest tests $args
+if [ -z $1 ]; then
+	args="$args tests"
+else
+	args="$args $*" #if some unknown arguments are passed, just pass directly to py.test
+fi
+
+PYTHONPATH=".:$PYTHONPATH" python -m pytest$args

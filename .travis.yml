@@ -10,10 +10,10 @@ deploy:
     condition: $TOXENV == py27
     repo: zalando/expan
   distributions: sdist bdist_wheel
-
 env:
 - TOXENV=py27
-install: pip install -U tox
+install:
+- pip install -U tox
 language: python
 python: 2.7
 script: tox

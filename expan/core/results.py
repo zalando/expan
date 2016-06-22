@@ -4,40 +4,42 @@ from copy import deepcopy
 import numpy as np
 import pandas as pd
 import version
+import statistics as statx
+from scipy.stats import norm
 
 # from tests.tests_core.test_data import generate_random_data
 
 from debugging import Dbg
+from pdb import set_trace
 
 class Results(object):
 	"""
-  A Results instance represents the results of a series of analyses such as
-  SGA or deltaKPI.
+	A Results instance represents the results of a series of analyses such as
+	SGA or deltaKPI.
 
-  Q: could we make this a subclass of DataFrame (i.e. provide this class in an
-  'is-a' relationship with DataFrame, rather than the 'has-a' relationship it
-  has now? It seems to be a difficult thing to subclass the DataFrame object
-  for some reason. https://github.com/pydata/pandas/pull/4271
-  For now, will leave as a 'has-a' class.
+	Q: could we make this a subclass of DataFrame (i.e. provide this class in an
+	'is-a' relationship with DataFrame, rather than the 'has-a' relationship it
+	has now? It seems to be a difficult thing to subclass the DataFrame object
+	for some reason. https://github.com/pydata/pandas/pull/4271
+	For now, will leave as a 'has-a' class.
 
-  TODO: can we remove the 'value' level from the columns, so that the columns
-  of the dataframe are simply the names of the variants? This will make the
-  columns a normal index rather than a multi-index. Currently, always a multi-
-  index with second level only containing a single value 'value'
-  """
+	TODO: can we remove the 'value' level from the columns, so that the columns
+	of the dataframe are simply the names of the variants? This will make the
+	columns a normal index rather than a multi-index. Currently, always a multi-
+	index with second level only containing a single value 'value'
+	"""
 	mandatory_index_levels = [
 		'metric',
 		'subgroup_metric',
 		'subgroup',
 		'statistic',
 		'pctile']
-	# TODO: explain
 	mandatory_column_levels = ['variant']
 
 	def __init__(self, df, metadata={}, dbg=None):
 		"""
-    Want to be able to create results from just a single dataframe.
-    """
+	    Want to be able to create results from just a single dataframe.
+	    """
 		self.df = df
 		self.metadata = metadata
 		self.metadata['version'] = version.__version__
@@ -65,10 +67,10 @@ class Results(object):
 					 subgroup_metric='-',
 					 subgroup=None):
 		"""
-    Appends the results of a delta.
+	    Appends the results of a delta.
 
-    Modifies (or creates) the results data (df).
-    """
+	    Modifies (or creates) the results data (df).
+	    """
 		df = delta_to_dataframe(metric, variant, mu, pctiles,
 								samplesize_variant,
 								samplesize_baseline,
@@ -84,20 +86,20 @@ class Results(object):
 
 	def variants(self):
 		"""
-    Return the variants represented in this object
-    """
+	    Return the variants represented in this object
+	    """
 		return self.df.columns.levels[0]
 
 	def index_values(self, level='metric'):
 		"""
-    Return the metrics represented in this Results object
-    """
+	    Return the metrics represented in this Results object
+	    """
 		return self.df.index.get_level_values(level=level).unique()
 
 	def relative_uplift(self, analysis_type, metric=None, subgroup_metric='-'):
 		"""Calculate the relative uplift for the given metrics and subgroup
-    metrics.
-    """
+	    metrics.
+	    """
 		uplifts = self.statistic(analysis_type, 'uplift', metric, subgroup_metric)
 		baseline_abs = self.statistic(analysis_type, 'variant_mean', metric,
 									  subgroup_metric).loc[:, ('value', self.metadata['baseline_variant'])]
@@ -112,6 +114,22 @@ class Results(object):
 
 		# TODO: do we return a data frame or a Results object here?
 		return df
+
+	def calculate_prob_uplift_over_zero(self):
+		# check if the subgroup index is NaN
+		# NB: this will NOT work if we store delta and SGA results in the same object
+		# if the subgroup index contains only NaNs
+		if len(self.df.index.levels[2]) == 0:
+			df = self.df.groupby(level=['metric']).apply(lambda x:prob_uplift_over_zero_single_metric(x,self.metadata['baseline_variant']))
+			# remove redundant levels (coming from groupby)
+			df.reset_index(level=0,drop=True,inplace=True)
+		else:
+			df = self.df.groupby(level=['metric','subgroup_metric','subgroup']).apply(lambda x:prob_uplift_over_zero_single_metric(x,self.metadata['baseline_variant']))
+			# remove redundant levels (coming from groupby)
+			df.reset_index(level=[0,1,2],drop=True,inplace=True)
+
+		self.df = df
+		#return df
 
 	def delta_means(self, metric=None, subgroup_metric='-'):
 		return self.statistic('delta', 'variant_mean', metric, subgroup_metric)
@@ -134,35 +152,35 @@ class Results(object):
 				  include_pctiles=True):
 		"""
 
-    This is just a basic 'formatter' to allow easy access to results without
-    knowing the ordering of the index, etc. and to have sensible defaults.
-    All of this can be accomplished with fancy indexing on the dataframe
-    directly, but this should just serve as a convenience and an obvious
-    place to 'document' what the typical use-case is.
+	    This is just a basic 'formatter' to allow easy access to results without
+	    knowing the ordering of the index, etc. and to have sensible defaults.
+	    All of this can be accomplished with fancy indexing on the dataframe
+	    directly, but this should just serve as a convenience and an obvious
+	    place to 'document' what the typical use-case is.
 
-    For all arguments, None means all, and '-' means only those for which
-    this particular argument is undefined (e.g. subgroup_metric='-')
+	    For all arguments, None means all, and '-' means only those for which
+	    this particular argument is undefined (e.g. subgroup_metric='-')
 
-    Args:
+	    Args:
 
-            analysis_type (string): the type of analysis that produced the  TODO: implement this!
-                results (several can be present in a single Result object). Must be
-                one of the following:
-                        - 'delta':	only those with no time_since_treatment information, and no subgroup defined
-                        - 'sga':		only those with subgroup defined
-                        - 'trend':	only those with time_since_treatment defined
-                        - None:			no restriction done
+	            analysis_type (string): the type of analysis that produced the  TODO: implement this!
+	                results (several can be present in a single Result object). Must be
+	                one of the following:
+	                        - 'delta':	only those with no time_since_treatment information, and no subgroup defined
+	                        - 'sga':		only those with subgroup defined
+	                        - 'trend':	only those with time_since_treatment defined
+	                        - None:			no restriction done
 
-            statistic (string): the type of data you want, such as 'uplift'
+	            statistic (string): the type of data you want, such as 'uplift'
 
-            metric (string): which metrics you are interested in
+	            metric (string): which metrics you are interested in
 
-            time_since_treatment (int?): TODO: implement
+	            time_since_treatment (int?): TODO: implement
 
-            include_pctiles (bool): some statistics (e.g. 'uplift') can be present
-                with percentiles defined, as opposed to just a mean. If this is true,
-                they'll be returned also. TODO: implement this!
-    """
+	            include_pctiles (bool): some statistics (e.g. 'uplift') can be present
+	                with percentiles defined, as opposed to just a mean. If this is true,
+	                they'll be returned also. TODO: implement this!
+	    """
 		# NOTE: throws AssertionError for trend results and unittest example results
 		# assert (self.df.index.names[0:4] == Results.mandatory_index_levels[0:4])
 		# assert (self.df.columns.names[1] == Results.mandatory_column_levels[0])
@@ -240,13 +258,13 @@ class Results(object):
 
 	def to_hdf(self, fpath):
 		"""
-    Persist to an HDF5 file, preserving metadata.
+	    Persist to an HDF5 file, preserving metadata.
 
-    MetaData is stored as attributes on a Group called 'metadata'. This group
-    doesn't include any datasets, but was used to avoid interfering with the
-    attributes that pandas stores on the 'data' Group.
+	    MetaData is stored as attributes on a Group called 'metadata'. This group
+	    doesn't include any datasets, but was used to avoid interfering with the
+	    attributes that pandas stores on the 'data' Group.
 
-    """
+	    """
 		import h5py
 
 		store = pd.HDFStore(fpath)
@@ -275,10 +293,48 @@ class Results(object):
 		hfile.close()
 
 
+def prob_uplift_over_zero_single_metric(result_df, baseline_variant):
+	"""Calculate the probability of uplift>0 for a single metric.
+
+	Args:
+		result_df (DataFrame): result data frame of a single metric/subgroup
+		baseline_variant (str): name of the baseline variant
+
+	Returns:
+		DataFrame: result data frame with one additional statistic 'prob_uplift_over_0'
+	"""
+	n1,n2 = np.array(result_df.xs(('sample_size'),level=('statistic'))).flatten()
+	pctile = 97.5 # result should be independent of the percentile that we choose
+	all_variants = set(result_df.columns.levels[1])
+	variant = (all_variants - set([baseline_variant])).pop()
+	mu = float(result_df.xs(('uplift'),level=('statistic'))[('value',variant)])
+	x = float(result_df.xs(('uplift_pctile',pctile),level=('statistic','pctile'))[('value',variant)])
+	sigma = statx.estimate_std(x, mu, pctile, n1, n2)
+
+	prob = 1 - norm.cdf(0, loc=mu, scale=sigma)
+	prob_dict = {baseline_variant:np.nan, variant:prob}
+	prob_list = []
+	for v in result_df.columns.levels[1]:
+		prob_list.append(prob_dict[v])
+
+	# a prob df w/o multi-index
+	prob_df = pd.DataFrame([prob_list], columns=result_df.columns)
+	# reconstruct indices
+	for i in ['metric','subgroup_metric','subgroup']:
+		prob_df[i] = result_df.index.get_level_values(i)[0]
+	prob_df['statistic'] = 'prob_uplift_over_0'
+	prob_df['pctile'] = np.nan
+	prob_df.set_index(Results.mandatory_index_levels, inplace=True)
+
+	ret = pd.concat((result_df,prob_df))
+	ret.sort_index(inplace=True)
+
+	return ret
+
 def from_hdf(fpath, dbg=None):
 	"""
-  Restores a Results object from HDF5 as created by the to_hdf method.
-  """
+	Restores a Results object from HDF5 as created by the to_hdf method.
+	"""
 	if dbg is None:
 		dbg = Dbg()
 
@@ -305,7 +361,7 @@ def from_hdf(fpath, dbg=None):
 def delta_to_dataframe(metric, variant, mu, pctiles, samplesize_variant, samplesize_baseline,
 					   subgroup_metric='-',
 					   subgroup=None):
-	""""Defines the Results data frame structure."""
+	"""Defines the Results data frame structure."""
 
 	df = pd.DataFrame({
 		'metric': metric,
@@ -338,7 +394,7 @@ def delta_to_dataframe_all_variants(metric, mu, pctiles, samplesize_variant,
 									mu_baseline,
 									subgroup_metric='-',
 									subgroup=None):
-	""""Defines the Results data frame structure."""
+	"""Defines the Results data frame structure."""
 
 	df = pd.DataFrame({
 		'metric': metric,
@@ -404,7 +460,16 @@ def feature_check_to_dataframe(metric,
 	return df
 
 
-# if __name__ == '__main__':
+if __name__ == '__main__':
+	pass
+	
+	# np.random.seed(0)
+	# from tests.tests_core.test_data import generate_random_data
+	# from expan.core.experiment import Experiment
+	# data = Experiment('B', *generate_random_data())
+	# res = data.delta(kpi_subset=['normal_same','normal_shifted'])
+	# df = res.calculate_prob_uplift_over_zero()
+
 	# from test_core.test_results import load_example_results
 	# aa = load_example_results()
 	# order_means = aa.means('orders').iloc[0]
