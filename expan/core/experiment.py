@@ -22,34 +22,34 @@ def _binned_deltas(df, variants, n_bins=4, binning=None,
 				   min_observations=20, nruns=10000, relative=False,
 				   label_format_str='{standard}'):
 	"""
-  Calculates the feature dependent delta. Only used internally. All
-  calculation by subgroup_delta() and time_dependant_delta() is pushed here.
+	Calculates the feature dependent delta. Only used internally. All
+	calculation by subgroup_delta() and time_dependant_delta() is pushed here.
 
-  Args:
-      df (pandas DataFrame): 3 columns. The order of the columns is expected
-          to be variant, feature, kpi.
-      variants (list of 2): 2 entries, first entry is the treatment variant,
-          second entry specifies the baseline variant
+	Args:
+	  df (pandas DataFrame): 3 columns. The order of the columns is expected
+	      to be variant, feature, kpi.
+	  variants (list of 2): 2 entries, first entry is the treatment variant,
+	      second entry specifies the baseline variant
 
-      n_bins (integer): number of bins to create if binning is None
-      binning (list of bins): preset (if None then binning is created)
+	  n_bins (integer): number of bins to create if binning is None
+	  binning (list of bins): preset (if None then binning is created)
 
-      percentiles (list): list of percentile values to compute
-      min_observations (integer): minimum number of observations necessary. If
-          less observations are given, then NaN is returned.
-      nruns (integer): number of bootstrap runs to perform if assume normal is
-          set to False.
-      relative (boolean): If relative==True, then the values will be returned
-          as distances below and above the mean, respectively, rather than the
-          absolute values. In	this case, the interval is mean-ret_val[0] to
-          mean+ret_val[1]. This is more useful in many situations because it
-          corresponds with the sem() and std() functions.
-      label_format_str (string): format string for the binning label function.
+	  percentiles (list): list of percentile values to compute
+	  min_observations (integer): minimum number of observations necessary. If
+	      less observations are given, then NaN is returned.
+	  nruns (integer): number of bootstrap runs to perform if assume normal is
+	      set to False.
+	  relative (boolean): If relative==True, then the values will be returned
+	      as distances below and above the mean, respectively, rather than the
+	      absolute values. In	this case, the interval is mean-ret_val[0] to
+	      mean+ret_val[1]. This is more useful in many situations because it
+	      corresponds with the sem() and std() functions.
+	  label_format_str (string): format string for the binning label function.
 
-  Returns:
-      pandas.DataFrame: bin-name, mean, percentile and corresponding values
-      list: binning used
-  """
+	Returns:
+	  pandas.DataFrame: bin-name, mean, percentile and corresponding values
+	  list: binning used
+	"""
 
 	# Performing binning of feature on feat2
 	if binning is None:
@@ -143,34 +143,34 @@ def subgroup_deltas(df, variants, n_bins=4, binning=None,
 					assume_normal=True, percentiles=[2.5, 97.5],
 					min_observations=20, nruns=10000, relative=False):
 	"""
-  Calculates the feature dependent delta.
+	Calculates the feature dependent delta.
 
-  Args:
-      df (pandas DataFrame): 3 columns. The order of the columns is expected
-          to be variant, feature, kpi.
-      variants (list of 2): 2 entries, first entry is the treatment variant,
-          second entry specifies the baseline variant
+	Args:
+	  df (pandas DataFrame): 3 columns. The order of the columns is expected
+	      to be variant, feature, kpi.
+	  variants (list of 2): 2 entries, first entry is the treatment variant,
+	      second entry specifies the baseline variant
 
-      n_bins (integer): number of bins to create if binning is None
-      binning (list of bins): preset (if None then binning is created)
+	  n_bins (integer): number of bins to create if binning is None
+	  binning (list of bins): preset (if None then binning is created)
 
-      assume_normal (boolean): specifies whether normal distribution
-          assumptions can be made
-      percentiles (list): list of percentile values to compute
-      min_observations (integer): minimum number of observations necessary. If
-          less observations are given, then NaN is returned.
-      nruns (integer): number of bootstrap runs to perform if assume normal is
-          set to False.
-      relative (boolean): If relative==True, then the values will be returned
-          as distances below and above the mean, respectively, rather than the
-          absolute values. In	this case, the interval is mean-ret_val[0] to
-          mean+ret_val[1]. This is more useful in many situations because it
-          corresponds with the sem() and std() functions.
+	  assume_normal (boolean): specifies whether normal distribution
+	      assumptions can be made
+	  percentiles (list): list of percentile values to compute
+	  min_observations (integer): minimum number of observations necessary. If
+	      less observations are given, then NaN is returned.
+	  nruns (integer): number of bootstrap runs to perform if assume normal is
+	      set to False.
+	  relative (boolean): If relative==True, then the values will be returned
+	      as distances below and above the mean, respectively, rather than the
+	      absolute values. In	this case, the interval is mean-ret_val[0] to
+	      mean+ret_val[1]. This is more useful in many situations because it
+	      corresponds with the sem() and std() functions.
 
-  Returns:
-      pandas.DataFrame: bin-name, mean, percentile and corresponding values
-      list: binning used
-  """
+	Returns:
+	  pandas.DataFrame: bin-name, mean, percentile and corresponding values
+	  list: binning used
+	"""
 
 	# Push computation to _binned_deltas() function
 	result = _binned_deltas(df=df, variants=variants, n_bins=n_bins,
@@ -194,31 +194,31 @@ def time_dependent_deltas(df, variants, time_step=1,
 						  assume_normal=True, percentiles=[2.5, 97.5],
 						  min_observations=20, nruns=10000, relative=False):
 	"""
-  Calculates the time dependent delta.
+	Calculates the time dependent delta.
 
-  Args:
-      df (pandas DataFrame): 3 columns. The order of the columns is expected
-          to be variant, time, kpi.
-      variants (list of 2): 2 entries, first entry is the treatment variant,
-          second entry specifies the baseline variant
+	Args:
+	  df (pandas DataFrame): 3 columns. The order of the columns is expected
+	      to be variant, time, kpi.
+	  variants (list of 2): 2 entries, first entry is the treatment variant,
+	      second entry specifies the baseline variant
 
-      time_step (integer): time_step used for analysis.
+	  time_step (integer): time_step used for analysis.
 
-      percentiles (list): list of percentile values to compute
-      min_observations (integer): minimum number of observations necessary. If
-          less observations are given, then NaN is returned
-      nruns (integer): number of bootstrap runs to perform if assume normal is
-          set to False.
-      relative (boolean): If relative==True, then the values will be returned
-          as distances below and above the mean, respectively, rather than the
-          absolute values. In	this case, the interval is mean-ret_val[0] to
-          mean+ret_val[1]. This is more useful in many situations because it
-          corresponds with the sem() and std() functions.
+	  percentiles (list): list of percentile values to compute
+	  min_observations (integer): minimum number of observations necessary. If
+	      less observations are given, then NaN is returned
+	  nruns (integer): number of bootstrap runs to perform if assume normal is
+	      set to False.
+	  relative (boolean): If relative==True, then the values will be returned
+	      as distances below and above the mean, respectively, rather than the
+	      absolute values. In	this case, the interval is mean-ret_val[0] to
+	      mean+ret_val[1]. This is more useful in many situations because it
+	      corresponds with the sem() and std() functions.
 
-  Returns:
-      pandas.DataFrame: bin-name, mean, percentile and corresponding values
-      list: binning used
-  """
+	Returns:
+	  pandas.DataFrame: bin-name, mean, percentile and corresponding values
+	  list: binning used
+	"""
 	# TODO: allow times to have time stamp format
 	# TODO: allow start time and end time format
 	# TODO: fill with zeros
@@ -255,8 +255,8 @@ def time_dependent_deltas(df, variants, time_step=1,
 # is preserved in all results.
 class Experiment(ExperimentData):
 	"""
-  Class which adds the analysis functions to experimental data.
-  """
+	Class which adds the analysis functions to experimental data.
+	"""
 
 	# TODO: rearrange arguments
 	# TODO: add a constructor that takes an ExperimentData!
@@ -300,36 +300,36 @@ class Experiment(ExperimentData):
 			  assume_normal=True, percentiles=[2.5, 97.5],
 			  min_observations=20, nruns=10000, relative=False):
 		"""
-    Compute delta (with confidence bounds) on all applicable kpis,
-    and returns in the standard Results format.
+	    Compute delta (with confidence bounds) on all applicable kpis,
+	    and returns in the standard Results format.
 
-    Does this for all non-baseline variants.
+	    Does this for all non-baseline variants.
 
-    TODO: Extend this function to metrics again with type-checking
+	    TODO: Extend this function to metrics again with type-checking
 
-    Args:
-        kpi_subset (list): kpis for which to perfom delta. If set to
-            None all kpis are used.
-        variant_subset (list): Variants to use compare against baseline. If
-            set to None all variants are used.
+	    Args:
+	        kpi_subset (list): kpis for which to perfom delta. If set to
+	            None all kpis are used.
+	        variant_subset (list): Variants to use compare against baseline. If
+	            set to None all variants are used.
 
-        assume_normal (boolean): specifies whether normal distribution
-            assumptions can be made
-        percentiles (list): list of percentile values to compute
-        min_observations (integer): minimum observations necessary. If
-            less observations are given, then NaN is returned
-        nruns (integer): number of bootstrap runs to perform if assume
-            normal is set to False.
-        relative (boolean): If relative==True, then the values will be
-            returned as distances below and above the mean, respectively,
-            rather than the	absolute values. In	this case, the interval is
-            mean-ret_val[0] to mean+ret_val[1]. This is more useful in many
-            situations because it corresponds with the sem() and std()
-            functions.
+	        assume_normal (boolean): specifies whether normal distribution
+	            assumptions can be made
+	        percentiles (list): list of percentile values to compute
+	        min_observations (integer): minimum observations necessary. If
+	            less observations are given, then NaN is returned
+	        nruns (integer): number of bootstrap runs to perform if assume
+	            normal is set to False.
+	        relative (boolean): If relative==True, then the values will be
+	            returned as distances below and above the mean, respectively,
+	            rather than the	absolute values. In	this case, the interval is
+	            mean-ret_val[0] to mean+ret_val[1]. This is more useful in many
+	            situations because it corresponds with the sem() and std()
+	            functions.
 
-    Returns:
-        Results object containing the computed deltas.
-    """
+	    Returns:
+	        Results object containing the computed deltas.
+	    """
 		res = Results(None, metadata=self.metadata)
 
 		kpis_to_analyse = self.kpi_names.copy()
@@ -362,6 +362,8 @@ class Experiment(ExperimentData):
 
 			except ValueError as e:
 				res.metadata['errors']['Experiment.delta'] = e
+
+		res.calculate_prob_uplift_over_zero()
 
 		return res
 
@@ -429,38 +431,38 @@ class Experiment(ExperimentData):
 			min_observations=20, nruns=10000, relative=False,
 			**kwargs):
 		"""
-    Compute subgroup delta (with confidence bounds) on all applicable
-    metrics, and returns in the standard Results format.
+	    Compute subgroup delta (with confidence bounds) on all applicable
+	    metrics, and returns in the standard Results format.
 
-    Does this for all non-baseline variants.
+	    Does this for all non-baseline variants.
 
-    Args:
-        feature_subset (list): Features which are binned for which to
-            perfom delta computations. If set to None all features are used.
-        kpi_subset (list): KPIs for which to perfom delta computations.
-            If set to None all features are used.
-        variant_subset (list): Variants to use compare against baseline. If
-            set to None all variants are used.
-        n_bins (integer): number of bins to create if binning is None
+	    Args:
+	        feature_subset (list): Features which are binned for which to
+	            perfom delta computations. If set to None all features are used.
+	        kpi_subset (list): KPIs for which to perfom delta computations.
+	            If set to None all features are used.
+	        variant_subset (list): Variants to use compare against baseline. If
+	            set to None all variants are used.
+	        n_bins (integer): number of bins to create if binning is None
 
-        binning (list of bins): preset (if None then binning is created)
-        assume_normal (boolean): specifies whether normal distribution
-            assumptions can be made
-        percentiles (list): list of percentile values to compute
-        min_observations (integer): minimum observations necessary. If
-            less observations are given, then NaN is returned
-        nruns (integer): number of bootstrap runs to perform if assume
-            normal is set to False.
-        relative (boolean): If relative==True, then the values will be
-            returned as distances below and above the mean, respectively,
-            rather than the	absolute values. In	this case, the interval is
-            mean-ret_val[0] to mean+ret_val[1]. This is more useful in many
-            situations because it corresponds with the sem() and std()
-            functions.
+	        binning (list of bins): preset (if None then binning is created)
+	        assume_normal (boolean): specifies whether normal distribution
+	            assumptions can be made
+	        percentiles (list): list of percentile values to compute
+	        min_observations (integer): minimum observations necessary. If
+	            less observations are given, then NaN is returned
+	        nruns (integer): number of bootstrap runs to perform if assume
+	            normal is set to False.
+	        relative (boolean): If relative==True, then the values will be
+	            returned as distances below and above the mean, respectively,
+	            rather than the	absolute values. In	this case, the interval is
+	            mean-ret_val[0] to mean+ret_val[1]. This is more useful in many
+	            situations because it corresponds with the sem() and std()
+	            functions.
 
-    Returns:
-        Results object containing the computed deltas.
-    """
+	    Returns:
+	        Results object containing the computed deltas.
+	    """
 		res = Results(None, metadata=self.metadata)
 
 		# Check if data exists
@@ -504,39 +506,39 @@ class Experiment(ExperimentData):
 			  min_observations=20, nruns=10000, relative=False,
 			  **kwargs):
 		"""
-    Compute time delta (with confidence bounds) on all applicable
-    metrics, and returns in the standard Results format.
+	    Compute time delta (with confidence bounds) on all applicable
+	    metrics, and returns in the standard Results format.
 
-    Does this for all non-baseline variants.
+	    Does this for all non-baseline variants.
 
-    Args:
-        kpi_subset (list): KPIs for which to perfom delta computations.
-            If set to None all features are used.
-        variant_subset (list): Variants to use compare against baseline. If
-            set to None all variants are used.
-        time_step (integer): time increment over which to aggregate data.
+	    Args:
+	        kpi_subset (list): KPIs for which to perfom delta computations.
+	            If set to None all features are used.
+	        variant_subset (list): Variants to use compare against baseline. If
+	            set to None all variants are used.
+	        time_step (integer): time increment over which to aggregate data.
 
-        assume_normal (boolean): specifies whether normal distribution
-            assumptions can be made
-        percentiles (list): list of percentile values to compute
-        min_observations (integer): minimum observations necessary. If
-            less observations are given, then NaN is returned
-        nruns (integer): number of bootstrap runs to perform if assume
-            normal is set to False.
-        relative (boolean): If relative==True, then the values will be
-            returned as distances below and above the mean, respectively,
-            rather than the	absolute values. In	this case, the interval is
-            mean-ret_val[0] to mean+ret_val[1]. This is more useful in many
-            situations because it corresponds with the sem() and std()
-            functions.
+	        assume_normal (boolean): specifies whether normal distribution
+	            assumptions can be made
+	        percentiles (list): list of percentile values to compute
+	        min_observations (integer): minimum observations necessary. If
+	            less observations are given, then NaN is returned
+	        nruns (integer): number of bootstrap runs to perform if assume
+	            normal is set to False.
+	        relative (boolean): If relative==True, then the values will be
+	            returned as distances below and above the mean, respectively,
+	            rather than the	absolute values. In	this case, the interval is
+	            mean-ret_val[0] to mean+ret_val[1]. This is more useful in many
+	            situations because it corresponds with the sem() and std()
+	            functions.
 
-    Returns:
-        Results object containing the computed deltas.
-    """
+	    Returns:
+	        Results object containing the computed deltas.
+	    """
 		res = Results(None, metadata=self.metadata)
 		# Check if data exists
 		if self.kpis_time is None:
-			warnings.warn('Empty data set entered to analysis.'
+			warnings.warn('Empty data set entered to analysis. '
 						  + 'Returning empty result set')
 			res.metadata['warnings']['Experiment.trend'] = \
 				UserWarning('Empty data set entered to analysis.')
