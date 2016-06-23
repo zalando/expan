@@ -177,7 +177,7 @@ repository.
 
     >>> import core.binning
     >>> core.version()
-    'v0.3.3'
+    'v0.3.0'
     >>> core.version('{major}.{minor}..{commits}')
     '0.0..176'
     >>> core.version('{commit}')
