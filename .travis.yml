@@ -9,8 +9,6 @@ deploy:
     condition: $TOXENV == py27
     repo: zalando/expan
     tags: true
-    on:
-      branch: master
   distributions: sdist bdist_wheel
   password:
     secure: W5YW/k7l9quSg+wcsFMhcCO1Rl6YVvV6nYkLBpzBIdAZ1g1+4RxBlFwHUVQzBlBKFML4cr1F7cuuSZ2SCsOi71M92VlkS3qXBUSGLUZdH1tvwp0MBWmrqTiXW6A8uC+01o2D++K1/F9gJ274vaKMI0lgD0g+bzknyw0laxlQSxYMvweFaEX00AKPHngh31UCeUUmucqFU5BjwsQHhHfBlbNFsEtu+TMH7Db6+5AK0xF2CICwBnPJYA6hq8pn3/T3ng6hG/qQAQsLdAzkI4+ulWmN1RhUFMDSFuV3pl2xxxjeN0V+D9agTzRhi/7xMUSiP+pCFalBMc79klRCowlAM3CExmLZBJjV34yWANNKcN1iGa6DqcLChRlID4TsHQJXydtCKdI2nDeI8jgNtlIjag014ePw2FekT8Wj7wHNVajxfcyPZoPN2krpw+40m/zHutMW2wQNe1aYKZ8dj5IxxorioPgPLU0ZOvMOAnTdCS9pDlaGLD50xzqf1uz+BqkvrNjjvTDSXNuvv3VUhjqz1QrEiOIir6M02YUxa0zKeXHZKPo68lITezN//llRJrTRUpDsikKNb3kowcJj7nkOs/DI/I1qkHxi2Cwfx/EZ+dd+3NDC1IiZTyYf5yr9yyDvdFnZdBpuJkzkfYNO3KRBkHDFYdClH2ViKrB/kzLKDkU=
