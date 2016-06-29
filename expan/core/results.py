@@ -309,7 +309,7 @@ def prob_uplift_over_zero_single_metric(result_df, baseline_variant):
 	variant = (all_variants - set([baseline_variant])).pop()
 	mu = float(result_df.xs(('uplift'),level=('statistic'))[('value',variant)])
 	x = float(result_df.xs(('uplift_pctile',pctile),level=('statistic','pctile'))[('value',variant)])
-	sigma = statx.estimate_std(x, mu, pctile, n1, n2)
+	sigma = statx.estimate_std(x, mu, pctile)
 
 	prob = 1 - norm.cdf(0, loc=mu, scale=sigma)
 	prob_dict = {baseline_variant:np.nan, variant:prob}
@@ -461,13 +461,13 @@ def feature_check_to_dataframe(metric,
 
 
 if __name__ == '__main__':
-	pass
+	#pass
 	
-	# np.random.seed(0)
-	# from tests.tests_core.test_data import generate_random_data
-	# from expan.core.experiment import Experiment
-	# data = Experiment('B', *generate_random_data())
-	# res = data.delta(kpi_subset=['normal_same','normal_shifted'])
+	np.random.seed(0)
+	from tests.tests_core.test_data import generate_random_data
+	from expan.core.experiment import Experiment
+	data = Experiment('B', *generate_random_data())
+	res = data.delta(kpi_subset=['normal_same','normal_shifted'])
 	# df = res.calculate_prob_uplift_over_zero()
 
 	# from test_core.test_results import load_example_results
