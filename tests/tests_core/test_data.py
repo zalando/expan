@@ -52,6 +52,30 @@ def generate_random_data():
 	return test_data_frame, metadata
 
 
+def generate_random_data_n_variants(n_variants=3):
+	np.random.seed(42)
+	size = 10000
+
+	test_data_frame = pd.DataFrame()
+	test_data_frame['entity'] = range(size)
+	test_data_frame['variant'] = np.random.choice(map(chr, range(65,65+n_variants)), size=size)
+
+	test_data_frame['normal_same'] = np.random.normal(size=size)
+	test_data_frame['poisson_same'] = np.random.poisson(size=size)
+
+	test_data_frame['feature'] = np.random.choice(['has', 'non'], size=size)
+
+	test_data_frame['treatment_start_time'] = np.random.choice(range(10), size=size)
+
+	metadata = {
+		'primary_KPI': 'normal_same',
+		'source': 'simulated',
+		'experiment': 'random_data_generation'
+	}
+
+	return test_data_frame, metadata
+
+
 class DataTestCase(unittest.TestCase):
 	def setUp(self):
 		"""
