@@ -580,20 +580,15 @@ class Experiment(ExperimentData):
 		return res
 
 
-# if __name__ == '__main__':
-# 	from tests.tests_core.test_data import generate_random_data
-#
-# 	np.random.seed(0)
-# 	data = Experiment('B', *generate_random_data())
-# 	# Create time column. TODO: Do this nicer
-# 	# data.kpis['time_since_treatment'] = data.features['treatment_start_time']
-# 	# Make time part of index
-# 	# data.kpis.set_index('time_since_treatment',append=True,inplace=True)
-#
-# 	data.kpis['time_since_treatment'] = data.features['treatment_start_time']
-# 	data.kpis.set_index('time_since_treatment', append=True, inplace=True)
-# 	result = data.delta(kpi_subset=['normal_unequal_variance'],
-# 						variant_subset=['A'])
+if __name__ == '__main__':
+	from tests.tests_core.test_data import generate_random_data
+
+	np.random.seed(0)
+	metrics, metadata = generate_random_data()
+	metrics['time_since_treatment'] = metrics['treatment_start_time']
+	exp = Experiment('B', metrics, metadata, [4, 6])
+	# Perform sga()
+	result = exp.trend()
 
 # result = time_dependent_deltas(data.metrics.reset_index()
 #	[['variant','time_since_treatment','normal_shifted']],variants=['A','B']).df.loc[:,1]
