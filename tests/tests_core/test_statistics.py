@@ -76,16 +76,16 @@ class StatisticsTestCase(unittest.TestCase):
 		# TODO: find out if we have to remove data manually
 		pass
 
-	def test_estimate_std(self):
-		"""
-		Check if the std estimation is correct.
+	# def test_estimate_std(self):
+	# 	"""
+	# 	Check if the std estimation is correct.
 
-		http://sphweb.bumc.bu.edu/otlt/MPH-Modules/BS/BS704_Confidence_Intervals/BS704_Confidence_Intervals5.html
-		"""
-		res = statx.estimate_std(0.44, 1.7, 2.5, 1623, 1911)
-		self.assertAlmostEqual(res, 19.03837750)
-		res = statx.estimate_std(2.96, 1.7, 97.5, 1623, 1911)
-		self.assertAlmostEqual(res, 19.03837750)
+	# 	http://sphweb.bumc.bu.edu/otlt/MPH-Modules/BS/BS704_Confidence_Intervals/BS704_Confidence_Intervals5.html
+	# 	"""
+	# 	res = statx.estimate_std(0.44, 1.7, 2.5, 1623, 1911)
+	# 	self.assertAlmostEqual(res, 19.03837750)
+	# 	res = statx.estimate_std(2.96, 1.7, 97.5, 1623, 1911)
+	# 	self.assertAlmostEqual(res, 19.03837750)
 
 class DeltaTestCases(StatisticsTestCase):
 	"""
