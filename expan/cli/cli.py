@@ -45,7 +45,8 @@ def run_analysis(features_file, kpis_file, metadata_file):
 	return (exp.delta(), exp.sga())
 
 
-def run_expan((features_file, kpis_file, metadata_file, output_file)):
+def run_expan(xxx_todo_changeme):
+	(features_file, kpis_file, metadata_file, output_file) = xxx_todo_changeme
 	(delta_result, sga_result) = run_analysis(features_file, kpis_file, metadata_file)
 	print_results(delta_result, sga_result, output_file)
 
@@ -58,12 +59,12 @@ def print_results(delta, sga, output_file):
 		output.write(delta_s)
 		output.write(sga_s)
 	else:
-		print delta_s
-		print sga_s
+		print(delta_s)
+		print(sga_s)
 
 
 def check_input_data(args):
-	print args
+	print(args)
 	if not args.kpis:
 		raise UsageError('Kpis file shall be provided (-k cli parameter)')
 	if not args.metadata:

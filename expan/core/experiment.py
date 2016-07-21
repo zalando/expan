@@ -2,19 +2,20 @@
 # the proper interface is through the Experiment instance functions, surely?
 
 # import numpy as np
-import statistics as statx
+from __future__ import absolute_import
+import expan.core.statistics as statx
 import warnings
 
-import binning as binmodule  # name conflict with binning...
+import expan.core.binning as binmodule  # name conflict with binning...
 import numpy as np
 import pandas as pd
-from experimentdata import ExperimentData
-from results import Results, delta_to_dataframe_all_variants, feature_check_to_dataframe
+from expan.core.experimentdata import ExperimentData
+from expan.core.results import Results, delta_to_dataframe_all_variants, feature_check_to_dataframe
 
 # raise the same warning multiple times
 warnings.simplefilter('always', UserWarning)
 
-from debugging import Dbg
+from expan.core.debugging import Dbg
 
 def _binned_deltas(df, variants, n_bins=4, binning=None, cumulative=False,
 				   assume_normal=True, percentiles=[2.5, 97.5],
@@ -258,7 +259,7 @@ def time_dependent_deltas(df, variants, time_step=1, cumulative=False,
 
 	# create binning manually, ASSUMING uniform sampling
 	tpoints = np.unique(df.iloc[:,1])
-	binning = binmodule.NumericalBinning(uppers=tpoints, lowers=tpoints, 
+	binning = binmodule.NumericalBinning(uppers=tpoints, lowers=tpoints,
 		up_closed=[True]*len(tpoints), lo_closed=[True]*len(tpoints))
 
 	# Push computation to _binned_deltas() function
