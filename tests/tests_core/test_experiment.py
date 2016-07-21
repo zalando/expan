@@ -299,7 +299,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
 		result = self.data.trend()
 		w = result.metadata['warnings']['Experiment.trend']
 		self.assertTrue(isinstance(w, UserWarning))
-		self.assertTrue(w.message == 'Empty data set entered to analysis.')
+		self.assertTrue(w.args[0] == 'Empty data set entered to analysis.')
 
 
 
@@ -344,7 +344,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
 								 variant_subset=['A'])
 		w = result.metadata['warnings']['Experiment.delta']
 		self.assertTrue(isinstance(w, UserWarning))
-		self.assertTrue(w.message == 'Sample variances differ too much to assume that population variances are equal.')
+		self.assertTrue(w.args[0] == 'Sample variances differ too much to assume that population variances are equal.')
 
 
 if __name__ == '__main__':
