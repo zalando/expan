@@ -140,8 +140,8 @@ class ExperimentClassTestCases(ExperimentTestCase):
 									   np.array([[0.769093, 1]]), decimal=5)
 
 		# check metadata is preserved
-		np.testing.assert_equal(True, all(item in result.metadata.items()
-		                                for item in self.testmetadata.items()))
+		np.testing.assert_equal(True, all(item in list(result.metadata.items())
+		                                for item in list(self.testmetadata.items())))
 
 
 	def test__sga__index_levels(self):
@@ -152,13 +152,13 @@ class ExperimentClassTestCases(ExperimentTestCase):
 		result = self.data.sga()
 		# Check if all index levels are present
 		index_levels = [
-			pd.Index([u'normal_same', u'normal_shifted', u'normal_shifted_by_feature', u'normal_unequal_variance'],
-					 dtype='object', name=u'metric'),
-			pd.Index([u'feature', u'treatment_start_time'], dtype='object', name=u'subgroup_metric'),
-			pd.Index([u'[0.0,2.0)', u'[2.0,4.0)', u'[4.0,7.0)', u'[7.0,9.0]', u'{has}', u'{non}'], dtype='object',
-					 name=u'subgroup'),
-			pd.Index([u'sample_size', u'uplift', u'uplift_pctile', u'variant_mean'], dtype='object', name=u'statistic'),
-			pd.Float64Index([2.5, 97.5], dtype='float64', name=u'pctile')
+			pd.Index(['normal_same', 'normal_shifted', 'normal_shifted_by_feature', 'normal_unequal_variance'],
+					 dtype='object', name='metric'),
+			pd.Index(['feature', 'treatment_start_time'], dtype='object', name='subgroup_metric'),
+			pd.Index(['[0.0,2.0)', '[2.0,4.0)', '[4.0,7.0)', '[7.0,9.0]', '{has}', '{non}'], dtype='object',
+					 name='subgroup'),
+			pd.Index(['sample_size', 'uplift', 'uplift_pctile', 'variant_mean'], dtype='object', name='statistic'),
+			pd.Float64Index([2.5, 97.5], dtype='float64', name='pctile')
 		]
 		result_levels = list(result.df.index.levels)
 		# Check if all index levels match expectation TODO: Make nice
@@ -192,8 +192,8 @@ class ExperimentClassTestCases(ExperimentTestCase):
 									   np.array([[0.001221, 0.981820], [-0.012310, 0.989196]]), decimal=5)
 
 		# check metadata is preserved
-		np.testing.assert_equal(True, all(item in result.metadata.items()
-		                                for item in self.testmetadata.items()))
+		np.testing.assert_equal(True, all(item in list(result.metadata.items())
+		                                for item in list(self.testmetadata.items())))
 
 
 	def test__trend__index_levels(self):
@@ -208,13 +208,13 @@ class ExperimentClassTestCases(ExperimentTestCase):
 		result = exp.trend()
 		# Check if all index levels are present
 		index_levels = [
-			pd.Index([u'normal_same', u'normal_shifted', u'normal_shifted_by_feature', u'normal_unequal_variance'],
-					 dtype='object', name=u'metric'),
-			pd.Index([u'-'], dtype='object', name=u'subgroup_metric'),
-			pd.Index(range(10), dtype='object', name=u'time'),
-			pd.Float64Index([], dtype='float64', name=u'subgroup'),
-			pd.Index([u'sample_size', u'uplift', u'uplift_pctile', u'variant_mean'], dtype='object', name=u'statistic'),
-			pd.Float64Index([2.5, 97.5], dtype='float64', name=u'pctile')
+			pd.Index(['normal_same', 'normal_shifted', 'normal_shifted_by_feature', 'normal_unequal_variance'],
+					 dtype='object', name='metric'),
+			pd.Index(['-'], dtype='object', name='subgroup_metric'),
+			pd.Index(list(range(10)), dtype='object', name='time'),
+			pd.Float64Index([], dtype='float64', name='subgroup'),
+			pd.Index(['sample_size', 'uplift', 'uplift_pctile', 'variant_mean'], dtype='object', name='statistic'),
+			pd.Float64Index([2.5, 97.5], dtype='float64', name='pctile')
 		]
 		result_levels = list(result.df.index.levels)
 		# Check if all index levels match expectation TODO: Make nice
@@ -262,8 +262,8 @@ class ExperimentClassTestCases(ExperimentTestCase):
 														 0.921807, 0.967238, 0.995031, 0.979605])), decimal=5)
 
 		# check metadata is preserved
-		np.testing.assert_equal(True, all(item in result.metadata.items()
-		                                for item in self.testmetadata.items()))
+		np.testing.assert_equal(True, all(item in list(result.metadata.items())
+		                                for item in list(self.testmetadata.items())))
 
 
 	def test_trend_missing_time_resolved_data(self):
@@ -271,7 +271,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
 		result = self.data.trend()
 		w = result.metadata['warnings']['Experiment.trend']
 		self.assertTrue(isinstance(w, UserWarning))
-		self.assertTrue(w.message == 'Empty data set entered to analysis.')
+		self.assertTrue(w.args[0] == 'Empty data set entered to analysis.')
 
 
 
@@ -305,8 +305,8 @@ class ExperimentClassTestCases(ExperimentTestCase):
 									   np.array([[0.025219, -0.007833]]), decimal=5)
 
 		# check metadata is preserved
-		np.testing.assert_equal(True, all(item in result.metadata.items()
-		                                for item in self.testmetadata.items()))
+		np.testing.assert_equal(True, all(item in list(result.metadata.items())
+		                                for item in list(self.testmetadata.items())))
 
 	def test_unequal_variance_warning_in_results(self):
 		"""
@@ -316,7 +316,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
 								 variant_subset=['A'])
 		w = result.metadata['warnings']['Experiment.delta']
 		self.assertTrue(isinstance(w, UserWarning))
-		self.assertTrue(w.message == 'Sample variances differ too much to assume that population variances are equal.')
+		self.assertTrue(w.args[0] == 'Sample variances differ too much to assume that population variances are equal.')
 
 
 if __name__ == '__main__':

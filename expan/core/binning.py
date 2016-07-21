@@ -13,7 +13,7 @@ dbg_lvl = 3
 
 def dbg(lvl, msg):
 	if lvl <= dbg_lvl:
-		print
+		print()
 		'D{:d}|{}'.format(lvl, msg)
 
 
@@ -157,9 +157,9 @@ class CategoricalBinning(Binning):
 
 		if '{iter.' in format_str:
 			if '{iter.uppercase}' in format_str:
-				it = iter(string.uppercase)
+				it = iter(string.ascii_uppercase)
 			elif '{iter.lowercase}' in format_str:
-				it = iter(string.lowercase)
+				it = iter(string.ascii_lowercase)
 			elif '{iter.integer}' in format_str:
 				import itertools
 				it = itertools.count()
@@ -184,10 +184,10 @@ class CategoricalBinning(Binning):
 				format_args['set_notation'] = '{unseen}'
 
 			if it is not None:
-				print
+				print()
 				'ii: ' + str(ii)
 				if not is_catchall:
-					format_args['iterator'] = it.next()
+					format_args['iterator'] = next(it)
 				else:
 					format_args['iterator'] = '?'
 
@@ -434,9 +434,9 @@ class NumericalBinning(Binning):
 
 		if '{iter.' in format_str:
 			if '{iter.uppercase}' in format_str:
-				it = iter(string.uppercase)
+				it = iter(string.ascii_uppercase)
 			elif '{iter.lowercase}' in format_str:
-				it = iter(string.lowercase)
+				it = iter(string.ascii_lowercase)
 			elif '{iter.integer}' in format_str:
 				import itertools
 				it = itertools.count()
@@ -474,7 +474,7 @@ class NumericalBinning(Binning):
 				'up_bracket': ']' if uc else ')',
 			}
 			if (not is_catchall) and (it is not None):
-				format_args['iterator'] = it.next()
+				format_args['iterator'] = next(it)
 
 			lbl = (format_str if not is_catchall else catchall_format_str).format(**format_args)
 

@@ -2,19 +2,20 @@
 # the proper interface is through the Experiment instance functions, surely?
 
 # import numpy as np
-import statistics as statx
+from __future__ import absolute_import
+import expan.core.statistics as statx
 import warnings
 
-import binning as binmodule  # name conflict with binning...
+import expan.core.binning as binmodule  # name conflict with binning...
 import numpy as np
 import pandas as pd
-from experimentdata import ExperimentData
-from results import Results, delta_to_dataframe_all_variants, feature_check_to_dataframe
+from expan.core.experimentdata import ExperimentData
+from expan.core.results import Results, delta_to_dataframe_all_variants, feature_check_to_dataframe
 
 # raise the same warning multiple times
 warnings.simplefilter('always', UserWarning)
 
-from debugging import Dbg
+from expan.core.debugging import Dbg
 
 
 def _binned_deltas(df, variants, n_bins=4, binning=None,
@@ -224,7 +225,7 @@ def time_dependent_deltas(df, variants, time_step=1,
 	# TODO: fill with zeros
 
 	# Create time binning with time_step
-	time_bin = (lambda x: round(x / float(time_step) + 0.5) * time_step)
+	time_bin = (lambda x: int(x / float(time_step) + 0.5) * time_step)
 
 	# Apply time binning vectorized to each element in the input array
 	df['_tmp_time_'] = df.iloc[:, 1].apply(time_bin)
@@ -586,9 +587,11 @@ if __name__ == '__main__':
 	np.random.seed(0)
 	metrics, metadata = generate_random_data()
 	metrics['time_since_treatment'] = metrics['treatment_start_time']
-	exp = Experiment('B', metrics, metadata, [4, 6])
+	exp = Experiment('B', metrics, metadata)
 	# Perform sga()
-	result = exp.trend()
+	#result = exp.trend()
+	result = time_dependent_deltas(exp.metrics.reset_index()
+									   [['variant', 'treatment_start_time', 'normal_shifted']], variants=['A', 'B'])
 
 # result = time_dependent_deltas(data.metrics.reset_index()
 #	[['variant','time_since_treatment','normal_shifted']],variants=['A','B']).df.loc[:,1]

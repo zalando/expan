@@ -10,8 +10,9 @@ import expan.core.results as r
 from expan.core.experiment import Experiment
 from tests.tests_core.test_data import generate_random_data
 from expan.core.results import prob_uplift_over_zero_single_metric
+import imp
 
-reload(r)
+imp.reload(r)
 
 data_dir = os.getcwd() + '/tests/tests_core/'  # TODO: adjust depending on where we're called from?
 
