@@ -17,7 +17,7 @@ warnings.simplefilter('always', UserWarning)
 from debugging import Dbg
 
 
-def _binned_deltas(df, variants, n_bins=4, binning=None,
+def _binned_deltas(df, variants, n_bins=4, binning=None, cumulative=False,
 				   assume_normal=True, percentiles=[2.5, 97.5],
 				   min_observations=20, nruns=10000, relative=False,
 				   label_format_str='{standard}'):
@@ -30,6 +30,8 @@ def _binned_deltas(df, variants, n_bins=4, binning=None,
 	      to be variant, feature, kpi.
 	  variants (list of 2): 2 entries, first entry is the treatment variant,
 	      second entry specifies the baseline variant
+	      TODO: currently only the baseline variant is extracted from this list
+	        and deltas are calculated for all variants (see bug OCTO-869)
 
 	  n_bins (integer): number of bins to create if binning is None
 	  binning (list of bins): preset (if None then binning is created)
@@ -53,29 +55,52 @@ def _binned_deltas(df, variants, n_bins=4, binning=None,
 
 	# Performing binning of feature on feat2
 	if binning is None:
-		cg_feat_df = df.iloc[:, 1][df.iloc[:, 0] == variants[1]]
 		binning = binmodule.create_binning(df.iloc[:, 1], nbins=n_bins)
+
+	if cumulative==True and type(binning)!=binmodule.NumericalBinning:
+		raise ValueError("Cannot calculate cumulative deltas for numerical binnings")
 
 	# Applying binning to feat1 and feat2 arrays
 	df.loc[:, '_tmp_bin_'] = binning.label(data=df.iloc[:, 1],
 										   format_str=label_format_str)
 
 	# Initialize result object as data frame with bin keys as index
-	def do_delta(f):
+	def do_delta(f, bin_name):
 		# find the corresponding bin in the baseline variant
-		baseline_metric = df.iloc[:, 2][
-			(df.iloc[:, 0] == variants[1]) & (df['_tmp_bin_'] == f['_tmp_bin_'].tolist()[0])]
-		return (delta_to_dataframe_all_variants(f.columns[2],
-												*statx.delta(
-													x=f.iloc[:, 2],
-													y=baseline_metric,
-													assume_normal=assume_normal,
-													percentiles=percentiles,
-													min_observations=min_observations,
-													nruns=nruns, relative=relative)))
+		baseline_metric = f.iloc[:, 2][(f.iloc[:, 0] == variants[1])]
+		out_df=pd.DataFrame()
+
+		for v in f['variant'].unique():
+			v_metric =  f.iloc[:, 2][ (f.iloc[:,0]==v) ]
+			df = delta_to_dataframe_all_variants(f.columns[2],
+													*statx.delta(
+														x=v_metric,
+														y=baseline_metric,
+														assume_normal=assume_normal,
+														percentiles=percentiles,
+														min_observations=min_observations,
+														nruns=nruns, relative=relative))
+
+			# add new index levels for variant and binning
+			df['_tmp_bin_']=bin_name
+			df['variant'] = v
+			df.set_index(['variant', '_tmp_bin_'], append=True, inplace=True)
+			df=df.reorder_levels(['variant', '_tmp_bin_', 'metric',
+			                      'subgroup_metric', 'subgroup',
+			                      'statistic', 'pctile'])
+
+			out_df=out_df.append(df)
+		return out_df
 
 	# Actual calculation
-	result = df.groupby(['variant', '_tmp_bin_']).apply(do_delta)
+	result = pd.DataFrame()
+	unique_tmp_bins=df['_tmp_bin_'].unique()
+	for bin in unique_tmp_bins:
+		if not cumulative:
+			result=result.append(do_delta(df[df['_tmp_bin_'] == bin], bin))
+		else:
+			result=result.append(do_delta(df[df['_tmp_bin_'] <= bin], bin))
+
 	# unstack variant
 	result = result.unstack(0)
 	# drop _tmp_bin_ in the input data frame
@@ -190,7 +215,7 @@ def subgroup_deltas(df, variants, n_bins=4, binning=None,
 	return result
 
 
-def time_dependent_deltas(df, variants, time_step=1,
+def time_dependent_deltas(df, variants, time_step=1, cumulative=False,
 						  assume_normal=True, percentiles=[2.5, 97.5],
 						  min_observations=20, nruns=10000, relative=False):
 	"""
@@ -234,6 +259,7 @@ def time_dependent_deltas(df, variants, time_step=1,
 
 	# Push computation to _binned_deltas() function
 	result = _binned_deltas(df=df, variants=variants, n_bins=n_bins,
+	                        cumulative=cumulative,
 							assume_normal=assume_normal, percentiles=percentiles,
 							min_observations=min_observations, nruns=nruns,
 							relative=relative, label_format_str=None)
@@ -488,8 +514,7 @@ class Experiment(ExperimentData):
 				res.df = pd.concat([
 					res.df,
 					subgroup_deltas(
-						self.metrics.reset_index() \
-							[['variant', feature, kpi]],
+						self.metrics.reset_index()[['variant', feature, kpi]],
 						variants=['dummy', self.baseline_variant],
 						n_bins=n_bins,
 						binning=binning,
@@ -501,7 +526,7 @@ class Experiment(ExperimentData):
 		return res
 
 	def trend(self, kpi_subset=None, variant_subset=None,
-			  time_step=1,
+			  time_step=1, cumulative=True,
 			  assume_normal=True, percentiles=[2.5, 97.5],
 			  min_observations=20, nruns=10000, relative=False,
 			  **kwargs):
@@ -517,6 +542,8 @@ class Experiment(ExperimentData):
 	        variant_subset (list): Variants to use compare against baseline. If
 	            set to None all variants are used.
 	        time_step (integer): time increment over which to aggregate data.
+	        cumulative (boolean): Trend is calculated using data from
+	            start till the current bin or the current bin only
 
 	        assume_normal (boolean): specifies whether normal distribution
 	            assumptions can be made
@@ -568,6 +595,7 @@ class Experiment(ExperimentData):
 												  'time_since_treatment', kpi]],
 					variants=[variant, self.baseline_variant],
 					time_step=time_step,
+					cumulative=cumulative,
 					assume_normal=assume_normal,
 					percentiles=percentiles,
 					min_observations=min_observations,
