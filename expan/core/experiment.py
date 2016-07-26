@@ -58,7 +58,7 @@ def _binned_deltas(df, variants, n_bins=4, binning=None, cumulative=False,
 		binning = binmodule.create_binning(df.iloc[:, 1], nbins=n_bins)
 
 	if cumulative==True and type(binning)!=binmodule.NumericalBinning:
-		raise ValueError("Cannot calculate cumulative deltas for numerical binnings")
+		raise ValueError("Cannot calculate cumulative deltas for non-numerical binnings")
 
 	# Applying binning to feat1 and feat2 arrays
 	df.loc[:, '_tmp_bin_'] = binning.label(data=df.iloc[:, 1],
