@@ -236,7 +236,7 @@ def time_dependent_deltas(df, variants, time_step=1,
 	result = _binned_deltas(df=df, variants=variants, n_bins=n_bins,
 							assume_normal=assume_normal, percentiles=percentiles,
 							min_observations=min_observations, nruns=nruns,
-							relative=relative, label_format_str=None)
+							relative=relative, label_format_str='{mid}')
 
 	# Reformating of the index names in the result data frame object
 	result.df.index.set_names('time', level=2, inplace=True)
