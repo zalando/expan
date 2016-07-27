@@ -3,7 +3,6 @@ import warnings
 
 import numpy as np
 import pandas as pd
-
 from expan.core.experiment import Experiment, subgroup_deltas, time_dependent_deltas
 from tests.tests_core.test_data import generate_random_data
 
@@ -234,8 +233,8 @@ class ExperimentClassTestCases(ExperimentTestCase):
 		metrics, metadata = generate_random_data()
 		metrics['time_since_treatment'] = metrics['treatment_start_time']
 		exp = Experiment('B', metrics, metadata, [4, 6])
-		# Perform sga()
-		result = exp.trend()
+		# Perform sga() with non-cumulative results
+		result = exp.trend(cumulative=False)
 
 		# check uplift
 		df = result.statistic('trend', 'uplift', 'normal_shifted')
@@ -261,6 +260,34 @@ class ExperimentClassTestCases(ExperimentTestCase):
 														 -0.067894, -0.030500, -0.060996, 0.016257, -0.006091],
 														[1.015182, 0.904887, 1.052778, 1.043721, 0.961904, 1.023271,
 														 0.921807, 0.967238, 0.995031, 0.979605])), decimal=5)
+
+		# Perform sga() with cumulative results
+		result = exp.trend()
+		# check uplift
+		df = result.statistic('trend', 'uplift', 'normal_shifted')
+
+		np.testing.assert_almost_equal(df.loc[:, ('value', 'A')],
+									   np.array([-1.009421, -0.929807, -0.991088, -1.003129, -0.976023,
+												 -0.994857,-0.988167,-0.993119,-0.991571, -0.990986]), decimal=5)
+		# check pctile
+		df = result.statistic('trend', 'uplift_pctile', 'normal_shifted')
+		np.testing.assert_almost_equal(df.loc[:, ('value', 'A')],
+									   np.array([ -1.137482, -0.881360, -1.018794, -0.840820, -1.063820,
+									              -0.918356, -1.067283, -0.938976, -1.033110, -0.918936,
+									              -1.047413, -0.942302, -1.036888, -0.939446, -1.038455,
+									              -0.947784, -1.033861, -0.949280, -1.031002, -0.950970]), decimal=5)
+		# check samplesize
+		df = result.statistic('trend', 'sample_size', 'normal_shifted')
+		np.testing.assert_almost_equal(df.loc[:, 'value'],
+									   np.column_stack(([ 649, 1244, 1844, 2434, 3059, 3661, 4268, 4876, 5492, 6108],
+														[  405, 806, 1184, 1546, 1923, 2292, 2698, 3090, 3504, 3892])), decimal=5)
+		# check variant_mean
+		df = result.statistic('trend', 'variant_mean', 'normal_shifted')
+		np.testing.assert_almost_equal(df.loc[:, 'value'],
+									   np.column_stack(([ 0.005761, 0.030501, -0.001258, -0.000681, 0.018477,
+									                      0.004274, -0.000671, -0.008193, -0.005451, -0.005515],
+														[ 1.015182, 0.960308, 0.989830, 1.002449, 0.994500,
+														  0.999132, 0.987496, 0.984926, 0.986120, 0.985470])), decimal=5)
 
 		# check metadata is preserved
 		np.testing.assert_equal(True, all(item in result.metadata.items()
