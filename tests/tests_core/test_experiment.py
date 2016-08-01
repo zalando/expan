@@ -210,8 +210,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
 			pd.Index([u'normal_same', u'normal_shifted', u'normal_shifted_by_feature', u'normal_unequal_variance'],
 					 dtype='object', name=u'metric'),
 			pd.Index([u'-'], dtype='object', name=u'subgroup_metric'),
-			#pd.Index(range(10), dtype='object', name=u'time'),
-			pd.Index(['0.0', '1.0', '2.5', '3.5', '4.5', '5.5', '6.0', '7.5', '8.0', '9.0'], dtype='object', name=u'time'),
+			pd.Index([str(x) for x in np.arange(10.)], dtype='object', name=u'time'),
 			pd.Float64Index([], dtype='float64', name=u'subgroup'),
 			pd.Index([u'sample_size', u'uplift', u'uplift_pctile', u'variant_mean'], dtype='object', name=u'statistic'),
 			pd.Float64Index([2.5, 97.5], dtype='float64', name=u'pctile')

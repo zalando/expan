@@ -12,8 +12,6 @@ import copy
 import numpy as np
 import pandas as pd
 
-from pdb import set_trace
-
 class ExperimentData(object):
 	# TODO: allow definition of the name of 'entity': would be nicer if the index
 	# itself maintained the name 'chash' or 'order_number' etc.
