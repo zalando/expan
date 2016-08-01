@@ -16,7 +16,6 @@ warnings.simplefilter('always', UserWarning)
 
 from debugging import Dbg
 
-
 def _binned_deltas(df, variants, n_bins=4, binning=None, cumulative=False,
 				   assume_normal=True, percentiles=[2.5, 97.5],
 				   min_observations=20, nruns=10000, relative=False,
@@ -249,20 +248,25 @@ def time_dependent_deltas(df, variants, time_step=1, cumulative=False,
 	# TODO: fill with zeros
 
 	# Create time binning with time_step
-	time_bin = (lambda x: round(x / float(time_step) + 0.5) * time_step)
+	#time_bin = (lambda x: round(x / float(time_step) + 0.5) * time_step)
 
 	# Apply time binning vectorized to each element in the input array
-	df['_tmp_time_'] = df.iloc[:, 1].apply(time_bin)
+	#df['_tmp_time_'] = df.iloc[:, 1].apply(time_bin)
 
 	# Get appropriate bin number
-	n_bins = len(pd.unique(df['_tmp_time_']))
+	#n_bins = len(pd.unique(df['_tmp_time_']))
+
+	# create binning manually, ASSUMING uniform sampling
+	tpoints = np.unique(df.iloc[:,1])
+	binning = binmodule.NumericalBinning(uppers=tpoints, lowers=tpoints, 
+		up_closed=[True]*len(tpoints), lo_closed=[True]*len(tpoints))
 
 	# Push computation to _binned_deltas() function
-	result = _binned_deltas(df=df, variants=variants, n_bins=n_bins,
+	result = _binned_deltas(df=df, variants=variants, binning=binning,
 	                        cumulative=cumulative,
 							assume_normal=assume_normal, percentiles=percentiles,
 							min_observations=min_observations, nruns=nruns,
-							relative=relative, label_format_str=None)
+							relative=relative, label_format_str='{mid}')
 
 	# Reformating of the index names in the result data frame object
 	result.df.index.set_names('time', level=2, inplace=True)

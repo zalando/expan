@@ -12,7 +12,6 @@ import copy
 import numpy as np
 import pandas as pd
 
-
 class ExperimentData(object):
 	# TODO: allow definition of the name of 'entity': would be nicer if the index
 	# itself maintained the name 'chash' or 'order_number' etc.
@@ -121,6 +120,8 @@ class ExperimentData(object):
 		# check if time domain exists
 		if 'time_since_treatment' in self.kpis.index.names:
 			self.kpis_time = self.kpis
+			# discard NaNs in the time dimension
+			self.kpis_time = self.kpis_time[(~self.kpis_time.reset_index('time_since_treatment').time_since_treatment.isnull()).tolist()]
 			# NOTE: for most current implemented KPIs, the sum aggregation is
 			# appropriate
 			self.kpis = self.kpis_time.groupby(level=['entity', 'variant']).sum()
