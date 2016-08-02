@@ -2,29 +2,28 @@ ExpAn: Experiment Analysis
 ==========================
 
 .. image:: https://img.shields.io/travis/zalando/expan.svg
-        :target: https://travis-ci.org/zalando/expan
-        :alt: Build status
+    :target: https://travis-ci.org/zalando/expan
+    :alt: Build status
 
 .. image:: https://img.shields.io/pypi/v/expan.svg
-        :target: https://pypi.python.org/pypi/expan
-        :alt: Latest PyPI version
+    :target: https://pypi.python.org/pypi/expan
+    :alt: Latest PyPI version
 
 .. image:: https://img.shields.io/pypi/status/expan.svg
-   :target: https://pypi.python.org/pypi/expan
-   :alt: Development Status
+    :target: https://pypi.python.org/pypi/expan
+    :alt: Development Status
 
 .. image:: https://img.shields.io/pypi/pyversions/expan.svg
-   :target: https://pypi.python.org/pypi/expan
-   :alt: Python Versions
-
+    :target: https://pypi.python.org/pypi/expan
+    :alt: Python Versions
 
 .. image:: https://img.shields.io/pypi/dw/expan.svg
-        :target: https://pypi.python.org/pypi/expan/
-        :alt: PyPI Downloads
+    :target: https://pypi.python.org/pypi/expan/
+    :alt: PyPI Downloads
 
 .. image:: https://img.shields.io/pypi/l/expan.svg
-        :target: https://pypi.python.org/pypi/expan/
-        :alt: License
+    :target: https://pypi.python.org/pypi/expan/
+    :alt: License
 
 A/B tests (a.k.a. Randomized Controlled Trials or Experiments) have been widely
 applied in different industries to optimize business processes and user
@@ -47,22 +46,22 @@ Major statistical functionalities include:
 Table of Contents
 =================
 
--  `Quick start <#quick-start>`__
+- `Quick start <#quick-start>`__
 
-   -  `Install <#install>`__
-   -  `Some mock-up data <#some-mock-up-data>`__
+- `Install <#install>`__
+- `Some mock-up data <#some-mock-up-data>`__
 
--  `Further documentation <#further-documentation>`__
--  `How to contribute <#how-to-contribute>`__
+- `Further documentation <#further-documentation>`__
+- `How to contribute <#how-to-contribute>`__
 
-   -  `Style guide <#style-guide>`__
-   -  `Branching / Release <#branching--release>`__
-   -  `Versioning <#versioning>`__
-   -  `Bumping Version <#bumping-version>`__
-   -  `Travis CI and PyPI deployment <#travis-ci-and-pypi-deployment>`__
-   -  `TODO <#todo>`__
+- `Style guide <#style-guide>`__
+- `Branching / Release <#branching--release>`__
+- `Versioning <#versioning>`__
+- `Bumping Version <#bumping-version>`__
+- `Travis CI and PyPI deployment <#travis-ci-and-pypi-deployment>`__
+- `TODO <#todo>`__
 
--  `License <#license>`__
+- `License <#license>`__
 
 Quick start
 ===========
@@ -74,8 +73,7 @@ To install you can simply run (pip >= 8.1.1 and setuptools >= 21.0.0 are require
 
 ::
 
-	pip install expan
-
+    pip install expan
 
 An alternative way to install is it to clone the repo and run:
 
@@ -97,7 +95,7 @@ Some mock-up data
 
     from expan.core.experiment import Experiment
     from tests.tests_core.test_data import generate_random_data
-
+    
     exp = Experiment('B', *generate_random_data())
     exp.delta()
 
@@ -105,9 +103,9 @@ Some mock-up data
 Further documentation
 =====================
 
-`ExpAn Description <https://github.com/zalando/expan/blob/master/ExpAn-Description.mediawiki>`__ - details about the concept of the library and data structures.
+`ExpAn Description <https: github.com="" zalando="" expan="" blob="" master="" expan-description.mediawiki="">`__ - details about the concept of the library and data structures.
 
-`ExpAn Introduction <https://github.com/zalando/expan/blob/dev/ExpAn-Intro.ipynb>`__ - a full jupyter (iPython) notebook. You can view it as slides with `jupyter <http://jupyter.org>`__:
+`ExpAn Introduction <https: github.com="" zalando="" expan="" blob="" dev="" expan-intro.ipynb="">`__ - a full jupyter (iPython) notebook. You can view it as slides with `jupyter <http: jupyter.org="">`__:
 
 ::
 
@@ -119,8 +117,8 @@ Alternatives
 There may be alternative libraries providing similar functionality, and these
 should be collected here. Very incomplete list so far...
 
-abba (https://github.com/thumbtack/abba)
-----
+ - **abba** (https://github.com/thumbtack/abba)
+
 
 Not an alternative, the Python part of this is simply a collection of some functions to handle binomial distributions.
 
@@ -131,7 +129,7 @@ How to contribute
 Style guide
 -----------
 
-We follow `PEP8 standards <https://www.python.org/dev/peps/pep-0008>`__
+We follow `PEP8 standards <https: www.python.org="" dev="" peps="" pep-0008="">`__
 with the following exceptions:
 
 - Use *tabs instead of spaces* - this allows all individuals to have visual depth of indentation they prefer, without changing the source code at all, and it is simply smaller
@@ -144,7 +142,7 @@ and merged back to the ``dev`` branch, and the ``master`` branch stores
 snapshots/releases of the ``dev`` branch.
 
 See also the much simpler github flow
-`here <http://scottchacon.com/2011/08/31/github-flow.html>`__
+`here <http: scottchacon.com="" 2011="" 08="" 31="" github-flow.html="">`__
 
 Versioning
 ----------
@@ -153,7 +151,7 @@ Versioning
 when doing the analysis!**
 
 We use semantic versioning (http://semver.org), and the current version of
-ExpAn is: v0.3.0.
+ExpAn is: v0.3.2.
 
 The version is maintained in ``setup.cfg``, and propagated from there to various files
 by the ``bumpversion`` program. The most important propagation destination is
@@ -177,14 +175,14 @@ repository.
 
     >>> import core.binning
     >>> core.version()
-    'v0.3.0'
+    'v0.3.2'
     >>> core.version('{major}.{minor}..{commits}')
     '0.0..176'
     >>> core.version('{commit}')
     'a24730a42a4b5ae01bbdb05f6556dedd453c1767'
 
 See: `StackExchange
-151558 <http://programmers.stackexchange.com/a/151558>`__
+151558 <http: programmers.stackexchange.com="" a="" 151558="">`__
 
 Bumping Version
 ---------------
@@ -194,7 +192,11 @@ Can use bumpversion to maintain the ``__version__`` in ``version.py``:
 ::
 
     $ bumpversion patch
-    or
+
+or
+
+::
+
     $ bumpversion minor
 
 This will update the version number, create a new tag in git, and commit
@@ -205,7 +207,7 @@ repository with:
 
 ::
 
-    $ git push --tags
+$ git push --tags
 
 Travis CI and PyPI deployment
 -----------------------------
@@ -217,7 +219,7 @@ A **build** and **test** is triggered when a commit is pushed to either
 - **dev**,
 - **master**
 - or a **pull request branch to dev or master**.
- 
+
 A **build**, **test** and **push to PyPI** is triggered when a **tagged commit** is pushed to **master**.
 
 If you wish to skip triggering a CI task (for example when you change documentation), please include ``[ci skip]`` in your commit message.
@@ -225,14 +227,10 @@ If you wish to skip triggering a CI task (for example when you change documentat
 TODO
 ----
 
--  parallelization, eg. for the bootstrapping code
--  Bayesian updating/early stopping
--  multiple comparison correction, definitely relevant for delta and
-   SGA, have to think about how to correct for time dependency in the
-   trend analysis
--  implement from\_json and to\_json methods in the Binning class, in
-   order to convert the Python object to a json format for persisting in
-   the Results metadata and reloading from a script
+- parallelization, eg. for the bootstrapping code
+- Bayesian updating/early stopping
+- multiple comparison correction, definitely relevant for delta and SGA, have to think about how to correct for time dependency in the trend analysis
+- implement from\_json and to\_json methods in the Binning class, in order to convert the Python object to a json format for persisting in the Results metadata and reloading from a script
 
 License
 =======
@@ -259,3 +257,21 @@ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
 CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+History
+=======
+
+0.2.5
+-----
+
+* Inclusion of cli in install
+* many other minor changes since open-sourcing...
+
+0.2.0 (2016-05-03)
+------------------
+
+* First opensource release to GitHub
+
+0.1.0 (2016-04-29)
+------------------

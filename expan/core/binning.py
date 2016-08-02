@@ -269,15 +269,26 @@ class NumericalBinning(Binning):
 	integer-based array slicing.
 	"""
 
-	def __init__(self, data=None, nbins=None):
+	def __init__(self, data=None, nbins=None, uppers=None, lowers=None, 
+				 up_closed=None, lo_closed=None):
+		"""NumericalBinning constructor.
+		"""
 		super(NumericalBinning, self).__init__()
 		if data is None:
-			# NB: this will go through the property setters, so they will not be
-			# simply lists.
-			self.uppers = []
-			self.lowers = []
-			self.up_closed = []
-			self.lo_closed = []
+			# initialize binning explicitly?
+			if (uppers is not None and lowers is not None and 
+				up_closed is not None and lo_closed is not None):
+				self.uppers = uppers
+				self.lowers = lowers
+				self.up_closed = up_closed
+				self.lo_closed = lo_closed
+			else:
+				# NB: this will go through the property setters, so they will not be
+				# simply lists.
+				self.uppers = []
+				self.lowers = []
+				self.up_closed = []
+				self.lo_closed = []
 		else:
 			# TODO: this is extremely simple, but doesn't handle skewed distributions
 			# properly. Update with the interval-based code.
