@@ -2,28 +2,29 @@ ExpAn: Experiment Analysis
 ==========================
 
 .. image:: https://img.shields.io/travis/zalando/expan.svg
-    :target: https://travis-ci.org/zalando/expan
-    :alt: Build status
+        :target: https://travis-ci.org/zalando/expan
+        :alt: Build status
 
 .. image:: https://img.shields.io/pypi/v/expan.svg
-    :target: https://pypi.python.org/pypi/expan
-    :alt: Latest PyPI version
+        :target: https://pypi.python.org/pypi/expan
+        :alt: Latest PyPI version
 
 .. image:: https://img.shields.io/pypi/status/expan.svg
-    :target: https://pypi.python.org/pypi/expan
-    :alt: Development Status
+   :target: https://pypi.python.org/pypi/expan
+   :alt: Development Status
 
 .. image:: https://img.shields.io/pypi/pyversions/expan.svg
-    :target: https://pypi.python.org/pypi/expan
-    :alt: Python Versions
+   :target: https://pypi.python.org/pypi/expan
+   :alt: Python Versions
+
 
 .. image:: https://img.shields.io/pypi/dw/expan.svg
-    :target: https://pypi.python.org/pypi/expan/
-    :alt: PyPI Downloads
+        :target: https://pypi.python.org/pypi/expan/
+        :alt: PyPI Downloads
 
 .. image:: https://img.shields.io/pypi/l/expan.svg
-    :target: https://pypi.python.org/pypi/expan/
-    :alt: License
+        :target: https://pypi.python.org/pypi/expan/
+        :alt: License
 
 A/B tests (a.k.a. Randomized Controlled Trials or Experiments) have been widely
 applied in different industries to optimize business processes and user
@@ -46,22 +47,22 @@ Major statistical functionalities include:
 Table of Contents
 =================
 
-- `Quick start <#quick-start>`__
+-  `Quick start <#quick-start>`__
 
-- `Install <#install>`__
-- `Some mock-up data <#some-mock-up-data>`__
+   -  `Install <#install>`__
+   -  `Some mock-up data <#some-mock-up-data>`__
 
-- `Further documentation <#further-documentation>`__
-- `How to contribute <#how-to-contribute>`__
+-  `Further documentation <#further-documentation>`__
+-  `How to contribute <#how-to-contribute>`__
 
-- `Style guide <#style-guide>`__
-- `Branching / Release <#branching--release>`__
-- `Versioning <#versioning>`__
-- `Bumping Version <#bumping-version>`__
-- `Travis CI and PyPI deployment <#travis-ci-and-pypi-deployment>`__
-- `TODO <#todo>`__
+   -  `Style guide <#style-guide>`__
+   -  `Branching / Release <#branching--release>`__
+   -  `Versioning <#versioning>`__
+   -  `Bumping Version <#bumping-version>`__
+   -  `Travis CI and PyPI deployment <#travis-ci-and-pypi-deployment>`__
+   -  `TODO <#todo>`__
 
-- `License <#license>`__
+-  `License <#license>`__
 
 Quick start
 ===========
@@ -95,7 +96,7 @@ Some mock-up data
 
     from expan.core.experiment import Experiment
     from tests.tests_core.test_data import generate_random_data
-    
+
     exp = Experiment('B', *generate_random_data())
     exp.delta()
 
@@ -103,9 +104,9 @@ Some mock-up data
 Further documentation
 =====================
 
-`ExpAn Description <https: github.com="" zalando="" expan="" blob="" master="" expan-description.mediawiki="">`__ - details about the concept of the library and data structures.
+`ExpAn Description <https://github.com/zalando/expan/blob/master/ExpAn-Description.mediawiki>`__ - details about the concept of the library and data structures.
 
-`ExpAn Introduction <https: github.com="" zalando="" expan="" blob="" dev="" expan-intro.ipynb="">`__ - a full jupyter (iPython) notebook. You can view it as slides with `jupyter <http: jupyter.org="">`__:
+`ExpAn Introduction <https://github.com/zalando/expan/blob/dev/ExpAn-Intro.ipynb>`__ - a full jupyter (iPython) notebook. You can view it as slides with `jupyter <http://jupyter.org>`__:
 
 ::
 
@@ -129,7 +130,7 @@ How to contribute
 Style guide
 -----------
 
-We follow `PEP8 standards <https: www.python.org="" dev="" peps="" pep-0008="">`__
+We follow `PEP8 standards <https://www.python.org/dev/peps/pep-0008>`__
 with the following exceptions:
 
 - Use *tabs instead of spaces* - this allows all individuals to have visual depth of indentation they prefer, without changing the source code at all, and it is simply smaller
@@ -142,7 +143,7 @@ and merged back to the ``dev`` branch, and the ``master`` branch stores
 snapshots/releases of the ``dev`` branch.
 
 See also the much simpler github flow
-`here <http: scottchacon.com="" 2011="" 08="" 31="" github-flow.html="">`__
+`here <http://scottchacon.com/2011/08/31/github-flow.html>`__
 
 Versioning
 ----------
@@ -182,7 +183,7 @@ repository.
     'a24730a42a4b5ae01bbdb05f6556dedd453c1767'
 
 See: `StackExchange
-151558 <http: programmers.stackexchange.com="" a="" 151558="">`__
+151558 <http://programmers.stackexchange.com/a/151558>`__
 
 Bumping Version
 ---------------
@@ -207,7 +208,7 @@ repository with:
 
 ::
 
-$ git push --tags
+    $ git push --tags
 
 Travis CI and PyPI deployment
 -----------------------------
@@ -220,7 +221,12 @@ A **build** and **test** is triggered when a commit is pushed to either
 - **master**
 - or a **pull request branch to dev or master**.
 
-A **build**, **test** and **push to PyPI** is triggered when a **tagged commit** is pushed to **master**.
+If you want to **deploy to PyPI**, then follow these steps:
+
+- assuming you have a dev branch that is up to date, create a pull request from dev to master (a travis job will be started for the pull request)
+- once the pull request is approved, merge it (another travis job will be started because a push to master happened)
+- checkout master
+- push **tags** to **master** (a third travis job will be started, but this time it will also push to PyPI because tags were pushed)
 
 If you wish to skip triggering a CI task (for example when you change documentation), please include ``[ci skip]`` in your commit message.
 
