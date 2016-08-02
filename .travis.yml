@@ -10,6 +10,7 @@ deploy:
   password:
     secure: A5mVqXR2gLCN6mi6oPR5HmhiPhhHurePcx8VDFojmRNSqViFADg/WZnd9rZvzmMQB4wjKs8JmK742FbqYQlTrLCWSG2oF28dnWLVtZBnQfHFfMEgoQfkF/KXFmtuJ1Sw+5opE8CfV5+75zKs6mhPeobieFgpTExzfuyA6ldlaeAbGFBEGh4P8Vd093Jgmf3o7xu19aMsr9zn3EJWf0UR+zlc8RnCi33jRoVYpP5/QcUKHM5Jm0ejN6L+6FMyhKqbxPMk6Umd0PPuwtOv2hSs175r4lvxzFZYJKcIkuf4mqTIZzdKOSVlHNBALEenQJweq5/KNWDh/XlN3YFFd9kGPHZP1UHgJmDePRvRXTCvjbpqfV94Cq6K7mvHRMcnziQjDd2/CZgS7Nsa5Qt4uig7hm/BzhoywrjjqhmRQ2sErCQSLpJx8ecWvI/cYFVzM4HdZrvUZ1IhxM5Gt6vITdhgJzR7f2TWNs6IQERhTv5pba0hSmPuj/ys/B3Mhpci7oXkfEpgzhjJTMrLQ1OIrmr3XFrfS87cRPHyqCqVzmayNrT/7leqAQpUgxYY9XzMqXriPDqrL+s8gIsgJRGAoMTl/XW0/nDY5nYW+n3wgzQjAX73ZE0WwUgyJaphf5zz2CgPaydt30dBBU1Pu/JfLbnVo4VzVm0SUB9IWMV/abbsIAw=
   on:
+    branch: master
     tags: true
     distributions: sdist bdist_wheel
     repo: zalando/expan

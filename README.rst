@@ -217,8 +217,13 @@ A **build** and **test** is triggered when a commit is pushed to either
 - **dev**,
 - **master**
 - or a **pull request branch to dev or master**.
- 
-A **build**, **test** and **push to PyPI** is triggered when a **tagged commit** is pushed to **master**.
+
+If you want to **deploy to PyPI**, then follow these steps:
+
+- assuming you have a dev branch that is up to date, create a pull request from dev to master (a travis job will be started for the pull request)
+- once the pull request is approved, merge it (another travis job will be started because a push to master happened)
+- checkout master
+- push **tags** to **master** (a third travis job will be started, but this time it will also push to PyPI because tags were pushed)
 
 If you wish to skip triggering a CI task (for example when you change documentation), please include ``[ci skip]`` in your commit message.
 
