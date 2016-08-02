@@ -74,8 +74,7 @@ To install you can simply run (pip >= 8.1.1 and setuptools >= 21.0.0 are require
 
 ::
 
-	pip install expan
-
+    pip install expan
 
 An alternative way to install is it to clone the repo and run:
 
@@ -119,8 +118,8 @@ Alternatives
 There may be alternative libraries providing similar functionality, and these
 should be collected here. Very incomplete list so far...
 
-abba (https://github.com/thumbtack/abba)
-----
+ - **abba** (https://github.com/thumbtack/abba)
+
 
 Not an alternative, the Python part of this is simply a collection of some functions to handle binomial distributions.
 
@@ -153,7 +152,7 @@ Versioning
 when doing the analysis!**
 
 We use semantic versioning (http://semver.org), and the current version of
-ExpAn is: v0.3.0.
+ExpAn is: v0.3.2.
 
 The version is maintained in ``setup.cfg``, and propagated from there to various files
 by the ``bumpversion`` program. The most important propagation destination is
@@ -177,7 +176,7 @@ repository.
 
     >>> import core.binning
     >>> core.version()
-    'v0.3.0'
+    'v0.3.2'
     >>> core.version('{major}.{minor}..{commits}')
     '0.0..176'
     >>> core.version('{commit}')
@@ -194,7 +193,11 @@ Can use bumpversion to maintain the ``__version__`` in ``version.py``:
 ::
 
     $ bumpversion patch
-    or
+
+or
+
+::
+
     $ bumpversion minor
 
 This will update the version number, create a new tag in git, and commit
@@ -230,14 +233,10 @@ If you wish to skip triggering a CI task (for example when you change documentat
 TODO
 ----
 
--  parallelization, eg. for the bootstrapping code
--  Bayesian updating/early stopping
--  multiple comparison correction, definitely relevant for delta and
-   SGA, have to think about how to correct for time dependency in the
-   trend analysis
--  implement from\_json and to\_json methods in the Binning class, in
-   order to convert the Python object to a json format for persisting in
-   the Results metadata and reloading from a script
+- parallelization, eg. for the bootstrapping code
+- Bayesian updating/early stopping
+- multiple comparison correction, definitely relevant for delta and SGA, have to think about how to correct for time dependency in the trend analysis
+- implement from\_json and to\_json methods in the Binning class, in order to convert the Python object to a json format for persisting in the Results metadata and reloading from a script
 
 License
 =======
@@ -264,3 +263,21 @@ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
 CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+History
+=======
+
+0.2.5
+-----
+
+* Inclusion of cli in install
+* many other minor changes since open-sourcing...
+
+0.2.0 (2016-05-03)
+------------------
+
+* First opensource release to GitHub
+
+0.1.0 (2016-04-29)
+------------------
