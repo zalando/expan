@@ -17,8 +17,7 @@ deploy:
 env:
 - TOXENV=py
 install:
-- pip install -U pip
-- pip install -U tox
+- pip install -U pip setuptools tox
 - pip install -r requirements.txt
 language: python
 python:
