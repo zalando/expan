@@ -2,7 +2,7 @@
 # the proper interface is through the Experiment instance functions, surely?
 
 # import numpy as np
-from __future__ import absolute_import
+
 import expan.core.statistics as statx
 import warnings
 
