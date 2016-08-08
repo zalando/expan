@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 
 import re
+
 from pip.req import parse_requirements
 from setuptools import setup, find_packages
-from setuptools.command.build_ext import build_ext as _build_ext
 
 try:
 	install_reqs = parse_requirements('requirements.txt', session=False)
 	requirements = [str(ir.req) for ir in install_reqs]
-except:
+except OSError:
 	requirements = []
 
 with open('README.rst') as readme_file:
@@ -30,16 +30,6 @@ test_requirements = [
 	'pytest'
 ]
 
-
-class build_ext(_build_ext):
-	def finalize_options(self):
-		_build_ext.finalize_options(self)
-		# Prevent numpy from thinking it is still in its setup process:
-		__builtins__.__NUMPY_SETUP__ = False
-		import numpy
-		self.include_dirs.append(numpy.get_include())
-
-
 setup(
 	name='expan',
 	version=version,
@@ -52,16 +42,14 @@ setup(
 	package_dir={'expan': 'expan'},
 	include_package_data=True,
 	install_requires=requirements,
-	cmdclass={'build_ext': build_ext},
-	setup_requires=['numpy'],
 	license="MIT",
 	zip_safe=False,
 	keywords='expan',
 	entry_points={
-        'console_scripts': [
-            'expan = expan.cli.cli:main'
-        ]
-    },
+		'console_scripts': [
+			'expan = expan.cli.cli:main'
+		]
+	},
 	classifiers=[
 		'Development Status :: 2 - Pre-Alpha',
 		'Intended Audience :: Developers',
