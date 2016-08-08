@@ -12,7 +12,7 @@ def git_commit_count():
 
   http://programmers.stackexchange.com/a/151558
   """
-	print
+	print()
 	'dd'
 	commit_count = None
 
@@ -30,7 +30,7 @@ def git_latest_commit():
 
   http://programmers.stackexchange.com/a/151558
   """
-	print
+	print()
 	'ee'
 	latest_commit = None
 	import subprocess
@@ -67,7 +67,7 @@ def version(format_str='{short}'):
 
 
 if __name__ == '__main__':
-	print
+	print()
 	version('Short Version String: "{short}"')
-	print
+	print()
 	version('Full Version String: "{long}"')

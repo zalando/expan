@@ -1,15 +1,16 @@
+from __future__ import absolute_import
 import datetime
 from copy import deepcopy
 
 import numpy as np
 import pandas as pd
-import version
-import statistics as statx
+from expan.core.version import __version__
+import expan.core.statistics as statx
 from scipy.stats import norm
 
 # from tests.tests_core.test_data import generate_random_data
 
-from debugging import Dbg
+from expan.core.debugging import Dbg
 from pdb import set_trace
 
 class Results(object):
@@ -42,7 +43,7 @@ class Results(object):
 	    """
 		self.df = df
 		self.metadata = metadata
-		self.metadata['version'] = version.__version__
+		self.metadata['version'] = __version__
 		self.metadata['errors'] = {}
 		self.metadata['warnings'] = {}
 
@@ -275,7 +276,7 @@ class Results(object):
 		hfile = h5py.File(fpath)
 		md = hfile.require_group('metadata')
 		datetime_conversions = set(md.attrs.get('_datetime_attributes', set()))
-		for k, v in self.metadata.iteritems():
+		for k, v in list(self.metadata.items()):
 			if k == '_datetime_attributes':
 				continue
 			if v is None:
@@ -350,7 +351,7 @@ def from_hdf(fpath, dbg=None):
 	md = hfile['metadata']
 	datetime_conversions = set(md.attrs.get('_datetime_attributes', set()))
 	metadata = {}
-	for k, v in md.attrs.iteritems():
+	for k, v in list(md.attrs.items()):
 		if k == '_datetime_attributes':
 			continue
 		dbg(3, 'from_hdf: retrieving metadata {}'.format(k))
@@ -371,8 +372,8 @@ def delta_to_dataframe(metric, variant, mu, pctiles, samplesize_variant, samples
 		'metric': metric,
 		'variant': variant,
 		'statistic': 'pctile',
-		'pctile': pctiles.keys(),
-		'value': pctiles.values(),
+		'pctile': list(pctiles.keys()),
+		'value': list(pctiles.values()),
 		'subgroup_metric': subgroup_metric,
 		'subgroup': subgroup
 	})
@@ -403,8 +404,8 @@ def delta_to_dataframe_all_variants(metric, mu, pctiles, samplesize_variant,
 	df = pd.DataFrame({
 		'metric': metric,
 		'statistic': 'uplift_pctile',
-		'pctile': pctiles.keys(),
-		'value': pctiles.values(),
+		'pctile': list(pctiles.keys()),
+		'value': list(pctiles.values()),
 		'subgroup_metric': subgroup_metric,
 		'subgroup': subgroup
 	})
@@ -435,8 +436,8 @@ def feature_check_to_dataframe(metric,
 	if pval is None:
 		df = pd.DataFrame({'metric': metric,
 						   'statistic': 'pre_treatment_diff_pctile',
-						   'pctile': pctiles.keys(),
-						   'value': pctiles.values(),
+						   'pctile': list(pctiles.keys()),
+						   'value': list(pctiles.values()),
 						   'subgroup_metric': '-',
 						   'subgroup': None})
 		df = df.append(pd.DataFrame({
