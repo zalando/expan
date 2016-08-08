@@ -135,6 +135,11 @@ with the following exceptions:
 
 - Use *tabs instead of spaces* - this allows all individuals to have visual depth of indentation they prefer, without changing the source code at all, and it is simply smaller
 
+Testing
+-------
+
+Easiest way to run tests is by running the command ``tox`` from the terminal. The default Python environments for testing with are py27 and py34, but you can specify your own by running e.g. ``tox -e py35``.
+
 Branching / Release
 -------------------
 
@@ -152,7 +157,7 @@ Versioning
 when doing the analysis!**
 
 We use semantic versioning (http://semver.org), and the current version of
-ExpAn is: v0.3.2.
+ExpAn is: v0.3.4.
 
 The version is maintained in ``setup.cfg``, and propagated from there to various files
 by the ``bumpversion`` program. The most important propagation destination is
@@ -176,7 +181,7 @@ repository.
 
     >>> import core.binning
     >>> core.version()
-    'v0.3.2'
+    'v0.3.4'
     >>> core.version('{major}.{minor}..{commits}')
     '0.0..176'
     >>> core.version('{commit}')
@@ -263,21 +268,3 @@ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
 CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-
-History
-=======
-
-0.2.5
------
-
-* Inclusion of cli in install
-* many other minor changes since open-sourcing...
-
-0.2.0 (2016-05-03)
-------------------
-
-* First opensource release to GitHub
-
-0.1.0 (2016-04-29)
-------------------
