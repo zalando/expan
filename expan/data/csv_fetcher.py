@@ -30,21 +30,18 @@ def get_data(folder_path):
 				try:
 					metrics = pd.read_csv(folder_path + '/' + f)
 				except Exception as e:
-					print()
-					e
+					print(e)
 
 			elif 'metadata' in f:
 				try:
 					with open(folder_path + '/' + f, 'r') as input_json:
 						metadata = json.load(input_json)
 				except ValueError as e:
-					print()
-					e
+					print(e)
 					raise
 
 		return ExperimentData(metrics=metrics, metadata=metadata)
 
 	except AssertionError as e:
-		print()
-		e
+		print(e)
 		raise

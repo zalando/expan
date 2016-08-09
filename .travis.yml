@@ -17,10 +17,11 @@ deploy:
 env:
 - TOXENV=py
 install:
-- pip install -U pip setuptools tox pytest-cov coveralls
+- pip install -U pip setuptools tox coveralls
 - pip install -r requirements.txt
 language: python
 python:
+- pypy
 #- 2.6
 - 2.7
 #- 3.3
