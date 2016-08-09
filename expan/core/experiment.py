@@ -3,6 +3,7 @@
 
 # import numpy as np
 
+import re
 import expan.core.statistics as statx
 import warnings
 
@@ -327,7 +328,7 @@ class Experiment(ExperimentData):
 
 		return res
 
-	def delta(self, kpi_subset=None, variant_subset=None,
+	def delta(self, kpi_subset=None, derived_kpis=None, variant_subset=None,
 			  assume_normal=True, percentiles=[2.5, 97.5],
 			  min_observations=20, nruns=10000, relative=False):
 		"""
@@ -341,6 +342,9 @@ class Experiment(ExperimentData):
 	    Args:
 	        kpi_subset (list): kpis for which to perfom delta. If set to
 	            None all kpis are used.
+	        derived_kpis (list): definition of additional KPIs derived from the
+	        	primary ones, e.g. 
+	        	[{'name':'return_rate', 'formula':'returned/ordered'}] 
 	        variant_subset (list): Variants to use compare against baseline. If
 	            set to None all variants are used.
 
@@ -363,7 +367,15 @@ class Experiment(ExperimentData):
 	    """
 		res = Results(None, metadata=self.metadata)
 
+		# determine the complete KPI name list
 		kpis_to_analyse = self.kpi_names.copy()
+		if derived_kpis is not None:
+			for dk in derived_kpis:
+				kpis_to_analyse.update([dk['name']])
+				# assuming the columns in the formula can all be cast into float
+				# and create the derived KPI as an additional column
+				self.kpis.loc[:,dk['name']] = eval(re.sub('('+'|'.join(self.kpi_names)+')', r'self.kpis.\1.astype(float)', dk['formula']))
+
 		if kpi_subset is not None:
 			kpis_to_analyse.intersection_update(kpi_subset)
 		self.dbg(3, 'kpis_to_analyse: ' + ','.join(kpis_to_analyse))
@@ -620,8 +632,8 @@ if __name__ == '__main__':
 	metrics, metadata = generate_random_data()
 	metrics['time_since_treatment'] = metrics['treatment_start_time']
 	exp = Experiment('B', metrics, metadata, [4, 6])
-	# Perform sga()
-	result = exp.trend()
+	res = exp.delta(kpi_subset=['derived'], 
+			derived_kpis=[{'name':'derived','formula':'normal_same/normal_shifted'}])
 
 # result = time_dependent_deltas(data.metrics.reset_index()
 #	[['variant','time_since_treatment','normal_shifted']],variants=['A','B']).df.loc[:,1]
