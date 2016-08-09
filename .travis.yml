@@ -17,7 +17,7 @@ deploy:
 env:
 - TOXENV=py
 install:
-- pip install -U pip setuptools tox
+- pip install -U pip setuptools tox coveralls
 - pip install -r requirements.txt
 language: python
 python:
@@ -27,3 +27,5 @@ python:
 - 3.4
 - 3.5
 script: tox
+after_success:
+- coveralls
