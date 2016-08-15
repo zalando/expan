@@ -11,7 +11,6 @@ from os import listdir
 from os.path import isfile, join
 
 import simplejson as json
-
 from expan.core.experimentdata import *
 
 
@@ -27,18 +26,11 @@ def get_data(folder_path):
 		for f in files:
 
 			if 'metrics' in f:
-				try:
 					metrics = pd.read_csv(folder_path + '/' + f)
-				except Exception as e:
-					print(e)
 
 			elif 'metadata' in f:
-				try:
-					with open(folder_path + '/' + f, 'r') as input_json:
-						metadata = json.load(input_json)
-				except ValueError as e:
-					print(e)
-					raise
+				with open(folder_path + '/' + f, 'r') as input_json:
+					metadata = json.load(input_json)
 
 		return ExperimentData(metrics=metrics, metadata=metadata)
 
