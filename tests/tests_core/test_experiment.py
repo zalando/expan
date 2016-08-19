@@ -336,6 +336,74 @@ class ExperimentClassTestCases(ExperimentTestCase):
 		np.testing.assert_equal(True, all(item in result.metadata.items()
 		                                for item in self.testmetadata.items()))
 
+	def test_delta_derived_kpis(self):
+		"""
+	    Check if Experiment.delta() functions properly for derived KPIs
+	    """
+		# this should work
+		self.assertTrue(isinstance(self.data, Experiment))  # check that the subclassing works
+
+		self.assertTrue(self.data.baseline_variant == 'B')
+
+		result = self.data.delta(kpi_subset=['derived'], 
+			derived_kpis=[{'name':'derived','formula':'normal_same/normal_shifted'}])
+
+		# check uplift
+		df = result.statistic('delta', 'uplift', 'derived')
+		np.testing.assert_almost_equal(df.loc[:, ('value', 'A')],
+									   np.array([0.308368]), decimal=5)
+		# check pctile
+		df = result.statistic('delta', 'uplift_pctile', 'derived')
+		np.testing.assert_almost_equal(df.loc[:, ('value', 'A')],
+									   np.array([-4.319602, 4.936339]), decimal=5)
+		# check samplesize
+		df = result.statistic('delta', 'sample_size', 'derived')
+		np.testing.assert_almost_equal(df.loc[:, 'value'],
+									   np.array([[6108, 3892]]), decimal=5)
+		# check variant_mean
+		df = result.statistic('delta', 'variant_mean', 'derived')
+		np.testing.assert_almost_equal(df.loc[:, 'value'],
+									   np.array([[0.376876, 0.068508]]), decimal=5)
+
+		# check metadata is preserved
+		np.testing.assert_equal(True, all(item in result.metadata.items()
+		                                for item in self.testmetadata.items()))
+
+	def test_delta_derived_kpis_weighted(self):
+		"""
+	    Check if Experiment.delta() functions properly for derived KPIs using 
+	    the weighted method.
+	    """
+		# this should work
+		self.assertTrue(isinstance(self.data, Experiment))  # check that the subclassing works
+
+		self.assertTrue(self.data.baseline_variant == 'B')
+
+		result = self.data.delta(kpi_subset=['derived'], 
+			derived_kpis=[{'name':'derived','formula':'normal_same/normal_shifted'}],
+			weighted_kpis=['derived'])
+
+		# check uplift
+		df = result.statistic('delta', 'uplift', 'derived')
+		np.testing.assert_almost_equal(df.loc[:, ('value', 'A')],
+									   np.array([-4.564575]), decimal=5)
+		# check pctile
+		df = result.statistic('delta', 'uplift_pctile', 'derived')
+		np.testing.assert_almost_equal(df.loc[:, ('value', 'A')],
+									   np.array([-10.274232, 1.145082]), decimal=5)
+		# check samplesize
+		df = result.statistic('delta', 'sample_size', 'derived')
+		np.testing.assert_almost_equal(df.loc[:, 'value'],
+									   np.array([[6108, 3892]]), decimal=5)
+		# check variant_mean
+		df = result.statistic('delta', 'variant_mean', 'derived')
+		np.testing.assert_almost_equal(df.loc[:, 'value'],
+									   np.array([[-4.572524, -0.007949]]), decimal=5)
+
+		# check metadata is preserved
+		np.testing.assert_equal(True, all(item in result.metadata.items()
+		                                for item in self.testmetadata.items()))
+
 	def test_unequal_variance_warning_in_results(self):
 		"""
 		Check if the unequal variance warning message is persisted to the Results structure

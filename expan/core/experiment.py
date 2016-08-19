@@ -3,6 +3,7 @@
 
 # import numpy as np
 
+import re
 import expan.core.statistics as statx
 import warnings
 
@@ -114,17 +115,36 @@ def _binned_deltas(df, variants, n_bins=4, binning=None, cumulative=False,
 
 def _delta_all_variants(metric_df, baseline_variant, assume_normal=True,
 						percentiles=[2.5, 97.5], min_observations=20,
-						nruns=10000, relative=False):
-	"""Applies delta to all variants, given a metric."""
+						nruns=10000, relative=False, weighted=False):
+	"""Applies delta to all variants, given a metric and a baseline variant.
+
+	metric_df has 4 columns: entity, variant, metric, reference_kpi
+	"""
 	baseline_metric = metric_df.iloc[:, 2][metric_df.iloc[:, 1] == baseline_variant]
-	do_delta = (lambda f: delta_to_dataframe_all_variants(f.columns[2],
-														  *statx.delta(
-															  x=f.iloc[:, 2],
-															  y=baseline_metric,
-															  assume_normal=assume_normal,
-															  percentiles=percentiles,
-															  min_observations=min_observations,
-															  nruns=nruns, relative=relative)))
+	baseline_weights = metric_df.iloc[:, 3][metric_df.iloc[:, 1] == baseline_variant]
+
+	if weighted:
+		do_delta = (lambda f: delta_to_dataframe_all_variants(f.columns[2],
+															  *statx.delta(
+																  x=f.iloc[:, 2],
+																  y=baseline_metric,
+																  assume_normal=assume_normal,
+																  percentiles=percentiles,
+																  min_observations=min_observations,
+																  nruns=nruns, 
+																  relative=relative,
+																  x_weights=f.iloc[:,3]/sum(f.iloc[:,3])*len(f.iloc[:,3]),
+																  y_weights=baseline_weights/sum(baseline_weights)*len(baseline_weights))))
+	else:
+		do_delta = (lambda f: delta_to_dataframe_all_variants(f.columns[2],
+															  *statx.delta(
+																  x=f.iloc[:, 2],
+																  y=baseline_metric,
+																  assume_normal=assume_normal,
+																  percentiles=percentiles,
+																  min_observations=min_observations,
+																  nruns=nruns, 
+																  relative=relative)))
 	# Actual calculation
 	return metric_df.groupby('variant').apply(do_delta).unstack(0)
 
@@ -327,9 +347,9 @@ class Experiment(ExperimentData):
 
 		return res
 
-	def delta(self, kpi_subset=None, variant_subset=None,
+	def delta(self, kpi_subset=None, derived_kpis=None, variant_subset=None,
 			  assume_normal=True, percentiles=[2.5, 97.5],
-			  min_observations=20, nruns=10000, relative=False):
+			  min_observations=20, nruns=10000, relative=False, weighted_kpis=None):
 		"""
 	    Compute delta (with confidence bounds) on all applicable kpis,
 	    and returns in the standard Results format.
@@ -341,6 +361,9 @@ class Experiment(ExperimentData):
 	    Args:
 	        kpi_subset (list): kpis for which to perfom delta. If set to
 	            None all kpis are used.
+	        derived_kpis (list): definition of additional KPIs derived from the
+	        	primary ones, e.g. 
+	        	[{'name':'return_rate', 'formula':'returned/ordered'}] 
 	        variant_subset (list): Variants to use compare against baseline. If
 	            set to None all variants are used.
 
@@ -357,13 +380,31 @@ class Experiment(ExperimentData):
 	            mean-ret_val[0] to mean+ret_val[1]. This is more useful in many
 	            situations because it corresponds with the sem() and std()
 	            functions.
+	        weighted_kpis (list): a list of metric names. For each metric 
+	        	in the list, the weighted mean and confidence intervals
+	        	are calculated, which is equivalent to the overall metric.
+	        	Otherwise the metrics are unweighted, this weighted approach 
+	        	is only relevant for ratios.
 
 	    Returns:
 	        Results object containing the computed deltas.
 	    """
 		res = Results(None, metadata=self.metadata)
+		res.metadata['reference_kpi'] = {}
+		res.metadata['weighted_kpis'] = weighted_kpis
 
+		# determine the complete KPI name list
 		kpis_to_analyse = self.kpi_names.copy()
+		if derived_kpis is not None:
+			for dk in derived_kpis:
+				kpis_to_analyse.update([dk['name']])
+				# assuming the columns in the formula can all be cast into float
+				# and create the derived KPI as an additional column
+				self.kpis.loc[:,dk['name']] = eval(re.sub('('+'|'.join(self.kpi_names)+')', r'self.kpis.\1.astype(float)', dk['formula']))
+				# store the reference metric name to be used in the weighting
+				# TODO: only works for ratios
+				res.metadata['reference_kpi'][dk['name']] = re.sub('('+'|'.join(self.kpi_names)+')/', '', dk['formula'])
+
 		if kpi_subset is not None:
 			kpis_to_analyse.intersection_update(kpi_subset)
 		self.dbg(3, 'kpis_to_analyse: ' + ','.join(kpis_to_analyse))
@@ -375,14 +416,26 @@ class Experiment(ExperimentData):
 		self.dbg(3, 'treat_variants to analyse: ' + ','.join(treat_variants))
 
 		for mname in kpis_to_analyse:
+			# the weighted approach implies that derived_kpis is not None
+			if weighted_kpis is not None and mname in weighted_kpis:
+				reference_kpi = res.metadata['reference_kpi'][mname]
+				weighted = True
+			else:
+				reference_kpi = mname
+				weighted = False
+
 			try:
 				with warnings.catch_warnings(record=True) as w:
 					# Cause all warnings to always be triggered.
 					warnings.simplefilter("always")
-					df = (_delta_all_variants(self.kpis.reset_index()[['entity', 'variant', mname]],
-											  self.baseline_variant, assume_normal=assume_normal,
-											  percentiles=percentiles, min_observations=min_observations,
-											  nruns=nruns, relative=relative))
+					df = (_delta_all_variants(self.kpis.reset_index()[['entity', 'variant', mname, reference_kpi]],
+											  self.baseline_variant, 
+											  assume_normal=assume_normal,
+											  percentiles=percentiles, 
+											  min_observations=min_observations,
+											  nruns=nruns, 
+											  relative=relative, 
+											  weighted=weighted))
 					if len(w):
 						res.metadata['warnings']['Experiment.delta'] = w[-1].message
 
@@ -620,8 +673,9 @@ if __name__ == '__main__':
 	metrics, metadata = generate_random_data()
 	metrics['time_since_treatment'] = metrics['treatment_start_time']
 	exp = Experiment('B', metrics, metadata, [4, 6])
-	# Perform sga()
-	result = exp.trend()
+	res = exp.delta(kpi_subset=['derived'], 
+			derived_kpis=[{'name':'derived','formula':'normal_same/normal_shifted'}],
+			weighted_kpis=['derived'])
 
 # result = time_dependent_deltas(data.metrics.reset_index()
 #	[['variant','time_since_treatment','normal_shifted']],variants=['A','B']).df.loc[:,1]
