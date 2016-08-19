@@ -2,14 +2,13 @@ import os
 import unittest
 from os.path import dirname, join, realpath
 
-import simplejson as json
-
 import expan.data.csv_fetcher as csv_fetcher
+import simplejson as json
 import tests.tests_core.test_data as td
 
 __location__ = realpath(join(os.getcwd(), dirname(__file__)))
 
-TEST_FOLDER = __location__ + 'test_folder'
+TEST_FOLDER = __location__ + '/test_folder'
 
 
 class CsvFetcherTestCase(unittest.TestCase):

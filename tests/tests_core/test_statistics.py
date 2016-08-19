@@ -6,10 +6,11 @@ import pandas as pd
 import os
 import numpy as np
 import expan.core.statistics as statx
+import imp
 
 # import random
 
-reload(statx)
+imp.reload(statx)
 
 data_dir = os.getcwd() + '/tests/tests_core/'  # TODO: adjust this depending on where we're calling
 

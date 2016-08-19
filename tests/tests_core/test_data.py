@@ -13,7 +13,7 @@ def generate_random_data():
 	size = 10000
 
 	test_data_frame = pd.DataFrame()
-	test_data_frame['entity'] = range(size)
+	test_data_frame['entity'] = list(range(size))
 	test_data_frame['variant'] = np.random.choice(['A', 'B'], size=size, p=[0.6, 0.4])
 
 	test_data_frame['normal_same'] = np.random.normal(size=size)
@@ -36,7 +36,7 @@ def generate_random_data():
 
 		test_data_frame.loc[ii, 'normal_shifted_by_feature'] = randdata
 
-	test_data_frame['treatment_start_time'] = np.random.choice(range(10), size=size)
+	test_data_frame['treatment_start_time'] = np.random.choice(list(range(10)), size=size)
 
 	test_data_frame['normal_unequal_variance'] = np.random.normal(size=size)
 	test_data_frame.loc[test_data_frame['variant'] == 'B', 'normal_unequal_variance'] \
@@ -57,15 +57,15 @@ def generate_random_data_n_variants(n_variants=3):
 	size = 10000
 
 	test_data_frame = pd.DataFrame()
-	test_data_frame['entity'] = range(size)
-	test_data_frame['variant'] = np.random.choice(map(chr, range(65,65+n_variants)), size=size)
+	test_data_frame['entity'] = list(range(size))
+	test_data_frame['variant'] = np.random.choice(list(map(chr, list(range(65,65+n_variants)))), size=size)
 
 	test_data_frame['normal_same'] = np.random.normal(size=size)
 	test_data_frame['poisson_same'] = np.random.poisson(size=size)
 
 	test_data_frame['feature'] = np.random.choice(['has', 'non'], size=size)
 
-	test_data_frame['treatment_start_time'] = np.random.choice(range(10), size=size)
+	test_data_frame['treatment_start_time'] = np.random.choice(list(range(10)), size=size)
 
 	metadata = {
 		'primary_KPI': 'normal_same',
@@ -200,11 +200,11 @@ class DataTestCase(unittest.TestCase):
 		"""Initialize ExperimentData with time-resolved KPI data"""
 		n = 5  # replicate raw data and create synthetic time domain
 		metrics_time = self.metrics.loc[np.repeat(self.metrics.index.values, n)]
-		metrics_time.loc[:, 'time_since_treatment'] = np.tile(range(5), self.metrics.shape[0])
+		metrics_time.loc[:, 'time_since_treatment'] = np.tile(list(range(5)), self.metrics.shape[0])
 
 		D = ExperimentData(metrics_time, self.metadata, [4])
 		self.assertIsNotNone(D.kpis_time)
-		self.assertEquals(D.kpis.shape[0] * n, D.kpis_time.shape[0])
+		self.assertEqual(D.kpis.shape[0] * n, D.kpis_time.shape[0])
 
 
 if __name__ == '__main__':

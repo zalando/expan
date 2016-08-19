@@ -45,14 +45,14 @@ class BinningTestCase(UtilTestCase):
 			create_binning(None, 10)
 
 		with self.assertRaises(ValueError):
-			create_binning(range(100), 0)
+			create_binning(list(range(100)), 0)
 
 	def test_creation_range_100__nbins_1(self):
 		"""
 		Check if n_bins = 1 functions properly.
 		"""
 		# Create data
-		x = range(100)
+		x = list(range(100))
 		# Calculate binning
 		bins = create_binning(x, 1)
 		r = bins.label(x, '{simplei}')
@@ -66,7 +66,7 @@ class BinningTestCase(UtilTestCase):
 		Check if n_bins = 2 functions properly.
 		"""
 		# Create data
-		x = range(100)
+		x = list(range(100))
 		# Calculate binning
 		bins = create_binning(x, 2)
 		r = bins.label(x, '{simplei}')
@@ -79,7 +79,7 @@ class BinningTestCase(UtilTestCase):
 		Check if n_bins = 5 functions properly.
 		"""
 		# Create data
-		x = range(100)
+		x = list(range(100))
 		# Calculate binning
 		bins = create_binning(x, 5)
 		r = bins.label(x, '{simplei}')
@@ -97,7 +97,7 @@ class BinningTestCase(UtilTestCase):
 		Check if n_bins = 8 functions properly.
 		"""
 		# Create data
-		x = range(100)
+		x = list(range(100))
 		# Calculate binning
 		bins = create_binning(x, 8)
 		labels = bins.label(x, '{simplei}')
@@ -114,7 +114,7 @@ class BinningTestCase(UtilTestCase):
 		Check if n_bins = 10 functions properly.
 		"""
 		# Create data
-		x = range(100)
+		x = list(range(100))
 		# Calculate binning
 		bins = create_binning(x, 10)
 		r = bins.label(x, '{simplei}')
@@ -129,7 +129,7 @@ class BinningTestCase(UtilTestCase):
 		Check if n_bins = 20 functions properly.
 		"""
 		# Create data
-		x = range(100)
+		x = list(range(100))
 
 		# Calculate binning
 		bins = create_binning(x, 20)
@@ -177,7 +177,7 @@ class BinningTestCase(UtilTestCase):
 
 	def test_creation_very_skewed_data(self):
 		# Create data
-		x = [0] * 10000 + range(300)
+		x = [0] * 10000 + list(range(300))
 		# Calculate binning
 		with warnings.catch_warnings(record=True) as w:
 			bins = create_binning(x=x, nbins=4)
@@ -206,7 +206,7 @@ class BinningTestCase(UtilTestCase):
 
 	def test_creation_two_big_bins_noise_between(self):
 		# Create data
-		x = [0] * 10000 + range(300) + [301] * 10000
+		x = [0] * 10000 + list(range(300)) + [301] * 10000
 		# Calculate binning
 
 		with warnings.catch_warnings(record=True) as w:

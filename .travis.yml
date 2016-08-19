@@ -15,9 +15,18 @@ deploy:
     distributions: sdist bdist_wheel
     repo: zalando/expan
 env:
-- TOXENV=py27
+- TOXENV=py
 install:
-- pip install -U tox
+- pip install -U pip setuptools tox coveralls
+- pip install -r requirements.txt
 language: python
-python: 2.7
+python:
+#- pypy
+#- 2.6
+- 2.7
+#- 3.3
+- 3.4
+- 3.5
 script: tox
+after_success:
+- coveralls

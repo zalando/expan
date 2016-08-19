@@ -1,5 +1,7 @@
+from __future__ import absolute_import
+
 __all__ = ["binning", "debugging", "experiment", "experimentdata", "results", "statistics", "util", "version"]
 
-from version import __version__, version
+from expan.core.version import __version__, version
 
-print 'ExpAn core init: {}'.format(version())
+print(('ExpAn core init: {}'.format(version())))
