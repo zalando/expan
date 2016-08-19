@@ -11,7 +11,7 @@ def _delta_mean(x, y):
 
 
 def delta(x, y, assume_normal=True, percentiles=[2.5, 97.5],
-		  min_observations=20, nruns=10000, relative=False):
+		  min_observations=20, nruns=10000, relative=False, x_weights=1, y_weights=1):
 	"""
 	Calculates the difference of means between the samples (x-y) in a
 	statistical sense, i.e. with confidence intervals.
@@ -38,6 +38,14 @@ def delta(x, y, assume_normal=True, percentiles=[2.5, 97.5],
 			absolute values. In	this case, the interval is mean-ret_val[0] to
 			mean+ret_val[1]. This is more useful in many situations because it
 			corresponds with the sem() and std() functions.
+		x_weights (list): weights for the x vector, in order to calculate 
+			the weighted mean and confidence intervals, which is equivalent 
+			to the overall metric. This weighted approach is only relevant 
+			for ratios.
+		y_weights (list): weights for the y vector, in order to calculate 
+			the weighted mean and confidence intervals, which is equivalent 
+			to the overall metric. This weighted approach is only relevant 
+			for ratios.
 
 	Returns:
 		float: mean value of the difference
@@ -52,8 +60,8 @@ def delta(x, y, assume_normal=True, percentiles=[2.5, 97.5],
 		raise ValueError('Please provide two non-None samples.')
 
 	# Coercing missing values to right format
-	_x = np.array(x, dtype=float)
-	_y = np.array(y, dtype=float)
+	_x = np.array(x, dtype=float) * x_weights
+	_y = np.array(y, dtype=float) * y_weights
 
 	x_nan = np.isnan(_x).sum()
 	y_nan = np.isnan(_y).sum()
