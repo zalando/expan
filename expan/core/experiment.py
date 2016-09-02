@@ -400,7 +400,10 @@ class Experiment(ExperimentData):
 				kpis_to_analyse.update([dk['name']])
 				# assuming the columns in the formula can all be cast into float
 				# and create the derived KPI as an additional column
-				self.kpis.loc[:,dk['name']] = eval(re.sub('('+'|'.join(self.kpi_names)+')', r'self.kpis.\1.astype(float)', dk['formula']))
+				# it's necessary to first sort the KPIs in reverse order
+				# in order to match e.g. NET_SALES_BEF_RET instead of matching
+				# only the substring NET_SALES
+				self.kpis.loc[:,dk['name']] = eval(re.sub('('+'|'.join(sorted(self.kpi_names,reverse=True))+')', r'self.kpis.\1.astype(float)', dk['formula']))
 				# store the reference metric name to be used in the weighting
 				# TODO: only works for ratios
 				res.metadata['reference_kpi'][dk['name']] = re.sub('('+'|'.join(self.kpi_names)+')/', '', dk['formula'])
