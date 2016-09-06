@@ -133,8 +133,8 @@ def _delta_all_variants(metric_df, baseline_variant, assume_normal=True,
 																  min_observations=min_observations,
 																  nruns=nruns, 
 																  relative=relative,
-																  x_weights=f.iloc[:,3]/sum(f.iloc[:,3])*len(f.iloc[:,3]),
-																  y_weights=baseline_weights/sum(baseline_weights)*len(baseline_weights))))
+																  x_weights=f.iloc[:,3]/sum(f.iloc[:,3])*sum(f.iloc[:,3]!=0),
+																  y_weights=baseline_weights/sum(baseline_weights)*sum(baseline_weights!=0))))
 	else:
 		do_delta = (lambda f: delta_to_dataframe_all_variants(f.columns[2],
 															  *statx.delta(
