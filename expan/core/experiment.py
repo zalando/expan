@@ -124,6 +124,10 @@ def _delta_all_variants(metric_df, baseline_variant, assume_normal=True,
 	baseline_weights = metric_df.iloc[:, 3][metric_df.iloc[:, 1] == baseline_variant]
 
 	if weighted:
+		# ASSUMPTIONS:
+		# - reference KPI is never NaN (such that sum works the same as np.nansum)
+		# - whenever the reference KPI is 0, it means the derived KPI is NaN,
+		#	and therefore should not be counted (only works for ratio)
 		do_delta = (lambda f: delta_to_dataframe_all_variants(f.columns[2],
 															  *statx.delta(
 																  x=f.iloc[:, 2],
