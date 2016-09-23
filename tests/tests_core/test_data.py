@@ -5,6 +5,8 @@ from copy import deepcopy
 import numpy as np
 import pandas as pd
 
+from pprint import pprint
+
 from expan.core.experimentdata import ExperimentData
 
 
@@ -205,6 +207,28 @@ class DataTestCase(unittest.TestCase):
 		D = ExperimentData(metrics_time, self.metadata, [4])
 		self.assertIsNotNone(D.kpis_time)
 		self.assertEqual(D.kpis.shape[0] * n, D.kpis_time.shape[0])
+
+	def test_outlier_filtering(self):
+		D = ExperimentData(metrics=self.metrics, metadata=self.metadata)
+
+		print(D.kpis.head())
+		print(D.features.head())
+
+		D.filter_outliers(rules=[{"metric":"normal_shifted_by_feature",
+								  "type":"threshold",
+								  "value": 0.0,
+								  "kind": "lower",
+								  "time_interval": 2},
+								 {"metric": "normal_same",
+								  "type": "threshold",
+								  "value": 0.0,
+								  "kind": "upper",
+								  "time_interval": 6}
+								 ])
+
+		print(D.kpis.head())
+		print(D.features.head())
+		pprint(D.metadata)
 
 
 if __name__ == '__main__':

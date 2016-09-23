@@ -11,6 +11,8 @@ import copy
 
 import numpy as np
 import pandas as pd
+import warnings
+
 
 class ExperimentData(object):
 	# TODO: allow definition of the name of 'entity': would be nicer if the index
@@ -191,6 +193,48 @@ class ExperimentData(object):
 	# a member variable without specifying each?
 	def feature_boxplot(self, feature, kpi, **kwargs):
 		self.metrics.set_index(feature, append=True).unstack(level=['variant', feature])[kpi].boxplot(**kwargs)
+
+	def _filter_threshold(self, params):
+		"""
+		:param params:
+		:return:
+		"""
+		if params['kind'] == 'lower':
+			try:
+				self.kpis.loc[self.kpis[params['metric']] < params['value'], params['metric']] = np.nan
+			except KeyError:
+				warnings.warn("kpi key not found")
+			try:
+				self.features.loc[self.features[params['metric']] < params['value'], params['metric']] = np.nan
+			except KeyError:
+				warnings.warn("feature key not found")
+
+		elif params['kind'] == 'upper':
+			try:
+				self.kpis.loc[self.kpis[params['metric']] > params['value'], params['metric']] = np.nan
+			except KeyError:
+				warnings.warn("kpi key not found")
+			try:
+				self.features.loc[self.features[params['metric']] > params['value'], params['metric']] = np.nan
+			except KeyError:
+				warnings.warn("feature key not found")
+		else:
+			warnings.warn("threshold kind not defined")
+
+	def filter_outliers(self, rules, drop_nans=True):
+		"""
+		:param rules:
+		:param drop_nans:
+		:return:
+		"""
+		for rule in rules:
+			if rule['type'] == 'threshold':
+				self._filter_threshold(params=rule)
+
+		if drop_nans:
+			self.kpis.dropna(inplace=True)
+
+		self.metadata['outlier_filter'] = rules
 
 
 def detect_features(metrics):
