@@ -39,7 +39,8 @@ def generate_random_data():
 		test_data_frame.loc[ii, 'normal_shifted_by_feature'] = randdata
 
 	# provides random treatment start time in the past year
-	test_data_frame['treatment_start_time'] = np.random.choice(list(range(int(time() - 1*365*24*60*60), int(time()))), size=size)
+	# test_data_frame['treatment_start_time'] = np.random.choice(list(range(int(time() - 1*365*24*60*60), int(time()))), size=size)
+	test_data_frame['treatment_start_time'] = np.random.choice(list(range(10)), size=size)
 
 	test_data_frame['normal_unequal_variance'] = np.random.normal(size=size)
 	test_data_frame.loc[test_data_frame['variant'] == 'B', 'normal_unequal_variance'] \
@@ -169,7 +170,7 @@ class DataTestCase(unittest.TestCase):
 		"""Initialize ExperimentData with metrics=None, features=[]/'default'"""
 		meta = {
 			'source': 'simulated',
-			'experiment': 'random_data_generation'
+			'experiment': 'random_data_generatiogeneraten'
 		}
 
 		with self.assertRaises(ValueError):
