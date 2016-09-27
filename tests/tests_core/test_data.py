@@ -211,7 +211,7 @@ class DataTestCase(unittest.TestCase):
 
 	def test_outlier_filtering(self):
 
-		# use three rules, one is not implemented, deafult settings
+		# use three rules, one is not implemented, default settings
 		D = ExperimentData(metrics=self.metrics, metadata=self.metadata)
 		D.filter_outliers(rules=[{"metric":"normal_shifted_by_feature",
 								  "type":"threshold",
