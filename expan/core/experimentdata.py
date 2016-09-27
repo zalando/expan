@@ -12,7 +12,7 @@ import copy
 import numpy as np
 import pandas as pd
 import warnings
-
+from time import time
 
 class ExperimentData(object):
 	# TODO: allow definition of the name of 'entity': would be nicer if the index
@@ -194,47 +194,71 @@ class ExperimentData(object):
 	def feature_boxplot(self, feature, kpi, **kwargs):
 		self.metrics.set_index(feature, append=True).unstack(level=['variant', feature])[kpi].boxplot(**kwargs)
 
-	def _filter_threshold(self, params):
+	def _filter_threshold(self, params, drop_thresh_column=True):
 		"""
-		:param params:
-		:return:
+		Internal method that applies a threshold filter on an ExperimentData inplace.
+		:param params: Dictionary of parameters that define a threshold filter.
+		:param drop_thresh_column: Whether to remove added threshold columns (defaults to true).
+		:return: used_rule: If the rule was applied returns the applied rule.
 		"""
-		if params['kind'] == 'lower':
-			try:
-				self.kpis.loc[self.kpis[params['metric']] < params['value'], params['metric']] = np.nan
-			except KeyError:
-				warnings.warn("kpi key not found")
-			try:
-				self.features.loc[self.features[params['metric']] < params['value'], params['metric']] = np.nan
-			except KeyError:
-				warnings.warn("feature key not found")
-
-		elif params['kind'] == 'upper':
-			try:
-				self.kpis.loc[self.kpis[params['metric']] > params['value'], params['metric']] = np.nan
-			except KeyError:
-				warnings.warn("kpi key not found")
-			try:
-				self.features.loc[self.features[params['metric']] > params['value'], params['metric']] = np.nan
-			except KeyError:
-				warnings.warn("feature key not found")
+		# if the time interval is set calculate a linearly adjusted threshold and store it in a separate column
+		if params['time_interval'] is not None:
+			self.kpis = self.kpis.assign(calc_thresh_value = lambda x: (params['value'] * ((time() - self.features['treatment_start_time']) / params['time_interval'])), axis='rows')
 		else:
-			warnings.warn("threshold kind not defined")
+			self.kpis['calc_thresh_value'] = params['value']
 
-	def filter_outliers(self, rules, drop_nans=True):
+		used_rule = {}
+
+		if params['kind'] == 'lower':
+			if params['metric'] in self.kpis.columns:
+				self.kpis.loc[self.kpis[params['metric']] < self.kpis.calc_thresh_value, params['metric']] = np.nan
+				used_rule = params
+			elif params['metric'] in self.features.columns:
+				self.features.loc[self.features[params['metric']] < self.kpis.calc_thresh_value, params['metric']] = np.nan
+				used_rule = params
+			else:
+				warnings.warn("Column key not found!")
+		elif params['kind'] == 'upper':
+			if params['metric'] in self.kpis.columns:
+				self.kpis.loc[self.kpis[params['metric']] > self.kpis.calc_thresh_value, params['metric']] = np.nan
+				used_rule = params
+			elif params['metric'] in self.features.columns:
+				self.features.loc[self.features[params['metric']] > self.kpis.calc_thresh_value, params['metric']] = np.nan
+				used_rule = params
+			else:
+				warnings.warn("Column key not found!")
+		else:
+			warnings.warn("Threshold kind not defined!")
+
+		# drop calculated threshold
+		if drop_thresh_column:
+			if 'calc_thresh_value' in self.kpis.columns:
+				self.kpis.drop(['calc_thresh_value'], axis=1, inplace=True)
+			if 'axis' in self.kpis.columns:
+				self.kpis.drop(['axis'], axis=1, inplace=True)
+
+		return used_rule
+
+
+	def filter_outliers(self, rules, drop_nans=True, drop_thresh=True):
 		"""
-		:param rules:
-		:param drop_nans:
+		Method that applies outlier filtering rules on an ExperimentData object inplace.
+		:param rules: List of dictionaries that define filtering rules.
+		:param drop_nans: Whether to drop NaNs after filtering (defaults to true).
+		:param drop_thresh: Whether to remove added threshold columns (defaults to true).
 		:return:
 		"""
+		used_rules = []
+
 		for rule in rules:
 			if rule['type'] == 'threshold':
-				self._filter_threshold(params=rule)
+				used_rules.append(self._filter_threshold(params=rule, drop_thresh_column=drop_thresh))
 
 		if drop_nans:
 			self.kpis.dropna(inplace=True)
 
-		self.metadata['outlier_filter'] = rules
+		# store rules in the metadata
+		self.metadata['outlier_filter'] = used_rules
 
 
 def detect_features(metrics):

@@ -5,7 +5,7 @@ from copy import deepcopy
 import numpy as np
 import pandas as pd
 
-from pprint import pprint
+from time import time
 
 from expan.core.experimentdata import ExperimentData
 
@@ -38,7 +38,8 @@ def generate_random_data():
 
 		test_data_frame.loc[ii, 'normal_shifted_by_feature'] = randdata
 
-	test_data_frame['treatment_start_time'] = np.random.choice(list(range(10)), size=size)
+	# provides random treatment start time in the past year
+	test_data_frame['treatment_start_time'] = np.random.choice(list(range(int(time() - 1*365*24*60*60), int(time()))), size=size)
 
 	test_data_frame['normal_unequal_variance'] = np.random.normal(size=size)
 	test_data_frame.loc[test_data_frame['variant'] == 'B', 'normal_unequal_variance'] \
@@ -209,27 +210,57 @@ class DataTestCase(unittest.TestCase):
 		self.assertEqual(D.kpis.shape[0] * n, D.kpis_time.shape[0])
 
 	def test_outlier_filtering(self):
+
+		# use three rules, one is not implemented, deafult settings
 		D = ExperimentData(metrics=self.metrics, metadata=self.metadata)
-
-		print(D.kpis.head())
-		print(D.features.head())
-
 		D.filter_outliers(rules=[{"metric":"normal_shifted_by_feature",
 								  "type":"threshold",
-								  "value": 0.0,
+								  "value": 1.0,
 								  "kind": "lower",
-								  "time_interval": 2},
+								  "time_interval": 30758400},
 								 {"metric": "normal_same",
 								  "type": "threshold",
-								  "value": 0.0,
+								  "value": 1.0,
 								  "kind": "upper",
-								  "time_interval": 6}
+								  "time_interval": 30758400},
+								 {"metric": "normal_same",
+								  "type": "water",
+								  "value": 1.0,
+								  "kind": "both",
+								  "time_interval": 30758400}
 								 ])
+		self.assertEqual(len(D.metadata['outlier_filter']), 2)
+		self.assertFalse('calc_thresh_value' in D.kpis.columns)
 
-		print(D.kpis.head())
-		print(D.features.head())
-		pprint(D.metadata)
+		# use one rule, do not drop NaNs
+		D = ExperimentData(metrics=self.metrics, metadata=self.metadata)
+		temp_D = D
+		D.filter_outliers(rules=[{"metric": "normal_shifted_by_feature",
+								  "type": "threshold",
+								  "value": 1.0,
+								  "kind": "lower",
+								  "time_interval": 30758400}
+								 ],
+						  	drop_nans=False)
+		self.assertEqual(len(D.metadata['outlier_filter']), 1)
+		self.assertFalse('calc_thresh_value' in D.kpis.columns)
+		self.assertEqual(len(D.kpis), len(temp_D.kpis))
 
+
+		# use one rule, do not drop NaNs, do not drop threshold column
+		D = ExperimentData(metrics=self.metrics, metadata=self.metadata)
+		temp_D = D
+		D.filter_outliers(rules=[{"metric": "normal_shifted_by_feature",
+								  "type": "threshold",
+								  "value": 1.0,
+								  "kind": "lower",
+								  "time_interval": 30758400}
+								 ],
+						  drop_nans=False,
+						  drop_thresh=False)
+		self.assertEqual(len(D.metadata['outlier_filter']), 1)
+		self.assertTrue('calc_thresh_value' in D.kpis.columns)
+		self.assertEqual(len(D.kpis), len(temp_D.kpis))
 
 if __name__ == '__main__':
 	unittest.main()
