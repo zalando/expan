@@ -201,41 +201,44 @@ class ExperimentData(object):
 		:param drop_thresh_column: Whether to remove added threshold columns (defaults to true).
 		:return: used_rule: If the rule was applied returns the applied rule.
 		"""
-		# if the time interval is set calculate a linearly adjusted threshold and store it in a separate column
-		if params['time_interval'] is not None:
-			self.kpis = self.kpis.assign(calc_thresh_value = lambda x: (params['value'] * ((time() - self.features['treatment_start_time']) / params['time_interval'])), axis='rows')
-		else:
-			self.kpis['calc_thresh_value'] = params['value']
-
 		used_rule = {}
 
-		if params['kind'] == 'lower':
-			if params['metric'] in self.kpis.columns:
-				self.kpis.loc[self.kpis[params['metric']] < self.kpis.calc_thresh_value, params['metric']] = np.nan
-				used_rule = params
-			elif params['metric'] in self.features.columns:
-				self.features.loc[self.features[params['metric']] < self.kpis.calc_thresh_value, params['metric']] = np.nan
-				used_rule = params
+		if 'metric' in params and 'value' in params and 'treatment_stop_time' in params:
+			# if the time interval is set calculate a linearly adjusted threshold and store it in a separate column
+			if params['time_interval'] is not None:
+				self.kpis = self.kpis.assign(calc_thresh_value = lambda x: (params['value'] * ((params['treatment_stop_time'] - self.features['treatment_start_time']) / params['time_interval'])), axis='rows')
 			else:
-				warnings.warn("Column key not found!")
-		elif params['kind'] == 'upper':
-			if params['metric'] in self.kpis.columns:
-				self.kpis.loc[self.kpis[params['metric']] > self.kpis.calc_thresh_value, params['metric']] = np.nan
-				used_rule = params
-			elif params['metric'] in self.features.columns:
-				self.features.loc[self.features[params['metric']] > self.kpis.calc_thresh_value, params['metric']] = np.nan
-				used_rule = params
-			else:
-				warnings.warn("Column key not found!")
-		else:
-			warnings.warn("Threshold kind not defined!")
+				self.kpis['calc_thresh_value'] = params['value']
 
-		# drop calculated threshold
-		if drop_thresh_column:
-			if 'calc_thresh_value' in self.kpis.columns:
-				self.kpis.drop(['calc_thresh_value'], axis=1, inplace=True)
-			if 'axis' in self.kpis.columns:
-				self.kpis.drop(['axis'], axis=1, inplace=True)
+			if params['kind'] == 'lower':
+				if params['metric'] in self.kpis.columns:
+					self.kpis.loc[self.kpis[params['metric']] < self.kpis.calc_thresh_value, params['metric']] = np.nan
+					used_rule = params
+				elif params['metric'] in self.features.columns:
+					self.features.loc[self.features[params['metric']] < self.kpis.calc_thresh_value, params['metric']] = np.nan
+					used_rule = params
+				else:
+					warnings.warn("Column key not found!")
+			elif params['kind'] == 'upper':
+				if params['metric'] in self.kpis.columns:
+					self.kpis.loc[self.kpis[params['metric']] > self.kpis.calc_thresh_value, params['metric']] = np.nan
+					used_rule = params
+				elif params['metric'] in self.features.columns:
+					self.features.loc[self.features[params['metric']] > self.kpis.calc_thresh_value, params['metric']] = np.nan
+					used_rule = params
+				else:
+					warnings.warn("Column key not found!")
+			else:
+				warnings.warn("Threshold kind not defined!")
+
+			# drop calculated threshold
+			if drop_thresh_column:
+				if 'calc_thresh_value' in self.kpis.columns:
+					self.kpis.drop(['calc_thresh_value'], axis=1, inplace=True)
+				if 'axis' in self.kpis.columns:
+					self.kpis.drop(['axis'], axis=1, inplace=True)
+		else:
+			warnings.warn("Threshold filter parameters not set properly!")
 
 		return used_rule
 

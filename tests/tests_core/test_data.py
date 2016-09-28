@@ -5,7 +5,7 @@ from copy import deepcopy
 import numpy as np
 import pandas as pd
 
-from time import time
+# from time import time
 
 from expan.core.experimentdata import ExperimentData
 
@@ -170,7 +170,7 @@ class DataTestCase(unittest.TestCase):
 		"""Initialize ExperimentData with metrics=None, features=[]/'default'"""
 		meta = {
 			'source': 'simulated',
-			'experiment': 'random_data_generatiogeneraten'
+			'experiment': 'random_data_generation'
 		}
 
 		with self.assertRaises(ValueError):
@@ -218,17 +218,20 @@ class DataTestCase(unittest.TestCase):
 								  "type":"threshold",
 								  "value": 1.0,
 								  "kind": "lower",
-								  "time_interval": 30758400},
+								  "time_interval": 30758400,
+								  "treatment_stop_time": 30758500},
 								 {"metric": "normal_same",
 								  "type": "threshold",
 								  "value": 1.0,
 								  "kind": "upper",
-								  "time_interval": 30758400},
+								  "time_interval": 30758400,
+								  "treatment_stop_time": 30758500},
 								 {"metric": "normal_same",
 								  "type": "water",
 								  "value": 1.0,
 								  "kind": "both",
-								  "time_interval": 30758400}
+								  "time_interval": 30758400,
+								  "treatment_stop_time": 30758500}
 								 ])
 		self.assertEqual(len(D.metadata['outlier_filter']), 2)
 		self.assertFalse('calc_thresh_value' in D.kpis.columns)
@@ -240,7 +243,8 @@ class DataTestCase(unittest.TestCase):
 								  "type": "threshold",
 								  "value": 1.0,
 								  "kind": "lower",
-								  "time_interval": 30758400}
+								  "time_interval": 30758400,
+								  "treatment_stop_time": 30758500}
 								 ],
 						  	drop_nans=False)
 		self.assertEqual(len(D.metadata['outlier_filter']), 1)
@@ -255,7 +259,8 @@ class DataTestCase(unittest.TestCase):
 								  "type": "threshold",
 								  "value": 1.0,
 								  "kind": "lower",
-								  "time_interval": 30758400}
+								  "time_interval": 30758400,
+								  "treatment_stop_time": 30758500}
 								 ],
 						  drop_nans=False,
 						  drop_thresh=False)
