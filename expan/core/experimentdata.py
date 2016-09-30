@@ -194,18 +194,21 @@ class ExperimentData(object):
 	def feature_boxplot(self, feature, kpi, **kwargs):
 		self.metrics.set_index(feature, append=True).unstack(level=['variant', feature])[kpi].boxplot(**kwargs)
 
-	def _filter_threshold(self, params, drop_thresh_column=True):
+	def _filter_threshold(self, params, drop_nans=True, drop_thresh_column=True):
 		"""
 		Internal method that applies a threshold filter on an ExperimentData inplace.
 		:param params: Dictionary of parameters that define a threshold filter.
+		:param drop_nans: Whether to drop the outliers or leave them marked with nan in the drop column
 		:param drop_thresh_column: Whether to remove added threshold columns (defaults to true).
 		:return: used_rule: If the rule was applied returns the applied rule.
+		TODO: this function should also return the number of outliers detected by a rule
 		"""
 		used_rule = {}
 
-		if 'metric' in params and 'value' in params and 'treatment_stop_time' in params:
+		if 'metric' in params and 'value' in params and not ('time_interval' in params and not 'treatment_stop_time' in params):
 			# if the time interval is set calculate a linearly adjusted threshold and store it in a separate column
-			if params['time_interval'] is not None:
+			#TODO: check if column 'calc_thresh_value exists in self.kpis?
+			if 'time_interval' in params and params['time_interval'] is not None:
 				self.kpis = self.kpis.assign(calc_thresh_value = lambda x: (params['value'] * ((params['treatment_stop_time'] - self.features['treatment_start_time']) / params['time_interval'])), axis='rows')
 			else:
 				self.kpis['calc_thresh_value'] = params['value']
@@ -231,6 +234,9 @@ class ExperimentData(object):
 			else:
 				warnings.warn("Threshold kind not defined!")
 
+			if drop_nans:
+				self.kpis.dropna(axis=0, subset=[params['metric']], inplace=True)
+
 			# drop calculated threshold
 			if drop_thresh_column:
 				if 'calc_thresh_value' in self.kpis.columns:
@@ -255,10 +261,7 @@ class ExperimentData(object):
 
 		for rule in rules:
 			if rule['type'] == 'threshold':
-				used_rules.append(self._filter_threshold(params=rule, drop_thresh_column=drop_thresh))
-
-		if drop_nans:
-			self.kpis.dropna(inplace=True)
+				used_rules.append(self._filter_threshold(params=rule, drop_nans=drop_nans, drop_thresh_column=drop_thresh))
 
 		# store rules in the metadata
 		self.metadata['outlier_filter'] = used_rules

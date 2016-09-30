@@ -211,33 +211,45 @@ class DataTestCase(unittest.TestCase):
 		self.assertEqual(D.kpis.shape[0] * n, D.kpis_time.shape[0])
 
 	def test_outlier_filtering(self):
+		#pick 1000 data points and make them outliers
+		metrics_outlier = self.metrics
+		import random
+		idx=metrics_outlier.sample(1000).index
+		#make sure the values are below than -1 or above 1 then multiply
+		metrics_outlier.loc[idx, "normal_shifted_by_feature"] += np.sign(metrics_outlier.loc[idx, "normal_shifted_by_feature"])
+		metrics_outlier.loc[idx, "normal_shifted_by_feature"] *= 10
 
-		# use three rules, one is not implemented, default settings
-		D = ExperimentData(metrics=self.metrics, metadata=self.metadata)
+		# use 4 rules, one is not implemented, default settings
+		D = ExperimentData(metrics=metrics_outlier, metadata=self.metadata)
 		D.filter_outliers(rules=[{"metric":"normal_shifted_by_feature",
 								  "type":"threshold",
-								  "value": 1.0,
-								  "kind": "lower",
-								  "time_interval": 30758400,
-								  "treatment_stop_time": 30758500},
+								  "value": -10.0,
+								  "kind": "lower"
+		                          },
+								{"metric": "normal_shifted_by_feature",
+								 "type": "threshold",
+								 "value": 10.0,
+								 "kind": "upper"
+								 },
 								 {"metric": "normal_same",
 								  "type": "threshold",
-								  "value": 1.0,
-								  "kind": "upper",
-								  "time_interval": 30758400,
-								  "treatment_stop_time": 30758500},
+								  "value": 10.0,
+								  "kind": "upper"
+								  },
 								 {"metric": "normal_same",
 								  "type": "water",
-								  "value": 1.0,
-								  "kind": "both",
-								  "time_interval": 30758400,
-								  "treatment_stop_time": 30758500}
+								  "value": 10.0,
+								  "kind": "both"
+		                         }
 								 ])
-		self.assertEqual(len(D.metadata['outlier_filter']), 2)
+		self.assertEqual(len(D.metadata['outlier_filter']), 3)
+		self.assertEqual(len(D.metrics), 9000)
+		for i in idx:
+			self.assertEqual(D.metrics.ix[i].empty, True)
 		self.assertFalse('calc_thresh_value' in D.kpis.columns)
 
 		# use one rule, do not drop NaNs
-		D = ExperimentData(metrics=self.metrics, metadata=self.metadata)
+		D = ExperimentData(metrics=metrics_outlier, metadata=self.metadata)
 		temp_D = D
 		D.filter_outliers(rules=[{"metric": "normal_shifted_by_feature",
 								  "type": "threshold",
@@ -253,7 +265,7 @@ class DataTestCase(unittest.TestCase):
 
 
 		# use one rule, do not drop NaNs, do not drop threshold column
-		D = ExperimentData(metrics=self.metrics, metadata=self.metadata)
+		D = ExperimentData(metrics=metrics_outlier, metadata=self.metadata)
 		temp_D = D
 		D.filter_outliers(rules=[{"metric": "normal_shifted_by_feature",
 								  "type": "threshold",
