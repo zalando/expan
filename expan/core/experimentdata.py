@@ -44,20 +44,20 @@ class ExperimentData(object):
 	def __init__(self, metrics=None, metadata={}, features='default',
 				 deepcopy=False):
 		"""
-    Want to be able to create results from just a single dataframe.
+	    Want to be able to create results from just a single dataframe.
 
-    Args:
-        metrics: data frame that contains either KPI or feature
-        metadata: the metadata dict
-        features: either 'default', which searches the metrics data frame for predefined feature names
-                  or list, which subsets the metrics data frame with the given column indices
-                  or data frame, which is feature data frame itself and metrics is either KPI or None
-                  or None
-        deepcopy: the internal data frames are, by default, shallow copies of the input
-                            dataframes: this means the actual data arrays underlying the frames are
-                            references to the input. In most use-cases, this is desired (reindexing
-                            will not reindex the original etc.) but it may have some edge-case issues.
-    """
+	    Args:
+	        metrics: data frame that contains either KPI or feature
+	        metadata: the metadata dict
+	        features: either 'default', which searches the metrics data frame for predefined feature names
+	                  or list, which subsets the metrics data frame with the given column indices
+	                  or data frame, which is feature data frame itself and metrics is either KPI or None
+	                  or None
+	        deepcopy: the internal data frames are, by default, shallow copies of the input
+	                            dataframes: this means the actual data arrays underlying the frames are
+	                            references to the input. In most use-cases, this is desired (reindexing
+	                            will not reindex the original etc.) but it may have some edge-case issues.
+	    """
 
 		self.metadata = metadata or {}
 
@@ -171,11 +171,11 @@ class ExperimentData(object):
 	@property
 	def metrics(self):
 		"""
-    Simply joins the KPIs and the features.
+	    Simply joins the KPIs and the features.
 
-    TODO: it may well be worth investigating caching this result because the
-    features and kpis will rarely change, and accessing them in this way is likely to be common.
-    """
+	    TODO: it may well be worth investigating caching this result because the
+	    features and kpis will rarely change, and accessing them in this way is likely to be common.
+	    """
 		if 'time_since_treatment' in self.kpis.index.names:
 			return self.kpis.reset_index('time_since_treatment').join(self.features).set_index('time_since_treatment',
 																							   append=True)
@@ -184,9 +184,9 @@ class ExperimentData(object):
 
 	def __getitem__(self, key):
 		"""
-    Allows indexing the ExperimentData directly as though it were a DataFrame
-    composed of KPIs and Features.
-    """
+	    Allows indexing the ExperimentData directly as though it were a DataFrame
+	    composed of KPIs and Features.
+	    """
 		return self.metrics.__getitem__(key)
 
 	# Q: is it possible to pass a whole lot of functions to
@@ -269,8 +269,8 @@ class ExperimentData(object):
 
 def detect_features(metrics):
 	"""
-  Automatically detect which of the metrics are features.
-  """
+	Automatically detect which of the metrics are features.
+	"""
 	from warnings import warn
 
 	if 'time_since_treatment' in metrics:
