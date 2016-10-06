@@ -83,16 +83,16 @@ def generate_random_data_n_variants(n_variants=3):
 class DataTestCase(unittest.TestCase):
 	def setUp(self):
 		"""
-    Load the needed datasets for all StatisticsTestCases and set the random
-    seed so that randomized algorithms show deterministic behaviour.
-    """
+	    Load the needed datasets for all StatisticsTestCases and set the random
+	    seed so that randomized algorithms show deterministic behaviour.
+	    """
 		# np.random.seed(0)
 		self.metrics, self.metadata = generate_random_data()
 
 	def tearDown(self):
 		"""
-    Clean up after the test
-    """
+	    Clean up after the test
+	    """
 		# TODO: find out if we have to remove data manually
 		pass
 
@@ -211,6 +211,7 @@ class DataTestCase(unittest.TestCase):
 		self.assertEqual(D.kpis.shape[0] * n, D.kpis_time.shape[0])
 
 	def test_outlier_filtering(self):
+		"""Check outlier filtering functionality"""
 		#pick 1000 data points and make them outliers
 		metrics_outlier = self.metrics
 		import random

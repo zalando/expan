@@ -209,7 +209,12 @@ class ExperimentData(object):
 			# if the time interval is set calculate a linearly adjusted threshold and store it in a separate column
 			#TODO: check if column 'calc_thresh_value exists in self.kpis?
 			if 'time_interval' in params and params['time_interval'] is not None:
-				self.kpis = self.kpis.assign(calc_thresh_value = lambda x: (params['value'] * ((params['treatment_stop_time'] - self.features['treatment_start_time']) / params['time_interval'])), axis='rows')
+				# start timestamp exists as a feature
+				if 'treatment_start_time' in self.features.columns:
+					self.kpis = self.kpis.assign(calc_thresh_value = lambda x: (params['value'] * ((params['treatment_stop_time'] - self.features['treatment_start_time']) / params['time_interval'])), axis='rows')
+				else:
+					warnings.warn('Scaling by time not possible (treatment_start_time does not exist as a feature), using hard threshold instead!')
+					self.kpis['calc_thresh_value'] = params['value']
 			else:
 				self.kpis['calc_thresh_value'] = params['value']
 
@@ -294,4 +299,13 @@ if __name__ == '__main__':
 
 	np.random.seed(0)
 	metrics, meta = generate_random_data()
-	D = ExperimentData(metrics, meta, 'default')
+	metrics['time_since_treatment'] = metrics['treatment_start_time']
+	D = ExperimentData(metrics[['entity','variant','time_since_treatment','normal_shifted']], meta, 'default')
+	D.filter_outliers(rules=[{"metric":"normal_shifted",
+							  "type":"threshold",
+							  "value": -1.0,
+							  "kind": "lower",
+							  "time_interval": 30758400,
+							  "treatment_stop_time": 30758500
+		                     }
+							])
