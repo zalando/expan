@@ -258,8 +258,7 @@ class DataTestCase(unittest.TestCase):
 								  "kind": "lower",
 								  "time_interval": 30758400,
 								  "treatment_stop_time": 30758500}
-								 ],
-						  	drop_nans=False)
+								 ])
 		self.assertEqual(len(D.metadata['outlier_filter']), 1)
 		self.assertFalse('calc_thresh_value' in D.kpis.columns)
 		self.assertEqual(len(D.kpis), len(temp_D.kpis))
@@ -275,7 +274,6 @@ class DataTestCase(unittest.TestCase):
 								  "time_interval": 30758400,
 								  "treatment_stop_time": 30758500}
 								 ],
-						  drop_nans=False,
 						  drop_thresh=False)
 		self.assertEqual(len(D.metadata['outlier_filter']), 1)
 		self.assertTrue('calc_thresh_value' in D.kpis.columns)
@@ -299,6 +297,17 @@ class DataTestCase(unittest.TestCase):
 									])
 		    # Verify warning exists
 		    assert len(w) == 1
+
+	def test_outlier_filtering_n_filtered(self):
+		"""Check if the number of filtered entities is persisted in the metadata"""
+		D = ExperimentData(self.metrics, self.metadata, 'default')
+		D.filter_outliers(rules=[{"metric":"normal_shifted",
+								  "type":"threshold",
+								  "value": -1.0,
+								  "kind": "lower"
+			                     }
+								])
+		self.assertEqual(D.metadata['n_filtered'], [1082])
 
 if __name__ == '__main__':
 	unittest.main()

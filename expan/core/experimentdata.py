@@ -194,14 +194,13 @@ class ExperimentData(object):
 	def feature_boxplot(self, feature, kpi, **kwargs):
 		self.metrics.set_index(feature, append=True).unstack(level=['variant', feature])[kpi].boxplot(**kwargs)
 
-	def _filter_threshold(self, params, drop_nans=True, drop_thresh_column=True):
+	def _filter_threshold(self, params, drop_thresh_column=True):
 		"""
 		Internal method that applies a threshold filter on an ExperimentData inplace.
 		:param params: Dictionary of parameters that define a threshold filter.
-		:param drop_nans: Whether to drop the outliers or leave them marked with nan in the drop column
 		:param drop_thresh_column: Whether to remove added threshold columns (defaults to true).
 		:return: used_rule: If the rule was applied returns the applied rule.
-		TODO: this function should also return the number of outliers detected by a rule
+				 number of entities filtered out
 		"""
 		used_rule = {}
 
@@ -220,27 +219,28 @@ class ExperimentData(object):
 
 			if params['kind'] == 'lower':
 				if params['metric'] in self.kpis.columns:
-					self.kpis.loc[self.kpis[params['metric']] < self.kpis.calc_thresh_value, params['metric']] = np.nan
+					is_outlier = self.kpis[params['metric']] < self.kpis.calc_thresh_value
+					self.kpis = self.kpis[~is_outlier]
 					used_rule = params
 				elif params['metric'] in self.features.columns:
-					self.features.loc[self.features[params['metric']] < self.kpis.calc_thresh_value, params['metric']] = np.nan
+					is_outlier = self.features[params['metric']] < self.kpis.calc_thresh_value
+					self.features = self.features[~is_outlier]
 					used_rule = params
 				else:
 					warnings.warn("Column key not found!")
 			elif params['kind'] == 'upper':
 				if params['metric'] in self.kpis.columns:
-					self.kpis.loc[self.kpis[params['metric']] > self.kpis.calc_thresh_value, params['metric']] = np.nan
+					is_outlier = self.kpis[params['metric']] > self.kpis.calc_thresh_value
+					self.kpis = self.kpis[~is_outlier]
 					used_rule = params
 				elif params['metric'] in self.features.columns:
-					self.features.loc[self.features[params['metric']] > self.kpis.calc_thresh_value, params['metric']] = np.nan
+					is_outlier = self.features[params['metric']] > self.kpis.calc_thresh_value
+					self.features = self.features[~is_outlier]
 					used_rule = params
 				else:
 					warnings.warn("Column key not found!")
 			else:
 				warnings.warn("Threshold kind not defined!")
-
-			if drop_nans:
-				self.kpis.dropna(axis=0, subset=[params['metric']], inplace=True)
 
 			# drop calculated threshold
 			if drop_thresh_column:
@@ -251,25 +251,31 @@ class ExperimentData(object):
 		else:
 			warnings.warn("Threshold filter parameters not set properly!")
 
-		return used_rule
+		return used_rule, sum(is_outlier)
 
 
-	def filter_outliers(self, rules, drop_nans=True, drop_thresh=True):
+	def filter_outliers(self, rules, drop_thresh=True):
 		"""
 		Method that applies outlier filtering rules on an ExperimentData object inplace.
 		:param rules: List of dictionaries that define filtering rules.
-		:param drop_nans: Whether to drop NaNs after filtering (defaults to true).
 		:param drop_thresh: Whether to remove added threshold columns (defaults to true).
 		:return:
+		NOTE: the outcome of the filtering depends on the order of rules being
+			  processed, e.g. when the rule contains a percentile instead of an
+			  absolute threshold.
 		"""
 		used_rules = []
+		n_filtered = []
 
 		for rule in rules:
 			if rule['type'] == 'threshold':
-				used_rules.append(self._filter_threshold(params=rule, drop_nans=drop_nans, drop_thresh_column=drop_thresh))
+				urule, n = self._filter_threshold(params=rule, drop_thresh_column=drop_thresh)
+				used_rules.append(urule)
+				n_filtered.append(n)
 
 		# store rules in the metadata
 		self.metadata['outlier_filter'] = used_rules
+		self.metadata['n_filtered'] = n_filtered
 
 
 def detect_features(metrics):
@@ -300,12 +306,12 @@ if __name__ == '__main__':
 	np.random.seed(0)
 	metrics, meta = generate_random_data()
 	metrics['time_since_treatment'] = metrics['treatment_start_time']
-	D = ExperimentData(metrics[['entity','variant','time_since_treatment','normal_shifted']], meta, 'default')
+	D = ExperimentData(metrics, meta, 'default')
 	D.filter_outliers(rules=[{"metric":"normal_shifted",
 							  "type":"threshold",
 							  "value": -1.0,
 							  "kind": "lower",
-							  "time_interval": 30758400,
-							  "treatment_stop_time": 30758500
+							  #"time_interval": 30758400,
+							  #"treatment_stop_time": 30758500
 		                     }
 							])
