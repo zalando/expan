@@ -281,5 +281,24 @@ class DataTestCase(unittest.TestCase):
 		self.assertTrue('calc_thresh_value' in D.kpis.columns)
 		self.assertEqual(len(D.kpis), len(temp_D.kpis))
 
+	def test_outlier_filtering_no_treatment_start(self):
+		"""Check if outlier filtering issues a warning when treatment_start_time is not available"""
+		# initialize with only the kpi data
+		D = ExperimentData(self.metrics[['entity','variant','normal_shifted']], self.metadata, 'default')
+		with warnings.catch_warnings(record=True) as w:
+		    # Cause all warnings to always be triggered.
+		    warnings.simplefilter("always")
+		    # Trigger a warning.
+		    D.filter_outliers(rules=[{"metric":"normal_shifted",
+									  "type":"threshold",
+									  "value": -1.0,
+									  "kind": "lower",
+									  "time_interval": 30758400,
+									  "treatment_stop_time": 30758500
+				                     }
+									])
+		    # Verify warning exists
+		    assert len(w) == 1
+
 if __name__ == '__main__':
 	unittest.main()
