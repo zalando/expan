@@ -309,5 +309,18 @@ class DataTestCase(unittest.TestCase):
 								])
 		self.assertEqual(D.metadata['n_filtered'], [1082])
 
+	def test_outlier_filtering_treatment_exposure(self):
+		"""Check if scaling of the threshold works when the treatment_exposure is provided"""
+		self.metrics['treatment_exposure'] = self.metrics['treatment_start_time']
+		D = ExperimentData(self.metrics[['entity','variant','normal_shifted','treatment_exposure']], self.metadata, features=[3])
+		D.filter_outliers(rules=[{"metric":"normal_shifted",
+								  "type":"threshold",
+								  "value": -1.0,
+								  "kind": "lower",
+								  "time_interval": 30758400
+			                     }
+								])
+		self.assertEqual(D.metadata['n_filtered'], [3695])
+
 if __name__ == '__main__':
 	unittest.main()

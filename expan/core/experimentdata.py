@@ -204,15 +204,19 @@ class ExperimentData(object):
 		"""
 		used_rule = {}
 
-		if 'metric' in params and 'value' in params and not ('time_interval' in params and not 'treatment_stop_time' in params):
+		if 'metric' in params and 'value' in params: #and not ('time_interval' in params and not 'treatment_stop_time' in params):
 			# if the time interval is set calculate a linearly adjusted threshold and store it in a separate column
 			#TODO: check if column 'calc_thresh_value exists in self.kpis?
 			if 'time_interval' in params and params['time_interval'] is not None:
 				# start timestamp exists as a feature
+				# NOTE: treatment_start_time has to be epoch time in seconds
 				if 'treatment_start_time' in self.features.columns:
 					self.kpis = self.kpis.assign(calc_thresh_value = lambda x: (params['value'] * ((params['treatment_stop_time'] - self.features['treatment_start_time']) / params['time_interval'])), axis='rows')
+				# treatment exposure exists as a feature
+				elif 'treatment_exposure' in self.features.columns:
+					self.kpis['calc_thresh_value'] = params['value'] * self.features.treatment_exposure / params['time_interval']
 				else:
-					warnings.warn('Scaling by time not possible (treatment_start_time does not exist as a feature), using hard threshold instead!')
+					warnings.warn('Scaling by time not possible, using hard threshold instead!')
 					self.kpis['calc_thresh_value'] = params['value']
 			else:
 				self.kpis['calc_thresh_value'] = params['value']
@@ -305,13 +309,13 @@ if __name__ == '__main__':
 
 	np.random.seed(0)
 	metrics, meta = generate_random_data()
-	metrics['time_since_treatment'] = metrics['treatment_start_time']
-	D = ExperimentData(metrics, meta, 'default')
+	metrics['treatment_exposure'] = metrics['treatment_start_time']
+	D = ExperimentData(metrics[['entity','variant','normal_shifted','treatment_exposure']], meta, features=[3])
 	D.filter_outliers(rules=[{"metric":"normal_shifted",
 							  "type":"threshold",
 							  "value": -1.0,
 							  "kind": "lower",
-							  #"time_interval": 30758400,
+							  "time_interval": 30758400,
 							  #"treatment_stop_time": 30758500
 		                     }
 							])
