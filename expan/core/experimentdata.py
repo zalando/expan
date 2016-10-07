@@ -210,7 +210,7 @@ class ExperimentData(object):
 			if 'time_interval' in params and params['time_interval'] is not None:
 				# start timestamp exists as a feature
 				# NOTE: treatment_start_time and treatment_exposure have to be epoch time in seconds
-				if 'treatment_start_time' in self.features.columns:
+				if 'treatment_start_time' in self.features.columns and 'treatment_stop_time' in params:
 					self.kpis = self.kpis.assign(calc_thresh_value = lambda x: (params['value'] * ((params['treatment_stop_time'] - self.features['treatment_start_time']) / params['time_interval'])), axis='rows')
 				# treatment exposure exists as a feature
 				elif 'treatment_exposure' in self.features.columns:
