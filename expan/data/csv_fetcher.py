@@ -26,10 +26,10 @@ def get_data(folder_path):
 		for f in files:
 
 			if 'metrics' in f:
-					metrics = pd.read_csv(folder_path + '/' + f)
+				metrics = pd.read_csv(join(folder_path, f))
 
 			elif 'metadata' in f:
-				with open(folder_path + '/' + f, 'r') as input_json:
+				with open(join(folder_path, f), 'r') as input_json:
 					metadata = json.load(input_json)
 
 		return ExperimentData(metrics=metrics, metadata=metadata)
