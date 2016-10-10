@@ -8,7 +8,7 @@ import tests.tests_core.test_data as td
 
 __location__ = realpath(join(getcwd(), dirname(__file__)))
 
-TEST_FOLDER = __location__ + '/test_folder'
+TEST_FOLDER = join(__location__, 'test_folder')
 
 
 class CsvFetcherTestCase(unittest.TestCase):
@@ -44,4 +44,4 @@ class CsvFetcherTestCase(unittest.TestCase):
 
 		# should not work:
 		with self.assertRaises(AssertionError):
-			csv_fetcher.get_data(__location__ + '/../')
+			csv_fetcher.get_data(join(__location__, '..'))
