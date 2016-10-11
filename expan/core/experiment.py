@@ -124,6 +124,10 @@ def _delta_all_variants(metric_df, baseline_variant, assume_normal=True,
 	baseline_weights = metric_df.iloc[:, 3][metric_df.iloc[:, 1] == baseline_variant]
 
 	if weighted:
+		# ASSUMPTIONS:
+		# - reference KPI is never NaN (such that sum works the same as np.nansum)
+		# - whenever the reference KPI is 0, it means the derived KPI is NaN,
+		#	and therefore should not be counted (only works for ratio)
 		do_delta = (lambda f: delta_to_dataframe_all_variants(f.columns[2],
 															  *statx.delta(
 																  x=f.iloc[:, 2],
@@ -133,8 +137,8 @@ def _delta_all_variants(metric_df, baseline_variant, assume_normal=True,
 																  min_observations=min_observations,
 																  nruns=nruns,
 																  relative=relative,
-																  x_weights=f.iloc[:,3]/sum(f.iloc[:,3])*len(f.iloc[:,3]),
-																  y_weights=baseline_weights/sum(baseline_weights)*len(baseline_weights))))
+																  x_weights=f.iloc[:,3]/sum(f.iloc[:,3])*sum(f.iloc[:,3]!=0),
+																  y_weights=baseline_weights/sum(baseline_weights)*sum(baseline_weights!=0))))
 	else:
 		do_delta = (lambda f: delta_to_dataframe_all_variants(f.columns[2],
 															  *statx.delta(
@@ -400,10 +404,10 @@ class Experiment(ExperimentData):
 				kpis_to_analyse.update([dk['name']])
 				# assuming the columns in the formula can all be cast into float
 				# and create the derived KPI as an additional column
-				self.kpis.loc[:,dk['name']] = eval(re.sub('('+'|'.join(self.kpi_names)+')', r'self.kpis.\1.astype(float)', dk['formula']))
+				self.kpis.loc[:,dk['name']] = eval(re.sub('([a-zA-Z_]+)', r'self.kpis.\1.astype(float)', dk['formula']))
 				# store the reference metric name to be used in the weighting
 				# TODO: only works for ratios
-				res.metadata['reference_kpi'][dk['name']] = re.sub('('+'|'.join(self.kpi_names)+')/', '', dk['formula'])
+				res.metadata['reference_kpi'][dk['name']] = re.sub('([a-zA-Z_]+)/', '', dk['formula'])
 
 		if kpi_subset is not None:
 			kpis_to_analyse.intersection_update(kpi_subset)
