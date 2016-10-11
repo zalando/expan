@@ -1,3 +1,4 @@
+==========================
 ExpAn: Experiment Analysis
 ==========================
 
@@ -20,9 +21,6 @@ ExpAn: Experiment Analysis
 .. image:: https://img.shields.io/pypi/l/expan.svg
         :target: https://pypi.python.org/pypi/expan/
         :alt: License
-
-Introduction
-============
 
 A/B tests (a.k.a. Randomized Controlled Trials or Experiments) have been widely
 applied in different industries to optimize business processes and user
