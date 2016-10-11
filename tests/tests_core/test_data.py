@@ -5,6 +5,8 @@ from copy import deepcopy
 import numpy as np
 import pandas as pd
 
+# from time import time
+
 from expan.core.experimentdata import ExperimentData
 
 
@@ -36,6 +38,8 @@ def generate_random_data():
 
 		test_data_frame.loc[ii, 'normal_shifted_by_feature'] = randdata
 
+	# provides random treatment start time in the past year
+	# test_data_frame['treatment_start_time'] = np.random.choice(list(range(int(time() - 1*365*24*60*60), int(time()))), size=size)
 	test_data_frame['treatment_start_time'] = np.random.choice(list(range(10)), size=size)
 
 	test_data_frame['normal_unequal_variance'] = np.random.normal(size=size)
@@ -79,16 +83,16 @@ def generate_random_data_n_variants(n_variants=3):
 class DataTestCase(unittest.TestCase):
 	def setUp(self):
 		"""
-    Load the needed datasets for all StatisticsTestCases and set the random
-    seed so that randomized algorithms show deterministic behaviour.
-    """
+	    Load the needed datasets for all StatisticsTestCases and set the random
+	    seed so that randomized algorithms show deterministic behaviour.
+	    """
 		# np.random.seed(0)
 		self.metrics, self.metadata = generate_random_data()
 
 	def tearDown(self):
 		"""
-    Clean up after the test
-    """
+	    Clean up after the test
+	    """
 		# TODO: find out if we have to remove data manually
 		pass
 
@@ -206,6 +210,117 @@ class DataTestCase(unittest.TestCase):
 		self.assertIsNotNone(D.kpis_time)
 		self.assertEqual(D.kpis.shape[0] * n, D.kpis_time.shape[0])
 
+	def test_outlier_filtering(self):
+		"""Check outlier filtering functionality"""
+		#pick 1000 data points and make them outliers
+		metrics_outlier = self.metrics
+		import random
+		idx=metrics_outlier.sample(1000).index
+		#make sure the values are below than -1 or above 1 then multiply
+		metrics_outlier.loc[idx, "normal_shifted_by_feature"] += np.sign(metrics_outlier.loc[idx, "normal_shifted_by_feature"])
+		metrics_outlier.loc[idx, "normal_shifted_by_feature"] *= 10
+
+		# use 4 rules, one is not implemented, default settings
+		D = ExperimentData(metrics=metrics_outlier, metadata=self.metadata)
+		D.filter_outliers(rules=[{"metric":"normal_shifted_by_feature",
+								  "type":"threshold",
+								  "value": -10.0,
+								  "kind": "lower"
+		                          },
+								{"metric": "normal_shifted_by_feature",
+								 "type": "threshold",
+								 "value": 10.0,
+								 "kind": "upper"
+								 },
+								 {"metric": "normal_same",
+								  "type": "threshold",
+								  "value": 10.0,
+								  "kind": "upper"
+								  },
+								 {"metric": "normal_same",
+								  "type": "water",
+								  "value": 10.0,
+								  "kind": "both"
+		                         }
+								 ])
+		self.assertEqual(len(D.metadata['outlier_filter']), 3)
+		self.assertEqual(len(D.metrics), 9000)
+		for i in idx:
+			self.assertEqual(D.metrics.ix[i].empty, True)
+		self.assertFalse('calc_thresh_value' in D.kpis.columns)
+
+		# use one rule, do not drop NaNs
+		D = ExperimentData(metrics=metrics_outlier, metadata=self.metadata)
+		temp_D = D
+		D.filter_outliers(rules=[{"metric": "normal_shifted_by_feature",
+								  "type": "threshold",
+								  "value": 1.0,
+								  "kind": "lower",
+								  "time_interval": 30758400,
+								  "treatment_stop_time": 30758500}
+								 ])
+		self.assertEqual(len(D.metadata['outlier_filter']), 1)
+		self.assertFalse('calc_thresh_value' in D.kpis.columns)
+		self.assertEqual(len(D.kpis), len(temp_D.kpis))
+
+
+		# use one rule, do not drop NaNs, do not drop threshold column
+		D = ExperimentData(metrics=metrics_outlier, metadata=self.metadata)
+		temp_D = D
+		D.filter_outliers(rules=[{"metric": "normal_shifted_by_feature",
+								  "type": "threshold",
+								  "value": 1.0,
+								  "kind": "lower",
+								  "time_interval": 30758400,
+								  "treatment_stop_time": 30758500}
+								 ],
+						  drop_thresh=False)
+		self.assertEqual(len(D.metadata['outlier_filter']), 1)
+		self.assertTrue('calc_thresh_value' in D.kpis.columns)
+		self.assertEqual(len(D.kpis), len(temp_D.kpis))
+
+	def test_outlier_filtering_no_treatment_start(self):
+		"""Check if outlier filtering issues a warning when treatment_start_time is not available"""
+		# initialize with only the kpi data
+		D = ExperimentData(self.metrics[['entity','variant','normal_shifted']], self.metadata, 'default')
+		with warnings.catch_warnings(record=True) as w:
+		    # Cause all warnings to always be triggered.
+		    warnings.simplefilter("always")
+		    # Trigger a warning.
+		    D.filter_outliers(rules=[{"metric":"normal_shifted",
+									  "type":"threshold",
+									  "value": -1.0,
+									  "kind": "lower",
+									  "time_interval": 30758400,
+									  "treatment_stop_time": 30758500
+				                     }
+									])
+		    # Verify warning exists
+		    assert len(w) == 1
+
+	def test_outlier_filtering_n_filtered(self):
+		"""Check if the number of filtered entities is persisted in the metadata"""
+		D = ExperimentData(self.metrics, self.metadata, 'default')
+		D.filter_outliers(rules=[{"metric":"normal_shifted",
+								  "type":"threshold",
+								  "value": -1.0,
+								  "kind": "lower"
+			                     }
+								])
+		self.assertEqual(D.metadata['n_filtered'], [1082])
+
+	def test_outlier_filtering_treatment_exposure(self):
+		"""Check if scaling of the threshold works when the treatment_exposure is provided"""
+		self.metrics['treatment_exposure'] = self.metrics['treatment_start_time']
+		D = ExperimentData(self.metrics[['entity','variant','normal_shifted','treatment_exposure']], self.metadata, features=[3])
+		D.filter_outliers(rules=[{"metric":"normal_shifted",
+								  "type":"threshold",
+								  "value": -1.0,
+								  "kind": "lower",
+								  "time_interval": 30758400
+			                     }
+								])
+		self.assertEqual(D.metadata['n_filtered'], [3695])
 
 if __name__ == '__main__':
 	unittest.main()

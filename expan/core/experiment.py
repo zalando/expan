@@ -131,7 +131,7 @@ def _delta_all_variants(metric_df, baseline_variant, assume_normal=True,
 																  assume_normal=assume_normal,
 																  percentiles=percentiles,
 																  min_observations=min_observations,
-																  nruns=nruns, 
+																  nruns=nruns,
 																  relative=relative,
 																  x_weights=f.iloc[:,3]/sum(f.iloc[:,3])*len(f.iloc[:,3]),
 																  y_weights=baseline_weights/sum(baseline_weights)*len(baseline_weights))))
@@ -143,7 +143,7 @@ def _delta_all_variants(metric_df, baseline_variant, assume_normal=True,
 																  assume_normal=assume_normal,
 																  percentiles=percentiles,
 																  min_observations=min_observations,
-																  nruns=nruns, 
+																  nruns=nruns,
 																  relative=relative)))
 	# Actual calculation
 	return metric_df.groupby('variant').apply(do_delta).unstack(0)
@@ -362,8 +362,8 @@ class Experiment(ExperimentData):
 	        kpi_subset (list): kpis for which to perfom delta. If set to
 	            None all kpis are used.
 	        derived_kpis (list): definition of additional KPIs derived from the
-	        	primary ones, e.g. 
-	        	[{'name':'return_rate', 'formula':'returned/ordered'}] 
+	        	primary ones, e.g.
+	        	[{'name':'return_rate', 'formula':'returned/ordered'}]
 	        variant_subset (list): Variants to use compare against baseline. If
 	            set to None all variants are used.
 
@@ -380,10 +380,10 @@ class Experiment(ExperimentData):
 	            mean-ret_val[0] to mean+ret_val[1]. This is more useful in many
 	            situations because it corresponds with the sem() and std()
 	            functions.
-	        weighted_kpis (list): a list of metric names. For each metric 
+	        weighted_kpis (list): a list of metric names. For each metric
 	        	in the list, the weighted mean and confidence intervals
 	        	are calculated, which is equivalent to the overall metric.
-	        	Otherwise the metrics are unweighted, this weighted approach 
+	        	Otherwise the metrics are unweighted, this weighted approach
 	        	is only relevant for ratios.
 
 	    Returns:
@@ -429,12 +429,12 @@ class Experiment(ExperimentData):
 					# Cause all warnings to always be triggered.
 					warnings.simplefilter("always")
 					df = (_delta_all_variants(self.kpis.reset_index()[['entity', 'variant', mname, reference_kpi]],
-											  self.baseline_variant, 
+											  self.baseline_variant,
 											  assume_normal=assume_normal,
-											  percentiles=percentiles, 
+											  percentiles=percentiles,
 											  min_observations=min_observations,
-											  nruns=nruns, 
-											  relative=relative, 
+											  nruns=nruns,
+											  relative=relative,
 											  weighted=weighted))
 					if len(w):
 						res.metadata['warnings']['Experiment.delta'] = w[-1].message
@@ -673,7 +673,7 @@ if __name__ == '__main__':
 	metrics, metadata = generate_random_data()
 	metrics['time_since_treatment'] = metrics['treatment_start_time']
 	exp = Experiment('B', metrics, metadata, [4, 6])
-	res = exp.delta(kpi_subset=['derived'], 
+	res = exp.delta(kpi_subset=['derived'],
 			derived_kpis=[{'name':'derived','formula':'normal_same/normal_shifted'}],
 			weighted_kpis=['derived'])
 

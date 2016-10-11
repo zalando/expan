@@ -11,6 +11,8 @@ import copy
 
 import numpy as np
 import pandas as pd
+import warnings
+from time import time
 
 class ExperimentData(object):
 	# TODO: allow definition of the name of 'entity': would be nicer if the index
@@ -42,20 +44,20 @@ class ExperimentData(object):
 	def __init__(self, metrics=None, metadata={}, features='default',
 				 deepcopy=False):
 		"""
-    Want to be able to create results from just a single dataframe.
+	    Want to be able to create results from just a single dataframe.
 
-    Args:
-        metrics: data frame that contains either KPI or feature
-        metadata: the metadata dict
-        features: either 'default', which searches the metrics data frame for predefined feature names
-                  or list, which subsets the metrics data frame with the given column indices
-                  or data frame, which is feature data frame itself and metrics is either KPI or None
-                  or None
-        deepcopy: the internal data frames are, by default, shallow copies of the input
-                            dataframes: this means the actual data arrays underlying the frames are
-                            references to the input. In most use-cases, this is desired (reindexing
-                            will not reindex the original etc.) but it may have some edge-case issues.
-    """
+	    Args:
+	        metrics: data frame that contains either KPI or feature
+	        metadata: the metadata dict
+	        features: either 'default', which searches the metrics data frame for predefined feature names
+	                  or list, which subsets the metrics data frame with the given column indices
+	                  or data frame, which is feature data frame itself and metrics is either KPI or None
+	                  or None
+	        deepcopy: the internal data frames are, by default, shallow copies of the input
+	                            dataframes: this means the actual data arrays underlying the frames are
+	                            references to the input. In most use-cases, this is desired (reindexing
+	                            will not reindex the original etc.) but it may have some edge-case issues.
+	    """
 
 		self.metadata = metadata or {}
 
@@ -169,11 +171,11 @@ class ExperimentData(object):
 	@property
 	def metrics(self):
 		"""
-    Simply joins the KPIs and the features.
+	    Simply joins the KPIs and the features.
 
-    TODO: it may well be worth investigating caching this result because the
-    features and kpis will rarely change, and accessing them in this way is likely to be common.
-    """
+	    TODO: it may well be worth investigating caching this result because the
+	    features and kpis will rarely change, and accessing them in this way is likely to be common.
+	    """
 		if 'time_since_treatment' in self.kpis.index.names:
 			return self.kpis.reset_index('time_since_treatment').join(self.features).set_index('time_since_treatment',
 																							   append=True)
@@ -182,9 +184,9 @@ class ExperimentData(object):
 
 	def __getitem__(self, key):
 		"""
-    Allows indexing the ExperimentData directly as though it were a DataFrame
-    composed of KPIs and Features.
-    """
+	    Allows indexing the ExperimentData directly as though it were a DataFrame
+	    composed of KPIs and Features.
+	    """
 		return self.metrics.__getitem__(key)
 
 	# Q: is it possible to pass a whole lot of functions to
@@ -192,11 +194,98 @@ class ExperimentData(object):
 	def feature_boxplot(self, feature, kpi, **kwargs):
 		self.metrics.set_index(feature, append=True).unstack(level=['variant', feature])[kpi].boxplot(**kwargs)
 
+	def _filter_threshold(self, params, drop_thresh_column=True):
+		"""
+		Internal method that applies a threshold filter on an ExperimentData inplace.
+		:param params: Dictionary of parameters that define a threshold filter.
+		:param drop_thresh_column: Whether to remove added threshold columns (defaults to true).
+		:return: used_rule: If the rule was applied returns the applied rule.
+				 number of entities filtered out
+		"""
+		used_rule = {}
+
+		if 'metric' in params and 'value' in params: #and not ('time_interval' in params and not 'treatment_stop_time' in params):
+			# if the time interval is set calculate a linearly adjusted threshold and store it in a separate column
+			#TODO: check if column 'calc_thresh_value exists in self.kpis?
+			if 'time_interval' in params and params['time_interval'] is not None:
+				# start timestamp exists as a feature
+				# NOTE: treatment_start_time and treatment_exposure have to be epoch time in seconds
+				if 'treatment_start_time' in self.features.columns and 'treatment_stop_time' in params:
+					self.kpis = self.kpis.assign(calc_thresh_value = lambda x: (params['value'] * ((params['treatment_stop_time'] - self.features['treatment_start_time']) / params['time_interval'])), axis='rows')
+				# treatment exposure exists as a feature
+				elif 'treatment_exposure' in self.features.columns:
+					self.kpis['calc_thresh_value'] = params['value'] * self.features.treatment_exposure / params['time_interval']
+				else:
+					warnings.warn('Scaling by time not possible, using hard threshold instead!')
+					self.kpis['calc_thresh_value'] = params['value']
+			else:
+				self.kpis['calc_thresh_value'] = params['value']
+
+			if params['kind'] == 'lower':
+				if params['metric'] in self.kpis.columns:
+					is_outlier = self.kpis[params['metric']] < self.kpis.calc_thresh_value
+					self.kpis = self.kpis[~is_outlier]
+					used_rule = params
+				elif params['metric'] in self.features.columns:
+					is_outlier = self.features[params['metric']] < self.kpis.calc_thresh_value
+					self.features = self.features[~is_outlier]
+					used_rule = params
+				else:
+					warnings.warn("Column key not found!")
+			elif params['kind'] == 'upper':
+				if params['metric'] in self.kpis.columns:
+					is_outlier = self.kpis[params['metric']] > self.kpis.calc_thresh_value
+					self.kpis = self.kpis[~is_outlier]
+					used_rule = params
+				elif params['metric'] in self.features.columns:
+					is_outlier = self.features[params['metric']] > self.kpis.calc_thresh_value
+					self.features = self.features[~is_outlier]
+					used_rule = params
+				else:
+					warnings.warn("Column key not found!")
+			else:
+				warnings.warn("Threshold kind not defined!")
+
+			# drop calculated threshold
+			if drop_thresh_column:
+				if 'calc_thresh_value' in self.kpis.columns:
+					self.kpis.drop(['calc_thresh_value'], axis=1, inplace=True)
+				if 'axis' in self.kpis.columns:
+					self.kpis.drop(['axis'], axis=1, inplace=True)
+		else:
+			warnings.warn("Threshold filter parameters not set properly!")
+
+		return used_rule, sum(is_outlier)
+
+
+	def filter_outliers(self, rules, drop_thresh=True):
+		"""
+		Method that applies outlier filtering rules on an ExperimentData object inplace.
+		:param rules: List of dictionaries that define filtering rules.
+		:param drop_thresh: Whether to remove added threshold columns (defaults to true).
+		:return:
+		NOTE: the outcome of the filtering depends on the order of rules being
+			  processed, e.g. when the rule contains a percentile instead of an
+			  absolute threshold.
+		"""
+		used_rules = []
+		n_filtered = []
+
+		for rule in rules:
+			if rule['type'] == 'threshold':
+				urule, n = self._filter_threshold(params=rule, drop_thresh_column=drop_thresh)
+				used_rules.append(urule)
+				n_filtered.append(n)
+
+		# store rules in the metadata
+		self.metadata['outlier_filter'] = used_rules
+		self.metadata['n_filtered'] = n_filtered
+
 
 def detect_features(metrics):
 	"""
-  Automatically detect which of the metrics are features.
-  """
+	Automatically detect which of the metrics are features.
+	"""
 	from warnings import warn
 
 	if 'time_since_treatment' in metrics:
@@ -220,4 +309,13 @@ if __name__ == '__main__':
 
 	np.random.seed(0)
 	metrics, meta = generate_random_data()
-	D = ExperimentData(metrics, meta, 'default')
+	metrics['treatment_exposure'] = metrics['treatment_start_time']
+	D = ExperimentData(metrics[['entity','variant','normal_shifted','treatment_exposure']], meta, features=[3])
+	D.filter_outliers(rules=[{"metric":"normal_shifted",
+							  "type":"threshold",
+							  "value": -1.0,
+							  "kind": "lower",
+							  "time_interval": 30758400,
+							  #"treatment_stop_time": 30758500
+		                     }
+							])
