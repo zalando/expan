@@ -21,6 +21,9 @@ ExpAn: Experiment Analysis
         :target: https://pypi.python.org/pypi/expan/
         :alt: License
 
+Introduction
+============
+
 A/B tests (a.k.a. Randomized Controlled Trials or Experiments) have been widely
 applied in different industries to optimize business processes and user
 experience. ExpAn (**Exp**\ eriment **An**\ alysis) is a Python library
