@@ -4,110 +4,118 @@
 Contributing
 ============
 
-Contributions are welcome, and they are greatly appreciated! Every
-little bit helps, and credit will always be given.
+Style guide
+===========
 
-You can contribute in many ways:
+We follow `PEP8 standards <https://www.python.org/dev/peps/pep-0008>`__
+with the following exceptions:
 
-Types of Contributions
-----------------------
+- Use *tabs instead of spaces* - this allows all individuals to have visual depth of indentation they prefer, without changing the source code at all, and it is simply smaller
 
-Report Bugs
-~~~~~~~~~~~
+Testing
+=======
 
-Report bugs at https://github.com/zalando/expan/issues.
+Easiest way to run tests is by running the command ``tox`` from the terminal. The default Python environments for testing with are py27 and py34, but you can specify your own by running e.g. ``tox -e py35``.
 
-If you are reporting a bug, please include:
+Branching / Release
+===================
 
-* Your operating system name and version.
-* Any details about your local setup that might be helpful in troubleshooting.
-* Detailed steps to reproduce the bug.
+We currently use the gitflow workflow. Feature branches are created from
+and merged back to the ``dev`` branch, and the ``master`` branch stores
+snapshots/releases of the ``dev`` branch.
 
-Fix Bugs
-~~~~~~~~
+See also the much simpler github flow
+`here <http://scottchacon.com/2011/08/31/github-flow.html>`__
 
-Look through the GitHub issues for bugs. Anything tagged with "bug"
-is open to whoever wants to implement it.
+Versioning
+==========
 
-Implement Features
-~~~~~~~~~~~~~~~~~~
+**For the sake of reproducibility, always be sure to work with a release
+when doing the analysis!**
 
-Look through the GitHub issues for features. Anything tagged with "feature"
-is open to whoever wants to implement it.
+We use semantic versioning (http://semver.org), and the current version of
+ExpAn is: v0.4.0.
 
-Write Documentation
-~~~~~~~~~~~~~~~~~~~
+The version is maintained in ``setup.cfg``, and propagated from there to various files
+by the ``bumpversion`` program. The most important propagation destination is
+in ``version.py`` where it is held in the string ``__version__`` with
+the form:
 
-ExpAn could always use more documentation, whether as part of the
-official ExpAn docs, in docstrings, or even on the web in blog posts,
-articles, and such.
+::
 
-Submit Feedback
-~~~~~~~~~~~~~~~
+    '{major}.{minor}.{patch}'
 
-The best way to send feedback is to file an issue at https://github.com/zalando/expan/issues.
+The ``__version__`` string and a ``version()`` function is imported by
+``core.__init__`` and so is accessible to imported functions in expan.
 
-If you are proposing a feature:
+The ``version(format_str)`` function generates version strings of any
+form. It can use git's commit count and revision number to generate a
+long version string which may be useful for pip versioning? Examples:
+NB: caution using this... it won't work if not in the original git
+repository.
 
-* Explain in detail how it would work.
-* Keep the scope as narrow as possible, to make it easier to implement.
-* Remember that this is a volunteer-driven project, and that contributions
-  are welcome :)
+::
 
-Get Started!
-------------
+    >>> import core.binning
+    >>> core.version()
+    'v0.4.0'
+    >>> core.version('{major}.{minor}..{commits}')
+    '0.0..176'
+    >>> core.version('{commit}')
+    'a24730a42a4b5ae01bbdb05f6556dedd453c1767'
 
-Ready to contribute? Here's how to set up `expan` for local development.
+See: `StackExchange
+151558 <http://programmers.stackexchange.com/a/151558>`__
 
-1. Fork the `expan` repo on GitHub.
-2. Clone your fork locally::
+Bumping Version
+===============
 
-    $ git clone git@github.com:zalando/expan.git
+Can use bumpversion to maintain the ``__version__`` in ``version.py``:
 
-3. Install your local copy into a virtualenv. Assuming you have virtualenvwrapper installed, this is how you set up your fork for local development::
+::
 
-    $ mkvirtualenv expan
-    $ cd expan/
-    $ python setup.py develop
+    $ bumpversion patch
 
-4. Create a branch for local development::
+or
 
-    $ git checkout -b name-of-your-bugfix-or-feature
+::
 
-   Now you can make your changes locally.
+    $ bumpversion minor
 
-5. When you're done making changes, check that your changes pass flake8 and the tests, including testing other Python versions with tox::
+This will update the version number, create a new tag in git, and commit
+the changes with a standard commit message.
 
-    $ flake8 expan tests
-    $ python setup.py test
-    $ tox
+When you have done this, you must push the commit and new tag to the
+repository with:
 
-   To get flake8 and tox, just pip install them into your virtualenv.
+::
 
-6. Commit your changes and push your branch to GitHub::
+    $ git push --tags
 
-    $ git add .
-    $ git commit -m "Your detailed description of your changes."
-    $ git push origin name-of-your-bugfix-or-feature
+Travis CI and PyPI deployment
+=============================
 
-7. Submit a pull request through the GitHub website.
+We use Travis CI for testing builds and deploying our PyPI package.
 
-Pull Request Guidelines
------------------------
+A **build** and **test** is triggered when a commit is pushed to either
 
-Before you submit a pull request, check that it meets these guidelines:
+- **dev**,
+- **master**
+- or a **pull request branch to dev or master**.
 
-1. The pull request should include tests.
-2. If the pull request adds functionality, the docs should be updated. Put
-   your new functionality into a function with a docstring, and add the
-   feature to the list in README.rst.
-3. The pull request should work for Python 2.7, 3.4 and 3.5. Check
-   https://travis-ci.org/zalando/expan/pull_requests
-   and make sure that the tests pass for all supported Python versions.
+If you want to **deploy to PyPI**, then follow these steps:
 
-Tips
-----
+- assuming you have a dev branch that is up to date, create a pull request from dev to master (a travis job will be started for the pull request)
+- once the pull request is approved, merge it (another travis job will be started because a push to master happened)
+- checkout master
+- push **tags** to **master** (a third travis job will be started, but this time it will also push to PyPI because tags were pushed)
 
-To run a subset of tests::
+If you wish to skip triggering a CI task (for example when you change documentation), please include ``[ci skip]`` in your commit message.
 
-    $ py.test tests/tests_core/test_results.py
+TODOs
+=====
+
+- parallelization, eg. for the bootstrapping code
+- Bayesian updating/early stopping
+- multiple comparison correction, definitely relevant for delta and SGA, have to think about how to correct for time dependency in the trend analysis
+- implement from\_json and to\_json methods in the Binning class, in order to convert the Python object to a json format for persisting in the Results metadata and reloading from a script
