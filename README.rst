@@ -40,7 +40,7 @@ Major statistical functionalities include:
 - **subgroup analysis**
 - **trend**
 
-Further documentation
+Documentation
 =====================
 
 `ExpAn Description <https://github.com/zalando/expan/blob/master/ExpAn-Description.mediawiki>`__ - details about the concept of the library and data structures.
@@ -51,16 +51,6 @@ Further documentation
 
     sh serve_intro_slides
 
-Alternatives
-============
-
-There may be alternative libraries providing similar functionality, and these
-should be collected here. Very incomplete list so far...
-
- - **abba** (https://github.com/thumbtack/abba)
-
-
-Not an alternative, the Python part of this is simply a collection of some functions to handle binomial distributions.
 
 License
 =======

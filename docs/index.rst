@@ -15,6 +15,7 @@ Contents:
    installation
    usage
    contributing
+   alternatives
    authors
    history
 
