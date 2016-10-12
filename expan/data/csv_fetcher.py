@@ -1,10 +1,4 @@
-"""
-CSV fetcher
-Expects as input a folder containing the following files:
- - one .csv or .csv.gz with 'metrics' in the filename
- - one .txt containing 'metadata' in the filename
-
-Opens the files and uses them to create an ExperimentData object which it then returns.
+"""CSV fetcher module.
 """
 
 from os import listdir
@@ -15,6 +9,20 @@ from expan.core.experimentdata import *
 
 
 def get_data(folder_path):
+	"""
+	Expects as input a folder containing the following files:
+ 	- one .csv or .csv.gz with 'metrics' in the filename
+ 	- one .txt containing 'metadata' in the filename
+
+	Opens the files and uses them to create an ExperimentData object which it then returns.
+
+	Args:
+	    folder_path:
+
+	Returns:
+	    ExperimentData: ExperimentData object with loaded csv data
+
+	"""
 	files = [f for f in listdir(folder_path) if isfile(join(folder_path, f))]
 
 	try:

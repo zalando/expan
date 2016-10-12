@@ -1,4 +1,7 @@
-# TODO: question, shouldnt the module level functions be private (_*), because
+"""Experiment module.
+"""
+
+# TODO: question, shouldn't the module level functions be private (_*), because
 # the proper interface is through the Experiment instance functions, surely?
 
 # import numpy as np
@@ -334,6 +337,12 @@ class Experiment(ExperimentData):
 
 	@property
 	def baseline_variant(self):
+		"""
+		Returns the baseline variant.
+
+		Returns:
+			string: baseline variant
+		"""
 		return self.metadata['baseline_variant']
 
 	def __str__(self):

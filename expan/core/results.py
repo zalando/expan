@@ -24,11 +24,12 @@ class Results(object):
 	for some reason. https://github.com/pydata/pandas/pull/4271
 	For now, will leave as a 'has-a' class.
 
-	TODO: can we remove the 'value' level from the columns, so that the columns
-	of the dataframe are simply the names of the variants? This will make the
-	columns a normal index rather than a multi-index. Currently, always a multi-
-	index with second level only containing a single value 'value'
+	Todo:
+		Can we remove the 'value' level from the columns, so that the columns of the dataframe are simply the names of the variants?
+		This will make the columns a normal index rather than a multi-index. Currently, always a multi-index with second level only containing a single value 'value'.
 	"""
+
+	#TODO: maybe move these two to the __init__?
 	mandatory_index_levels = [
 		'metric',
 		'subgroup_metric',
@@ -40,6 +41,11 @@ class Results(object):
 	def __init__(self, df, metadata={}, dbg=None):
 		"""
 	    Want to be able to create results from just a single dataframe.
+
+	    Args:
+	        df (pandas.DataFrame): input dataframe
+	        metadata (dict): input metadata
+	        dbg:
 	    """
 		self.df = df
 		self.metadata = metadata
@@ -71,6 +77,16 @@ class Results(object):
 	    Appends the results of a delta.
 
 	    Modifies (or creates) the results data (df).
+
+	    Args:
+	        metric:
+	        variant:
+	        mu:
+	        pctiles:
+	        samplesize_variant:
+	        samplesize_baseline:
+	        subgroup_metric:
+	        subgroup:
 	    """
 		df = delta_to_dataframe(metric, variant, mu, pctiles,
 								samplesize_variant,
@@ -117,6 +133,9 @@ class Results(object):
 		return df
 
 	def calculate_prob_uplift_over_zero(self):
+		"""
+
+		"""
 		# check if the subgroup index is NaN
 		# NB: this will NOT work if we store delta and SGA results in the same object
 		# if the subgroup index contains only NaNs
@@ -133,18 +152,64 @@ class Results(object):
 		#return df
 
 	def delta_means(self, metric=None, subgroup_metric='-'):
+		"""
+
+		Args:
+		    metric:
+		    subgroup_metric:
+
+		Returns:
+
+		"""
 		return self.statistic('delta', 'variant_mean', metric, subgroup_metric)
 
 	def sga_means(self, metric=None, subgroup_metric='-'):
+		"""
+
+		Args:
+		    metric:
+		    subgroup_metric:
+
+		Returns:
+
+		"""
 		return self.statistic('sga', 'variant_mean', metric, subgroup_metric)
 
 	def uplifts(self, metric=None, subgroup_metric='-'):
+		"""
+
+		Args:
+		    metric:
+		    subgroup_metric:
+
+		Returns:
+
+		"""
 		return self.statistic('delta', 'uplift', metric, subgroup_metric)
 
 	def sga_uplifts(self, metric=None, subgroup_metric='-'):
+		"""
+
+		Args:
+		    metric:
+		    subgroup_metric:
+
+		Returns:
+
+		"""
 		return self.statistic('sga', 'uplift', metric, subgroup_metric)
 
 	def sample_sizes(self, analysis_type='delta', metric=None, subgroup_metric='-'):
+		"""
+
+		Args:
+		    analysis_type:
+		    metric:
+		    subgroup_metric:
+
+		Returns:
+
+		"""
 		return self.statistic(analysis_type, 'sample_size', metric, subgroup_metric)
 
 	def statistic(self, analysis_type, statistic=None, metric=None,
@@ -152,7 +217,6 @@ class Results(object):
 				  time_since_treatment='-',
 				  include_pctiles=True):
 		"""
-
 	    This is just a basic 'formatter' to allow easy access to results without
 	    knowing the ordering of the index, etc. and to have sensible defaults.
 	    All of this can be accomplished with fancy indexing on the dataframe
@@ -216,7 +280,15 @@ class Results(object):
 		return mean_results
 
 	def bounds(self, metric=None, subgroup_metric='-'):
+		"""
 
+		Args:
+		    metric:
+		    subgroup_metric:
+
+		Returns:
+
+		"""
 		if False:
 			rows = (slice(None), '-', slice(None), ['uplift', 'uplift_pctile'])
 			cols = (slice(None), 'value')
@@ -251,7 +323,17 @@ class Results(object):
 													  repr(self.df.unstack('pctile')))
 
 	def to_csv(self, fpath):
-		"This will lose all metadata"
+		"""
+
+		Args:
+		    fpath:
+
+		Returns:
+
+		Note:
+		    This will lose all metadata.
+		"""
+
 		res = deepcopy(self.df)
 		res.columns = res.columns.droplevel(0)
 		res = res.reset_index()
@@ -264,6 +346,11 @@ class Results(object):
 	    MetaData is stored as attributes on a Group called 'metadata'. This group
 	    doesn't include any datasets, but was used to avoid interfering with the
 	    attributes that pandas stores on the 'data' Group.
+
+		Args:
+		    fpath:
+
+		Returns:
 
 	    """
 		import h5py
@@ -339,6 +426,13 @@ def prob_uplift_over_zero_single_metric(result_df, baseline_variant):
 def from_hdf(fpath, dbg=None):
 	"""
 	Restores a Results object from HDF5 as created by the to_hdf method.
+
+	Args:
+	    fpath:
+	    dbg:
+
+	Returns:
+
 	"""
 	if dbg is None:
 		dbg = Dbg()
@@ -366,7 +460,21 @@ def from_hdf(fpath, dbg=None):
 def delta_to_dataframe(metric, variant, mu, pctiles, samplesize_variant, samplesize_baseline,
 					   subgroup_metric='-',
 					   subgroup=None):
-	"""Defines the Results data frame structure."""
+	"""Defines the Results data frame structure.
+
+	Args:
+	    metric:
+	    variant:
+	    mu:
+	    pctiles:
+	    samplesize_variant:
+	    samplesize_baseline:
+	    subgroup_metric:
+	    subgroup:
+
+	Returns:
+
+	"""
 
 	df = pd.DataFrame({
 		'metric': metric,
@@ -399,7 +507,22 @@ def delta_to_dataframe_all_variants(metric, mu, pctiles, samplesize_variant,
 									mu_baseline,
 									subgroup_metric='-',
 									subgroup=None):
-	"""Defines the Results data frame structure."""
+	"""Defines the Results data frame structure.
+
+	Args:
+	    metric:
+	    mu:
+	    pctiles:
+	    samplesize_variant:
+	    samplesize_baseline:
+	    mu_variant:
+	    mu_baseline:
+	    subgroup_metric:
+	    subgroup:
+
+	Returns:
+
+	"""
 
 	df = pd.DataFrame({
 		'metric': metric,
@@ -430,7 +553,19 @@ def feature_check_to_dataframe(metric,
 							   pctiles=None,
 							   pval=None,
 							   mu_variant=None):
-	"""Defines the Results data frame structure."""
+	"""Defines the Results data frame structure.
+
+	Args:
+	    metric:
+	    samplesize_variant:
+	    mu:
+	    pctiles:
+	    pval:
+	    mu_variant:
+
+	Returns:
+
+	"""
 
 	# numerical feature
 	if pval is None:
@@ -467,7 +602,7 @@ def feature_check_to_dataframe(metric,
 
 if __name__ == '__main__':
 	#pass
-	
+
 	np.random.seed(0)
 	from tests.tests_core.test_data import generate_random_data
 	from expan.core.experiment import Experiment

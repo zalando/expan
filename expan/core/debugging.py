@@ -1,4 +1,4 @@
-'''
+"""
 This started as a very simple central place to provide a really easy interface
 to output (standardised across projects) so I could always just do dbg(1, 'blah').
 
@@ -15,12 +15,14 @@ A few things it offers over just using logging:
 
 Created on Aug 11, 2014
 
-TODO: need to figure out how to tell the logging class to skip this module's functions
-in the stack, for printing of module and function name etc.. Could potentially
-fiddle with the stack before calling logging, but that's very dodgy.
+Todo:
+	Need to figure out how to tell the logging class to skip this module's functions
+	in the stack, for printing of module and function name etc.. Could potentially
+	fiddle with the stack before calling logging, but that's very dodgy.
 
 @author: rmuil
-'''
+"""
+
 import inspect
 import logging
 import os
@@ -36,15 +38,15 @@ def _wherefrom(skip_stack_lvls=0):
 	"""
 	Returns the name of the function from which this was called.
 
-	NB: from https://docs.python.org/2/library/inspect.html:
-	"Keeping references to frame objects, as found in the first element of the
-	frame records these functions return, can cause your program to create
-	reference cycles..."
+	Note:
+	    from https://docs.python.org/2/library/inspect.html:
+	    "Keeping references to frame objects, as found in the first element of the frame records these functions return, can cause your program to create reference cycles..."
 
-	In the stack, pos 0 is this function, 1 is direct caller of this function
-	and 2 is the caller of the caller, which would usually be the interesting one.
+		In the stack, pos 0 is this function, 1 is direct caller of this function
+		and 2 is the caller of the caller, which would usually be the interesting one.
 
-	NB: this seems to throw an IndexError at the inspect.stack() line sometimes. HAven't traced the bug yet.
+	Note:
+	    This seems to throw an IndexError at the inspect.stack() line sometimes. Haven't traced the bug yet.
 	"""
 	stack_lvl = 1 + skip_stack_lvls
 	caller_name = caller_file = None
@@ -79,11 +81,16 @@ class Dbg():
 	def out(self, lvl, msg,
 			skip_stack_lvls=0):
 		"""
-		This isn't very well implemented for important messages...
-		we should move to relying much more on the Logging class for dispatching
-		and filtering logs.
+		Note:
+		    This isn't very well implemented for important messages...
+		    We should move to relying much more on the Logging class for dispatching and filtering logs.
 
-		Treat this as just a convenience.
+		    Treat this as just a convenience.
+
+		Args:
+		    lvl:
+		    msg:
+		    skip_stack_lvls:
 		"""
 		caller_name, caller_file, caller_lineno = _wherefrom(skip_stack_lvls + 1)
 		dlvl = self._dbg_lvl
@@ -103,11 +110,26 @@ class Dbg():
 					self.logger.debug('D%d|%s,%d|%s: %s' % (lvl, caller_file, caller_lineno, caller_name, msg))
 
 	def set_lvl(self, new_dbg_lvl):
+		"""
+		Sets new debug level.
+
+		Args:
+		    new_dbg_lvl:
+		"""
 		self._dbg_lvl = new_dbg_lvl
 
 	def get_lvl(self):
+		"""
+		Returns debug level.
+
+		Returns:
+		    debug level
+		"""
 		return self._dbg_lvl
 
 	def reset(self):
+		"""
+		Resets debug level and call count.
+		"""
 		self._dbg_lvl = default_dbg_lvl
 		self._call_count = {}

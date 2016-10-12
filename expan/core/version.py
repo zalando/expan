@@ -8,9 +8,10 @@ def version_numbers():
 
 def git_commit_count():
 	"""
-  Returns the output of `git rev-list --count HEAD` as an int
+  	Returns the output of `git rev-list --count HEAD` as an int.
 
-  http://programmers.stackexchange.com/a/151558
+  	Note:
+  	    http://programmers.stackexchange.com/a/151558
   """
 	print()
 	'dd'
@@ -26,9 +27,10 @@ def git_commit_count():
 
 def git_latest_commit():
 	""""
-  Returns output of `git rev-parse HEAD`
+  	Returns output of `git rev-parse HEAD`.
 
-  http://programmers.stackexchange.com/a/151558
+	Note:
+	    http://programmers.stackexchange.com/a/151558
   """
 	print()
 	'ee'
@@ -41,6 +43,15 @@ def git_latest_commit():
 
 
 def version(format_str='{short}'):
+	"""
+	Returns current version number in specified format.
+
+	Args:
+	    format_str (str):
+
+	Returns:
+
+	"""
 	major, minor, patch = version_numbers()
 
 	format_dict = {
