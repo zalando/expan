@@ -45,6 +45,7 @@ extensions = [
 	# 'sphinx.ext.viewcode',
 	'sphinx.ext.napoleon',
 	'sphinx.ext.todo',
+	'sphinx.ext.imgmath',
 	# 'sphinx.ext.linkcode'
 	# 'sphinx.ext.coverage'
 	# 'sphinx.ext.autosummary'
@@ -205,6 +206,9 @@ todo_include_todos = True
 
 # Whether to show the class or the __init__ docstring (or both).
 autoclass_content = 'both'
+
+# imgmath image format.
+imgmath_image_format = 'png'
 
 # -- Options for LaTeX output ------------------------------------------
 

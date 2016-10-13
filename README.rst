@@ -41,7 +41,7 @@ Major statistical functionalities include:
 - **trend**
 
 Documentation
-=====================
+=============
 
 `ExpAn Description <https://github.com/zalando/expan/blob/master/ExpAn-Description.mediawiki>`__ - details about the concept of the library and data structures.
 

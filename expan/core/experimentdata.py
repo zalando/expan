@@ -302,8 +302,49 @@ class ExperimentData(object):
 			rules (dict list): list of dictionaries that define filtering rules
 			drop_thresh (boolean): whether to remove added threshold columns (defaults to true)
 
+		Examples:
+			First example shows a 'rules' example usage for the 'threshold' filter with two different kinds, 'upper' and 'lower' - anything lower than -10.0 is filtered by the first rule and anything higher than 10.0 is filtered by the second one.
+
+			>>>
+			[
+				{
+					"metric":"normal_shifted_by_feature",
+					"type":"threshold",
+					"value": -10.0,
+					"kind": "lower"
+				},
+				{
+					"metric": "normal_shifted_by_feature",
+					"type": "threshold",
+					"value": 10.0,
+					"kind": "upper"
+				}
+			]
+
+			Second example shows the usage of additional 'time_interval' and 'treatment_stop_time' parameters (it implies that a 'treatment_start_time' column exists).
+
+			Given these parameters a per entity threshold is calculated by the following equation:
+
+			.. math::
+				threshold = value * \\frac{treatment\_stop\_time - treatment\_start\_time}{time\_interval}
+
+			>>>
+			[
+				{
+					"metric": "normal_shifted_by_feature",
+					"type": "threshold",
+					"value": 1.0,
+					"kind": "lower",
+					"time_interval": 30758400,
+					"treatment_stop_time": 30758500
+				}
+			]
+
 		Note:
 		    The outcome of the filtering depends on the order of rules being processed, e.g. when the rule contains a percentile instead of an absolute threshold.
+
+		Todo:
+			Implement other types of filtering, eg. percentile_XYZ_distribution.
 		"""
 		used_rules = []
 		n_filtered = []
