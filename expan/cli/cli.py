@@ -41,7 +41,7 @@ def run_analysis(features_file, kpis_file, metadata_file):
 			metadata_file: metadata file path
 
 		Returns:
-		delta analysis results and subgroup analysis results as a tuple
+			delta analysis results and subgroup analysis results as a tuple
 	"""
 	kpis = pd.read_csv(kpis_file)
 	if features_file:
