@@ -22,6 +22,7 @@ class UsageError(Exception):
 def parse_metadata(filename):
 	"""
 		Parse metadata file
+
 		Args:
 		filename - metadata file path
 	"""
@@ -74,6 +75,7 @@ def run_expan(xxx_todo_changeme):
 def print_results(delta, sga, output_file):
 	"""
 		Print analyses results either to stdout or output file, if specified
+
 		Args:
 			delta - delta analysis results
 			sga - subgroup analysis results
