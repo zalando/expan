@@ -21,12 +21,9 @@ class UsageError(Exception):
 
 def parse_metadata(filename):
 	"""
-
-	Args:
-	    filename:
-
-	Returns:
-
+		Parse metadata file
+		Args:
+		filename - metadata file path
 	"""
 	metadata_file = open(filename)
 	metadata_s = metadata_file.read()
@@ -35,14 +32,15 @@ def parse_metadata(filename):
 
 def run_analysis(features_file, kpis_file, metadata_file):
 	"""
+		Load kpis and features from file and pass them to expan to perform delta and subgroup analyses
 
-	Args:
-	    features_file:
-	    kpis_file:
-	    metadata_file:
+		Args:
+			features_file: features file path
+			kpis_file: kpis file path
+			metadata_file: metadata file path
 
-	Returns:
-
+		Returns:
+		delta analysis results and subgroup analysis results as a tuple
 	"""
 	kpis = pd.read_csv(kpis_file)
 	if features_file:
@@ -65,12 +63,8 @@ def run_analysis(features_file, kpis_file, metadata_file):
 
 def run_expan(xxx_todo_changeme):
 	"""
-
-	Args:
-	    xxx_todo_changeme:
-
-	Returns:
-
+		Triggers expan to perform delta and subgroup analyses
+		Print response either to stdout or output file, if specified
 	"""
 	(features_file, kpis_file, metadata_file, output_file) = xxx_todo_changeme
 	(delta_result, sga_result) = run_analysis(features_file, kpis_file, metadata_file)
@@ -79,14 +73,11 @@ def run_expan(xxx_todo_changeme):
 
 def print_results(delta, sga, output_file):
 	"""
-
-	Args:
-	    delta:
-	    sga:
-	    output_file:
-
-	Returns:
-
+		Print analyses results either to stdout or output file, if specified
+		Args:
+			delta - delta analysis results
+			sga - subgroup analysis results
+			output_file - output file path
 	"""
 	delta_s = pickle.dumps(delta)
 	sga_s = pickle.dumps(sga)
@@ -101,12 +92,7 @@ def print_results(delta, sga, output_file):
 
 def check_input_data(args):
 	"""
-
-	Args:
-	    args:
-
-	Returns:
-
+		Check if kpi and metadata files are provided in input arguments
 	"""
 	print(args)
 	if not args.kpis:
@@ -117,12 +103,7 @@ def check_input_data(args):
 
 def prepare_cli_parameters(args):
 	"""
-
-	Args:
-	    args:
-
-	Returns:
-
+		Parse input parameters
 	"""
 	check_input_data(args)
 	features_file = args.features
