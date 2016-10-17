@@ -45,7 +45,7 @@ extensions = [
 	# 'sphinx.ext.viewcode',
 	'sphinx.ext.napoleon',
 	'sphinx.ext.todo',
-	'sphinx.ext.imgmath',
+	'sphinx.ext.pngmath',
 	# 'sphinx.ext.linkcode'
 	# 'sphinx.ext.coverage'
 	# 'sphinx.ext.autosummary'
@@ -208,7 +208,7 @@ todo_include_todos = True
 autoclass_content = 'both'
 
 # imgmath image format.
-imgmath_image_format = 'png'
+# imgmath_image_format = 'png'
 
 # -- Options for LaTeX output ------------------------------------------
 
