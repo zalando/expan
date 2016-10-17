@@ -11,7 +11,6 @@ from scipy.stats import norm
 # from tests.tests_core.test_data import generate_random_data
 
 from expan.core.debugging import Dbg
-from pdb import set_trace
 
 class Results(object):
 	"""
