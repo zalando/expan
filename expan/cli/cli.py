@@ -22,6 +22,7 @@ class UsageError(Exception):
 def parse_metadata(filename):
 	"""
 		Parse metadata file
+
 		Args:
 		filename - metadata file path
 	"""
@@ -40,7 +41,7 @@ def run_analysis(features_file, kpis_file, metadata_file):
 			metadata_file: metadata file path
 
 		Returns:
-		delta analysis results and subgroup analysis results as a tuple
+			delta analysis results and subgroup analysis results as a tuple
 	"""
 	kpis = pd.read_csv(kpis_file)
 	if features_file:
@@ -74,6 +75,7 @@ def run_expan(xxx_todo_changeme):
 def print_results(delta, sga, output_file):
 	"""
 		Print analyses results either to stdout or output file, if specified
+
 		Args:
 			delta - delta analysis results
 			sga - subgroup analysis results

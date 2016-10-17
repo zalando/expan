@@ -5,7 +5,7 @@ Credits
 Development Lead
 ----------------
 
-* Octopus McSquid <octopus@zalando.de>
+* Octopus McSquid <team-octopus@zalando.de>
 
 Contributors
 ------------

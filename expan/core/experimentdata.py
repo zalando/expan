@@ -4,7 +4,6 @@ such that we can have multiple fetcher modules that only need import this
 module, and none of our analysis modules need know anything about the fetchers.
 
 In other words, this is the interface between data fetching and data analysis.
-
 """
 
 import copy
@@ -15,9 +14,19 @@ import warnings
 from time import time
 
 class ExperimentData(object):
+	"""Main class in ExperimentData module.
+
+	Attributes:
+	    mandatory_metadata: metadata that needs to be provided (default: {'experiment', 'source'})
+	    primary_indices: primary indices on which the analyses will be performed (default: ['entity', 'variant']
+	    optional_kpi_indices: optional indices for analysis (default: ['time_since_treatment']
+	    known_feature_metrics: metric  names that are automatically considered as features
+	"""
+
 	# TODO: allow definition of the name of 'entity': would be nicer if the index
 	# itself maintained the name 'chash' or 'order_number' etc.
 	# TODO: explain the mandatory_metadata in the exception raised
+	# TODO: maybe move these to the __init__?
 	mandatory_metadata = {'experiment', 'source'}
 	primary_indices = ['entity', 'variant']
 	optional_kpi_indices = ['time_since_treatment']
@@ -132,12 +141,22 @@ class ExperimentData(object):
 
 	@property
 	def feature_names(self):
-		"""List of features"""
+		"""
+		Returns list of features.
+
+		Returns:
+		    set: list of feature names
+		"""
 		return set([] if self.features is None else self.features.columns)
 
 	@property
 	def kpi_names(self):
-		"""List of KPIs"""
+		"""
+		Returns list of KPIs.
+
+		Returns:
+		    set: list of KPI names
+		"""
 		return set([] if self.kpis is None else self.kpis.columns)
 
 	# @property
@@ -147,7 +166,12 @@ class ExperimentData(object):
 
 	@property
 	def metric_names(self):
-		"""List of metrics (KPIs and features)"""
+		"""
+		Returns list of metrics (KPIs and features).
+
+		Returns:
+		    set: list of metric names
+		"""
 		return self.feature_names.union(self.kpi_names)
 
 	def __str__(self):
@@ -173,8 +197,8 @@ class ExperimentData(object):
 		"""
 	    Simply joins the KPIs and the features.
 
-	    TODO: it may well be worth investigating caching this result because the
-	    features and kpis will rarely change, and accessing them in this way is likely to be common.
+	    Todo:
+	    	It may well be worth investigating caching this result because the features and kpis will rarely change, and accessing them in this way is likely to be common.
 	    """
 		if 'time_since_treatment' in self.kpis.index.names:
 			return self.kpis.reset_index('time_since_treatment').join(self.features).set_index('time_since_treatment',
@@ -192,15 +216,27 @@ class ExperimentData(object):
 	# Q: is it possible to pass a whole lot of functions to
 	# a member variable without specifying each?
 	def feature_boxplot(self, feature, kpi, **kwargs):
+		"""
+		Plot feature boxplot.
+
+		Args:
+		    feature (list): list of features
+		    kpi (list): list of KPIs
+		    **kwargs: additional boxplot arguments (see pandas.DataFrame.boxplot())
+		"""
 		self.metrics.set_index(feature, append=True).unstack(level=['variant', feature])[kpi].boxplot(**kwargs)
 
 	def _filter_threshold(self, params, drop_thresh_column=True):
 		"""
 		Internal method that applies a threshold filter on an ExperimentData inplace.
-		:param params: Dictionary of parameters that define a threshold filter.
-		:param drop_thresh_column: Whether to remove added threshold columns (defaults to true).
-		:return: used_rule: If the rule was applied returns the applied rule.
-				 number of entities filtered out
+
+		Args:
+			params (dict): dictionary of parameters that define a threshold filter
+			drop_thresh_column (boolean): whether to remove added threshold columns (defaults to true)
+
+		Returns:
+			dict: if the rule was applied returns the applied rule
+			int: number of entities filtered out
 		"""
 		used_rule = {}
 
@@ -261,12 +297,54 @@ class ExperimentData(object):
 	def filter_outliers(self, rules, drop_thresh=True):
 		"""
 		Method that applies outlier filtering rules on an ExperimentData object inplace.
-		:param rules: List of dictionaries that define filtering rules.
-		:param drop_thresh: Whether to remove added threshold columns (defaults to true).
-		:return:
-		NOTE: the outcome of the filtering depends on the order of rules being
-			  processed, e.g. when the rule contains a percentile instead of an
-			  absolute threshold.
+
+		Args:
+			rules (dict list): list of dictionaries that define filtering rules
+			drop_thresh (boolean): whether to remove added threshold columns (defaults to true)
+
+		Examples:
+			First example shows a 'rules' example usage for the 'threshold' filter with two different kinds, 'upper' and 'lower' - anything lower than -10.0 is filtered by the first rule and anything higher than 10.0 is filtered by the second one.
+
+			>>>
+			[
+				{
+					"metric":"normal_shifted_by_feature",
+					"type":"threshold",
+					"value": -10.0,
+					"kind": "lower"
+				},
+				{
+					"metric": "normal_shifted_by_feature",
+					"type": "threshold",
+					"value": 10.0,
+					"kind": "upper"
+				}
+			]
+
+			Second example shows the usage of additional 'time_interval' and 'treatment_stop_time' parameters (it implies that a 'treatment_start_time' column exists).
+
+			Given these parameters a per entity threshold is calculated by the following equation:
+
+			.. math::
+				threshold = value * \\frac{treatment\_stop\_time - treatment\_start\_time}{time\_interval}
+
+			>>>
+			[
+				{
+					"metric": "normal_shifted_by_feature",
+					"type": "threshold",
+					"value": 1.0,
+					"kind": "lower",
+					"time_interval": 30758400,
+					"treatment_stop_time": 30758500
+				}
+			]
+
+		Note:
+		    The outcome of the filtering depends on the order of rules being processed, e.g. when the rule contains a percentile instead of an absolute threshold.
+
+		Todo:
+			Implement other types of filtering, eg. percentile_XYZ_distribution.
 		"""
 		used_rules = []
 		n_filtered = []
@@ -285,6 +363,12 @@ class ExperimentData(object):
 def detect_features(metrics):
 	"""
 	Automatically detect which of the metrics are features.
+
+	Args:
+	    metrics (pandas.DataFrame): ExperimentData metrics
+
+	Returns:
+	    dict: dictionary of features present in the metrics
 	"""
 	from warnings import warn
 

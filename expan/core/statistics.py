@@ -38,22 +38,23 @@ def delta(x, y, assume_normal=True, percentiles=[2.5, 97.5],
 			absolute values. In	this case, the interval is mean-ret_val[0] to
 			mean+ret_val[1]. This is more useful in many situations because it
 			corresponds with the sem() and std() functions.
-		x_weights (list): weights for the x vector, in order to calculate 
-			the weighted mean and confidence intervals, which is equivalent 
-			to the overall metric. This weighted approach is only relevant 
+		x_weights (list): weights for the x vector, in order to calculate
+			the weighted mean and confidence intervals, which is equivalent
+			to the overall metric. This weighted approach is only relevant
 			for ratios.
-		y_weights (list): weights for the y vector, in order to calculate 
-			the weighted mean and confidence intervals, which is equivalent 
-			to the overall metric. This weighted approach is only relevant 
+		y_weights (list): weights for the y vector, in order to calculate
+			the weighted mean and confidence intervals, which is equivalent
+			to the overall metric. This weighted approach is only relevant
 			for ratios.
 
 	Returns:
-		float: mean value of the difference
-		dict: percentile levels (index) and values
-		int: size of x excluding NA values
-		int: size of y excluding NA values
-		float: absolute mean of x
-		float: absolute mean of y
+	    tuple:
+			* mu (float): mean value of the difference
+			* c_i (dict): percentile levels (index) and values
+			* ss_x (int): size of x excluding NA values
+			* ss_y (int): size of y excluding NA values
+			* _x (float): absolute mean of x
+			* _y (float): absolute mean of y
 	"""
 	# Checking if data was provided
 	if x is None or y is None:
@@ -102,7 +103,6 @@ def sample_size(x):
 
 	Returns:
 	    int: sample size of the sample excluding nans
-
 	"""
 	# cast into a dummy numpy array to infer the dtype
 	if ~isinstance(x, np.ndarray):
@@ -137,10 +137,10 @@ def chi_square(x, y, min_counts=5):
 		                or expected observations is below min_counts for x or y
 
 	Returns:
-		float: p-value
-		float: chi-square value
-		int: number of attributes used (after dropping)
-
+	    tuple:
+			* float: p-value
+			* float: chi-square value
+			* int: number of attributes used (after dropping)
 	"""
 	# Checking if data was provided
 	if x is None or y is None:
@@ -231,8 +231,9 @@ def bootstrap(x, y, func=_delta_mean, nruns=10000, percentiles=[2.5, 97.5],
 			corresponds with the sem() and std() functions.
 
 	Returns:
-		dict: percentile levels (index) and values
-		np.array (nruns): array containing the bootstraping results per run
+	    tuple:
+			* dict: percentile levels (index) and values
+			* np.array (nruns): array containing the bootstraping results per run
 	"""
 	# Checking if data was provided
 	if x is None or y is None:
@@ -284,7 +285,8 @@ def pooled_std(std1, n1, std2, n2):
 	For further information visit:
 		http://sphweb.bumc.bu.edu/otlt/MPH-Modules/BS/BS704_Confidence_Intervals/BS704_Confidence_Intervals5.html
 
-	TODO: also implement a version for unequal variances
+	Todo:
+		Also implement a version for unequal variances.
 	"""
 	if not (0.5 < (std1 ** 2) / (std2 ** 2) < 2.):
 		warnings.warn('Sample variances differ too much to assume that '
@@ -466,8 +468,8 @@ def estimate_std(x, mu, pctile):
 	Returns:
 		float: estimated standard deviation of the distribution
 	"""
-	return (x - mu) / stats.norm.ppf(pctile / 100.0) 
-	
+	return (x - mu) / stats.norm.ppf(pctile / 100.0)
+
 
 if __name__ == '__main__':
 	# doctest.testmod()

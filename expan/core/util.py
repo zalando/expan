@@ -4,13 +4,22 @@ import pandas as pd
 
 def scale_range(x, new_min=0.0, new_max=1.0, old_min=None, old_max=None, squash_outside_range=True, squash_inf=False, ):
 	"""
-  Scales a sequence to fit within a new range.
+	Scales a sequence to fit within a new range.
 
-  If squash_inf is set, then infinite values will take on the
-  extremes of the new range (as opposed to staying infinite).
+	If squash_inf is set, then infinite values will take on the
+	extremes of the new range (as opposed to staying infinite).
 
-  NB: Infinity in the input is disregarded in the construction of
-  the scale of the mapping.
+	Args:
+	    x:
+	    new_min:
+	    new_max:
+	    old_min:
+	    old_max:
+	    squash_outside_range:
+	    squash_inf:
+
+	Note:
+	    Infinity in the input is disregarded in the construction of the scale of the mapping.
 
   >>> scale_range([1,3,5])
   array([ 0. ,  0.5,  1. ])
@@ -72,12 +81,20 @@ def scale_range(x, new_min=0.0, new_max=1.0, old_min=None, old_max=None, squash_
 
 def reindex(df, axis=0):
 	"""
-  partial fulfilment of:
-  https://github.com/pydata/pandas/issues/2770
 
-  TODO: test.
-  TODO: incorporate in pandas in drop() call and issue pull request
-  """
+	Args:
+	    df:
+	    axis:
+
+	Returns:
+
+	Note:
+		Partial fulfilment of: https://github.com/pydata/pandas/issues/2770
+
+	Todo:
+		* test
+		* incorporate in pandas in drop() call and issue pull request
+  	"""
 
 	if axis not in [0, 1, 'index', 'columns']:
 		raise NotImplementedError('only index and columns can be selected for axis')

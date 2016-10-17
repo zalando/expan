@@ -1,4 +1,8 @@
 # fileencoding: utf8
+
+""" Binning module.
+"""
+
 import string
 import warnings
 
@@ -24,6 +28,9 @@ def isNaN(obj):
 
 class Binning(object):
 	def __init__(self):
+		"""The Binning class has two subclasses: CategoricalBinning and 
+		NumericalBinning.
+		"""
 		pass
 
 	def __len__(self):
@@ -34,13 +41,15 @@ class Binning(object):
 		This returns the bin labels associated with each data point in the series,
 		essentially 'applying' the binning to data.
 
-		Arguments:
-			data: array-like (pandas Series etc.) of datapoints to be binned
-			format_str: str defining the format of the label to apply
+		Args:
+			data (array-like): array of datapoints to be binned
+			format_str (str): string defining the format of the label to apply
 
 		Returns:
-			array-like (pandas Series etc.) of the bin label corresponding to each
-				data point.
+			array-like: array of the bin label corresponding to each data point.
+
+		Note:
+		    Implemented in subclass.
 		"""
 		raise NotImplementedError('must implement this in subclass')
 
@@ -53,12 +62,16 @@ class Binning(object):
 
 class CategoricalBinning(Binning):
 	"""
-	A CategoricalBinning is essentially a list of lists of categories.
-
-	Each bin within a Binning is an ordered list of categories.
+	A CategoricalBinning is essentially a list of lists of categories. Each bin within a Binning is an ordered list of categories.
 	"""
 
 	def __init__(self, data=None, nbins=None):
+		"""CategoricalBinning constructor
+
+		Args:
+			data (array-like): array of datapoints to be binned
+			nbins (int): number of bins
+		"""
 		super(CategoricalBinning, self).__init__()
 		if data is None:
 			# NB: this will go through the property setters, so they will not be
@@ -124,6 +137,13 @@ class CategoricalBinning(Binning):
 
 	@property
 	def categories(self):
+		"""
+		Returns list of categories.
+
+		Returns:
+			array-like: list of categories
+		"""
+
 		return self._categories[:-1]
 
 	def __len__(self):
@@ -201,8 +221,20 @@ class CategoricalBinning(Binning):
 		"""
 		Returns the labels of the bins defined by this binning.
 
-		NB: this is not the same as label (which applies the bins to data and
-		returns the labels of the data)
+		Args:
+		    format_str (str): string defining the format of the label to return
+
+		    	Options:
+
+				* {iter.uppercase}, {iter.lowercase}, {iter.integer} 
+				* {set_notation} - all categories, comma-separated, surrounded by curly braces
+				* {standard} - a shortcut for: {set_notation}
+
+		Returns:
+		    array-like: labels of the bins defined by this binning
+
+		Note:
+		    This is not the same as label (which applies the bins to data and returns the labels of the data).
 		"""
 		return self._labels(format_str)[0:-1]
 
@@ -241,9 +273,35 @@ class CategoricalBinning(Binning):
 		return out
 
 	def mid(self, data):
+		"""
+		Returns the middle category of every bin.
+
+		Args:
+		    data: data on which the binning is to be applied
+
+		Returns:
+		    array-like: the middle category of every bin
+		"""
 		return self._mids[self._apply(data)]
 
 	def label(self, data, format_str='{standard}'):
+		"""
+		This returns the bin labels associated with each data point in the series,
+		essentially 'applying' the binning to data.
+
+		Args:
+			data (array-like): array of datapoints to be binned
+			format_str (str): string defining the format of the label to apply
+
+				Options:
+
+				* {iter.uppercase}, {iter.lowercase}, {iter.integer} 
+				* {set_notation} - all categories, comma-separated, surrounded by curly braces
+				* {standard} - a shortcut for: {set_notation}
+
+		Returns:
+			array-like: array of the bin label corresponding to each data point
+		"""
 		lbls = None
 		if format_str is None:  # TODO: remove this special case?
 			lbls = self.mid(data)
@@ -256,27 +314,35 @@ class CategoricalBinning(Binning):
 
 class NumericalBinning(Binning):
 	"""
-	TODO: think of a good way of exposing the _apply() method, because with the
-	returned indices, can then get uppers/lowers/mids/labels (ie reformat)
-	without doing the apply again.
+	The Binning class for numerical variables.
 
-	Am experimenting with maintaining the lists with a single element tacked
-	onto the end representing non-matching entries. All access then are through
-	properties which drop this end list, except when using the indices returned
-	by _apply.
-	This means that the -1 indices just works, so using the indices to get
-	labels, bounds, etc., is straightforward and fast because it is just
-	integer-based array slicing.
+	Todo:
+	    Think of a good way of exposing the _apply() method, because with the returned indices, can then get uppers/lowers/mids/labels (ie reformat) without doing the apply again.
+	    Am experimenting with maintaining the lists with a single element tacked onto the end representing non-matching entries.
+
+	    All access then are through properties which drop this end list, except when using the indices returned by _apply.
+
+	    This means that the -1 indices just works, so using the indices to get labels, bounds, etc., is straightforward and fast because it is just integer-based array slicing.
 	"""
 
-	def __init__(self, data=None, nbins=None, uppers=None, lowers=None, 
+	def __init__(self, data=None, nbins=None, uppers=None, lowers=None,
 				 up_closed=None, lo_closed=None):
 		"""NumericalBinning constructor.
+
+		Args:
+			data (array-like): array of datapoints to be binned
+			nbins (int): number of bins
+			uppers (array-like): a list of upper bounds
+			lowers (array-like): a list of lower bounds
+			up_closed (array-like): a list of booleans indicating whether the 
+				upper bounds are closed
+			lo_closed (array-like): a list of booleans indicating whether the 
+				lower bounds are closed
 		"""
 		super(NumericalBinning, self).__init__()
 		if data is None:
 			# initialize binning explicitly?
-			if (uppers is not None and lowers is not None and 
+			if (uppers is not None and lowers is not None and
 				up_closed is not None and lo_closed is not None):
 				self.uppers = uppers
 				self.lowers = lowers
@@ -372,18 +438,25 @@ class NumericalBinning(Binning):
 
 	@property
 	def uppers(self):
+		"""Return a list of upper bounds."""
 		return self._uppers[:-1]
 
 	@property
 	def lowers(self):
+		"""Return a list of lower bounds."""
 		return self._lowers[:-1]
 
 	@property
 	def up_closed(self):
+		"""Return a list of booleans indicating whether the upper bounds are 
+		closed.
+		"""
 		return self._up_closed[:-1]
 
 	@property
 	def lo_closed(self):
+		"""Return a list of booleans indicating whether the lower bounds are 
+		closed."""
 		return self._lo_closed[:-1]
 
 	@uppers.setter
@@ -424,7 +497,7 @@ class NumericalBinning(Binning):
 			- {simple} = {lo:.1f}_{up:.1f}
 			- {simplei} = {lo:.0f}_{up:.0f} (same as simple but for integers)
 		"""
-		# TODO: thas been implemented in an ugly way, but the interface should be good
+		# TODO: has been implemented in an ugly way, but the interface should be good
 		lbls = []
 
 		it = None
@@ -497,8 +570,25 @@ class NumericalBinning(Binning):
 		"""
 		Returns the labels of the bins defined by this binning.
 
-		NB: this is not the same as label (which applies the bins to data and
-		returns the labels of the data)
+		Returns:
+			array-like: array of labels of the bins defined by this binning
+
+				Options:
+
+				- {iter.uppercase} and {iter.lowercase} = labels the bins with letters
+				- {iter.integer} = labels the bins with integers
+				- {up} and {lo} = the bounds themselves (can specify precision: {up:.1f})
+				- {up_cond} and {lo_cond} = '<', '<=' etc.
+				- {up_bracket} and {lo_bracket} = '(', '[' etc.
+				- {mid}       = the midpoint of the bin (can specify precision: {mid:.1f}
+				- {conditions} = {lo:.1f}{lo_cond}x{up_cond}{up:.1f}
+				- {set_notation} = {lo_bracket}{lo:.1f},{up:.1f}{up_bracket}
+				- {standard} = {conditions}
+				- {simple} = {lo:.1f}_{up:.1f}
+				- {simplei} = {lo:.0f}_{up:.0f} (same as simple but for integers)
+
+		Note:
+		    This is not the same as label (which applies the bins to data and returns the labels of the data)
 		"""
 		return self._labels(format_str)[0:-1]
 
@@ -568,10 +658,10 @@ class NumericalBinning(Binning):
 		Returns the upper bounds of the bins associated with the data
 
 		Arguments:
-			data: array-like (pandas Series etc.) of datapoints to be binned
+			data (array-like): array of datapoints to be binned
 
 		Returns:
-			array-like (pandas Series etc.) containing upper bound of bin
+			array-like: array containing upper bound of bin
 					corresponding to each data point.
 		"""
 		return self._bound(data, 'upper')
@@ -582,12 +672,41 @@ class NumericalBinning(Binning):
 
 	def mid(self, data):
 		"""
-		Currently doesn't take into account whether bounds are closed or open.
+		Returns the midpoints of the bins associated with the data
+
+		Arguments:
+			data (array-like): array of datapoints to be binned
+
+		Returns:
+			array-like: array containing midpoints of bin
+					corresponding to each data point.
+		
+		Note:
+			Currently doesn't take into account whether bounds are closed or open.
 		"""
 		return self._bound(data, 'mid')
 
 	def label(self, data, format_str='{standard}'):
-		"""
+		"""Return the bin labels associated with each data point in the series,
+		essentially 'applying' the binning to data.
+
+		Args:
+			data (array-like): array of datapoints to be binned
+			format_str (str): string defining the format of the label to apply
+
+				Options:
+
+				- {iter.uppercase} and {iter.lowercase} = labels the bins with letters
+				- {iter.integer} = labels the bins with integers
+				- {up} and {lo} = the bounds themselves (can specify precision: {up:.1f})
+				- {up_cond} and {lo_cond} = '<', '<=' etc.
+				- {up_bracket} and {lo_bracket} = '(', '[' etc.
+				- {mid}       = the midpoint of the bin (can specify precision: {mid:.1f}
+				- {conditions} = {lo:.1f}{lo_cond}x{up_cond}{up:.1f}
+				- {set_notation} = {lo_bracket}{lo:.1f},{up:.1f}{up_bracket}
+				- {standard} = {conditions}
+				- {simple} = {lo:.1f}_{up:.1f}
+				- {simplei} = {lo:.0f}_{up:.0f} (same as simple but for integers)
 
 		see:
 			- Binning.label.__doc__
@@ -616,10 +735,10 @@ def create_binning(x, nbins=8):
 
 	Arguments:
 		x (array_like): input array
-		nbins (integer): number of bins.
+		nbins (integer): number of bins
 
 	Returns:
-		Binning object
+		binning object
 	"""
 	if x is None or len(x) <= 0:
 		raise ValueError('Empty input array!')
