@@ -77,6 +77,8 @@ Some mock-up data:
 Documentation
 =============
 
+The latest stable version is 0.4.0.
+
 `ExpAn main documentation <http://expan.readthedocs.io/>`__
 
 `ExpAn Description <https://github.com/zalando/expan/blob/master/ExpAn-Description.mediawiki>`__ - details about the concept of the library and data structures.
