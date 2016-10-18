@@ -44,6 +44,36 @@ Major statistical functionalities include:
 - **subgroup analysis**
 - **trend**
 
+
+Installation
+============
+
+To install ExpAn, run this command in your terminal:
+
+.. code-block:: console
+
+    $ pip install expan
+
+
+Usage
+=====
+
+To use ExpAn in a project::
+
+    import expan
+
+Some mock-up data:
+
+::
+
+    from expan.core.experiment import Experiment
+    from tests.tests_core.test_data import generate_random_data
+
+    exp = Experiment('B', *generate_random_data())
+    exp.delta()
+
+
+
 Documentation
 =============
 
