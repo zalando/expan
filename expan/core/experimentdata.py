@@ -257,6 +257,7 @@ class ExperimentData(object):
 			else:
 				self.kpis['calc_thresh_value'] = params['value']
 
+			is_outlier=[]
 			if params['kind'] == 'lower':
 				if params['metric'] in self.kpis.columns:
 					is_outlier = self.kpis[params['metric']] < self.kpis.calc_thresh_value
