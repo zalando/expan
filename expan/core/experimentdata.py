@@ -353,8 +353,9 @@ class ExperimentData(object):
 		for rule in rules:
 			if rule['type'] == 'threshold':
 				urule, n = self._filter_threshold(params=rule, drop_thresh_column=drop_thresh)
-				used_rules.append(urule)
-				n_filtered.append(n)
+				if n>0:
+					used_rules.append(urule)
+					n_filtered.append(n)
 
 		# store rules in the metadata
 		self.metadata['outlier_filter'] = used_rules
