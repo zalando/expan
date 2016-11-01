@@ -123,7 +123,10 @@ class ExperimentData(object):
 				self.metadata['primary_KPI']))
 
 		if len(self.variant_names) < 2:
-			raise KeyError('Less than 2 variants found!')
+			raise ValueError('Less than 2 variants found!')
+
+		if self.kpis.reset_index()['entity'].nunique()<len(self.kpis):
+			raise ValueError("Column 'entity' is not unique!")
 
 		self.features.set_index(list(feature_indices), inplace=True)
 		self.kpis.set_index(list(kpi_indices), inplace=True)
@@ -247,10 +250,13 @@ class ExperimentData(object):
 				# start timestamp exists as a feature
 				# NOTE: treatment_start_time and treatment_exposure have to be epoch time in seconds
 				if 'treatment_start_time' in self.features.columns and 'treatment_stop_time' in params:
-					self.kpis = self.kpis.assign(calc_thresh_value = lambda x: (params['value'] * ((params['treatment_stop_time'] - self.features['treatment_start_time']) / params['time_interval'])), axis='rows')
+					# set minimum scaling to time_interval defined in rule
+					scale_factor=max([ (params['treatment_stop_time'] - self.features['treatment_start_time']) / params['time_interval'], 1 ])
+					self.kpis = self.kpis.assign(calc_thresh_value = lambda x: (params['value'] * scale_factor), axis='rows')
 				# treatment exposure exists as a feature
 				elif 'treatment_exposure' in self.features.columns:
-					self.kpis['calc_thresh_value'] = params['value'] * self.features.treatment_exposure / params['time_interval']
+					scale_factor=max([ self.features.treatment_exposure / params['time_interval'], 1])
+					self.kpis['calc_thresh_value'] = params['value'] * scale_factor
 				else:
 					warnings.warn('Scaling by time not possible, using hard threshold instead!')
 					self.kpis['calc_thresh_value'] = params['value']
@@ -327,7 +333,10 @@ class ExperimentData(object):
 			Given these parameters a per entity threshold is calculated by the following equation:
 
 			.. math::
-				threshold = value * \\frac{treatment\_stop\_time - treatment\_start\_time}{time\_interval}
+				threshold = value * min( \\frac{treatment\_stop\_time - treatment\_start\_time}{time\_interval} , 1)
+
+			Using the equation above, the threshold defined for a specific time_interval is scaled according to the treatment exposure time for each entity.
+			Thereby, the minimum scaling factor is 1, i.e. the time_interval defined in the outlier rules is the smallest threshold that is applied.
 
 			>>>
 			[
@@ -353,7 +362,7 @@ class ExperimentData(object):
 		for rule in rules:
 			if rule['type'] == 'threshold':
 				urule, n = self._filter_threshold(params=rule, drop_thresh_column=drop_thresh)
-				if n>0:
+				if n > 0:
 					used_rules.append(urule)
 					n_filtered.append(n)
 
