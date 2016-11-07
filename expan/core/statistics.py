@@ -159,7 +159,11 @@ def chi_square(x, y, min_counts=5):
 	control_counts = _y.value_counts()
 	# Get observed counts for both _x and _y for each category
 	# (=contingency table) and set the counts for non occuring categories to 0
-	observed_ct = pd.DataFrame([treat_counts, control_counts]).fillna(0)
+	# This is a workaround to fix the bug #56, to cast the output of value_counts
+	# into a Series with the normal Index instead of the CategoricalIndex
+	tcs = pd.Series(treat_counts.values, index=treat_counts.index.astype(list))
+	ccs = pd.Series(control_counts.values, index=control_counts.index.astype(list))
+	observed_ct = pd.DataFrame([tcs, ccs]).fillna(0)
 	# Ensure at least a frequency of 5 at every location in observed_ct,
 	# otherwise drop categorie see
 	# http://docs.scipy.org/doc/scipy-0.16.1/reference/generated/scipy.stats.chisquare.html
