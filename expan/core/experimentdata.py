@@ -251,12 +251,12 @@ class ExperimentData(object):
 				# NOTE: treatment_start_time and treatment_exposure have to be epoch time in seconds
 				if 'treatment_start_time' in self.features.columns and 'treatment_stop_time' in params:
 					# set minimum scaling to time_interval defined in rule
-					scale_factor=max([ (params['treatment_stop_time'] - self.features['treatment_start_time']) / params['time_interval'], 1 ])
-					self.kpis = self.kpis.assign(calc_thresh_value = lambda x: (params['value'] * scale_factor), axis='rows')
+					scale_factors=np.maximum( (params['treatment_stop_time'] - self.features['treatment_start_time']) / params['time_interval'], 1)
+					self.kpis = self.kpis.assign(calc_thresh_value = lambda x: (params['value'] * scale_factors), axis='rows')
 				# treatment exposure exists as a feature
 				elif 'treatment_exposure' in self.features.columns:
-					scale_factor=max([ self.features.treatment_exposure / params['time_interval'], 1])
-					self.kpis['calc_thresh_value'] = params['value'] * scale_factor
+					scale_factors=np.maximum( self.features.treatment_exposure / params['time_interval'], 1)
+					self.kpis['calc_thresh_value'] = params['value'] * scale_factors
 				else:
 					warnings.warn('Scaling by time not possible, using hard threshold instead!')
 					self.kpis['calc_thresh_value'] = params['value']
