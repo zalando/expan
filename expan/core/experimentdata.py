@@ -125,9 +125,6 @@ class ExperimentData(object):
 		if len(self.variant_names) < 2:
 			raise ValueError('Less than 2 variants found!')
 
-		if self.kpis.reset_index()['entity'].nunique()<len(self.kpis):
-			raise ValueError("Column 'entity' is not unique!")
-
 		self.features.set_index(list(feature_indices), inplace=True)
 		self.kpis.set_index(list(kpi_indices), inplace=True)
 
@@ -140,6 +137,8 @@ class ExperimentData(object):
 			# appropriate
 			self.kpis = self.kpis_time.groupby(level=['entity', 'variant']).sum()
 		else:
+			if self.kpis.reset_index()['entity'].nunique()<len(self.kpis):
+				raise ValueError("Column 'entity' is not unique!")
 			self.kpis_time = None
 
 	@property
@@ -410,7 +409,6 @@ if __name__ == '__main__':
 							  "type":"threshold",
 							  "value": -1.0,
 							  "kind": "lower",
-							  "time_interval": 30758400,
-							  #"treatment_stop_time": 30758500
+							  "time_interval": 30758400
 		                     }
 							])

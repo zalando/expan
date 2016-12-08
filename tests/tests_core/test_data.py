@@ -98,12 +98,12 @@ class DataTestCase(unittest.TestCase):
 
 	def test_create_with_insufficient_data(self):
 		# should not work:
-		with self.assertRaises(KeyError):
+		with self.assertRaises(ValueError):
 			ExperimentData(
 				pd.DataFrame(columns=['entity', 'variant']),
 				metadata={'experiment': 'test', 'source': 'none'}
 			)
-		with self.assertRaises(KeyError):
+		with self.assertRaises(ValueError):
 			ExperimentData(
 				pd.DataFrame(columns=['entity', 'variant', 'plums']),
 				metadata={'experiment': 'test', 'source': 'none', 'primary_KPI': 'plums'}
@@ -121,7 +121,7 @@ class DataTestCase(unittest.TestCase):
 		# 		pd.DataFrame(columns=['entity', 'treatment_start']),
 		# 		metadata={'experiment': 'fesf', 'source': 'random'},
 		# 	)
-		with self.assertRaises(KeyError):
+		with self.assertRaises(ValueError):
 			ExperimentData(
 				pd.DataFrame(columns=['variant', 'treatment_start']),
 				metadata={'experiment': 'fesf', 'source': 'random'}
