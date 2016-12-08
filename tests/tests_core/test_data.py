@@ -98,12 +98,12 @@ class DataTestCase(unittest.TestCase):
 
 	def test_create_with_insufficient_data(self):
 		# should not work:
-		with self.assertRaises(KeyError):
+		with self.assertRaises(ValueError):
 			ExperimentData(
 				pd.DataFrame(columns=['entity', 'variant']),
 				metadata={'experiment': 'test', 'source': 'none'}
 			)
-		with self.assertRaises(KeyError):
+		with self.assertRaises(ValueError):
 			ExperimentData(
 				pd.DataFrame(columns=['entity', 'variant', 'plums']),
 				metadata={'experiment': 'test', 'source': 'none', 'primary_KPI': 'plums'}
@@ -121,7 +121,7 @@ class DataTestCase(unittest.TestCase):
 		# 		pd.DataFrame(columns=['entity', 'treatment_start']),
 		# 		metadata={'experiment': 'fesf', 'source': 'random'},
 		# 	)
-		with self.assertRaises(KeyError):
+		with self.assertRaises(ValueError):
 			ExperimentData(
 				pd.DataFrame(columns=['variant', 'treatment_start']),
 				metadata={'experiment': 'fesf', 'source': 'random'}
@@ -220,7 +220,7 @@ class DataTestCase(unittest.TestCase):
 		metrics_outlier.loc[idx, "normal_shifted_by_feature"] += np.sign(metrics_outlier.loc[idx, "normal_shifted_by_feature"])
 		metrics_outlier.loc[idx, "normal_shifted_by_feature"] *= 10
 
-		# use 4 rules, one is not implemented, default settings
+		# use 4 rules, one is not implemented and one does not apply, default settings
 		D = ExperimentData(metrics=metrics_outlier, metadata=self.metadata)
 		D.filter_outliers(rules=[{"metric":"normal_shifted_by_feature",
 								  "type":"threshold",
@@ -233,17 +233,17 @@ class DataTestCase(unittest.TestCase):
 								 "kind": "upper"
 								 },
 								 {"metric": "normal_same",
-								  "type": "threshold",
+								  "type": "threshold", #this does not apply
 								  "value": 10.0,
 								  "kind": "upper"
 								  },
 								 {"metric": "normal_same",
-								  "type": "water",
+								  "type": "water", #this is not implemented
 								  "value": 10.0,
 								  "kind": "both"
 		                         }
 								 ])
-		self.assertEqual(len(D.metadata['outlier_filter']), 3)
+		self.assertEqual(len(D.metadata['outlier_filter']), 2) # only are actually applied
 		self.assertEqual(len(D.metrics), 9000)
 		for i in idx:
 			self.assertEqual(D.metrics.ix[i].empty, True)
@@ -311,16 +311,40 @@ class DataTestCase(unittest.TestCase):
 
 	def test_outlier_filtering_treatment_exposure(self):
 		"""Check if scaling of the threshold works when the treatment_exposure is provided"""
-		self.metrics['treatment_exposure'] = self.metrics['treatment_start_time']
+		self.metrics['treatment_exposure'] = 1000
 		D = ExperimentData(self.metrics[['entity','variant','normal_shifted','treatment_exposure']], self.metadata, features=[3])
 		D.filter_outliers(rules=[{"metric":"normal_shifted",
 								  "type":"threshold",
 								  "value": -1.0,
 								  "kind": "lower",
-								  "time_interval": 30758400
+								  "time_interval": 1000
 			                     }
 								])
-		self.assertEqual(D.metadata['n_filtered'], [3695])
+		n_filtered=D.metadata['n_filtered']
+		self.assertEqual(n_filtered, [1082])
+
+		#setting a larger long time_interval than the treatment_exposure does not affect the scaling of the threshold
+		D = ExperimentData(self.metrics[['entity','variant','normal_shifted','treatment_exposure']], self.metadata, features=[3])
+		D.filter_outliers(rules=[{"metric":"normal_shifted",
+								  "type":"threshold",
+								  "value": -1.0,
+								  "kind": "lower",
+								  "time_interval": 10000
+			                     }
+								])
+		self.assertEqual(D.metadata['n_filtered'], D.metadata['n_filtered'])
+
+		#setting a lower time_interval filters less, here so much less that filter will not be applied
+		D = ExperimentData(self.metrics[['entity','variant','normal_shifted','treatment_exposure']], self.metadata, features=[3])
+		D.filter_outliers(rules=[{"metric":"normal_shifted",
+								  "type":"threshold",
+								  "value": -1.0,
+								  "kind": "lower",
+								  "time_interval": 100
+			                     }
+								])
+		self.assertEqual(len(D.metadata['outlier_filter']), 0)
+		self.assertEqual(len(D.metadata['n_filtered']), 0)
 
 if __name__ == '__main__':
 	unittest.main()
