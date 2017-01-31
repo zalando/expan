@@ -3,3 +3,4 @@ pandas == 0.18.1
 scipy == 0.17.0
 numpy == 1.10.4
 simplejson == 3.8.2
+pystan >= 2.14

@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 
 from expan.core.experiment import Experiment, subgroup_deltas, time_dependent_deltas
+from expan.core.results import Results
 from tests.tests_core.test_data import generate_random_data
 
 # raise the same warning multiple times
@@ -312,7 +313,65 @@ class ExperimentClassTestCases(ExperimentTestCase):
 
 		self.assertTrue(self.data.baseline_variant == 'B')
 
-		result = self.data.delta(kpi_subset=
+		########### t_test_delta ###########
+		result = self.data.delta(method='t_test', kpi_subset=['normal_same'])
+
+		# check uplift
+		df = result.statistic('delta', 'uplift', 'normal_same')
+		np.testing.assert_almost_equal(df.loc[:, ('value', 'A')],
+									   np.array([0.033053]), decimal=5)
+		# check pctile
+		df = result.statistic('delta', 'uplift_pctile', 'normal_same')
+		np.testing.assert_almost_equal(df.loc[:, ('value', 'A')],
+									   np.array([-0.007135, 0.073240]), decimal=5)
+		# check samplesize
+		df = result.statistic('delta', 'sample_size', 'normal_same')
+		np.testing.assert_almost_equal(df.loc[:, 'value'],
+									   np.array([[6108, 3892]]), decimal=5)
+		# check variant_mean
+		df = result.statistic('delta', 'variant_mean', 'normal_same')
+		np.testing.assert_almost_equal(df.loc[:, 'value'],
+									   np.array([[0.025219, -0.007833]]), decimal=5)
+
+		# check metadata is preserved
+		np.testing.assert_equal(True, all(item in result.metadata.items()
+		                                for item in self.testmetadata.items()))
+
+		########### group_sequential_delta ###########
+		self.data.metadata['estimatedSampleSize'] = 100000
+		result = self.data.delta(method='group_sequential', kpi_subset=['normal_same'])
+
+		# check uplift
+		df = result.statistic('delta', 'uplift', 'normal_same')
+		np.testing.assert_almost_equal(df.loc[:, ('value', 'A')],
+									   np.array([0.033053]), decimal=5)
+		# check stop
+		df = result.statistic('delta', 'stop', 'normal_same')
+		np.testing.assert_equal(df.loc[:, 'value'], 
+								np.array([[False, None]]))
+		# check samplesize
+		df = result.statistic('delta', 'sample_size', 'normal_same')
+		np.testing.assert_almost_equal(df.loc[:, 'value'],
+									   np.array([[6108, 3892]]), decimal=5)
+		# check variant_mean
+		df = result.statistic('delta', 'variant_mean', 'normal_same')
+		np.testing.assert_almost_equal(df.loc[:, 'value'],
+									   np.array([[0.025219, -0.007833]]), decimal=5)
+
+		# check metadata is preserved
+		np.testing.assert_equal(True, all(item in result.metadata.items()
+		                                for item in self.testmetadata.items()))
+
+	def test_t_test_delta(self):
+		"""
+	    Check if Experiment.t_test_delta() functions properly
+	    """
+		# this should work
+		self.assertTrue(isinstance(self.data, Experiment))  # check that the subclassing works
+
+		self.assertTrue(self.data.baseline_variant == 'B')
+
+		result = self.data.t_test_delta(kpi_subset=
 								 [m for m in self.data.kpi_names if 'normal' in m])
 
 		# check uplift
@@ -336,16 +395,58 @@ class ExperimentClassTestCases(ExperimentTestCase):
 		np.testing.assert_equal(True, all(item in result.metadata.items()
 		                                for item in self.testmetadata.items()))
 
-	def test_delta_derived_kpis(self):
+	def test_group_sequential_delta(self):
 		"""
-	    Check if Experiment.delta() functions properly for derived KPIs
+	    Check if Experiment.group_sequential_delta() functions properly
 	    """
 		# this should work
 		self.assertTrue(isinstance(self.data, Experiment))  # check that the subclassing works
 
 		self.assertTrue(self.data.baseline_variant == 'B')
 
-		result = self.data.delta(kpi_subset=['derived'], 
+		self.data.metadata['estimatedSampleSize'] = 100000
+		res = Results(None, metadata=self.data.metadata)
+		result = self.data.group_sequential_delta(result=res, kpis_to_analyse=['normal_same'])
+
+		# check uplift
+		df = result.statistic('delta', 'uplift', 'normal_same')
+		np.testing.assert_almost_equal(df.loc[:, ('value', 'A')],
+									   np.array([0.033053]), decimal=5)
+		# check stop
+		df = result.statistic('delta', 'stop', 'normal_same')
+		np.testing.assert_equal(df.loc[:, 'value'], 
+								np.array([[False, None]]))
+		# check samplesize
+		df = result.statistic('delta', 'sample_size', 'normal_same')
+		np.testing.assert_almost_equal(df.loc[:, 'value'],
+									   np.array([[6108, 3892]]), decimal=5)
+		# check variant_mean
+		df = result.statistic('delta', 'variant_mean', 'normal_same')
+		np.testing.assert_almost_equal(df.loc[:, 'value'],
+									   np.array([[0.025219, -0.007833]]), decimal=5)
+
+		# check metadata is preserved
+		np.testing.assert_equal(True, all(item in result.metadata.items()
+		                                for item in self.testmetadata.items()))
+
+	def test_group_sequential_delta_no_estimatedSampleSize(self):
+		"""
+	    group_sequential_delta should raise error if estimatedSampleSize is not present in the metadata.
+	    """
+		with self.assertRaises(ValueError):
+			res = Results(None, metadata=self.data.metadata)
+			result = self.data.group_sequential_delta(result=res, kpis_to_analyse=['normal_same'])
+
+	def test_delta_derived_kpis(self):
+		"""
+	    Check if Experiment.t_test_delta() functions properly for derived KPIs
+	    """
+		# this should work
+		self.assertTrue(isinstance(self.data, Experiment))  # check that the subclassing works
+
+		self.assertTrue(self.data.baseline_variant == 'B')
+
+		result = self.data.t_test_delta(kpi_subset=['derived'], 
 			derived_kpis=[{'name':'derived','formula':'normal_same/normal_shifted'}])
 
 		# check uplift
@@ -371,7 +472,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
 
 	def test_delta_derived_kpis_weighted(self):
 		"""
-	    Check if Experiment.delta() functions properly for derived KPIs using 
+	    Check if Experiment.t_test_delta() functions properly for derived KPIs using 
 	    the weighted method.
 	    """
 		# this should work
@@ -379,7 +480,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
 
 		self.assertTrue(self.data.baseline_variant == 'B')
 
-		result = self.data.delta(kpi_subset=['derived'], 
+		result = self.data.t_test_delta(kpi_subset=['derived'], 
 			derived_kpis=[{'name':'derived','formula':'normal_same/normal_shifted'}],
 			weighted_kpis=['derived'])
 
@@ -408,7 +509,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
 		"""
 		Check if the unequal variance warning message is persisted to the Results structure
     	"""
-		result = self.data.delta(kpi_subset=['normal_unequal_variance'],
+		result = self.data.t_test_delta(kpi_subset=['normal_unequal_variance'],
 								 variant_subset=['A'])
 		w = result.metadata['warnings']['Experiment.delta']
 		self.assertTrue(isinstance(w, UserWarning))

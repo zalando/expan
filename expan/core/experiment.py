@@ -390,7 +390,7 @@ class Experiment(ExperimentData):
 		self.dbg(3, 'kpis_to_analyse: ' + ','.join(kpis_to_analyse))
 
 		if method == 't_test':
-			return self.t_test_delta(**kwargs)
+			return self.t_test_delta(kpi_subset, derived_kpis, **kwargs)
 		elif method == 'group_sequential':
 			return self.group_sequential_delta(res, kpis_to_analyse, **kwargs)
 		else:
@@ -779,8 +779,9 @@ if __name__ == '__main__':
 	#res = exp.delta(method='t_test', kpi_subset=['derived'],
 	#		derived_kpis=[{'name':'derived','formula':'normal_same/normal_shifted'}],
 	#		weighted_kpis=['derived'])
-	res = exp.delta(method='group_sequential', kpi_subset=['derived'],
-			derived_kpis=[{'name':'derived','formula':'normal_same/normal_shifted'}])
+	#res = exp.delta(method='group_sequential', kpi_subset=['derived'],
+	#		derived_kpis=[{'name':'derived','formula':'normal_same/normal_shifted'}])
+	res = exp.delta(method='t_test', kpi_subset=['normal_same'])
 
 # result = time_dependent_deltas(data.metrics.reset_index()
 #	[['variant','time_since_treatment','normal_shifted']],variants=['A','B']).df.loc[:,1]

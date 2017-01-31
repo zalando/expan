@@ -111,4 +111,9 @@ def bayes_factor(x, y, distribution='normal'):
 
 
 if __name__ == '__main__':
-	res = obrien_fleming(np.linspace(0,1,5+1)[1:])
+	#res = obrien_fleming(np.linspace(0,1,5+1)[1:])
+	#res = obrien_fleming(0.5)
+	np.random.seed(0)
+	rand_s1 = np.random.normal(loc=0, size=1000)
+	rand_s2 = np.random.normal(loc=0.1, size=1000)
+	stop,delta,n_x,n_y,mu_x,mu_y = group_sequential(rand_s1, rand_s2)
