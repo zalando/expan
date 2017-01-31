@@ -345,7 +345,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
 
 		self.assertTrue(self.data.baseline_variant == 'B')
 
-		result = self.data.delta(kpi_subset=['derived'], 
+		result = self.data.delta(kpi_subset=['derived'],
 			derived_kpis=[{'name':'derived','formula':'normal_same/normal_shifted'}])
 
 		# check uplift
@@ -371,7 +371,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
 
 	def test_delta_derived_kpis_weighted(self):
 		"""
-	    Check if Experiment.delta() functions properly for derived KPIs using 
+	    Check if Experiment.delta() functions properly for derived KPIs using
 	    the weighted method.
 	    """
 		# this should work
@@ -379,7 +379,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
 
 		self.assertTrue(self.data.baseline_variant == 'B')
 
-		result = self.data.delta(kpi_subset=['derived'], 
+		result = self.data.delta(kpi_subset=['derived'],
 			derived_kpis=[{'name':'derived','formula':'normal_same/normal_shifted'}],
 			weighted_kpis=['derived'])
 
