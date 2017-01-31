@@ -15,7 +15,7 @@ import expan.core.binning as binmodule  # name conflict with binning...
 import numpy as np
 import pandas as pd
 from expan.core.experimentdata import ExperimentData
-from expan.core.results import Results, delta_to_dataframe_all_variants, feature_check_to_dataframe, group_sequential_to_dataframe
+from expan.core.results import Results, delta_to_dataframe_all_variants, feature_check_to_dataframe, early_stopping_to_dataframe
 
 # raise the same warning multiple times
 warnings.simplefilter('always', UserWarning)
@@ -393,6 +393,8 @@ class Experiment(ExperimentData):
 			return self.t_test_delta(kpi_subset, derived_kpis, **kwargs)
 		elif method == 'group_sequential':
 			return self.group_sequential_delta(res, kpis_to_analyse, **kwargs)
+		elif method == 'bayes_factor':
+			return self.bayes_factor_delta(res, kpis_to_analyse, **kwargs)
 		else:
 			raise NotImplementedError
 
@@ -531,14 +533,50 @@ class Experiment(ExperimentData):
 			baseline_metric = metric_df.iloc[:, 2][metric_df.iloc[:, 1] == self.baseline_variant]
 			current_sample_size = float(sum(~metric_df[mname].isnull()))
 
-			do_delta = (lambda f: group_sequential_to_dataframe(f.columns[2],
-															  	*es.group_sequential(
+			do_delta = (lambda f: early_stopping_to_dataframe(f.columns[2],
+															  *es.group_sequential(
 																  x=f.iloc[:, 2],
 																  y=baseline_metric,
 																  spending_function=spending_function, 
 					 											  information_fraction=current_sample_size/self.metadata['estimatedSampleSize'], 
 					 											  alpha=alpha, 
 					 											  cap=cap)))
+	
+			# Actual calculation
+			df = metric_df.groupby('variant').apply(do_delta).unstack(0)
+			# set the stop label of the baseline variant to None
+			df.loc[(mname,'-',slice(None),'stop'),('value',self.baseline_variant)] = None
+
+			if result.df is None:
+				result.df = df
+			else:
+				result.df = result.df.append(df)
+
+		return result
+
+
+	def bayes_factor_delta(self, 
+						   result,
+						   kpis_to_analyse,
+						   distribution='normal'):
+		"""
+		Calculate the stopping criterion based on the Bayes factor 
+		and the effect size.
+
+		Args:
+
+		Returns:
+
+		"""
+		for mname in kpis_to_analyse:
+			metric_df = self.kpis.reset_index()[['entity', 'variant', mname]]
+			baseline_metric = metric_df.iloc[:, 2][metric_df.iloc[:, 1] == self.baseline_variant]
+
+			do_delta = (lambda f: early_stopping_to_dataframe(f.columns[2],
+															  *es.bayes_factor(
+																  x=f.iloc[:, 2],
+																  y=baseline_metric,
+																  distribution=distribution)))
 	
 			# Actual calculation
 			df = metric_df.groupby('variant').apply(do_delta).unstack(0)
@@ -781,7 +819,7 @@ if __name__ == '__main__':
 	#		weighted_kpis=['derived'])
 	#res = exp.delta(method='group_sequential', kpi_subset=['derived'],
 	#		derived_kpis=[{'name':'derived','formula':'normal_same/normal_shifted'}])
-	res = exp.delta(method='t_test', kpi_subset=['normal_same'])
+	res = exp.delta(method='bayes_factor', kpi_subset=['normal_same'])
 
 # result = time_dependent_deltas(data.metrics.reset_index()
 #	[['variant','time_since_treatment','normal_shifted']],variants=['A','B']).df.loc[:,1]

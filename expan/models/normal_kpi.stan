@@ -1,8 +1,8 @@
 data {
 	int<lower=0> Nc; 	// number of entities in the control group
 	int<lower=0> Nt; 	// number of entities in the treatment group
-	real x[Nc]; 		// normally distributed KPI in the control group
-	real y[Nt]; 		// normally distributed KPI in the treatment group
+	real y[Nc]; 		// normally distributed KPI in the control group
+	real x[Nt]; 		// normally distributed KPI in the treatment group
 }
 
 parameters {
@@ -19,7 +19,7 @@ transformed parameters {
 model {
 	delta ~ cauchy(0, 1);
 	mu ~ cauchy(0, 1);
-	x ~ normal(mu-alpha/2, sigma);
-	y ~ normal(mu+alpha/2, sigma);
+	x ~ normal(mu+alpha, sigma);
+	y ~ normal(mu, sigma);
 }
 

@@ -59,13 +59,5 @@ def test_debugging_with_file_config():
 
 
 if __name__ == "__main__":
-	#pass  # TODO: call py.test?
-	dbg = dbgcls.Dbg()
-	dbg(-2, 'This should be an error')
-	out, err = capsys.readouterr()
-	print()
-	'out is: ' + out
-	print()
-	'err is: ' + err
-	errparts = err.split('|')
-	print()
+	pass  # TODO: call py.test?
+	

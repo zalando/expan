@@ -599,15 +599,16 @@ def feature_check_to_dataframe(metric,
 	return df
 
 
-def group_sequential_to_dataframe(metric, 
-								  stop, 
-								  mu,								  
-								  samplesize_variant,
-								  samplesize_baseline,
-								  mu_variant,
-								  mu_baseline,
-								  subgroup_metric='-',
-								  subgroup=None):
+def early_stopping_to_dataframe(metric, 
+								stop, 
+								mu,
+								pctiles,								  
+								samplesize_variant,
+								samplesize_baseline,
+								mu_variant,
+								mu_baseline,
+								subgroup_metric='-',
+								subgroup=None):
 	"""Defines the Results data frame structure.
 
 	Args:
@@ -622,7 +623,7 @@ def group_sequential_to_dataframe(metric,
 	    subgroup:
 
 	Returns:
-
+		the result data frame
 	"""
 	df = pd.DataFrame({
 		'metric': metric,
@@ -632,6 +633,15 @@ def group_sequential_to_dataframe(metric,
 		'subgroup_metric': subgroup_metric,
 		'subgroup': subgroup
 	})
+	if len(pctiles) > 0:
+		df = df.append(pd.DataFrame({
+			'metric': metric,
+			'statistic': 'uplift_pctile',
+			'pctile': list(pctiles.keys()),
+			'value': list(pctiles.values()),
+			'subgroup_metric': subgroup_metric,
+			'subgroup': subgroup
+			}))
 
 	df.set_index(Results.mandatory_index_levels, inplace=True)
 

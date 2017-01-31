@@ -76,7 +76,23 @@ def group_sequential(x,
 	else:
 		stop = False
 
-	return stop, mu_x-mu_y, n_x, n_y, mu_x, mu_y
+	return stop, mu_x-mu_y, {}, n_x, n_y, mu_x, mu_y
+
+
+def HDI_from_MCMC(posterior_samples, credible_mass=0.95):
+    # Computes highest density interval from a sample of representative values,
+    # estimated as the shortest credible interval
+    # Takes Arguments posterior_samples (samples from posterior) and credible mass (normally .95)
+    # http://stackoverflow.com/questions/22284502/highest-posterior-density-region-and-central-credible-region
+    sorted_points = sorted(posterior_samples)
+    ciIdxInc = np.ceil(credible_mass * len(sorted_points)).astype('int')
+    nCIs = len(sorted_points) - ciIdxInc
+    ciWidth = [0]*nCIs
+    for i in range(0, nCIs):
+        ciWidth[i] = sorted_points[i + ciIdxInc] - sorted_points[i]
+    HDImin = sorted_points[ciWidth.index(min(ciWidth))]
+    HDImax = sorted_points[ciWidth.index(min(ciWidth))+ciIdxInc]
+    return(HDImin, HDImax)
 
 
 def bayes_factor(x, y, distribution='normal'):
@@ -90,11 +106,24 @@ def bayes_factor(x, y, distribution='normal'):
 	Returns:
 		boolean
 	"""
+	# Checking if data was provided
+	if x is None or y is None:
+		raise ValueError('Please provide two non-None samples.')
+
+	# Coercing missing values to right format
+	_x = np.array(x, dtype=float) 
+	_y = np.array(y, dtype=float) 
+
+	mu_x = np.nanmean(_x)
+	mu_y = np.nanmean(_y)
+	n_x = statx.sample_size(_x)
+	n_y = statx.sample_size(_y)
+
 	if distribution == 'normal':
-		fit_data = {'Nc': len(x), 
-					'Nt': len(y), 
-					'x': x, 
-					'y': y}
+		fit_data = {'Nc': n_y, 
+					'Nt': n_x, 
+					'x': _x, 
+					'y': _y}
 	else:
 		raise NotImplementedError
 	model_file = __location__ + '/../models/' + distribution + '_kpi.stan'
@@ -106,8 +135,11 @@ def bayes_factor(x, y, distribution='normal'):
 
 	prior = cauchy.pdf(0, loc=0, scale=1)
 	bf = kde.evaluate(0)[0] / prior
+	stop = bf > 3 or bf < 1/3.
 
-	return bf > 3 or bf < 1/3.
+	interval = HDI_from_MCMC(traces['alpha'])
+
+	return stop, np.mean(traces['alpha']), {'lower':interval[0],'upper':interval[1]}, n_x, n_y, mu_x, mu_y
 
 
 if __name__ == '__main__':
