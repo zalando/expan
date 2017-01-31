@@ -37,6 +37,7 @@ def load_example_results():
 
 	return r.from_hdf(example_fpath)
 
+
 class ResultsTestCase(unittest.TestCase):
 	"""
 	Defines the setUp() and tearDown() functions for the results test cases.
@@ -79,7 +80,7 @@ class ResultsClassTestCase(ResultsTestCase):
 			)
 
 		if h5py_available:
-			#aa = load_example_results()
+			# aa = load_example_results()
 			warnings.warn("No data for h5 loading available... skipping tests of example h5 data")
 
 	def test_relative_uplift_delta(self):
@@ -93,19 +94,25 @@ class ResultsClassTestCase(ResultsTestCase):
 	def test_prob_uplift_over_zero_single_metric(self):
 		"""Check if the conversion from confidence intervals to probability is correct for one metric."""
 		res = self.data.delta(kpi_subset=['normal_same'])
-		#df = prob_uplift_over_zero_single_metric(res.df, self.data.baseline_variant)
-		np.testing.assert_almost_equal(res.df.loc[pd.IndexSlice[:,:,:,'prob_uplift_over_0'], 'value'],
+		# df = prob_uplift_over_zero_single_metric(res.df, self.data.baseline_variant)
+		np.testing.assert_almost_equal(res.df.loc[pd.IndexSlice[:, :, :, 'prob_uplift_over_0'], 'value'],
 									   np.array([[0.946519, np.nan]]), decimal=5)
 
 	def test_prob_uplift_over_zero_multiple_metric(self):
 		"""Check if the conversion from confidence intervals to probability is correct for multiple metrics."""
-		res = self.data.delta(kpi_subset=['normal_same','normal_shifted'])
-		#res.calculate_prob_uplift_over_zero()
-		np.testing.assert_almost_equal(res.df.loc[pd.IndexSlice[:,:,:,'prob_uplift_over_0'], 'value'],
-									   np.array([[0.946519,np.nan],[0,np.nan]]), decimal=5)
+		res = self.data.delta(kpi_subset=['normal_same', 'normal_shifted'])
+		# res.calculate_prob_uplift_over_zero()
+		np.testing.assert_almost_equal(res.df.loc[pd.IndexSlice[:, :, :, 'prob_uplift_over_0'], 'value'],
+									   np.array([[0.946519, np.nan], [0, np.nan]]), decimal=5)
+
+	def test_to_json(self):
+		# res = self.data.delta(kpi_subset=['normal_same'], percentiles=[2.5, 5.0, 95.0, 97.5])
+		res = self.data.sga(percentiles=[2.5, 5.0, 95.0, 97.5])
+		print(res.to_json())
+
 
 if __name__ == '__main__':
-	#unittest.main()
+	# unittest.main()
 	np.random.seed(0)
 	exp = Experiment('B', *generate_random_data())
 	res = exp.delta(['normal_shifted'])
