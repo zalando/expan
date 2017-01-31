@@ -8,13 +8,14 @@
 
 import re
 import expan.core.statistics as statx
+import expan.core.early_stopping as es
 import warnings
 
 import expan.core.binning as binmodule  # name conflict with binning...
 import numpy as np
 import pandas as pd
 from expan.core.experimentdata import ExperimentData
-from expan.core.results import Results, delta_to_dataframe_all_variants, feature_check_to_dataframe
+from expan.core.results import Results, delta_to_dataframe_all_variants, feature_check_to_dataframe, group_sequential_to_dataframe
 
 # raise the same warning multiple times
 warnings.simplefilter('always', UserWarning)
@@ -360,9 +361,51 @@ class Experiment(ExperimentData):
 
 		return res
 
-	def delta(self, kpi_subset=None, derived_kpis=None, variant_subset=None,
-			  assume_normal=True, percentiles=[2.5, 97.5],
-			  min_observations=20, nruns=10000, relative=False, weighted_kpis=None):
+	def delta(self, method, kpi_subset=None, derived_kpis=None, **kwargs):
+		"""
+		Wrapper for different delta functions with 'method' being the following:
+
+		't_test': 			self.t_test_delta()
+		'group_sequential': self.group_sequential_delta()
+		"""
+		res = Results(None, metadata=self.metadata)
+		res.metadata['reference_kpi'] = {}
+		if 'weighted_kpis' in kwargs:
+			res.metadata['weighted_kpis'] = kwargs['weighted_kpis']
+
+		# determine the complete KPI name list
+		kpis_to_analyse = self.kpi_names.copy()
+		if derived_kpis is not None:
+			for dk in derived_kpis:
+				kpis_to_analyse.update([dk['name']])
+				# assuming the columns in the formula can all be cast into float
+				# and create the derived KPI as an additional column
+				self.kpis.loc[:,dk['name']] = eval(re.sub('([a-zA-Z_]+)', r'self.kpis.\1.astype(float)', dk['formula']))
+				# store the reference metric name to be used in the weighting
+				# TODO: only works for ratios
+				res.metadata['reference_kpi'][dk['name']] = re.sub('([a-zA-Z_]+)/', '', dk['formula'])
+
+		if kpi_subset is not None:
+			kpis_to_analyse.intersection_update(kpi_subset)
+		self.dbg(3, 'kpis_to_analyse: ' + ','.join(kpis_to_analyse))
+
+		if method == 't_test':
+			return self.t_test_delta(**kwargs)
+		elif method == 'group_sequential':
+			return self.group_sequential_delta(res, kpis_to_analyse, **kwargs)
+		else:
+			raise NotImplementedError
+
+	def t_test_delta(self, 
+					 kpi_subset=None, 
+					 derived_kpis=None, 
+					 variant_subset=None,
+			  		 assume_normal=True, 
+			  		 percentiles=[2.5, 97.5],
+			  		 min_observations=20, 
+			  		 nruns=10000, 
+			  		 relative=False, 
+			  		 weighted_kpis=None):
 		"""
 	    Compute delta (with confidence bounds) on all applicable kpis,
 	    and returns in the standard Results format.
@@ -463,6 +506,52 @@ class Experiment(ExperimentData):
 		res.calculate_prob_uplift_over_zero()
 
 		return res
+
+	def group_sequential_delta(self, 
+							   result,
+							   kpis_to_analyse,
+							   spending_function='obrien_fleming', 
+					 		   information_fraction=1, 
+							   alpha=0.05, 
+					 		   cap=8):
+		"""
+		Calculate the stopping criterion based on the group sequential design 
+		and the effect size.
+
+		Args:
+
+		Returns:
+
+		"""
+		if 'estimatedSampleSize' not in self.metadata:
+			raise ValueError("Missing 'estimatedSampleSize' for the group sequential method!")
+
+		for mname in kpis_to_analyse:
+			metric_df = self.kpis.reset_index()[['entity', 'variant', mname]]
+			baseline_metric = metric_df.iloc[:, 2][metric_df.iloc[:, 1] == self.baseline_variant]
+			current_sample_size = float(sum(~metric_df[mname].isnull()))
+
+			do_delta = (lambda f: group_sequential_to_dataframe(f.columns[2],
+															  	*es.group_sequential(
+																  x=f.iloc[:, 2],
+																  y=baseline_metric,
+																  spending_function=spending_function, 
+					 											  information_fraction=current_sample_size/self.metadata['estimatedSampleSize'], 
+					 											  alpha=alpha, 
+					 											  cap=cap)))
+	
+			# Actual calculation
+			df = metric_df.groupby('variant').apply(do_delta).unstack(0)
+			# set the stop label of the baseline variant to None
+			df.loc[(mname,'-',slice(None),'stop'),('value',self.baseline_variant)] = None
+
+			if result.df is None:
+				result.df = df
+			else:
+				result.df = result.df.append(df)
+
+		return result
+
 
 	def feature_check(self, feature_subset=None, variant_subset=None,
 					  threshold=0.05, percentiles=[2.5, 97.5], assume_normal=True,
@@ -685,10 +774,13 @@ if __name__ == '__main__':
 	np.random.seed(0)
 	metrics, metadata = generate_random_data()
 	metrics['time_since_treatment'] = metrics['treatment_start_time']
+	metadata['estimatedSampleSize'] = 100000
 	exp = Experiment('B', metrics, metadata, [4, 6])
-	res = exp.delta(kpi_subset=['derived'],
-			derived_kpis=[{'name':'derived','formula':'normal_same/normal_shifted'}],
-			weighted_kpis=['derived'])
+	#res = exp.delta(method='t_test', kpi_subset=['derived'],
+	#		derived_kpis=[{'name':'derived','formula':'normal_same/normal_shifted'}],
+	#		weighted_kpis=['derived'])
+	res = exp.delta(method='group_sequential', kpi_subset=['derived'],
+			derived_kpis=[{'name':'derived','formula':'normal_same/normal_shifted'}])
 
 # result = time_dependent_deltas(data.metrics.reset_index()
 #	[['variant','time_since_treatment','normal_shifted']],variants=['A','B']).df.loc[:,1]

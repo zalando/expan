@@ -599,6 +599,45 @@ def feature_check_to_dataframe(metric,
 	return df
 
 
+def group_sequential_to_dataframe(metric, 
+								  stop, 
+								  mu,								  
+								  samplesize_variant,
+								  samplesize_baseline,
+								  mu_variant,
+								  mu_baseline,
+								  subgroup_metric='-',
+								  subgroup=None):
+	"""Defines the Results data frame structure.
+
+	Args:
+	    metric:
+	    mu:
+	    pctiles:
+	    samplesize_variant:
+	    samplesize_baseline:
+	    mu_variant:
+	    mu_baseline:
+	    subgroup_metric:
+	    subgroup:
+
+	Returns:
+
+	"""
+	df = pd.DataFrame({
+		'metric': metric,
+		'pctile': None,
+		'statistic': ['uplift', 'sample_size', 'variant_mean', 'stop'],
+		'value': [mu, samplesize_variant, mu_variant, stop],
+		'subgroup_metric': subgroup_metric,
+		'subgroup': subgroup
+	})
+
+	df.set_index(Results.mandatory_index_levels, inplace=True)
+
+	return df
+
+
 if __name__ == '__main__':
 	#pass
 
