@@ -1,4 +1,6 @@
 # fileencoding: utf8
+import imp
+import json
 import os
 import unittest
 import warnings
@@ -9,8 +11,6 @@ import pandas as pd
 import expan.core.results as r
 from expan.core.experiment import Experiment
 from tests.tests_core.test_data import generate_random_data
-from expan.core.results import prob_uplift_over_zero_single_metric
-import imp
 
 imp.reload(r)
 
@@ -105,10 +105,36 @@ class ResultsClassTestCase(ResultsTestCase):
 		np.testing.assert_almost_equal(res.df.loc[pd.IndexSlice[:, :, :, 'prob_uplift_over_0'], 'value'],
 									   np.array([[0.946519, np.nan], [0, np.nan]]), decimal=5)
 
-	def test_to_json(self):
-		# res = self.data.delta(kpi_subset=['normal_same'], percentiles=[2.5, 5.0, 95.0, 97.5])
-		res = self.data.sga(percentiles=[2.5, 5.0, 95.0, 97.5])
-		print(res.to_json())
+	def test_to_json_delta(self):
+		json_object = json.loads(
+			self.data.delta(
+				kpi_subset=['normal_same'],
+				percentiles=[2.5, 97.5]
+			).to_json()
+		)
+		self.assertEqual(2, len(json_object['variants']))
+		self.assertEqual(1, len(json_object['variants'][0]['metrics']))
+		self.assertEqual(1, len(json_object['variants'][0]['metrics'][0]['subgroup_metrics']))
+		self.assertEqual(1, len(json_object['variants'][0]['metrics'][0]['subgroup_metrics'][0]['subgroups']))
+		self.assertEqual(5, len(json_object['variants'][0]['metrics'][0]['subgroup_metrics'][0]['subgroups'][0]['statistics']))
+		self.assertEqual(2, len(json_object['variants'][0]['metrics'][0]['subgroup_metrics'][0]['subgroups'][0]['statistics'][3]['pctiles']))
+
+	def test_to_json_sga(self):
+		json_object = json.loads(
+			self.data.sga(
+				percentiles=[2.5, 5.0, 95.0, 97.5]
+			).to_json()
+		)
+		self.assertEqual(2, len(json_object['variants']))
+		self.assertEqual(4, len(json_object['variants'][0]['metrics']))
+		self.assertEqual(2, len(json_object['variants'][0]['metrics'][0]['subgroup_metrics']))
+		self.assertGreaterEqual(4, len(json_object['variants'][0]['metrics'][0]['subgroup_metrics'][0]['subgroups']))
+		self.assertEqual(4, len(json_object['variants'][0]['metrics'][0]['subgroup_metrics'][0]['subgroups'][0]['statistics']))
+		self.assertEqual(1, len(json_object['variants'][0]['metrics'][0]['subgroup_metrics'][0]['subgroups'][0]['statistics'][3]['pctiles']))
+
+	def test_to_json_trend(self):
+		# res = self.data.trend()
+		pass
 
 
 if __name__ == '__main__':

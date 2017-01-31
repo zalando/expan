@@ -406,6 +406,7 @@ class Results(object):
 		df.fillna("nan", inplace=True)
 
 		json_tree = {}
+
 		variants = []
 		for variant in df.value.keys():
 			metrics = []
@@ -427,7 +428,14 @@ class Results(object):
 
 		json_tree['variants'] = variants
 
-		return json.dumps(json_tree)
+		json_string = json.dumps(json_tree)
+
+		try:
+			json.loads(json_string)
+			return json_string
+		except ValueError as e:
+			print('Invalid json created in expan.results.to_json(): %s' % e)
+			return None  # or: raise
 
 def prob_uplift_over_zero_single_metric(result_df, baseline_variant):
 	"""Calculate the probability of uplift>0 for a single metric.
