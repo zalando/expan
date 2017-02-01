@@ -1,4 +1,4 @@
-set tabstop=4          " how many columns a tab counts for
+set tabstop=4          " how many spaces a tab counts for
 set softtabstop=4
 set shiftwidth=4       " how many columns text is indentented with <<
                        " and >> and autoindent
