@@ -1,3 +1,8 @@
+" use this vim plugin:
+" - https://github.com/embear/vim-localvimrc
+" to be able to read local .lvimrc to override your default tabs
+" settings
+
 set tabstop=4          " how many spaces a tab counts for
 set softtabstop=4
 set shiftwidth=4       " how many columns text is indentented with <<
