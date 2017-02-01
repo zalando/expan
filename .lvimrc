@@ -2,4 +2,4 @@ set tabstop=4          " how many columns a tab counts for
 set softtabstop=4
 set shiftwidth=4       " how many columns text is indentented with <<
                        " and >> and autoindent
-set noexpandtab        " tab in insert mode produces spaces
+set noexpandtab        " tab in insert mode does not produces spaces
