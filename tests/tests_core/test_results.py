@@ -133,8 +133,8 @@ class ResultsClassTestCase(ResultsTestCase):
 		self.assertEqual(1, len(json_object['variants'][0]['metrics'][0]['subgroup_metrics'][0]['subgroups'][0]['statistics'][3]['pctiles']))
 
 	def test_to_json_trend(self):
-		# res = self.data.trend()
-		pass
+		# to_json() doesn't handle trend() results yet!
+		self.assertIsNone(self.data.trend().to_json())
 
 
 if __name__ == '__main__':

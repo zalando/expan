@@ -399,10 +399,15 @@ class Results(object):
 
 		df = deepcopy(self.df)
 
-		for column in df.index.names:
-			df[column] = df.index.get_level_values(column)
+		try:
+			for column in df.index.names:
+				df[column] = df.index.get_level_values(column)
+		except AttributeError:
+			self.dbg(-1, "trend() results are not supported yet")
+			return None
 
 		df = df.reset_index(drop=True).copy()
+
 		df.fillna("nan", inplace=True)
 
 		json_tree = {}
@@ -427,6 +432,7 @@ class Results(object):
 			variants.append({"name": variant, "metrics": metrics})
 
 		json_tree['variants'] = variants
+		json_tree['metadata'] = self.metadata
 
 		json_string = json.dumps(json_tree)
 
