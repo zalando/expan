@@ -327,11 +327,13 @@ class Results(object):
 
 	def to_csv(self, fpath):
 		"""
+		Persist to a csv file, losing metadata.
 
 		Args:
-		    fpath:
+		    fpath: file path where the csv should be created
 
 		Returns:
+			csv file
 
 		Note:
 		    This will lose all metadata.
@@ -383,16 +385,17 @@ class Results(object):
 
 		hfile.close()
 
-	def to_json(self):
+	def to_json(self, fpath=None):
 		"""
+		Produces either a JSON string (if there is no filepath specified)
+		or a JSON file containing the results.
 
 		Args:
-		    fpath:
+		    fpath: filepath where the result JSON file should be stored
 
 		Returns:
-
-		Note:
-		    This will lose all metadata.
+			string: JSON string with the results
+			file: JSON file with the results
 		"""
 
 		import json
@@ -438,10 +441,15 @@ class Results(object):
 
 		try:
 			json.loads(json_string)
-			return json_string
 		except ValueError as e:
-			print('Invalid json created in expan.results.to_json(): %s' % e)
-			return None  # or: raise
+			self.dbg(-2,'Invalid json created in expan.results.to_json(): %s' % e)
+			return None
+
+		if fpath:
+			with open(fpath, 'w') as json_file:
+				json.dump(obj=json_tree, fp=json_file)
+		else:
+			return json_string
 
 def prob_uplift_over_zero_single_metric(result_df, baseline_variant):
 	"""Calculate the probability of uplift>0 for a single metric.

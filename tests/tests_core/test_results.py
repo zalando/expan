@@ -116,8 +116,32 @@ class ResultsClassTestCase(ResultsTestCase):
 		self.assertEqual(1, len(json_object['variants'][0]['metrics']))
 		self.assertEqual(1, len(json_object['variants'][0]['metrics'][0]['subgroup_metrics']))
 		self.assertEqual(1, len(json_object['variants'][0]['metrics'][0]['subgroup_metrics'][0]['subgroups']))
-		self.assertEqual(5, len(json_object['variants'][0]['metrics'][0]['subgroup_metrics'][0]['subgroups'][0]['statistics']))
-		self.assertEqual(2, len(json_object['variants'][0]['metrics'][0]['subgroup_metrics'][0]['subgroups'][0]['statistics'][3]['pctiles']))
+		self.assertEqual(5, len(
+			json_object['variants'][0]['metrics'][0]['subgroup_metrics'][0]['subgroups'][0]['statistics']))
+		self.assertEqual(2, len(
+			json_object['variants'][0]['metrics'][0]['subgroup_metrics'][0]['subgroups'][0]['statistics'][3][
+				'pctiles']))
+
+	def test_to_json_delta_to_file(self):
+		self.data.delta(
+			kpi_subset=['normal_same'],
+			percentiles=[2.5, 97.5]
+		).to_json(fpath="test_json.json")
+
+		with open("test_json.json", 'r') as json_file:
+			json_object = json.load(fp=json_file)
+
+		self.assertEqual(2, len(json_object['variants']))
+		self.assertEqual(1, len(json_object['variants'][0]['metrics']))
+		self.assertEqual(1, len(json_object['variants'][0]['metrics'][0]['subgroup_metrics']))
+		self.assertEqual(1, len(json_object['variants'][0]['metrics'][0]['subgroup_metrics'][0]['subgroups']))
+		self.assertEqual(5, len(
+			json_object['variants'][0]['metrics'][0]['subgroup_metrics'][0]['subgroups'][0]['statistics']))
+		self.assertEqual(2, len(
+			json_object['variants'][0]['metrics'][0]['subgroup_metrics'][0]['subgroups'][0]['statistics'][3][
+				'pctiles']))
+
+		os.remove("test_json.json")
 
 	def test_to_json_sga(self):
 		json_object = json.loads(
@@ -129,13 +153,15 @@ class ResultsClassTestCase(ResultsTestCase):
 		self.assertEqual(4, len(json_object['variants'][0]['metrics']))
 		self.assertEqual(2, len(json_object['variants'][0]['metrics'][0]['subgroup_metrics']))
 		self.assertGreaterEqual(4, len(json_object['variants'][0]['metrics'][0]['subgroup_metrics'][0]['subgroups']))
-		self.assertEqual(4, len(json_object['variants'][0]['metrics'][0]['subgroup_metrics'][0]['subgroups'][0]['statistics']))
-		self.assertEqual(1, len(json_object['variants'][0]['metrics'][0]['subgroup_metrics'][0]['subgroups'][0]['statistics'][3]['pctiles']))
+		self.assertEqual(4, len(
+			json_object['variants'][0]['metrics'][0]['subgroup_metrics'][0]['subgroups'][0]['statistics']))
+		self.assertEqual(1, len(
+			json_object['variants'][0]['metrics'][0]['subgroup_metrics'][0]['subgroups'][0]['statistics'][3][
+				'pctiles']))
 
 	def test_to_json_trend(self):
 		# to_json() doesn't handle trend() results yet!
 		self.assertIsNone(self.data.trend().to_json())
-
 
 if __name__ == '__main__':
 	# unittest.main()
