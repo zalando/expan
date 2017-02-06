@@ -1,4 +1,6 @@
 # fileencoding: utf8
+import imp
+import json
 import os
 import unittest
 import warnings
@@ -9,8 +11,6 @@ import pandas as pd
 import expan.core.results as r
 from expan.core.experiment import Experiment
 from tests.tests_core.test_data import generate_random_data
-from expan.core.results import prob_uplift_over_zero_single_metric
-import imp
 
 imp.reload(r)
 
@@ -36,6 +36,7 @@ def load_example_results():
 	example_fpath = os.path.join(data_dir, example_fname)
 
 	return r.from_hdf(example_fpath)
+
 
 class ResultsTestCase(unittest.TestCase):
 	"""
@@ -79,7 +80,7 @@ class ResultsClassTestCase(ResultsTestCase):
 			)
 
 		if h5py_available:
-			#aa = load_example_results()
+			# aa = load_example_results()
 			warnings.warn("No data for h5 loading available... skipping tests of example h5 data")
 
 	def test_relative_uplift_delta(self):
@@ -93,19 +94,77 @@ class ResultsClassTestCase(ResultsTestCase):
 	def test_prob_uplift_over_zero_single_metric(self):
 		"""Check if the conversion from confidence intervals to probability is correct for one metric."""
 		res = self.data.delta(kpi_subset=['normal_same'])
-		#df = prob_uplift_over_zero_single_metric(res.df, self.data.baseline_variant)
-		np.testing.assert_almost_equal(res.df.loc[pd.IndexSlice[:,:,:,'prob_uplift_over_0'], 'value'],
+		# df = prob_uplift_over_zero_single_metric(res.df, self.data.baseline_variant)
+		np.testing.assert_almost_equal(res.df.loc[pd.IndexSlice[:, :, :, 'prob_uplift_over_0'], 'value'],
 									   np.array([[0.946519, np.nan]]), decimal=5)
 
 	def test_prob_uplift_over_zero_multiple_metric(self):
 		"""Check if the conversion from confidence intervals to probability is correct for multiple metrics."""
-		res = self.data.delta(kpi_subset=['normal_same','normal_shifted'])
-		#res.calculate_prob_uplift_over_zero()
-		np.testing.assert_almost_equal(res.df.loc[pd.IndexSlice[:,:,:,'prob_uplift_over_0'], 'value'],
-									   np.array([[0.946519,np.nan],[0,np.nan]]), decimal=5)
+		res = self.data.delta(kpi_subset=['normal_same', 'normal_shifted'])
+		# res.calculate_prob_uplift_over_zero()
+		np.testing.assert_almost_equal(res.df.loc[pd.IndexSlice[:, :, :, 'prob_uplift_over_0'], 'value'],
+									   np.array([[0.946519, np.nan], [0, np.nan]]), decimal=5)
+
+	def test_to_json_delta(self):
+		json_object = json.loads(
+			self.data.delta(
+				kpi_subset=['normal_same'],
+				percentiles=[2.5, 97.5]
+			).to_json()
+		)
+		self.assertEqual(2, len(json_object['variants']))
+		self.assertEqual(1, len(json_object['variants'][0]['metrics']))
+		self.assertEqual(1, len(json_object['variants'][0]['metrics'][0]['subgroup_metrics']))
+		self.assertEqual(1, len(json_object['variants'][0]['metrics'][0]['subgroup_metrics'][0]['subgroups']))
+		self.assertEqual(5, len(
+			json_object['variants'][0]['metrics'][0]['subgroup_metrics'][0]['subgroups'][0]['statistics']))
+		self.assertEqual(2, len(
+			json_object['variants'][0]['metrics'][0]['subgroup_metrics'][0]['subgroups'][0]['statistics'][3][
+				'pctiles']))
+
+	def test_to_json_delta_to_file(self):
+		self.data.delta(
+			kpi_subset=['normal_same'],
+			percentiles=[2.5, 97.5]
+		).to_json(fpath="test_json.json")
+
+		with open("test_json.json", 'r') as json_file:
+			json_object = json.load(fp=json_file)
+
+		self.assertEqual(2, len(json_object['variants']))
+		self.assertEqual(1, len(json_object['variants'][0]['metrics']))
+		self.assertEqual(1, len(json_object['variants'][0]['metrics'][0]['subgroup_metrics']))
+		self.assertEqual(1, len(json_object['variants'][0]['metrics'][0]['subgroup_metrics'][0]['subgroups']))
+		self.assertEqual(5, len(
+			json_object['variants'][0]['metrics'][0]['subgroup_metrics'][0]['subgroups'][0]['statistics']))
+		self.assertEqual(2, len(
+			json_object['variants'][0]['metrics'][0]['subgroup_metrics'][0]['subgroups'][0]['statistics'][3][
+				'pctiles']))
+
+		os.remove("test_json.json")
+
+	def test_to_json_sga(self):
+		json_object = json.loads(
+			self.data.sga(
+				percentiles=[2.5, 5.0, 95.0, 97.5]
+			).to_json()
+		)
+		self.assertEqual(2, len(json_object['variants']))
+		self.assertEqual(4, len(json_object['variants'][0]['metrics']))
+		self.assertEqual(2, len(json_object['variants'][0]['metrics'][0]['subgroup_metrics']))
+		self.assertGreaterEqual(4, len(json_object['variants'][0]['metrics'][0]['subgroup_metrics'][0]['subgroups']))
+		self.assertEqual(4, len(
+			json_object['variants'][0]['metrics'][0]['subgroup_metrics'][0]['subgroups'][0]['statistics']))
+		self.assertEqual(1, len(
+			json_object['variants'][0]['metrics'][0]['subgroup_metrics'][0]['subgroups'][0]['statistics'][3][
+				'pctiles']))
+
+	def test_to_json_trend(self):
+		# to_json() doesn't handle trend() results yet!
+		self.assertIsNone(self.data.trend().to_json())
 
 if __name__ == '__main__':
-	#unittest.main()
+	# unittest.main()
 	np.random.seed(0)
 	exp = Experiment('B', *generate_random_data())
 	res = exp.delta(['normal_shifted'])
