@@ -67,7 +67,7 @@ class BayesFactorTestCases(EarlyStoppingTestCase):
     	"""
 		stop,delta,CI,n_x,n_y,mu_x,mu_y = es.bayes_factor(self.rand_s1, self.rand_s2)
 		self.assertEqual(stop, True)
-		self.assertAlmostEqual(delta, -0.15760400163980656)
+		self.assertAlmostEqual(delta, -0.15887364780635896)
 		self.assertAlmostEqual(CI['lower'], -0.24414725578976518)
 		self.assertAlmostEqual(CI['upper'], -0.072120687308212819)
 		self.assertEqual(n_x, 1000)

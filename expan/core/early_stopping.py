@@ -139,7 +139,7 @@ def bayes_factor(x, y, distribution='normal'):
 
 	interval = HDI_from_MCMC(traces['alpha'])
 
-	return stop, np.mean(traces['alpha']), {'lower':interval[0],'upper':interval[1]}, n_x, n_y, mu_x, mu_y
+	return stop, mu_x-mu_y, {'lower':interval[0],'upper':interval[1]}, n_x, n_y, mu_x, mu_y
 
 
 if __name__ == '__main__':
