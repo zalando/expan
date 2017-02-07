@@ -313,8 +313,8 @@ class ExperimentClassTestCases(ExperimentTestCase):
 
 		self.assertTrue(self.data.baseline_variant == 'B')
 
-		########### t_test_delta ###########
-		result = self.data.delta(method='t_test', kpi_subset=['normal_same'])
+		########### fixed_horizon_delta ###########
+		result = self.data.delta(method='fixed_horizon', kpi_subset=['normal_same'])
 
 		# check uplift
 		df = result.statistic('delta', 'uplift', 'normal_same')
@@ -362,16 +362,16 @@ class ExperimentClassTestCases(ExperimentTestCase):
 		np.testing.assert_equal(True, all(item in result.metadata.items()
 		                                for item in self.testmetadata.items()))
 
-	def test_t_test_delta(self):
+	def test_fixed_horizon_delta(self):
 		"""
-	    Check if Experiment.t_test_delta() functions properly
+	    Check if Experiment.fixed_horizon_delta() functions properly
 	    """
 		# this should work
 		self.assertTrue(isinstance(self.data, Experiment))  # check that the subclassing works
 
 		self.assertTrue(self.data.baseline_variant == 'B')
 
-		result = self.data.t_test_delta(kpi_subset=
+		result = self.data.fixed_horizon_delta(kpi_subset=
 								 [m for m in self.data.kpi_names if 'normal' in m])
 
 		# check uplift
@@ -439,14 +439,14 @@ class ExperimentClassTestCases(ExperimentTestCase):
 
 	def test_delta_derived_kpis(self):
 		"""
-	    Check if Experiment.t_test_delta() functions properly for derived KPIs
+	    Check if Experiment.fixed_horizon_delta() functions properly for derived KPIs
 	    """
 		# this should work
 		self.assertTrue(isinstance(self.data, Experiment))  # check that the subclassing works
 
 		self.assertTrue(self.data.baseline_variant == 'B')
 
-		result = self.data.t_test_delta(kpi_subset=['derived'], 
+		result = self.data.fixed_horizon_delta(kpi_subset=['derived'], 
 			derived_kpis=[{'name':'derived','formula':'normal_same/normal_shifted'}])
 
 		# check uplift
@@ -472,7 +472,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
 
 	def test_delta_derived_kpis_weighted(self):
 		"""
-	    Check if Experiment.t_test_delta() functions properly for derived KPIs using 
+	    Check if Experiment.fixed_horizon_delta() functions properly for derived KPIs using 
 	    the weighted method.
 	    """
 		# this should work
@@ -480,7 +480,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
 
 		self.assertTrue(self.data.baseline_variant == 'B')
 
-		result = self.data.t_test_delta(kpi_subset=['derived'], 
+		result = self.data.fixed_horizon_delta(kpi_subset=['derived'], 
 			derived_kpis=[{'name':'derived','formula':'normal_same/normal_shifted'}],
 			weighted_kpis=['derived'])
 
@@ -509,7 +509,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
 		"""
 		Check if the unequal variance warning message is persisted to the Results structure
     	"""
-		result = self.data.t_test_delta(kpi_subset=['normal_unequal_variance'],
+		result = self.data.fixed_horizon_delta(kpi_subset=['normal_unequal_variance'],
 								 variant_subset=['A'])
 		w = result.metadata['warnings']['Experiment.delta']
 		self.assertTrue(isinstance(w, UserWarning))

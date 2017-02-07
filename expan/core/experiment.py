@@ -361,7 +361,7 @@ class Experiment(ExperimentData):
 
 		return res
 
-	def delta(self, method, kpi_subset=None, derived_kpis=None, **kwargs):
+	def delta(self, method='fixed_horizon', kpi_subset=None, derived_kpis=None, **kwargs):
 		"""
 		Wrapper for different delta functions with 'method' being the following:
 
@@ -389,8 +389,8 @@ class Experiment(ExperimentData):
 			kpis_to_analyse.intersection_update(kpi_subset)
 		self.dbg(3, 'kpis_to_analyse: ' + ','.join(kpis_to_analyse))
 
-		if method == 't_test':
-			return self.t_test_delta(kpi_subset, derived_kpis, **kwargs)
+		if method == 'fixed_horizon':
+			return self.fixed_horizon_delta(kpi_subset, derived_kpis, **kwargs)
 		elif method == 'group_sequential':
 			return self.group_sequential_delta(res, kpis_to_analyse, **kwargs)
 		elif method == 'bayes_factor':
@@ -398,16 +398,16 @@ class Experiment(ExperimentData):
 		else:
 			raise NotImplementedError
 
-	def t_test_delta(self, 
-					 kpi_subset=None, 
-					 derived_kpis=None, 
-					 variant_subset=None,
-			  		 assume_normal=True, 
-			  		 percentiles=[2.5, 97.5],
-			  		 min_observations=20, 
-			  		 nruns=10000, 
-			  		 relative=False, 
-			  		 weighted_kpis=None):
+	def fixed_horizon_delta(self, 
+					 		kpi_subset=None, 
+					 		derived_kpis=None, 
+					 		variant_subset=None,
+			  		 		assume_normal=True, 
+			  		 		percentiles=[2.5, 97.5],
+			  		 		min_observations=20, 
+			  		 		nruns=10000, 
+			  		 		relative=False, 
+			  		 		weighted_kpis=None):
 		"""
 	    Compute delta (with confidence bounds) on all applicable kpis,
 	    and returns in the standard Results format.

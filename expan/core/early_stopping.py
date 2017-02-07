@@ -129,7 +129,7 @@ def bayes_factor(x, y, distribution='normal'):
 	model_file = __location__ + '/../models/' + distribution + '_kpi.stan'
 	sm = StanModel(file=model_file)
 
-	fit = sm.sampling(data=fit_data, iter=25000, chains=4, n_jobs=1)
+	fit = sm.sampling(data=fit_data, iter=25000, chains=4, n_jobs=1, seed=1)
 	traces = fit.extract()
 	kde = gaussian_kde(traces['delta'])
 
@@ -148,4 +148,4 @@ if __name__ == '__main__':
 	np.random.seed(0)
 	rand_s1 = np.random.normal(loc=0, size=1000)
 	rand_s2 = np.random.normal(loc=0.1, size=1000)
-	stop,delta,n_x,n_y,mu_x,mu_y = group_sequential(rand_s1, rand_s2)
+	stop,delta,interval,n_x,n_y,mu_x,mu_y = bayes_factor(rand_s1, rand_s2)

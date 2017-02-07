@@ -46,9 +46,10 @@ class GroupSequentialTestCases(EarlyStoppingTestCase):
 		"""
     	Check the group sequential function.
     	"""
-		stop,delta,n_x,n_y,mu_x,mu_y = es.group_sequential(self.rand_s1, self.rand_s2)
+		stop,delta,CI,n_x,n_y,mu_x,mu_y = es.group_sequential(self.rand_s1, self.rand_s2)
 		self.assertEqual(stop, True)
 		self.assertAlmostEqual(delta, -0.15887364780635896)
+		self.assertEqual(len(CI), 0)
 		self.assertEqual(n_x, 1000)
 		self.assertEqual(n_y, 1000)
 		self.assertAlmostEqual(mu_x, -0.045256707490195384)
@@ -60,16 +61,19 @@ class BayesFactorTestCases(EarlyStoppingTestCase):
   	Test cases for the bayes_factor function in core.early_stopping.
   	"""
 
-	# def test_bayes_factor(self):
-	# 	"""
- #    	Check the bayes_factor function.
- #    	"""
-	# 	# Check if error is raised for None data
-	# 	with self.assertRaises(ValueError):
-	# 		statx.chi_square(self.samples.temperature, None)
-	# 	# Check if error is raised for None data
-	# 	with self.assertRaises(ValueError):
-	# 		statx.chi_square(None, self.samples.temperature)
+	def test_bayes_factor(self):
+		"""
+    	Check the Bayes factor function.
+    	"""
+		stop,delta,CI,n_x,n_y,mu_x,mu_y = es.bayes_factor(self.rand_s1, self.rand_s2)
+		self.assertEqual(stop, True)
+		self.assertAlmostEqual(delta, -0.15760400163980656)
+		self.assertAlmostEqual(CI['lower'], -0.24414725578976518)
+		self.assertAlmostEqual(CI['upper'], -0.072120687308212819)
+		self.assertEqual(n_x, 1000)
+		self.assertEqual(n_y, 1000)
+		self.assertAlmostEqual(mu_x, -0.045256707490195384)
+		self.assertAlmostEqual(mu_y, 0.11361694031616358)
 
 
 if __name__ == '__main__':

@@ -86,20 +86,20 @@ class ResultsClassTestCase(ResultsTestCase):
 		"""Check if the calculation of relative uplift for delta results is
 	    correct.
 	    """
-		res = self.data.t_test_delta()
+		res = self.data.fixed_horizon_delta()
 		df = res.relative_uplift('delta', 'normal_same')
 		np.testing.assert_almost_equal(df, np.array([[-4.219601, 0]]), decimal=5)
 
 	def test_prob_uplift_over_zero_single_metric(self):
 		"""Check if the conversion from confidence intervals to probability is correct for one metric."""
-		res = self.data.t_test_delta(kpi_subset=['normal_same'])
+		res = self.data.fixed_horizon_delta(kpi_subset=['normal_same'])
 		#df = prob_uplift_over_zero_single_metric(res.df, self.data.baseline_variant)
 		np.testing.assert_almost_equal(res.df.loc[pd.IndexSlice[:,:,:,'prob_uplift_over_0'], 'value'],
 									   np.array([[0.946519, np.nan]]), decimal=5)
 
 	def test_prob_uplift_over_zero_multiple_metric(self):
 		"""Check if the conversion from confidence intervals to probability is correct for multiple metrics."""
-		res = self.data.t_test_delta(kpi_subset=['normal_same','normal_shifted'])
+		res = self.data.fixed_horizon_delta(kpi_subset=['normal_same','normal_shifted'])
 		#res.calculate_prob_uplift_over_zero()
 		np.testing.assert_almost_equal(res.df.loc[pd.IndexSlice[:,:,:,'prob_uplift_over_0'], 'value'],
 									   np.array([[0.946519,np.nan],[0,np.nan]]), decimal=5)
