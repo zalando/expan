@@ -1,6 +1,47 @@
 Change Log
 ==========
 
+`v0.4.3 <https://github.com/zalando/expan/tree/v0.4.3>`__ (2017-02-07)
+----------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/zalando/expan/compare/v0.4.2...v0.4.3>`__
+
+**Closed issues:**
+
+-  coverage % is misleading
+   `#23 <https://github.com/zalando/expan/issues/23>`__
+
+**Merged pull requests:**
+
+-  Vim modelines `#63 <https://github.com/zalando/expan/pull/63>`__
+   (`gbordyugov <https://github.com/gbordyugov>`__)
+-  Feature/octo 1253 expan results in json
+   `#62 <https://github.com/zalando/expan/pull/62>`__
+   (`mkolarek <https://github.com/mkolarek>`__)
+-  0.4.2 release `#60 <https://github.com/zalando/expan/pull/60>`__
+   (`mkolarek <https://github.com/mkolarek>`__)
+
+`v0.4.2 <https://github.com/zalando/expan/tree/v0.4.2>`__ (2016-12-08)
+----------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/zalando/expan/compare/v0.4.1...v0.4.2>`__
+
+**Fixed bugs:**
+
+-  frequency table in the chi square test doesn't respect the order of
+   categories `#56 <https://github.com/zalando/expan/issues/56>`__
+
+**Merged pull requests:**
+
+-  OCTO-1143 Review outlier filtering
+   `#59 <https://github.com/zalando/expan/pull/59>`__
+   (`domheger <https://github.com/domheger>`__)
+-  Workaround to fix #56
+   `#57 <https://github.com/zalando/expan/pull/57>`__
+   (`jbao <https://github.com/jbao>`__)
+
 `v0.4.1 <https://github.com/zalando/expan/tree/v0.4.1>`__ (2016-10-18)
 ----------------------------------------------------------------------
 
