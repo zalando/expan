@@ -76,7 +76,9 @@ def group_sequential(x,
 	else:
 		stop = False
 
-	return stop, mu_x-mu_y, {}, n_x, n_y, mu_x, mu_y
+	interval = statx.normal_difference(mu_x,sigma_x,n_x,mu_y,sigma_y,n_y,[alpha_new*100/2,100-alpha_new*100/2])
+
+	return stop, mu_x-mu_y, interval, n_x, n_y, mu_x, mu_y
 
 
 def HDI_from_MCMC(posterior_samples, credible_mass=0.95):
@@ -148,4 +150,4 @@ if __name__ == '__main__':
 	np.random.seed(0)
 	rand_s1 = np.random.normal(loc=0, size=1000)
 	rand_s2 = np.random.normal(loc=0.1, size=1000)
-	stop,delta,interval,n_x,n_y,mu_x,mu_y = bayes_factor(rand_s1, rand_s2)
+	stop,delta,interval,n_x,n_y,mu_x,mu_y = group_sequential(rand_s1, rand_s2)
