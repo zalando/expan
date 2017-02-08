@@ -377,6 +377,8 @@ class Experiment(ExperimentData):
 	        derived_kpis (list): definition of additional KPIs derived from the
 	        	primary ones, e.g.
 	        	[{'name':'return_rate', 'formula':'returned/ordered'}]
+				derived kpi names are alphanumerical starting with a
+				letter, i.e. [a-zA-Z][0-9a-zA-Z_]+
 	        variant_subset (list): Variants to use compare against baseline. If
 	            set to None all variants are used.
 
@@ -413,7 +415,7 @@ class Experiment(ExperimentData):
 				kpis_to_analyse.update([dk['name']])
 				# assuming the columns in the formula can all be cast into float
 				# and create the derived KPI as an additional column
-				self.kpis.loc[:,dk['name']] = eval(re.sub('([a-zA-Z_]+)', r'self.kpis.\1.astype(float)', dk['formula']))
+				self.kpis.loc[:,dk['name']] = eval(re.sub('([a-zA-Z][0-9a-zA-Z_]*)', r'self.kpis.\1.astype(float)', dk['formula']))
 				# store the reference metric name to be used in the weighting
 				# TODO: only works for ratios
 				res.metadata['reference_kpi'][dk['name']] = re.sub('([a-zA-Z_]+)/', '', dk['formula'])
