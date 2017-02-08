@@ -395,6 +395,8 @@ class Experiment(ExperimentData):
 			return self.group_sequential_delta(res, kpis_to_analyse, **kwargs)
 		elif method == 'bayes_factor':
 			return self.bayes_factor_delta(res, kpis_to_analyse, **kwargs)
+		elif method == 'bayes_precision':
+			return self.bayes_precision_delta(res, kpis_to_analyse, **kwargs)
 		else:
 			raise NotImplementedError
 
@@ -577,6 +579,51 @@ class Experiment(ExperimentData):
 																  x=f.iloc[:, 2],
 																  y=baseline_metric,
 																  distribution=distribution)))
+	
+			# Actual calculation
+			df = metric_df.groupby('variant').apply(do_delta).unstack(0)
+			# set the stop label of the baseline variant to None
+			df.loc[(mname,'-',slice(None),'stop'),('value',self.baseline_variant)] = None
+
+			if result.df is None:
+				result.df = df
+			else:
+				result.df = result.df.append(df)
+
+		return result
+
+
+	def bayes_precision_delta(self, 
+						   	  result,
+						   	  kpis_to_analyse,
+						   	  distribution='normal',
+						   	  posterior_width=0.08):
+		"""
+		Calculate the stopping criterion based on the precision of the posterior 
+		and the effect size.
+
+		Args:
+			result: the initialized Results object
+			kpis_to_analyse: list of KPIs to be analysed
+			distribution: name of the KPI distribution model, which assumes a
+				Stan model file with the same name exists
+			posterior_width: the stopping criterion, threshold of the posterior 
+				width
+
+		Returns:
+			a Results object
+
+		"""
+		for mname in kpis_to_analyse:
+			metric_df = self.kpis.reset_index()[['entity', 'variant', mname]]
+			baseline_metric = metric_df.iloc[:, 2][metric_df.iloc[:, 1] == self.baseline_variant]
+
+			do_delta = (lambda f: early_stopping_to_dataframe(f.columns[2],
+															  *es.bayes_precision(
+																  x=f.iloc[:, 2],
+																  y=baseline_metric,
+																  distribution=distribution,
+																  posterior_width=posterior_width)))
 	
 			# Actual calculation
 			df = metric_df.groupby('variant').apply(do_delta).unstack(0)
@@ -819,7 +866,7 @@ if __name__ == '__main__':
 	#		weighted_kpis=['derived'])
 	#res = exp.delta(method='group_sequential', kpi_subset=['derived'],
 	#		derived_kpis=[{'name':'derived','formula':'normal_same/normal_shifted'}])
-	res = exp.delta(method='bayes_factor', kpi_subset=['normal_same'])
+	res = exp.delta(method='bayes_precision', kpi_subset=['normal_same'])
 
 # result = time_dependent_deltas(data.metrics.reset_index()
 #	[['variant','time_since_treatment','normal_shifted']],variants=['A','B']).df.loc[:,1]

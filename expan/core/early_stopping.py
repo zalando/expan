@@ -144,10 +144,52 @@ def bayes_factor(x, y, distribution='normal'):
 	return stop, mu_x-mu_y, {'lower':interval[0],'upper':interval[1]}, n_x, n_y, mu_x, mu_y
 
 
+def bayes_precision(x, y, distribution='normal', posterior_width=0.08):
+	"""
+	Args:
+		sm (pystan.model.StanModel): precompiled Stan model object
+		simulation_index (int): random seed used for the simulation
+		day_index (int): time step of the peeking
+		kpi (str): KPI name
+
+	Returns:
+		boolean
+	"""
+	# Checking if data was provided
+	if x is None or y is None:
+		raise ValueError('Please provide two non-None samples.')
+
+	# Coercing missing values to right format
+	_x = np.array(x, dtype=float) 
+	_y = np.array(y, dtype=float) 
+
+	mu_x = np.nanmean(_x)
+	mu_y = np.nanmean(_y)
+	n_x = statx.sample_size(_x)
+	n_y = statx.sample_size(_y)
+
+	if distribution == 'normal':
+		fit_data = {'Nc': n_y, 
+					'Nt': n_x, 
+					'x': _x, 
+					'y': _y}
+	else:
+		raise NotImplementedError
+	model_file = __location__ + '/../models/' + distribution + '_kpi.stan'
+	sm = StanModel(file=model_file)
+
+	fit = sm.sampling(data=fit_data, iter=25000, chains=4, n_jobs=1, seed=1)
+	traces = fit.extract()
+	interval = HDI_from_MCMC(traces['delta'])
+	stop = interval[1] - interval[0] < posterior_width
+
+	return stop, mu_x-mu_y, {'lower':interval[0],'upper':interval[1]}, n_x, n_y, mu_x, mu_y
+
+
 if __name__ == '__main__':
 	#res = obrien_fleming(np.linspace(0,1,5+1)[1:])
 	#res = obrien_fleming(0.5)
 	np.random.seed(0)
 	rand_s1 = np.random.normal(loc=0, size=1000)
 	rand_s2 = np.random.normal(loc=0.1, size=1000)
-	stop,delta,interval,n_x,n_y,mu_x,mu_y = group_sequential(rand_s1, rand_s2)
+	stop,delta,interval,n_x,n_y,mu_x,mu_y = bayes_precision(rand_s1, rand_s2)

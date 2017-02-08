@@ -609,18 +609,21 @@ def early_stopping_to_dataframe(metric,
 								mu_baseline,
 								subgroup_metric='-',
 								subgroup=None):
-	"""Defines the Results data frame structure.
+	"""
+	Create the Results data frame structure from the output of early-stopping
+	functions.
 
 	Args:
-	    metric:
-	    mu:
-	    pctiles:
-	    samplesize_variant:
-	    samplesize_baseline:
-	    mu_variant:
-	    mu_baseline:
-	    subgroup_metric:
-	    subgroup:
+	    metric: metric name
+	    stop: whether to stop the experiment based on this metric
+	    mu: mean
+	    pctiles: percentiles
+	    samplesize_variant: sample size of the non-default variant
+	    samplesize_baseline: sample size of the default variant
+	    mu_variant: absolute mean of the non-default variant
+	    mu_baseline: absolute mean of the default variant
+	    subgroup_metric: subgroup metric name
+	    subgroup: subgroup name
 
 	Returns:
 		the result data frame
