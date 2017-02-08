@@ -415,6 +415,7 @@ class Results(object):
 
 		json_tree = {}
 
+		stop_value = None
 		variants = []
 		for variant in df.value.keys():
 			metrics = []
@@ -425,13 +426,19 @@ class Results(object):
 					for subgroup in df[df.subgroup_metric == subgroup_metric].subgroup.unique():
 						statistics = []
 						for statistic in df[df.subgroup == subgroup].statistic.unique():
-							pctiles = []
-							for pctile in df[df.statistic == statistic].pctile.unique():
-								pctiles.append({"name": str(pctile), "value": df[(df.pctile == pctile) & (df.statistic == statistic) & (df.subgroup == subgroup) & (df.subgroup_metric == subgroup_metric) & (df.metric == metric)].value[variant].values[0]})
-							statistics.append({"name": statistic, "pctiles": pctiles})
+							if statistic not in "stop":
+								pctiles = []
+								for pctile in df[df.statistic == statistic].pctile.unique():
+									pctiles.append({"name": str(pctile), "value": df[(df.pctile == pctile) & (df.statistic == statistic) & (df.subgroup == subgroup) & (df.subgroup_metric == subgroup_metric) & (df.metric == metric)].value[variant].values[0]})
+								statistics.append({"name": statistic, "pctiles": pctiles})
+							elif statistic in "stop":
+								stop_value = df[(df.pctile == pctile) & (df.statistic == statistic) & (df.subgroup == subgroup) & (df.subgroup_metric == subgroup_metric) & (df.metric == metric)].value[variant].values[0]
 						subgroups.append({"name": subgroup, "statistics": statistics})
 					subgroup_metrics.append({"name": subgroup_metric, "subgroups": subgroups})
-				metrics.append({"name": metric, "subgroup_metrics": subgroup_metrics})
+				if stop_value:
+					metrics.append({"name": metric, "subgroup_metrics": subgroup_metrics, "stop": stop_value})
+				else:
+					metrics.append({"name": metric, "subgroup_metrics": subgroup_metrics})
 			variants.append({"name": variant, "metrics": metrics})
 
 		json_tree['variants'] = variants
