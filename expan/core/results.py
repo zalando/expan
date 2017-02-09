@@ -12,6 +12,7 @@ from scipy.stats import norm
 
 from expan.core.debugging import Dbg
 
+
 class Results(object):
 	"""
 	A Results instance represents the results of a series of analyses such as
@@ -28,7 +29,7 @@ class Results(object):
 		This will make the columns a normal index rather than a multi-index. Currently, always a multi-index with second level only containing a single value 'value'.
 	"""
 
-	#TODO: maybe move these two to the __init__?
+	# TODO: maybe move these two to the __init__?
 	mandatory_index_levels = [
 		'metric',
 		'subgroup_metric',
@@ -139,16 +140,19 @@ class Results(object):
 		# NB: this will NOT work if we store delta and SGA results in the same object
 		# if the subgroup index contains only NaNs
 		if len(self.df.index.levels[2]) == 0:
-			df = self.df.groupby(level=['metric']).apply(lambda x:prob_uplift_over_zero_single_metric(x,self.metadata['baseline_variant']))
+			df = self.df.groupby(level=['metric']).apply(
+				lambda x: prob_uplift_over_zero_single_metric(x, self.metadata['baseline_variant']))
 			# remove redundant levels (coming from groupby)
-			df.reset_index(level=0,drop=True,inplace=True)
+			df.reset_index(level=0, drop=True, inplace=True)
 		else:
-			df = self.df.groupby(level=['metric','subgroup_metric','subgroup']).apply(lambda x:prob_uplift_over_zero_single_metric(x,self.metadata['baseline_variant']))
+			df = self.df.groupby(level=['metric', 'subgroup_metric', 'subgroup']).apply(
+				lambda x: prob_uplift_over_zero_single_metric(x, self.metadata['baseline_variant']))
 			# remove redundant levels (coming from groupby)
-			df.reset_index(level=[0,1,2],drop=True,inplace=True)
+			df.reset_index(level=[0, 1, 2], drop=True, inplace=True)
 
 		self.df = df
-		#return df
+
+	# return df
 
 	def delta_means(self, metric=None, subgroup_metric='-'):
 		"""
@@ -323,11 +327,13 @@ class Results(object):
 
 	def to_csv(self, fpath):
 		"""
+		Persist to a csv file, losing metadata.
 
 		Args:
-		    fpath:
+		    fpath: file path where the csv should be created
 
 		Returns:
+			csv file
 
 		Note:
 		    This will lose all metadata.
@@ -379,6 +385,78 @@ class Results(object):
 
 		hfile.close()
 
+	def to_json(self, fpath=None):
+		"""
+		Produces either a JSON string (if there is no filepath specified)
+		or a JSON file containing the results.
+
+		Args:
+		    fpath: filepath where the result JSON file should be stored
+
+		Returns:
+			string: JSON string with the results
+			file: JSON file with the results
+		"""
+
+		import json
+
+		df = deepcopy(self.df)
+
+		try:
+			for column in df.index.names:
+				df[column] = df.index.get_level_values(column)
+		except AttributeError:
+			self.dbg(-1, "trend() results are not supported yet")
+			return None
+
+		df = df.reset_index(drop=True).copy()
+
+		df.fillna("nan", inplace=True)
+
+		json_tree = {}
+
+		stop_value = None
+		variants = []
+		for variant in df.value.keys():
+			metrics = []
+			for metric in df.metric.unique():
+				subgroup_metrics = []
+				for subgroup_metric in df[df.metric == metric].subgroup_metric.unique():
+					subgroups = []
+					for subgroup in df[df.subgroup_metric == subgroup_metric].subgroup.unique():
+						statistics = []
+						for statistic in df[df.subgroup == subgroup].statistic.unique():
+							if statistic not in "stop":
+								pctiles = []
+								for pctile in df[df.statistic == statistic].pctile.unique():
+									pctiles.append({"name": str(pctile), "value": df[(df.pctile == pctile) & (df.statistic == statistic) & (df.subgroup == subgroup) & (df.subgroup_metric == subgroup_metric) & (df.metric == metric)].value[variant].values[0]})
+								statistics.append({"name": statistic, "pctiles": pctiles})
+							elif statistic in "stop":
+								stop_value = df[(df.pctile == pctile) & (df.statistic == statistic) & (df.subgroup == subgroup) & (df.subgroup_metric == subgroup_metric) & (df.metric == metric)].value[variant].values[0]
+						subgroups.append({"name": subgroup, "statistics": statistics})
+					subgroup_metrics.append({"name": subgroup_metric, "subgroups": subgroups})
+				if stop_value:
+					metrics.append({"name": metric, "subgroup_metrics": subgroup_metrics, "stop": stop_value})
+				else:
+					metrics.append({"name": metric, "subgroup_metrics": subgroup_metrics})
+			variants.append({"name": variant, "metrics": metrics})
+
+		json_tree['variants'] = variants
+		json_tree['metadata'] = self.metadata
+
+		json_string = json.dumps(json_tree)
+
+		try:
+			json.loads(json_string)
+		except ValueError as e:
+			self.dbg(-2,'Invalid json created in expan.results.to_json(): %s' % e)
+			return None
+
+		if fpath:
+			with open(fpath, 'w') as json_file:
+				json.dump(obj=json_tree, fp=json_file)
+		else:
+			return json_string
 
 def prob_uplift_over_zero_single_metric(result_df, baseline_variant):
 	"""Calculate the probability of uplift>0 for a single metric.
@@ -390,15 +468,15 @@ def prob_uplift_over_zero_single_metric(result_df, baseline_variant):
 	Returns:
 		DataFrame: result data frame with one additional statistic 'prob_uplift_over_0'
 	"""
-	pctile = 97.5 # result should be independent of the percentile that we choose
+	pctile = 97.5  # result should be independent of the percentile that we choose
 	all_variants = set(result_df.columns.levels[1])
 	# iterate over all non-baseline variants
 	variant = all_variants - set([baseline_variant])
-	#set_trace()
-	prob_dict = {baseline_variant:np.nan}
+	# set_trace()
+	prob_dict = {baseline_variant: np.nan}
 	for v in variant:
-		mu = float(result_df.xs(('uplift'),level=('statistic'))[('value',v)])
-		x = float(result_df.xs(('uplift_pctile',pctile),level=('statistic','pctile'))[('value',v)])
+		mu = float(result_df.xs(('uplift'), level=('statistic'))[('value', v)])
+		x = float(result_df.xs(('uplift_pctile', pctile), level=('statistic', 'pctile'))[('value', v)])
 		sigma = statx.estimate_std(x, mu, pctile)
 
 		prob = 1 - norm.cdf(0, loc=mu, scale=sigma)
@@ -411,16 +489,17 @@ def prob_uplift_over_zero_single_metric(result_df, baseline_variant):
 	# a prob df w/o multi-index
 	prob_df = pd.DataFrame([prob_list], columns=result_df.columns)
 	# reconstruct indices
-	for i in ['metric','subgroup_metric','subgroup']:
+	for i in ['metric', 'subgroup_metric', 'subgroup']:
 		prob_df[i] = result_df.index.get_level_values(i)[0]
 	prob_df['statistic'] = 'prob_uplift_over_0'
 	prob_df['pctile'] = np.nan
 	prob_df.set_index(Results.mandatory_index_levels, inplace=True)
 
-	ret = pd.concat((result_df,prob_df))
+	ret = pd.concat((result_df, prob_df))
 	ret.sort_index(inplace=True)
 
 	return ret
+
 
 def from_hdf(fpath, dbg=None):
 	"""
@@ -652,30 +731,31 @@ def early_stopping_to_dataframe(metric,
 
 
 if __name__ == '__main__':
-	#pass
+	# pass
 
 	np.random.seed(0)
 	from tests.tests_core.test_data import generate_random_data
 	from expan.core.experiment import Experiment
+
 	data = Experiment('B', *generate_random_data())
-	res = data.delta(kpi_subset=['normal_same','normal_shifted'])
-	# df = res.calculate_prob_uplift_over_zero()
+	res = data.delta(kpi_subset=['normal_same', 'normal_shifted'])
+# df = res.calculate_prob_uplift_over_zero()
 
-	# from test_core.test_results import load_example_results
-	# aa = load_example_results()
-	# order_means = aa.means('orders').iloc[0]
-	# net_sales_var = aa.statistic('var', 'net_sales')
+# from test_core.test_results import load_example_results
+# aa = load_example_results()
+# order_means = aa.means('orders').iloc[0]
+# net_sales_var = aa.statistic('var', 'net_sales')
 
-	# import numpy as np
-	# res = Results(None)
-	# res.append_delta('dummy', 'A', *(0.1,{'2.5':0.01,'97.5':0.2},1000,1000))
-	# res.append_delta('dummy', 'B', *(0,{'2.5':np.nan,'97.5':np.nan},1000,1000))
+# import numpy as np
+# res = Results(None)
+# res.append_delta('dummy', 'A', *(0.1,{'2.5':0.01,'97.5':0.2},1000,1000))
+# res.append_delta('dummy', 'B', *(0,{'2.5':np.nan,'97.5':np.nan},1000,1000))
 
-	# from expan.core.experiment import Experiment
-    #
-	# np.random.seed(0)
-	# data = Experiment('B', *generate_random_data())
-	# res = data.sga()
-	# x = res.relative_uplift('sga', 'normal_same', 'feature')
+# from expan.core.experiment import Experiment
+#
+# np.random.seed(0)
+# data = Experiment('B', *generate_random_data())
+# res = data.sga()
+# x = res.relative_uplift('sga', 'normal_same', 'feature')
 # res = data.delta()
 # x = res.relative_uplift('delta', 'normal_same')

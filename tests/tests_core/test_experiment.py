@@ -503,6 +503,22 @@ class ExperimentClassTestCases(ExperimentTestCase):
 		np.testing.assert_equal(True, all(item in result.metadata.items()
 		                                for item in self.testmetadata.items()))
 
+	def test_alphanumeric_kpi_names(self):
+		old_kpi = 'normal_shifted'
+		new_kpi = 'normal_shifted_01'
+
+		self.data.kpis[new_kpi] = self.data.kpis[old_kpi]
+
+		result = self.data.delta(kpi_subset=['derived'],
+			derived_kpis=[{'name':'derived','formula':'normal_same/'+new_kpi}])
+
+		# check uplift
+		df = result.statistic('delta', 'uplift', 'derived')
+		np.testing.assert_almost_equal(df.loc[:, ('value', 'A')],
+									   np.array([0.308368]), decimal=5)
+		# clean up
+		del self.data.kpis[new_kpi]
+
 	def test_delta_derived_kpis(self):
 		"""
 	    Check if Experiment.fixed_horizon_delta() functions properly for derived KPIs
