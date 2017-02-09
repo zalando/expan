@@ -91,19 +91,19 @@ class ResultsClassTestCase(ResultsTestCase):
 		df = res.relative_uplift('delta', 'normal_same')
 		np.testing.assert_almost_equal(df, np.array([[-4.219601, 0]]), decimal=5)
 
-	def test_prob_uplift_over_zero_single_metric(self):
-		"""Check if the conversion from confidence intervals to probability is correct for one metric."""
-		res = self.data.delta(kpi_subset=['normal_same'])
-		# df = prob_uplift_over_zero_single_metric(res.df, self.data.baseline_variant)
-		np.testing.assert_almost_equal(res.df.loc[pd.IndexSlice[:, :, :, 'prob_uplift_over_0'], 'value'],
-									   np.array([[0.946519, np.nan]]), decimal=5)
-
-	def test_prob_uplift_over_zero_multiple_metric(self):
-		"""Check if the conversion from confidence intervals to probability is correct for multiple metrics."""
-		res = self.data.delta(kpi_subset=['normal_same', 'normal_shifted'])
-		# res.calculate_prob_uplift_over_zero()
-		np.testing.assert_almost_equal(res.df.loc[pd.IndexSlice[:, :, :, 'prob_uplift_over_0'], 'value'],
-									   np.array([[0.946519, np.nan], [0, np.nan]]), decimal=5)
+	# def test_prob_uplift_over_zero_single_metric(self):
+	# 	"""Check if the conversion from confidence intervals to probability is correct for one metric."""
+	# 	res = self.data.delta(kpi_subset=['normal_same'])
+	# 	# df = prob_uplift_over_zero_single_metric(res.df, self.data.baseline_variant)
+	# 	np.testing.assert_almost_equal(res.df.loc[pd.IndexSlice[:, :, :, 'prob_uplift_over_0'], 'value'],
+	# 								   np.array([[0.946519, np.nan]]), decimal=5)
+	#
+	# def test_prob_uplift_over_zero_multiple_metric(self):
+	# 	"""Check if the conversion from confidence intervals to probability is correct for multiple metrics."""
+	# 	res = self.data.delta(kpi_subset=['normal_same', 'normal_shifted'])
+	# 	# res.calculate_prob_uplift_over_zero()
+	# 	np.testing.assert_almost_equal(res.df.loc[pd.IndexSlice[:, :, :, 'prob_uplift_over_0'], 'value'],
+	# 								   np.array([[0.946519, np.nan], [0, np.nan]]), decimal=5)
 
 	def test_to_json_delta(self):
 		json_object = json.loads(
@@ -116,9 +116,9 @@ class ResultsClassTestCase(ResultsTestCase):
 		self.assertEqual(1, len(json_object['variants'][0]['metrics']))
 		self.assertEqual(1, len(json_object['variants'][0]['metrics'][0]['subgroup_metrics']))
 		self.assertEqual(1, len(json_object['variants'][0]['metrics'][0]['subgroup_metrics'][0]['subgroups']))
-		self.assertEqual(5, len(
+		self.assertEqual(4, len(
 			json_object['variants'][0]['metrics'][0]['subgroup_metrics'][0]['subgroups'][0]['statistics']))
-		self.assertEqual(2, len(
+		self.assertEqual(1, len(
 			json_object['variants'][0]['metrics'][0]['subgroup_metrics'][0]['subgroups'][0]['statistics'][3][
 				'pctiles']))
 
@@ -135,9 +135,9 @@ class ResultsClassTestCase(ResultsTestCase):
 		self.assertEqual(1, len(json_object['variants'][0]['metrics']))
 		self.assertEqual(1, len(json_object['variants'][0]['metrics'][0]['subgroup_metrics']))
 		self.assertEqual(1, len(json_object['variants'][0]['metrics'][0]['subgroup_metrics'][0]['subgroups']))
-		self.assertEqual(5, len(
+		self.assertEqual(4, len(
 			json_object['variants'][0]['metrics'][0]['subgroup_metrics'][0]['subgroups'][0]['statistics']))
-		self.assertEqual(2, len(
+		self.assertEqual(1, len(
 			json_object['variants'][0]['metrics'][0]['subgroup_metrics'][0]['subgroups'][0]['statistics'][3][
 				'pctiles']))
 

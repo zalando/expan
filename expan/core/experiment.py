@@ -460,7 +460,7 @@ class Experiment(ExperimentData):
 			except ValueError as e:
 				res.metadata['errors']['Experiment.delta'] = e
 
-		res.calculate_prob_uplift_over_zero()
+		# res.calculate_prob_uplift_over_zero()
 
 		return res
 
