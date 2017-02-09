@@ -365,8 +365,10 @@ class Experiment(ExperimentData):
 		"""
 		Wrapper for different delta functions with 'method' being the following:
 
-		't_test': 			self.t_test_delta()
-		'group_sequential': self.group_sequential_delta()
+		'fixed_horizon': 		self.fixed_horizon_delta()
+		'group_sequential': 	self.group_sequential_delta()
+		'bayes_factor':			self.bayes_factor_delta()
+		'bayes_precision':		self.bayes_precision_delta()
 		"""
 		res = Results(None, metadata=self.metadata)
 		res.metadata['reference_kpi'] = {}
@@ -523,9 +525,17 @@ class Experiment(ExperimentData):
 		and the effect size.
 
 		Args:
+			result: the initialized Results object
+			kpis_to_analyse: list of KPIs to be analysed
+			spending_function: name of the alpha spending function, currently
+				supports: 'obrien_fleming'
+			information_fraction: share of the information amount at the point 
+				of evaluation, e.g. the share of the maximum sample size
+			alpha: type-I error rate
+			cap: upper bound of the adapted z-score
 
 		Returns:
-
+			a Results object
 		"""
 		if 'estimatedSampleSize' not in self.metadata:
 			raise ValueError("Missing 'estimatedSampleSize' for the group sequential method!")
@@ -566,9 +576,13 @@ class Experiment(ExperimentData):
 		and the effect size.
 
 		Args:
+			result: the initialized Results object
+			kpis_to_analyse: list of KPIs to be analysed
+			distribution: name of the KPI distribution model, which assumes a
+				Stan model file with the same name exists
 
 		Returns:
-
+			a Results object
 		"""
 		for mname in kpis_to_analyse:
 			metric_df = self.kpis.reset_index()[['entity', 'variant', mname]]
@@ -612,7 +626,6 @@ class Experiment(ExperimentData):
 
 		Returns:
 			a Results object
-
 		"""
 		for mname in kpis_to_analyse:
 			metric_df = self.kpis.reset_index()[['entity', 'variant', mname]]

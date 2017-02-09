@@ -13,6 +13,9 @@ def obrien_fleming(information_fraction, alpha=0.05):
 	Calculate an approximation of the O'Brien-Fleming alpha spending function.
 
 	Args:
+		information_fraction: share of the information amount at the point 
+			of evaluation, e.g. the share of the maximum sample size
+		alpha: type-I error rate
 
 	Returns:
 		float: redistributed alpha value at the time point with the given 
@@ -31,10 +34,24 @@ def group_sequential(x,
 	Group sequential method to determine whether to stop early or not.
 
 	Args:
+		x (array_like): sample of a treatment group
+		y (array_like): sample of a control group
+		spending_function: name of the alpha spending function, currently
+			supports: 'obrien_fleming'
+		information_fraction: share of the information amount at the point 
+			of evaluation, e.g. the share of the maximum sample size
+		alpha: type-I error rate
+		cap: upper bound of the adapted z-score
 
 	Returns:
-		boolean: 	stop or not
-		float: 		absolute effect size
+		tuple: 
+			- stop label
+			- effect size (delta)
+			- confidence interval of delta
+			- sample size of x
+			- sample size of y
+			- absolute mean of x
+			- absolute mean of y
 	"""
 	# Checking if data was provided
 	if x is None or y is None:
@@ -100,13 +117,20 @@ def HDI_from_MCMC(posterior_samples, credible_mass=0.95):
 def bayes_factor(x, y, distribution='normal'):
 	"""
 	Args:
-		sm (pystan.model.StanModel): precompiled Stan model object
-		simulation_index (int): random seed used for the simulation
-		day_index (int): time step of the peeking
-		kpi (str): KPI name
+		x (array_like): sample of a treatment group
+		y (array_like): sample of a control group
+		distribution: name of the KPI distribution model, which assumes a
+			Stan model file with the same name exists
 
 	Returns:
-		boolean
+		tuple: 
+			- stop label
+			- effect size (delta)
+			- credible interval of delta
+			- sample size of x
+			- sample size of y
+			- absolute mean of x
+			- absolute mean of y
 	"""
 	# Checking if data was provided
 	if x is None or y is None:
@@ -147,13 +171,22 @@ def bayes_factor(x, y, distribution='normal'):
 def bayes_precision(x, y, distribution='normal', posterior_width=0.08):
 	"""
 	Args:
-		sm (pystan.model.StanModel): precompiled Stan model object
-		simulation_index (int): random seed used for the simulation
-		day_index (int): time step of the peeking
-		kpi (str): KPI name
+		x (array_like): sample of a treatment group
+		y (array_like): sample of a control group
+		distribution: name of the KPI distribution model, which assumes a
+			Stan model file with the same name exists
+		posterior_width: the stopping criterion, threshold of the posterior 
+			width
 
 	Returns:
-		boolean
+		tuple: 
+			- stop label
+			- effect size (delta)
+			- credible interval of delta
+			- sample size of x
+			- sample size of y
+			- absolute mean of x
+			- absolute mean of y
 	"""
 	# Checking if data was provided
 	if x is None or y is None:
