@@ -89,9 +89,9 @@ def group_sequential(x,
 	z = (mu_x-mu_y) / np.sqrt(sigma_x**2/n_x+sigma_y**2/n_y)
     
 	if z > bound or z < -bound:
-		stop = True
+		stop = 1
 	else:
-		stop = False
+		stop = 0
 
 	interval = statx.normal_difference(mu_x,sigma_x,n_x,mu_y,sigma_y,n_y,[alpha_new*100/2,100-alpha_new*100/2])
 
@@ -161,7 +161,7 @@ def bayes_factor(x, y, distribution='normal'):
 
 	prior = cauchy.pdf(0, loc=0, scale=1)
 	bf = kde.evaluate(0)[0] / prior
-	stop = bf > 3 or bf < 1/3.
+	stop = int(bf > 3 or bf < 1/3.)
 
 	interval = HDI_from_MCMC(traces['alpha'])
 
@@ -214,7 +214,7 @@ def bayes_precision(x, y, distribution='normal', posterior_width=0.08):
 	fit = sm.sampling(data=fit_data, iter=25000, chains=4, n_jobs=1, seed=1)
 	traces = fit.extract()
 	interval = HDI_from_MCMC(traces['delta'])
-	stop = interval[1] - interval[0] < posterior_width
+	stop = int(interval[1] - interval[0] < posterior_width)
 
 	return stop, mu_x-mu_y, {'lower':interval[0],'upper':interval[1]}, n_x, n_y, mu_x, mu_y
 

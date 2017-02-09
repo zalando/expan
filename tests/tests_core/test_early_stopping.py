@@ -47,7 +47,7 @@ class GroupSequentialTestCases(EarlyStoppingTestCase):
     	Check the group sequential function.
     	"""
 		stop,delta,CI,n_x,n_y,mu_x,mu_y = es.group_sequential(self.rand_s1, self.rand_s2)
-		self.assertEqual(stop, True)
+		self.assertEqual(stop, 1)
 		self.assertAlmostEqual(delta, -0.15887364780635896)
 		np.testing.assert_almost_equal(CI.values(), [-0.24461812530841959, -0.07312917030429833], decimal=5)
 		self.assertEqual(n_x, 1000)
@@ -66,7 +66,7 @@ class BayesFactorTestCases(EarlyStoppingTestCase):
     	Check the Bayes factor function.
     	"""
 		stop,delta,CI,n_x,n_y,mu_x,mu_y = es.bayes_factor(self.rand_s1, self.rand_s2)
-		self.assertEqual(stop, True)
+		self.assertEqual(stop, 1)
 		self.assertAlmostEqual(delta, -0.15887364780635896)
 		self.assertAlmostEqual(CI['lower'], -0.24414725578976518)
 		self.assertAlmostEqual(CI['upper'], -0.072120687308212819)
@@ -86,7 +86,7 @@ class BayesPrecisionTestCases(EarlyStoppingTestCase):
     	Check the bayes_precision function.
     	"""
 		stop,delta,CI,n_x,n_y,mu_x,mu_y = es.bayes_precision(self.rand_s1, self.rand_s2)
-		self.assertEqual(stop, False)
+		self.assertEqual(stop, 0)
 		self.assertAlmostEqual(delta, -0.15887364780635896)
 		self.assertAlmostEqual(CI['lower'], -0.25165623415486293)
 		self.assertAlmostEqual(CI['upper'], -0.075628298460462456)

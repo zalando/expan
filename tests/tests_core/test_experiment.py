@@ -348,7 +348,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
 		# check stop
 		df = result.statistic('delta', 'stop', 'normal_same')
 		np.testing.assert_equal(df.loc[:, 'value'], 
-								np.array([[False, None]]))
+								np.array([[0, 0]]))
 		# check samplesize
 		df = result.statistic('delta', 'sample_size', 'normal_same')
 		np.testing.assert_almost_equal(df.loc[:, 'value'],
@@ -415,7 +415,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
 		# check stop
 		df = result.statistic('delta', 'stop', 'normal_same')
 		np.testing.assert_equal(df.loc[:, 'value'], 
-								np.array([[False, None]]))
+								np.array([[0, 0]]))
 		# check samplesize
 		df = result.statistic('delta', 'sample_size', 'normal_same')
 		np.testing.assert_almost_equal(df.loc[:, 'value'],
@@ -456,7 +456,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
 		# check stop
 		df = result.statistic('delta', 'stop', 'normal_same')
 		np.testing.assert_equal(df.loc[:, 'value'], 
-								np.array([[True, None]]))
+								np.array([[1, 0]]))
 		# check samplesize
 		df = result.statistic('delta', 'sample_size', 'normal_same')
 		np.testing.assert_almost_equal(df.loc[:, 'value'],
@@ -489,7 +489,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
 		# check stop
 		df = result.statistic('delta', 'stop', 'normal_same')
 		np.testing.assert_equal(df.loc[:, 'value'], 
-								np.array([[False, None]]))
+								np.array([[0, 0]]))
 		# check samplesize
 		df = result.statistic('delta', 'sample_size', 'normal_same')
 		np.testing.assert_almost_equal(df.loc[:, 'value'],

@@ -556,8 +556,8 @@ class Experiment(ExperimentData):
 	
 			# Actual calculation
 			df = metric_df.groupby('variant').apply(do_delta).unstack(0)
-			# set the stop label of the baseline variant to None
-			df.loc[(mname,'-',slice(None),'stop'),('value',self.baseline_variant)] = None
+			# force the stop label of the baseline variant to 0
+			df.loc[(mname,'-',slice(None),'stop'),('value',self.baseline_variant)] = 0
 
 			if result.df is None:
 				result.df = df
@@ -596,8 +596,8 @@ class Experiment(ExperimentData):
 	
 			# Actual calculation
 			df = metric_df.groupby('variant').apply(do_delta).unstack(0)
-			# set the stop label of the baseline variant to None
-			df.loc[(mname,'-',slice(None),'stop'),('value',self.baseline_variant)] = None
+			# force the stop label of the baseline variant to 0
+			df.loc[(mname,'-',slice(None),'stop'),('value',self.baseline_variant)] = 0
 
 			if result.df is None:
 				result.df = df
@@ -640,8 +640,8 @@ class Experiment(ExperimentData):
 	
 			# Actual calculation
 			df = metric_df.groupby('variant').apply(do_delta).unstack(0)
-			# set the stop label of the baseline variant to None
-			df.loc[(mname,'-',slice(None),'stop'),('value',self.baseline_variant)] = None
+			# force the stop label of the baseline variant to 0
+			df.loc[(mname,'-',slice(None),'stop'),('value',self.baseline_variant)] = 0
 
 			if result.df is None:
 				result.df = df
