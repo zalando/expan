@@ -375,6 +375,7 @@ class Experiment(ExperimentData):
 		if 'weighted_kpis' in kwargs:
 			res.metadata['weighted_kpis'] = kwargs['weighted_kpis']
 
+		pattern = '([a-zA-Z][0-9a-zA-Z_]*)'
 		# determine the complete KPI name list
 		kpis_to_analyse = self.kpi_names.copy()
 		if derived_kpis is not None:
@@ -382,10 +383,10 @@ class Experiment(ExperimentData):
 				kpis_to_analyse.update([dk['name']])
 				# assuming the columns in the formula can all be cast into float
 				# and create the derived KPI as an additional column
-				self.kpis.loc[:,dk['name']] = eval(re.sub('([a-zA-Z_]+)', r'self.kpis.\1.astype(float)', dk['formula']))
+				self.kpis.loc[:,dk['name']] = eval(re.sub(pattern, r'self.kpis.\1.astype(float)', dk['formula']))
 				# store the reference metric name to be used in the weighting
 				# TODO: only works for ratios
-				res.metadata['reference_kpi'][dk['name']] = re.sub('([a-zA-Z_]+)/', '', dk['formula'])
+				res.metadata['reference_kpi'][dk['name']] = re.sub(pattern+'/', '', dk['formula'])
 
 		if kpi_subset is not None:
 			kpis_to_analyse.intersection_update(kpi_subset)
