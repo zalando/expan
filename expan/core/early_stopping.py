@@ -109,13 +109,19 @@ def HDI_from_MCMC(posterior_samples, credible_mass=0.95):
     ciWidth = [0]*nCIs
     for i in range(0, nCIs):
         ciWidth[i] = sorted_points[i + ciIdxInc] - sorted_points[i]
+
+    #ciWidth = np.zaeros(nCIs)
+    #ciWidth[:] = sorted_points[ciIdxInc:] - sorted_points
+
     HDImin = sorted_points[ciWidth.index(min(ciWidth))]
     HDImax = sorted_points[ciWidth.index(min(ciWidth))+ciIdxInc]
     return(HDImin, HDImax)
 
 
-def bayes_factor(x, y, distribution='normal'):
+def _bayes_sampling(x, y, distribution='normal'):
 	"""
+	Helper function.
+
 	Args:
 		x (array_like): sample of a treatment group
 		y (array_like): sample of a control group
@@ -123,10 +129,8 @@ def bayes_factor(x, y, distribution='normal'):
 			Stan model file with the same name exists
 
 	Returns:
-		tuple: 
-			- stop label
-			- effect size (delta)
-			- credible interval of delta
+		tuple:
+			- the posterior samples
 			- sample size of x
 			- sample size of y
 			- absolute mean of x
@@ -157,6 +161,29 @@ def bayes_factor(x, y, distribution='normal'):
 
 	fit = sm.sampling(data=fit_data, iter=25000, chains=4, n_jobs=1, seed=1)
 	traces = fit.extract()
+
+	return traces, n_x, n_y, mu_x, mu_y
+
+
+def bayes_factor(x, y, distribution='normal'):
+	"""
+	Args:
+		x (array_like): sample of a treatment group
+		y (array_like): sample of a control group
+		distribution: name of the KPI distribution model, which assumes a
+			Stan model file with the same name exists
+
+	Returns:
+		tuple: 
+			- stop label
+			- effect size (delta)
+			- credible interval of delta
+			- sample size of x
+			- sample size of y
+			- absolute mean of x
+			- absolute mean of y
+	"""
+	traces, n_x, n_y, mu_x, mu_y = _bayes_sampling(x, y, distribution=distribution)
 	kde = gaussian_kde(traces['delta'])
 
 	prior = cauchy.pdf(0, loc=0, scale=1)
@@ -188,31 +215,7 @@ def bayes_precision(x, y, distribution='normal', posterior_width=0.08):
 			- absolute mean of x
 			- absolute mean of y
 	"""
-	# Checking if data was provided
-	if x is None or y is None:
-		raise ValueError('Please provide two non-None samples.')
-
-	# Coercing missing values to right format
-	_x = np.array(x, dtype=float) 
-	_y = np.array(y, dtype=float) 
-
-	mu_x = np.nanmean(_x)
-	mu_y = np.nanmean(_y)
-	n_x = statx.sample_size(_x)
-	n_y = statx.sample_size(_y)
-
-	if distribution == 'normal':
-		fit_data = {'Nc': n_y, 
-					'Nt': n_x, 
-					'x': _x, 
-					'y': _y}
-	else:
-		raise NotImplementedError
-	model_file = __location__ + '/../models/' + distribution + '_kpi.stan'
-	sm = StanModel(file=model_file)
-
-	fit = sm.sampling(data=fit_data, iter=25000, chains=4, n_jobs=1, seed=1)
-	traces = fit.extract()
+	traces, n_x, n_y, mu_x, mu_y = _bayes_sampling(x, y, distribution=distribution)
 	interval = HDI_from_MCMC(traces['delta'])
 	stop = int(interval[1] - interval[0] < posterior_width)
 

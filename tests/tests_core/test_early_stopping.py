@@ -49,7 +49,7 @@ class GroupSequentialTestCases(EarlyStoppingTestCase):
 		stop,delta,CI,n_x,n_y,mu_x,mu_y = es.group_sequential(self.rand_s1, self.rand_s2)
 		self.assertEqual(stop, 1)
 		self.assertAlmostEqual(delta, -0.15887364780635896)
-		np.testing.assert_almost_equal(CI.values(), [-0.24461812530841959, -0.07312917030429833], decimal=5)
+		np.testing.assert_almost_equal(list(CI.values()), [-0.24461812530841959, -0.07312917030429833], decimal=5)
 		self.assertEqual(n_x, 1000)
 		self.assertEqual(n_y, 1000)
 		self.assertAlmostEqual(mu_x, -0.045256707490195384)

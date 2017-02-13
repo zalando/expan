@@ -392,16 +392,19 @@ class Experiment(ExperimentData):
 			kpis_to_analyse.intersection_update(kpi_subset)
 		self.dbg(3, 'kpis_to_analyse: ' + ','.join(kpis_to_analyse))
 
-		if method == 'fixed_horizon':
-			return self.fixed_horizon_delta(kpi_subset, derived_kpis, **kwargs)
-		elif method == 'group_sequential':
-			return self.group_sequential_delta(res, kpis_to_analyse, **kwargs)
-		elif method == 'bayes_factor':
-			return self.bayes_factor_delta(res, kpis_to_analyse, **kwargs)
-		elif method == 'bayes_precision':
-			return self.bayes_precision_delta(res, kpis_to_analyse, **kwargs)
-		else:
+		method_table = {
+			'fixed_horizon': (self.fixed_horizon_delta, kpi_subset, derived_kpis),
+			'group_sequential': (self.group_sequential_delta, res, kpis_to_analyse),
+			'bayes_factor': (self.bayes_factor_delta, res, kpis_to_analyse),
+			'bayes_precision': (self.bayes_precision_delta, res, kpis_to_analyse)
+		}
+
+		if not method in method_table:
 			raise NotImplementedError
+		else:
+			m = method_table[method]
+			f, a1, a2 = m[0], m[1], m[2]
+			return f(a1, a2, **kwargs)
 
 	def fixed_horizon_delta(self, 
 					 		kpi_subset=None, 
