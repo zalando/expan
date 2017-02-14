@@ -431,12 +431,12 @@ class Results(object):
 					for subgroup in df[df.subgroup_metric == subgroup_metric].subgroup.unique():
 						statistics = []
 						for statistic in df[df.subgroup == subgroup].statistic.unique():
-							if statistic not in "stop":
+							if statistic not in ["stop"]:
 								pctiles = []
 								for pctile in df[df.statistic == statistic].pctile.unique():
 									pctiles.append({"name": str(pctile), "value": df[(df.pctile == pctile) & (df.statistic == statistic) & (df.subgroup == subgroup) & (df.subgroup_metric == subgroup_metric) & (df.metric == metric)].value[variant].values[0]})
 								statistics.append({"name": statistic, "pctiles": pctiles})
-							elif statistic in "stop":
+							elif statistic in ["stop"]:
 								stop_value = df[(df.pctile == pctile) & (df.statistic == statistic) & (df.subgroup == subgroup) & (df.subgroup_metric == subgroup_metric) & (df.metric == metric)].value[variant].values[0]
 						subgroups.append({"name": subgroup, "statistics": statistics})
 					subgroup_metrics.append({"name": subgroup_metric, "subgroups": subgroups})
