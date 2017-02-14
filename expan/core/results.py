@@ -449,10 +449,9 @@ class Results(object):
 
 		# store metadata in temporary variable as UserWarning() needs to be converted to string so that JSON serialization can continue
 		metadata = self.metadata
-		for m in metadata:
-			if m == 'errors' or m == 'warnings':
-				for k in metadata[m]:
-					metadata[m][k] = str(metadata[m][k])
+		for m in set(metadata.keys()).intersection(['errors', 'warnings']):
+			for k in metadata[m]:
+				metadata[m][k] = str(metadata[m][k])
 
 		json_tree['metadata'] = metadata
 
