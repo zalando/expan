@@ -123,7 +123,7 @@ def _delta_all_variants(metric_df, baseline_variant, assume_normal=True,
 
 	metric_df has 4 columns: entity, variant, metric, reference_kpi
 	"""
-	baseline_metric = metric_df.iloc[:, 2][metric_df.iloc[:, 1] == baseline_variant]
+	baseline_metric  = metric_df.iloc[:, 2][metric_df.iloc[:, 1] == baseline_variant]
 	baseline_weights = metric_df.iloc[:, 3][metric_df.iloc[:, 1] == baseline_variant]
 
 	if weighted:
@@ -131,27 +131,22 @@ def _delta_all_variants(metric_df, baseline_variant, assume_normal=True,
 		# - reference KPI is never NaN (such that sum works the same as np.nansum)
 		# - whenever the reference KPI is 0, it means the derived KPI is NaN,
 		#	and therefore should not be counted (only works for ratio)
-		do_delta = (lambda f: delta_to_dataframe_all_variants(f.columns[2],
-															  *statx.delta(
-																  x=f.iloc[:, 2],
-																  y=baseline_metric,
-																  assume_normal=assume_normal,
-																  percentiles=percentiles,
-																  min_observations=min_observations,
-																  nruns=nruns,
-																  relative=relative,
-																  x_weights=f.iloc[:,3]/sum(f.iloc[:,3])*sum(f.iloc[:,3]!=0),
-																  y_weights=baseline_weights/sum(baseline_weights)*sum(baseline_weights!=0))))
+		x_weights = lambda f: f.iloc[:,3]/sum(f.iloc[:,3])*sum(f.iloc[:,3]!=0)
+		y_weights = lambda f: baseline_weights/sum(baseline_weights)*sum(baseline_weights!=0)
 	else:
-		do_delta = (lambda f: delta_to_dataframe_all_variants(f.columns[2],
-															  *statx.delta(
-																  x=f.iloc[:, 2],
-																  y=baseline_metric,
-																  assume_normal=assume_normal,
-																  percentiles=percentiles,
-																  min_observations=min_observations,
-																  nruns=nruns,
-																  relative=relative)))
+		x_weights = lambda f: 1
+		y_weights = lambda f: 1
+
+	do_delta = (lambda f: delta_to_dataframe_all_variants(f.columns[2],
+		*statx.delta(x=f.iloc[:, 2],
+			y=baseline_metric,
+			assume_normal=assume_normal,
+			percentiles=percentiles,
+			min_observations=min_observations,
+			nruns=nruns,
+			relative=relative,
+			x_weights = x_weights(f),
+			y_weights = y_weights(f))))
 	# Actual calculation
 	return metric_df.groupby('variant').apply(do_delta).unstack(0)
 
