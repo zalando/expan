@@ -400,21 +400,26 @@ class Results(object):
 
 		import json
 
+		# copy results dataframe so that we don't perform modifications on original
 		df = deepcopy(self.df)
 
+		# reindex manually to remove one level of nesting
 		try:
 			for column in df.index.names:
 				df[column] = df.index.get_level_values(column)
 		except AttributeError:
+			# trend() results are stored a bit differently, this needs to be addressed
 			self.dbg(-1, "trend() results are not supported yet")
 			return None
 
+		# reset the index
 		df = df.reset_index(drop=True).copy()
 
+		# fill numpy nans with string nans
 		df.fillna("nan", inplace=True)
 
+		# traverse dataframe and generate json tree, look at test output for an example
 		json_tree = {}
-
 		stop_value = None
 		variants = []
 		for variant in df.value.keys():
@@ -426,12 +431,12 @@ class Results(object):
 					for subgroup in df[df.subgroup_metric == subgroup_metric].subgroup.unique():
 						statistics = []
 						for statistic in df[df.subgroup == subgroup].statistic.unique():
-							if statistic not in "stop":
+							if statistic not in ["stop"]:
 								pctiles = []
 								for pctile in df[df.statistic == statistic].pctile.unique():
 									pctiles.append({"name": str(pctile), "value": df[(df.pctile == pctile) & (df.statistic == statistic) & (df.subgroup == subgroup) & (df.subgroup_metric == subgroup_metric) & (df.metric == metric)].value[variant].values[0]})
 								statistics.append({"name": statistic, "pctiles": pctiles})
-							elif statistic in "stop":
+							elif statistic in ["stop"]:
 								stop_value = df[(df.pctile == pctile) & (df.statistic == statistic) & (df.subgroup == subgroup) & (df.subgroup_metric == subgroup_metric) & (df.metric == metric)].value[variant].values[0]
 						subgroups.append({"name": subgroup, "statistics": statistics})
 					subgroup_metrics.append({"name": subgroup_metric, "subgroups": subgroups})
@@ -440,9 +445,15 @@ class Results(object):
 				else:
 					metrics.append({"name": metric, "subgroup_metrics": subgroup_metrics})
 			variants.append({"name": variant, "metrics": metrics})
-
 		json_tree['variants'] = variants
-		json_tree['metadata'] = self.metadata
+
+		# store metadata in temporary variable as UserWarning() needs to be converted to string so that JSON serialization can continue
+		metadata = self.metadata
+		for m in set(metadata.keys()).intersection(['errors', 'warnings']):
+			for k in metadata[m]:
+				metadata[m][k] = str(metadata[m][k])
+
+		json_tree['metadata'] = metadata
 
 		json_string = json.dumps(json_tree)
 
