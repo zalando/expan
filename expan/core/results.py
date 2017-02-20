@@ -431,12 +431,12 @@ class Results(object):
 					for subgroup in df[df.subgroup_metric == subgroup_metric].subgroup.unique():
 						statistics = []
 						for statistic in df[df.subgroup == subgroup].statistic.unique():
-							if statistic not in "stop":
+							if statistic not in ["stop"]:
 								pctiles = []
 								for pctile in df[df.statistic == statistic].pctile.unique():
 									pctiles.append({"name": str(pctile), "value": df[(df.pctile == pctile) & (df.statistic == statistic) & (df.subgroup == subgroup) & (df.subgroup_metric == subgroup_metric) & (df.metric == metric)].value[variant].values[0]})
 								statistics.append({"name": statistic, "pctiles": pctiles})
-							elif statistic in "stop":
+							elif statistic in ["stop"]:
 								stop_value = df[(df.pctile == pctile) & (df.statistic == statistic) & (df.subgroup == subgroup) & (df.subgroup_metric == subgroup_metric) & (df.metric == metric)].value[variant].values[0]
 						subgroups.append({"name": subgroup, "statistics": statistics})
 					subgroup_metrics.append({"name": subgroup_metric, "subgroups": subgroups})
@@ -449,10 +449,9 @@ class Results(object):
 
 		# store metadata in temporary variable as UserWarning() needs to be converted to string so that JSON serialization can continue
 		metadata = self.metadata
-		for m in metadata:
-			if m == 'errors' or m == 'warnings':
-				for k in metadata[m]:
-					metadata[m][k] = str(metadata[m][k])
+		for m in set(metadata.keys()).intersection(['errors', 'warnings']):
+			for k in metadata[m]:
+				metadata[m][k] = str(metadata[m][k])
 
 		json_tree['metadata'] = metadata
 
