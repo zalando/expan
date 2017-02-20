@@ -689,6 +689,58 @@ def feature_check_to_dataframe(metric,
 	return df
 
 
+def early_stopping_to_dataframe(metric, 
+								stop, 
+								mu,
+								pctiles,								  
+								samplesize_variant,
+								samplesize_baseline,
+								mu_variant,
+								mu_baseline,
+								subgroup_metric='-',
+								subgroup=None):
+	"""
+	Create the Results data frame structure from the output of early-stopping
+	functions.
+
+	Args:
+	    metric: metric name
+	    stop: whether to stop the experiment based on this metric
+	    mu: mean
+	    pctiles: percentiles
+	    samplesize_variant: sample size of the non-default variant
+	    samplesize_baseline: sample size of the default variant
+	    mu_variant: absolute mean of the non-default variant
+	    mu_baseline: absolute mean of the default variant
+	    subgroup_metric: subgroup metric name
+	    subgroup: subgroup name
+
+	Returns:
+		the result data frame
+	"""
+	df = pd.DataFrame({
+		'metric': metric,
+		'pctile': None,
+		'statistic': ['uplift', 'sample_size', 'variant_mean', 'stop'],
+		'value': [mu, samplesize_variant, mu_variant, stop],
+		'subgroup_metric': subgroup_metric,
+		'subgroup': subgroup
+	})
+	if len(pctiles) > 0:
+		df = df.append(pd.DataFrame({
+			'metric': metric,
+			'statistic': 'uplift_pctile',
+			'pctile': list(pctiles.keys()),
+			'value': list(pctiles.values()),
+			'subgroup_metric': subgroup_metric,
+			'subgroup': subgroup
+			}))
+
+	df.set_index(Results.mandatory_index_levels, inplace=True)
+
+	return df
+
+
 if __name__ == '__main__':
 	# pass
 

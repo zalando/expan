@@ -87,7 +87,7 @@ class ResultsClassTestCase(ResultsTestCase):
 		"""Check if the calculation of relative uplift for delta results is
 	    correct.
 	    """
-		res = self.data.delta()
+		res = self.data.fixed_horizon_delta()
 		df = res.relative_uplift('delta', 'normal_same')
 		np.testing.assert_almost_equal(df, np.array([[-4.219601, 0]]), decimal=5)
 
