@@ -157,8 +157,8 @@ def _bayes_sampling(x, y, distribution='normal'):
 	elif distribution == 'poisson':
 		fit_data = {'Nc': n_y, 
 					'Nt': n_x, 
-					'x': int(_x), 
-					'y': int(_y)}
+					'x': _x.astype(int), 
+					'y': _y.astype(int)}
 	else:
 		raise NotImplementedError
 	model_file = __location__ + '/../models/' + distribution + '_kpi.stan'
