@@ -149,7 +149,7 @@ def _bayes_sampling(x, y, distribution='normal'):
 	n_x = statx.sample_size(_x)
 	n_y = statx.sample_size(_y)
 
-	if distribution == 'normal':
+	if distribution in ('normal', 'poisson'):
 		fit_data = {'Nc': n_y, 
 					'Nt': n_x, 
 					'x': _x, 
