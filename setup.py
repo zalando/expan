@@ -66,5 +66,5 @@ setup(
 	],
 	test_suite='tests',
 	tests_require=test_requirements,
-	package_data={'expan': ['expan/models/*.stan']}
+	package_data={'expan': ['models/*.stan']}
 )
