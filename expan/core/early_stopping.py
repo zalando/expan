@@ -149,11 +149,16 @@ def _bayes_sampling(x, y, distribution='normal'):
 	n_x = statx.sample_size(_x)
 	n_y = statx.sample_size(_y)
 
-	if distribution in ('normal', 'poisson'):
+	if distribution == 'normal':
 		fit_data = {'Nc': n_y, 
 					'Nt': n_x, 
 					'x': _x, 
 					'y': _y}
+	elif distribution == 'poisson':
+		fit_data = {'Nc': n_y, 
+					'Nt': n_x, 
+					'x': int(_x), 
+					'y': int(_y)}
 	else:
 		raise NotImplementedError
 	model_file = __location__ + '/../models/' + distribution + '_kpi.stan'
