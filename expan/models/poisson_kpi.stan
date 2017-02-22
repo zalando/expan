@@ -1,8 +1,8 @@
 data {
 	int<lower=0> Nc; 	// number of entities in the control group
 	int<lower=0> Nt; 	// number of entities in the treatment group
-	int<lower=0> x[Nc]; 		// KPI in the control group
-	int<lower=0> y[Nt]; 		// KPI in the treatment group
+	int<lower=0> y[Nc]; 		// KPI in the control group
+	int<lower=0> x[Nt]; 		// KPI in the treatment group
 }
 
 parameters {
@@ -17,6 +17,7 @@ transformed parameters {
 
 model {
 	delta ~ cauchy(0, 1);
+	lambda ~ gamma(2, 2);
 	x ~ poisson(lambda);
 	y ~ poisson(lambda+alpha);
 }
