@@ -233,4 +233,6 @@ if __name__ == '__main__':
 	np.random.seed(0)
 	rand_s1 = np.random.normal(loc=0, size=1000)
 	rand_s2 = np.random.normal(loc=0.1, size=1000)
-	stop,delta,interval,n_x,n_y,mu_x,mu_y = bayes_precision(rand_s1, rand_s2)
+	rand_s3 = np.random.poisson(lam=1, size=1000)
+	rand_s4 = np.random.poisson(lam=3, size=1000)
+	stop,delta,interval,n_x,n_y,mu_x,mu_y = bayes_factor(rand_s3, rand_s4, distribution='poisson')

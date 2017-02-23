@@ -18,7 +18,7 @@ transformed parameters {
 model {
 	delta ~ cauchy(0, 1);
 	lambda ~ gamma(2, 2);
-	x ~ poisson(lambda);
-	y ~ poisson(lambda+alpha);
+	x ~ poisson(lambda+alpha);
+	y ~ poisson(lambda);
 }
 
