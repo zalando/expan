@@ -13,8 +13,9 @@ def obrien_fleming(information_fraction, alpha=0.05):
 	Calculate an approximation of the O'Brien-Fleming alpha spending function.
 
 	Args:
-		information_fraction: share of the information amount at the point 
-			of evaluation, e.g. the share of the maximum sample size
+		information_fraction (scalar or array_like): share of the information 
+			amount at the point of evaluation, e.g. the share of the maximum 
+			sample size
 		alpha: type-I error rate
 
 	Returns:
@@ -192,6 +193,7 @@ def bayes_factor(x, y, distribution='normal'):
 	kde = gaussian_kde(traces['delta'])
 
 	prior = cauchy.pdf(0, loc=0, scale=1)
+	# BF_01
 	bf = kde.evaluate(0)[0] / prior
 	stop = int(bf > 3 or bf < 1/3.)
 
@@ -235,4 +237,7 @@ if __name__ == '__main__':
 	rand_s2 = np.random.normal(loc=0.1, size=1000)
 	rand_s3 = np.random.poisson(lam=1, size=1000)
 	rand_s4 = np.random.poisson(lam=3, size=1000)
-	stop,delta,interval,n_x,n_y,mu_x,mu_y = bayes_factor(rand_s3, rand_s4, distribution='poisson')
+	#stop,delta,interval,n_x,n_y,mu_x,mu_y = bayes_factor(rand_s3, rand_s4, distribution='poisson')
+	fraction = np.arange(0,1.1,0.1)
+	alpha_new = obrien_fleming(fraction)
+	bound = norm.ppf(1-alpha_new/2)
