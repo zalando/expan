@@ -197,7 +197,8 @@ def bayes_factor(x, y, distribution='normal'):
 	bf = kde.evaluate(0)[0] / prior
 	stop = int(bf > 3 or bf < 1/3.)
 
-	interval = HDI_from_MCMC(traces['alpha'])
+	interval = HDI_from_MCMC(traces['delta'])
+	print(bf, interval)
 
 	return stop, mu_x-mu_y, {'lower':interval[0],'upper':interval[1]}, n_x, n_y, mu_x, mu_y
 
@@ -225,6 +226,7 @@ def bayes_precision(x, y, distribution='normal', posterior_width=0.08):
 	traces, n_x, n_y, mu_x, mu_y = _bayes_sampling(x, y, distribution=distribution)
 	interval = HDI_from_MCMC(traces['delta'])
 	stop = int(interval[1] - interval[0] < posterior_width)
+	print(interval)
 
 	return stop, mu_x-mu_y, {'lower':interval[0],'upper':interval[1]}, n_x, n_y, mu_x, mu_y
 
@@ -237,7 +239,7 @@ if __name__ == '__main__':
 	rand_s2 = np.random.normal(loc=0.1, size=1000)
 	rand_s3 = np.random.poisson(lam=1, size=1000)
 	rand_s4 = np.random.poisson(lam=3, size=1000)
-	#stop,delta,interval,n_x,n_y,mu_x,mu_y = bayes_factor(rand_s3, rand_s4, distribution='poisson')
-	fraction = np.arange(0,1.1,0.1)
-	alpha_new = obrien_fleming(fraction)
-	bound = norm.ppf(1-alpha_new/2)
+	stop,delta,interval,n_x,n_y,mu_x,mu_y = bayes_factor(rand_s1, rand_s2, distribution='normal')
+	#fraction = np.arange(0,1.1,0.1)
+	#alpha_new = obrien_fleming(fraction)
+	#bound = norm.ppf(1-alpha_new/2)
