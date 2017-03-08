@@ -10,6 +10,7 @@ Development Lead
 Contributors
 ------------
 
+* Grigory Bordyugov <grigory.bordyugov@zalando.de>
 * Dominic Heger <dominic.heger@zalando.de>
 * Jie Bao <jie.bao@zalando.de>
 * Marko Kolarek <marko.kolarek@zalando.de>
