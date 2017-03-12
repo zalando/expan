@@ -118,22 +118,20 @@ class CategoricalBinning(Binning):
 
 		assert len(category_list) == len(sample_size_list), 'category_list and sample_size_list of unequal lengths!'
 
-		new_cat_list = []
-		new_ssize_list = []
-		to_merge_cat = []
-		to_merge_ssize = []
-		for i, ii in enumerate(category_list):
-			if i != np.argsort(sample_size_list)[0] and i != np.argsort(sample_size_list)[1]:
-				new_cat_list.append(ii)
-				new_ssize_list.append(sample_size_list[i])
-			else:
-				to_merge_cat.append(ii)
-				to_merge_ssize.append(sample_size_list[i])
+		pairs = list(zip(sample_size_list, category_list)) # Schwartzian transform aka decorate-sort-undecorate
+		pairs.sort()
 
-		new_cat_list.append(to_merge_cat[0] + to_merge_cat[1])
-		new_ssize_list.append(to_merge_ssize[0] + to_merge_ssize[1])
+		ssl_and_cl = list(zip(*pairs)) # unzip
+		ssl = list(ssl_and_cl[0])
+		cl  = list(ssl_and_cl[1])
 
-		return new_cat_list, new_ssize_list
+		ssl[1] = ssl[0] + ssl[1] # merge [0] + [1] -> [1]
+		cl [1] =  cl[0] +  cl[1]
+
+		del(ssl[0]) # drop the smallest one
+		del( cl[0])
+
+		return cl, ssl
 
 	@property
 	def categories(self):
