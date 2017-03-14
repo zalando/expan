@@ -165,7 +165,7 @@ def _bayes_sampling(x, y, distribution='normal'):
 	model_file = __location__ + '/../models/' + distribution + '_kpi.stan'
 	sm = StanModel(file=model_file)
 
-	fit = sm.sampling(data=fit_data, iter=25000, chains=4, n_jobs=1, seed=1)
+	fit = sm.sampling(data=fit_data, iter=25000, chains=4, n_jobs=1, seed=1, control={'stepsize':0.01,'adapt_delta':0.99})
 	traces = fit.extract()
 
 	return traces, n_x, n_y, mu_x, mu_y
@@ -239,7 +239,7 @@ if __name__ == '__main__':
 	rand_s2 = np.random.normal(loc=0.1, size=1000)
 	rand_s3 = np.random.poisson(lam=1, size=1000)
 	rand_s4 = np.random.poisson(lam=3, size=1000)
-	stop,delta,interval,n_x,n_y,mu_x,mu_y = bayes_factor(rand_s1, rand_s2, distribution='normal')
+	stop,delta,interval,n_x,n_y,mu_x,mu_y = bayes_factor(rand_s3, rand_s4, distribution='poisson')
 	#fraction = np.arange(0,1.1,0.1)
 	#alpha_new = obrien_fleming(fraction)
 	#bound = norm.ppf(1-alpha_new/2)
