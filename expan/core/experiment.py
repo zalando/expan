@@ -385,6 +385,7 @@ class Experiment(ExperimentData):
 
 		if kpi_subset is not None:
 			kpis_to_analyse.intersection_update(kpi_subset)
+		res.metadata['kpis_to_analyse'] = kpis_to_analyse
 		self.dbg(3, 'kpis_to_analyse: ' + ','.join(kpis_to_analyse))
 
 		method_table = {
@@ -399,9 +400,14 @@ class Experiment(ExperimentData):
 		else:
 			m = method_table[method]
 			f, a1, a2 = m[0], m[1], m[2]
-			return f(a1, a2, **kwargs)
+			if method == 'fixed_horizon':
+				# pass initialized results object into fixed_horizon_delta
+				return f(res, a1, a2, **kwargs)
+			else:
+				return f(a1, a2, **kwargs)
 
-	def fixed_horizon_delta(self, 
+	def fixed_horizon_delta(self,
+							res,
 					 		kpi_subset=None, 
 					 		derived_kpis=None, 
 					 		variant_subset=None,
@@ -452,26 +458,8 @@ class Experiment(ExperimentData):
 	    Returns:
 	        Results object containing the computed deltas.
 	    """
-		res = Results(None, metadata=self.metadata)
-		res.metadata['reference_kpi'] = {}
-		res.metadata['weighted_kpis'] = weighted_kpis
-
-		pattern = '([a-zA-Z][0-9a-zA-Z_]*)'
-		# determine the complete KPI name list
-		kpis_to_analyse = self.kpi_names.copy()
-		if derived_kpis is not None:
-			for dk in derived_kpis:
-				kpis_to_analyse.update([dk['name']])
-				# assuming the columns in the formula can all be cast into float
-				# and create the derived KPI as an additional column
-				self.kpis.loc[:,dk['name']] = eval(re.sub(pattern, r'self.kpis.\1.astype(float)', dk['formula']))
-				# store the reference metric name to be used in the weighting
-				# TODO: only works for ratios
-				res.metadata['reference_kpi'][dk['name']] = re.sub(pattern+'/', '', dk['formula'])
-
-		if kpi_subset is not None:
-			kpis_to_analyse.intersection_update(kpi_subset)
-		self.dbg(3, 'kpis_to_analyse: ' + ','.join(kpis_to_analyse))
+		kpis_to_analyse = res.metadata['kpis_to_analyse']
+		del res.metadata['kpis_to_analyse']
 
 		treat_variants = self.variant_names - set([self.baseline_variant])
 		self.dbg(3, 'treat_variants before subset: ' + ','.join(treat_variants))
