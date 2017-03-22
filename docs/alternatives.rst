@@ -1,13 +1,16 @@
 .. highlight:: shell
 
-============
-Alternatives
-============
+================
+Related Projects
+================
 
 There may be alternative libraries providing similar functionality, and these
 should be collected here. Very incomplete list so far...
 
- - **abba** (https://github.com/thumbtack/abba)
+- **abba** (https://github.com/thumbtack/abba)
 
+	Mainly handles binomial distributions.
 
-Not an alternative, the Python part of this is simply a collection of some functions to handle binomial distributions.
+- **bootstrapped** (https://github.com/facebookincubator/bootstrapped)
+
+	Calculates bootstrapped confidence intervals, with A/B test as an example.

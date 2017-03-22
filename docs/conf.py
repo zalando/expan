@@ -45,7 +45,7 @@ extensions = [
 	# 'sphinx.ext.viewcode',
 	'sphinx.ext.napoleon',
 	'sphinx.ext.todo',
-	'sphinx.ext.pngmath',
+	'sphinx.ext.mathjax'
 	# 'sphinx.ext.linkcode'
 	# 'sphinx.ext.coverage'
 	# 'sphinx.ext.autosummary'
