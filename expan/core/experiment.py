@@ -574,16 +574,19 @@ class Experiment(ExperimentData):
 		Returns:
 			a Results object
 		"""
+		def do_delta(f): 
+			print(f.iloc[0,1])
+			return early_stopping_to_dataframe(f.columns[2],
+												*es.bayes_factor(
+													x=f.iloc[:, 2],
+													y=baseline_metric,
+													distribution=distribution
+												))
+
 		for mname in kpis_to_analyse:
 			metric_df = self.kpis.reset_index()[['entity', 'variant', mname]]
 			baseline_metric = metric_df.iloc[:, 2][metric_df.iloc[:, 1] == self.baseline_variant]
 
-			do_delta = (lambda f: early_stopping_to_dataframe(f.columns[2],
-															  *es.bayes_factor(
-																  x=f.iloc[:, 2],
-																  y=baseline_metric,
-																  distribution=distribution)))
-	
 			# Actual calculation
 			df = metric_df.groupby('variant').apply(do_delta).unstack(0)
 			# force the stop label of the baseline variant to 0
@@ -617,17 +620,20 @@ class Experiment(ExperimentData):
 		Returns:
 			a Results object
 		"""
+		def do_delta(f): 
+			print(f.iloc[0,1])
+			return early_stopping_to_dataframe(f.columns[2],
+												*es.bayes_precision(
+													x=f.iloc[:, 2],
+													y=baseline_metric,
+													distribution=distribution,
+													posterior_width=posterior_width
+												))
+
 		for mname in kpis_to_analyse:
 			metric_df = self.kpis.reset_index()[['entity', 'variant', mname]]
 			baseline_metric = metric_df.iloc[:, 2][metric_df.iloc[:, 1] == self.baseline_variant]
 
-			do_delta = (lambda f: early_stopping_to_dataframe(f.columns[2],
-															  *es.bayes_precision(
-																  x=f.iloc[:, 2],
-																  y=baseline_metric,
-																  distribution=distribution,
-																  posterior_width=posterior_width)))
-	
 			# Actual calculation
 			df = metric_df.groupby('variant').apply(do_delta).unstack(0)
 			# force the stop label of the baseline variant to 0

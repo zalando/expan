@@ -13,8 +13,9 @@ def obrien_fleming(information_fraction, alpha=0.05):
 	Calculate an approximation of the O'Brien-Fleming alpha spending function.
 
 	Args:
-		information_fraction: share of the information amount at the point 
-			of evaluation, e.g. the share of the maximum sample size
+		information_fraction (scalar or array_like): share of the information 
+			amount at the point of evaluation, e.g. the share of the maximum 
+			sample size
 		alpha: type-I error rate
 
 	Returns:
@@ -154,12 +155,17 @@ def _bayes_sampling(x, y, distribution='normal'):
 					'Nt': n_x, 
 					'x': _x, 
 					'y': _y}
+	elif distribution == 'poisson':
+		fit_data = {'Nc': n_y, 
+					'Nt': n_x, 
+					'x': _x.astype(int), 
+					'y': _y.astype(int)}
 	else:
 		raise NotImplementedError
 	model_file = __location__ + '/../models/' + distribution + '_kpi.stan'
 	sm = StanModel(file=model_file)
 
-	fit = sm.sampling(data=fit_data, iter=25000, chains=4, n_jobs=1, seed=1)
+	fit = sm.sampling(data=fit_data, iter=25000, chains=4, n_jobs=1, seed=1, control={'stepsize':0.01,'adapt_delta':0.99})
 	traces = fit.extract()
 
 	return traces, n_x, n_y, mu_x, mu_y
@@ -187,10 +193,12 @@ def bayes_factor(x, y, distribution='normal'):
 	kde = gaussian_kde(traces['delta'])
 
 	prior = cauchy.pdf(0, loc=0, scale=1)
+	# BF_01
 	bf = kde.evaluate(0)[0] / prior
 	stop = int(bf > 3 or bf < 1/3.)
 
-	interval = HDI_from_MCMC(traces['alpha'])
+	interval = HDI_from_MCMC(traces['delta'])
+	print(bf, interval)
 
 	return stop, mu_x-mu_y, {'lower':interval[0],'upper':interval[1]}, n_x, n_y, mu_x, mu_y
 
@@ -218,6 +226,7 @@ def bayes_precision(x, y, distribution='normal', posterior_width=0.08):
 	traces, n_x, n_y, mu_x, mu_y = _bayes_sampling(x, y, distribution=distribution)
 	interval = HDI_from_MCMC(traces['delta'])
 	stop = int(interval[1] - interval[0] < posterior_width)
+	print(interval)
 
 	return stop, mu_x-mu_y, {'lower':interval[0],'upper':interval[1]}, n_x, n_y, mu_x, mu_y
 
@@ -228,4 +237,9 @@ if __name__ == '__main__':
 	np.random.seed(0)
 	rand_s1 = np.random.normal(loc=0, size=1000)
 	rand_s2 = np.random.normal(loc=0.1, size=1000)
-	stop,delta,interval,n_x,n_y,mu_x,mu_y = bayes_precision(rand_s1, rand_s2)
+	rand_s3 = np.random.poisson(lam=1, size=1000)
+	rand_s4 = np.random.poisson(lam=3, size=1000)
+	stop,delta,interval,n_x,n_y,mu_x,mu_y = bayes_factor(rand_s3, rand_s4, distribution='poisson')
+	#fraction = np.arange(0,1.1,0.1)
+	#alpha_new = obrien_fleming(fraction)
+	#bound = norm.ppf(1-alpha_new/2)

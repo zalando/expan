@@ -19,6 +19,7 @@ transformed parameters {
 model {
 	delta ~ cauchy(0, 1);
 	mu ~ cauchy(0, 1);
+	sigma ~ gamma(2, 2);
 	x ~ normal(mu+alpha, sigma);
 	y ~ normal(mu, sigma);
 }
