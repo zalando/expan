@@ -71,5 +71,4 @@ target/
 ExpAn-Intro.slides.html
 
 # log file
-test_debugging.*
 /docs/_build/
