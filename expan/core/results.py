@@ -686,10 +686,10 @@ def feature_check_to_dataframe(metric,
 	return df
 
 
-def early_stopping_to_dataframe(metric, 
-								stop, 
+def early_stopping_to_dataframe(metric,
+								stop,
 								mu,
-								pctiles,								  
+								pctiles,
 								samplesize_variant,
 								samplesize_baseline,
 								mu_variant,
@@ -742,7 +742,7 @@ if __name__ == '__main__':
 	# pass
 
 	np.random.seed(0)
-	from tests.tests_core.test_data import generate_random_data
+	from expan.core.util import generate_random_data
 	from expan.core.experiment import Experiment
 
 	data = Experiment('B', *generate_random_data())

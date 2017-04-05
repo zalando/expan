@@ -6,7 +6,7 @@ import pandas as pd
 
 from expan.core.experiment import Experiment, subgroup_deltas, time_dependent_deltas
 from expan.core.results import Results
-from tests.tests_core.test_data import generate_random_data
+from expan.core.util import generate_random_data
 from tests.tests_core.test_results import mock_results_object
 
 # raise the same warning multiple times
@@ -348,7 +348,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
 									   np.array([0.033053]), decimal=5)
 		# check stop
 		df = result.statistic('delta', 'stop', 'normal_same')
-		np.testing.assert_equal(df.loc[:, 'value'], 
+		np.testing.assert_equal(df.loc[:, 'value'],
 								np.array([[0, 0]]))
 		# check samplesize
 		df = result.statistic('delta', 'sample_size', 'normal_same')
@@ -417,7 +417,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
 									   np.array([0.033053]), decimal=5)
 		# check stop
 		df = result.statistic('delta', 'stop', 'normal_same')
-		np.testing.assert_equal(df.loc[:, 'value'], 
+		np.testing.assert_equal(df.loc[:, 'value'],
 								np.array([[0, 0]]))
 		# check samplesize
 		df = result.statistic('delta', 'sample_size', 'normal_same')
@@ -458,7 +458,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
 									   np.array([0.033053]), decimal=5)
 		# check stop
 		df = result.statistic('delta', 'stop', 'normal_same')
-		np.testing.assert_equal(df.loc[:, 'value'], 
+		np.testing.assert_equal(df.loc[:, 'value'],
 								np.array([[1, 0]]))
 		# check samplesize
 		df = result.statistic('delta', 'sample_size', 'normal_same')
@@ -491,7 +491,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
 									   np.array([0.033053]), decimal=5)
 		# check stop
 		df = result.statistic('delta', 'stop', 'normal_same')
-		np.testing.assert_equal(df.loc[:, 'value'], 
+		np.testing.assert_equal(df.loc[:, 'value'],
 								np.array([[0, 0]]))
 		# check samplesize
 		df = result.statistic('delta', 'sample_size', 'normal_same')
@@ -533,7 +533,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
 
 		res = mock_results_object(self.data, kpi_subset=['derived'],
 			derived_kpis=[{'name':'derived','formula':'normal_same/normal_shifted'}])
-		result = self.data.fixed_horizon_delta(res, kpi_subset=['derived'], 
+		result = self.data.fixed_horizon_delta(res, kpi_subset=['derived'],
 			derived_kpis=[{'name':'derived','formula':'normal_same/normal_shifted'}])
 
 		# check uplift
@@ -570,7 +570,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
 		res = mock_results_object(self.data, kpi_subset=['derived'],
 			derived_kpis=[{'name':'derived','formula':'normal_same/normal_shifted'}],
 			weighted_kpis=['derived'])
-		result = self.data.fixed_horizon_delta(res, kpi_subset=['derived'], 
+		result = self.data.fixed_horizon_delta(res, kpi_subset=['derived'],
 			derived_kpis=[{'name':'derived','formula':'normal_same/normal_shifted'}],
 			weighted_kpis=['derived'])
 
