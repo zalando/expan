@@ -72,3 +72,6 @@ ExpAn-Intro.slides.html
 
 # log file
 /docs/_build/
+
+# Mac system file
+*.DS_Store
