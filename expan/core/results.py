@@ -7,9 +7,6 @@ import pandas as pd
 from expan.core.version import __version__
 import expan.core.statistics as statx
 from scipy.stats import norm
-
-# from tests.tests_core.test_data import generate_random_data
-
 from expan.core.debugging import Dbg
 
 
