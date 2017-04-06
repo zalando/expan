@@ -408,14 +408,14 @@ class Experiment(ExperimentData):
 
 	def fixed_horizon_delta(self,
 							res,
-					 		kpi_subset=None, 
-					 		derived_kpis=None, 
+					 		kpi_subset=None,
+					 		derived_kpis=None,
 					 		variant_subset=None,
-			  		 		assume_normal=True, 
+			  		 		assume_normal=True,
 			  		 		percentiles=[2.5, 97.5],
-			  		 		min_observations=20, 
-			  		 		nruns=10000, 
-			  		 		relative=False, 
+			  		 		min_observations=20,
+			  		 		nruns=10000,
+			  		 		relative=False,
 			  		 		weighted_kpis=None):
 		"""
 	    Compute delta (with confidence bounds) on all applicable kpis,
@@ -503,12 +503,12 @@ class Experiment(ExperimentData):
 
 		return res
 
-	def group_sequential_delta(self, 
+	def group_sequential_delta(self,
 							   result,
 							   kpis_to_analyse,
-							   spending_function='obrien_fleming', 
-					 		   information_fraction=1, 
-							   alpha=0.05, 
+							   spending_function='obrien_fleming',
+					 		   information_fraction=1,
+							   alpha=0.05,
 					 		   cap=8):
 		"""
 		Calculate the stopping criterion based on the group sequential design 
@@ -539,11 +539,11 @@ class Experiment(ExperimentData):
 															  *es.group_sequential(
 																  x=f.iloc[:, 2],
 																  y=baseline_metric,
-																  spending_function=spending_function, 
-					 											  information_fraction=current_sample_size/self.metadata['estimatedSampleSize'], 
-					 											  alpha=alpha, 
+																  spending_function=spending_function,
+					 											  information_fraction=current_sample_size/self.metadata['estimatedSampleSize'],
+					 											  alpha=alpha,
 					 											  cap=cap)))
-	
+
 			# Actual calculation
 			df = metric_df.groupby('variant').apply(do_delta).unstack(0)
 			# force the stop label of the baseline variant to 0
@@ -557,7 +557,7 @@ class Experiment(ExperimentData):
 		return result
 
 
-	def bayes_factor_delta(self, 
+	def bayes_factor_delta(self,
 						   result,
 						   kpis_to_analyse,
 						   distribution='normal'):
@@ -574,7 +574,7 @@ class Experiment(ExperimentData):
 		Returns:
 			a Results object
 		"""
-		def do_delta(f): 
+		def do_delta(f):
 			print(f.iloc[0,1])
 			return early_stopping_to_dataframe(f.columns[2],
 												*es.bayes_factor(
@@ -600,7 +600,7 @@ class Experiment(ExperimentData):
 		return result
 
 
-	def bayes_precision_delta(self, 
+	def bayes_precision_delta(self,
 						   	  result,
 						   	  kpis_to_analyse,
 						   	  distribution='normal',
@@ -620,7 +620,7 @@ class Experiment(ExperimentData):
 		Returns:
 			a Results object
 		"""
-		def do_delta(f): 
+		def do_delta(f):
 			print(f.iloc[0,1])
 			return early_stopping_to_dataframe(f.columns[2],
 												*es.bayes_precision(
@@ -863,7 +863,7 @@ class Experiment(ExperimentData):
 
 
 if __name__ == '__main__':
-	from tests.tests_core.test_data import generate_random_data
+	from expan.core.util import generate_random_data
 
 	np.random.seed(0)
 	metrics, metadata = generate_random_data()

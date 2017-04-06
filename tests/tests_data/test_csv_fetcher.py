@@ -2,9 +2,9 @@ from os import rmdir, makedirs, getcwd, remove, walk
 import unittest
 from os.path import dirname, join, realpath, exists
 
+import expan.core.util
 import expan.data.csv_fetcher as csv_fetcher
 import simplejson as json
-import tests.tests_core.test_data as td
 
 __location__ = realpath(join(getcwd(), dirname(__file__)))
 
@@ -19,7 +19,7 @@ class CsvFetcherTestCase(unittest.TestCase):
 			makedirs(TEST_FOLDER)
 
 		# generate metrics and metadata
-		(metrics, metadata) = td.generate_random_data()
+		(metrics, metadata) = expan.core.util.generate_random_data()
 
 		# save metrics to .csv.gz file in test folder
 		metrics.to_csv(path_or_buf=join(TEST_FOLDER, 'metrics.csv.gz'), compression='gzip')

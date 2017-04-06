@@ -11,7 +11,7 @@ import pandas as pd
 
 import expan.core.results as r
 from expan.core.experiment import Experiment
-from tests.tests_core.test_data import generate_random_data
+from expan.core.util import generate_random_data
 
 imp.reload(r)
 

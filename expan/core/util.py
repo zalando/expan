@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 import pandas as pd
 
@@ -110,6 +112,76 @@ def reindex(df, axis=0):
 		df.columns = new_index
 
 	return df
+
+
+def generate_random_data():
+	np.random.seed(42)
+	size = 10000
+
+	test_data_frame = pd.DataFrame()
+	test_data_frame['entity'] = list(range(size))
+	test_data_frame['variant'] = np.random.choice(['A', 'B'], size=size, p=[0.6, 0.4])
+
+	test_data_frame['normal_same'] = np.random.normal(size=size)
+	test_data_frame['normal_shifted'] = np.random.normal(size=size)
+
+	test_data_frame.loc[test_data_frame['variant'] == 'B', 'normal_shifted'] \
+		= np.random.normal(loc=1.0, size=test_data_frame['normal_shifted'][test_data_frame['variant'] == 'B'].shape[0])
+
+	test_data_frame['feature'] = np.random.choice(['has', 'non'], size=size)
+
+	test_data_frame['normal_shifted_by_feature'] = np.random.normal(size=size)
+
+	randdata = np.random.normal(loc=1.0, size=size)
+	ii = (test_data_frame['variant'] == 'B') & (test_data_frame['feature'] == 'has')
+
+	with warnings.catch_warnings(record=True) as w:
+		# ignore the 'flat[index' warning that comes out of pandas (and is
+		# not ours to fix)
+		warnings.simplefilter('ignore', DeprecationWarning)
+
+		test_data_frame.loc[ii, 'normal_shifted_by_feature'] = randdata
+
+	# provides random treatment start time in the past year
+	# test_data_frame['treatment_start_time'] = np.random.choice(list(range(int(time() - 1*365*24*60*60), int(time()))), size=size)
+	test_data_frame['treatment_start_time'] = np.random.choice(list(range(10)), size=size)
+
+	test_data_frame['normal_unequal_variance'] = np.random.normal(size=size)
+	test_data_frame.loc[test_data_frame['variant'] == 'B', 'normal_unequal_variance'] \
+		= np.random.normal(scale=10,
+						   size=test_data_frame['normal_unequal_variance'][test_data_frame['variant'] == 'B'].shape[0])
+
+	metadata = {
+		'primary_KPI': 'normal_shifted',
+		'source': 'simulated',
+		'experiment': 'random_data_generation'
+	}
+
+	return test_data_frame, metadata
+
+
+def generate_random_data_n_variants(n_variants=3):
+	np.random.seed(42)
+	size = 10000
+
+	test_data_frame = pd.DataFrame()
+	test_data_frame['entity'] = list(range(size))
+	test_data_frame['variant'] = np.random.choice(list(map(chr, list(range(65,65+n_variants)))), size=size)
+
+	test_data_frame['normal_same'] = np.random.normal(size=size)
+	test_data_frame['poisson_same'] = np.random.poisson(size=size)
+
+	test_data_frame['feature'] = np.random.choice(['has', 'non'], size=size)
+
+	test_data_frame['treatment_start_time'] = np.random.choice(list(range(10)), size=size)
+
+	metadata = {
+		'primary_KPI': 'normal_same',
+		'source': 'simulated',
+		'experiment': 'random_data_generation'
+	}
+
+	return test_data_frame, metadata
 
 
 if __name__ == '__main__':

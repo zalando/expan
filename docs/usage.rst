@@ -12,7 +12,7 @@ Some mock-up data
 ::
 
     from expan.core.experiment import Experiment
-    from tests.tests_core.test_data import generate_random_data
+    from expan.core.util import generate_random_data
 
     exp = Experiment('B', *generate_random_data())
     exp.delta()
@@ -49,7 +49,7 @@ One can calculate the :math:`CR^{(rt)}` from the :math:`\overline{CR}^{(pe)}` us
 
 	CR^{(rt)} = \frac{1}{n} \sum_{i=1}^n \alpha_i \frac{O_i}{V_i}
 
-with 
+with
 
 .. math::
 
@@ -58,7 +58,7 @@ with
 Weighted delta function
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-To have such functionality as a more generic approach in **ExpAn**, we can introduce a *weighted delta* function. Its input are 
+To have such functionality as a more generic approach in **ExpAn**, we can introduce a *weighted delta* function. Its input are
 
 - The per-entity metric, e.g. :math:`O_i/V_i`
 - A reference metric, on which the weighting factor is based, e.g. :math:`V_i`
