@@ -67,7 +67,7 @@ Some mock-up data:
 ::
 
     from expan.core.experiment import Experiment
-    from tests.tests_core.test_data import generate_random_data
+    from expan.core.util import generate_random_data
 
     exp = Experiment('B', *generate_random_data())
     exp.delta()
@@ -77,7 +77,7 @@ Some mock-up data:
 Documentation
 =============
 
-The latest stable version is 0.4.5.
+The latest stable version is 0.5.0.
 
 `ExpAn main documentation <http://expan.readthedocs.io/>`__
 

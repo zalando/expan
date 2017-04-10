@@ -399,7 +399,7 @@ def detect_features(metrics):
 
 
 if __name__ == '__main__':
-	from tests.tests_core.test_data import generate_random_data
+	from expan.core.util import generate_random_data
 
 	np.random.seed(0)
 	metrics, meta = generate_random_data()

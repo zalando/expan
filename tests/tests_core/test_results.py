@@ -4,13 +4,14 @@ import json
 import os
 import unittest
 import warnings
+import re
 
 import numpy as np
 import pandas as pd
 
 import expan.core.results as r
 from expan.core.experiment import Experiment
-from tests.tests_core.test_data import generate_random_data
+from expan.core.util import generate_random_data
 
 imp.reload(r)
 
@@ -36,6 +37,34 @@ def load_example_results():
 	example_fpath = os.path.join(data_dir, example_fname)
 
 	return r.from_hdf(example_fpath)
+
+def mock_results_object(data, kpi_subset=None, derived_kpis=None, **kwargs):
+	"""
+	Create a results object for any tests involving fixed_horizon_delta()
+	"""
+	res = r.Results(None, metadata=data.metadata)
+	res.metadata['reference_kpi'] = {}
+	if 'weighted_kpis' in kwargs:
+		res.metadata['weighted_kpis'] = kwargs['weighted_kpis']
+
+	pattern = '([a-zA-Z][0-9a-zA-Z_]*)'
+	# determine the complete KPI name list
+	kpis_to_analyse = data.kpi_names.copy()
+	if derived_kpis is not None:
+		for dk in derived_kpis:
+			kpis_to_analyse.update([dk['name']])
+			# assuming the columns in the formula can all be cast into float
+			# and create the derived KPI as an additional column
+			data.kpis.loc[:,dk['name']] = eval(re.sub(pattern, r'data.kpis.\1.astype(float)', dk['formula']))
+			# store the reference metric name to be used in the weighting
+			# TODO: only works for ratios
+			res.metadata['reference_kpi'][dk['name']] = re.sub(pattern+'/', '', dk['formula'])
+
+	if kpi_subset is not None:
+		kpis_to_analyse.intersection_update(kpi_subset)
+
+	res.metadata['kpis_to_analyse'] = kpis_to_analyse
+	return res
 
 
 class ResultsTestCase(unittest.TestCase):
@@ -87,7 +116,8 @@ class ResultsClassTestCase(ResultsTestCase):
 		"""Check if the calculation of relative uplift for delta results is
 	    correct.
 	    """
-		res = self.data.delta()
+		resObj = mock_results_object(self.data)
+		res = self.data.fixed_horizon_delta(resObj)
 		df = res.relative_uplift('delta', 'normal_same')
 		np.testing.assert_almost_equal(df, np.array([[-4.219601, 0]]), decimal=5)
 

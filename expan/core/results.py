@@ -7,9 +7,6 @@ import pandas as pd
 from expan.core.version import __version__
 import expan.core.statistics as statx
 from scipy.stats import norm
-
-# from tests.tests_core.test_data import generate_random_data
-
 from expan.core.debugging import Dbg
 
 
@@ -418,41 +415,37 @@ class Results(object):
 		# fill numpy nans with string nans
 		df.fillna("nan", inplace=True)
 
-		# traverse dataframe and generate json tree, look at test output for an example
-		json_tree = {}
-		stop_value = None
-		variants = []
-		for variant in df.value.keys():
-			metrics = []
-			for metric in df.metric.unique():
-				subgroup_metrics = []
-				for subgroup_metric in df[df.metric == metric].subgroup_metric.unique():
-					subgroups = []
-					for subgroup in df[df.subgroup_metric == subgroup_metric].subgroup.unique():
-						statistics = []
-						for statistic in df[df.subgroup == subgroup].statistic.unique():
-							if statistic not in "stop":
-								pctiles = []
-								for pctile in df[df.statistic == statistic].pctile.unique():
-									pctiles.append({"name": str(pctile), "value": df[(df.pctile == pctile) & (df.statistic == statistic) & (df.subgroup == subgroup) & (df.subgroup_metric == subgroup_metric) & (df.metric == metric)].value[variant].values[0]})
-								statistics.append({"name": statistic, "pctiles": pctiles})
-							elif statistic in "stop":
-								stop_value = df[(df.pctile == pctile) & (df.statistic == statistic) & (df.subgroup == subgroup) & (df.subgroup_metric == subgroup_metric) & (df.metric == metric)].value[variant].values[0]
-						subgroups.append({"name": subgroup, "statistics": statistics})
-					subgroup_metrics.append({"name": subgroup_metric, "subgroups": subgroups})
-				if stop_value:
-					metrics.append({"name": metric, "subgroup_metrics": subgroup_metrics, "stop": stop_value})
-				else:
-					metrics.append({"name": metric, "subgroup_metrics": subgroup_metrics})
-			variants.append({"name": variant, "metrics": metrics})
-		json_tree['variants'] = variants
+		# ----------------------------------------------------------------------------------------------------------------------------------
+		#         |                                                                |                   |                                   |
+		#         |               labels for the new dimension                     |  next dimension   |       data frame index mask       |
+		#         |                                                                |                   |                                   |
+		# ----------------------------------------------------------------------------------------------------------------------------------
+		table = [ ( lambda x: df.value.keys()                                      , 'variant'         , lambda x: True                    ),
+				  ( lambda x: df.metric.unique()                                   , 'metric'          , lambda x: df.metric          == x ),
+				  ( lambda x: df[df.metric          == x].subgroup_metric.unique() , 'subgroup_metric' , lambda x: df.subgroup_metric == x ),
+				  ( lambda x: df[df.subgroup_metric == x].subgroup.unique()        , 'subgroup'        , lambda x: df.subgroup        == x ),
+				  ( lambda x: df[df.subgroup        == x].statistic.unique()       , 'statistic'       , lambda x: df.statistic       == x ),
+				  ( lambda x: df[df.statistic       == x].pctile.unique()          , 'pctile'          , lambda x: df.pctile          == x ) ]
+
+		# traverse the tree of dimensions aka indices
+		# in parallel refining the data frame view mask
+		def go(table, name=None, ixes=[], mask = pd.Series([True]*len(df))):
+			if not table:
+				variant = dict(ixes)['variant']
+				return {"name": name, "value": df[mask].value[variant].values[0]}
+			else:
+				head, tail = table[0], table[1:]
+				f, nextDim, flter = head[0], head[1], head[2]
+				val = [go(tail, n, [(nextDim, n)]+ixes, flter(n) & mask) for n in f(name)]
+				return {"name": name, nextDim+"s": val}
+
+		json_tree = {'variants': go(table, 'none')['variants']}
 
 		# store metadata in temporary variable as UserWarning() needs to be converted to string so that JSON serialization can continue
 		metadata = self.metadata
-		for m in metadata:
-			if m == 'errors' or m == 'warnings':
-				for k in metadata[m]:
-					metadata[m][k] = str(metadata[m][k])
+		for m in set(metadata.keys()).intersection(['errors', 'warnings']):
+			for k in metadata[m]:
+				metadata[m][k] = str(metadata[m][k])
 
 		json_tree['metadata'] = metadata
 
@@ -690,11 +683,63 @@ def feature_check_to_dataframe(metric,
 	return df
 
 
+def early_stopping_to_dataframe(metric,
+								stop,
+								mu,
+								pctiles,
+								samplesize_variant,
+								samplesize_baseline,
+								mu_variant,
+								mu_baseline,
+								subgroup_metric='-',
+								subgroup=None):
+	"""
+	Create the Results data frame structure from the output of early-stopping
+	functions.
+
+	Args:
+	    metric: metric name
+	    stop: whether to stop the experiment based on this metric
+	    mu: mean
+	    pctiles: percentiles
+	    samplesize_variant: sample size of the non-default variant
+	    samplesize_baseline: sample size of the default variant
+	    mu_variant: absolute mean of the non-default variant
+	    mu_baseline: absolute mean of the default variant
+	    subgroup_metric: subgroup metric name
+	    subgroup: subgroup name
+
+	Returns:
+		the result data frame
+	"""
+	df = pd.DataFrame({
+		'metric': metric,
+		'pctile': None,
+		'statistic': ['uplift', 'sample_size', 'variant_mean', 'stop'],
+		'value': [mu, samplesize_variant, mu_variant, stop],
+		'subgroup_metric': subgroup_metric,
+		'subgroup': subgroup
+	})
+	if len(pctiles) > 0:
+		df = df.append(pd.DataFrame({
+			'metric': metric,
+			'statistic': 'uplift_pctile',
+			'pctile': list(pctiles.keys()),
+			'value': list(pctiles.values()),
+			'subgroup_metric': subgroup_metric,
+			'subgroup': subgroup
+			}))
+
+	df.set_index(Results.mandatory_index_levels, inplace=True)
+
+	return df
+
+
 if __name__ == '__main__':
 	# pass
 
 	np.random.seed(0)
-	from tests.tests_core.test_data import generate_random_data
+	from expan.core.util import generate_random_data
 	from expan.core.experiment import Experiment
 
 	data = Experiment('B', *generate_random_data())
