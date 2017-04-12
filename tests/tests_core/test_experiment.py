@@ -440,6 +440,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
 			res = Results(None, metadata=self.data.metadata)
 			result = self.data.group_sequential_delta(result=res, kpis_to_analyse=['normal_same'])
 
+	# @unittest.skip("sometimes takes too much time")
 	def test_bayes_factor_delta(self):
 		"""
 	    Check if Experiment.bayes_factor_delta() functions properly
@@ -473,6 +474,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
 		np.testing.assert_equal(True, all(item in result.metadata.items()
 		                                for item in self.testmetadata.items()))
 
+	# @unittest.skip("sometimes takes too much time")
 	def test_bayes_precision_delta(self):
 		"""
 	    Check if Experiment.bayes_precision_delta() functions properly
@@ -533,7 +535,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
 
 		res = mock_results_object(self.data, kpi_subset=['derived'],
 			derived_kpis=[{'name':'derived','formula':'normal_same/normal_shifted'}])
-		result = self.data.fixed_horizon_delta(res, kpi_subset=['derived'],
+		result = self.data.delta('fixed_horizon', kpi_subset=['derived'],
 			derived_kpis=[{'name':'derived','formula':'normal_same/normal_shifted'}])
 
 		# check uplift
@@ -570,7 +572,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
 		res = mock_results_object(self.data, kpi_subset=['derived'],
 			derived_kpis=[{'name':'derived','formula':'normal_same/normal_shifted'}],
 			weighted_kpis=['derived'])
-		result = self.data.fixed_horizon_delta(res, kpi_subset=['derived'],
+		result = self.data.delta('fixed_horizon', kpi_subset=['derived'],
 			derived_kpis=[{'name':'derived','formula':'normal_same/normal_shifted'}],
 			weighted_kpis=['derived'])
 
