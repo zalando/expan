@@ -386,7 +386,6 @@ class Experiment(ExperimentData):
 
 		if kpi_subset is not None:
 			kpis_to_analyse.intersection_update(kpi_subset)
-		res.metadata['kpis_to_analyse'] = kpis_to_analyse
 		self.dbg(3, 'kpis_to_analyse: ' + ','.join(kpis_to_analyse))
 
 		method_table = {
@@ -404,7 +403,7 @@ class Experiment(ExperimentData):
 
 	def fixed_horizon_delta(self,
 							res,
-					 		kpi_subset=None,
+							kpis_to_analyse=None,
 					 		variant_subset=None,
 			  		 		assume_normal=True,
 			  		 		percentiles=[2.5, 97.5],
@@ -421,7 +420,7 @@ class Experiment(ExperimentData):
 	    TODO: Extend this function to metrics again with type-checking
 
 	    Args:
-	        kpi_subset (list): kpis for which to perfom delta. If set to
+	        kpis_to_analyse (list): kpis for which to perfom delta. If set to
 	            None all kpis are used.
 	        derived_kpis (list): definition of additional KPIs derived from the
 	        	primary ones, e.g.
@@ -453,9 +452,7 @@ class Experiment(ExperimentData):
 	    Returns:
 	        Results object containing the computed deltas.
 	    """
-		kpis_to_analyse = res.metadata['kpis_to_analyse']
-		del res.metadata['kpis_to_analyse']
-
+		kpis_to_analyse = kpis_to_analyse or self.kpi_names.copy()
 		treat_variants = self.variant_names - set([self.baseline_variant])
 		self.dbg(3, 'treat_variants before subset: ' + ','.join(treat_variants))
 		if variant_subset is not None:
