@@ -372,9 +372,8 @@ class ExperimentClassTestCases(ExperimentTestCase):
 
 		self.assertTrue(self.data.baseline_variant == 'B')
 
-		res = mock_results_object(self.data, kpi_subset=
-								 [m for m in self.data.kpi_names if 'normal' in m])
-		result = self.data.fixed_horizon_delta(res, kpi_subset=
+		res = mock_results_object(self.data)
+		result = self.data.fixed_horizon_delta(res, kpis_to_analyse=
 								 [m for m in self.data.kpi_names if 'normal' in m])
 
 		# check uplift
@@ -533,8 +532,8 @@ class ExperimentClassTestCases(ExperimentTestCase):
 
 		self.assertTrue(self.data.baseline_variant == 'B')
 
-		res = mock_results_object(self.data, kpi_subset=['derived'],
-			derived_kpis=[{'name':'derived','formula':'normal_same/normal_shifted'}])
+		res = mock_results_object(self.data,
+								  derived_kpis=[{'name': 'derived', 'formula': 'normal_same/normal_shifted'}])
 		result = self.data.delta('fixed_horizon', kpi_subset=['derived'],
 			derived_kpis=[{'name':'derived','formula':'normal_same/normal_shifted'}])
 
@@ -569,9 +568,9 @@ class ExperimentClassTestCases(ExperimentTestCase):
 
 		self.assertTrue(self.data.baseline_variant == 'B')
 
-		res = mock_results_object(self.data, kpi_subset=['derived'],
-			derived_kpis=[{'name':'derived','formula':'normal_same/normal_shifted'}],
-			weighted_kpis=['derived'])
+		res = mock_results_object(self.data,
+								  derived_kpis=[{'name': 'derived', 'formula': 'normal_same/normal_shifted'}],
+								  weighted_kpis=['derived'])
 		result = self.data.delta('fixed_horizon', kpi_subset=['derived'],
 			derived_kpis=[{'name':'derived','formula':'normal_same/normal_shifted'}],
 			weighted_kpis=['derived'])
@@ -601,9 +600,8 @@ class ExperimentClassTestCases(ExperimentTestCase):
 		"""
 		Check if the unequal variance warning message is persisted to the Results structure
     	"""
-		res = mock_results_object(self.data, kpi_subset=['normal_unequal_variance'],
-    							 variant_subset=['A'])
-		result = self.data.fixed_horizon_delta(res, kpi_subset=['normal_unequal_variance'],
+		res = mock_results_object(self.data, variant_subset=['A'])
+		result = self.data.fixed_horizon_delta(res, kpis_to_analyse=['normal_unequal_variance'],
 								 variant_subset=['A'])
 		w = result.metadata['warnings']['Experiment.delta']
 		self.assertTrue(isinstance(w, UserWarning))

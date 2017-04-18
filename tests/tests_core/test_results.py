@@ -38,7 +38,7 @@ def load_example_results():
 
 	return r.from_hdf(example_fpath)
 
-def mock_results_object(data, kpi_subset=None, derived_kpis=None, **kwargs):
+def mock_results_object(data, derived_kpis=None, **kwargs):
 	"""
 	Create a results object for any tests involving fixed_horizon_delta()
 	"""
@@ -60,10 +60,6 @@ def mock_results_object(data, kpi_subset=None, derived_kpis=None, **kwargs):
 			# TODO: only works for ratios
 			res.metadata['reference_kpi'][dk['name']] = re.sub(pattern+'/', '', dk['formula'])
 
-	if kpi_subset is not None:
-		kpis_to_analyse.intersection_update(kpi_subset)
-
-	res.metadata['kpis_to_analyse'] = kpis_to_analyse
 	return res
 
 
