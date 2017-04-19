@@ -601,8 +601,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
 		Check if the unequal variance warning message is persisted to the Results structure
     	"""
 		res = mock_results_object(self.data, variant_subset=['A'])
-		result = self.data.fixed_horizon_delta(res, kpis_to_analyse=['normal_unequal_variance'],
-								 variant_subset=['A'])
+		result = self.data.fixed_horizon_delta(res, kpis_to_analyse=['normal_unequal_variance'])
 		w = result.metadata['warnings']['Experiment.delta']
 		self.assertTrue(isinstance(w, UserWarning))
 		self.assertTrue(w.args[0] == 'Sample variances differ too much to assume that population variances are equal.')

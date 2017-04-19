@@ -404,7 +404,6 @@ class Experiment(ExperimentData):
 	def fixed_horizon_delta(self,
 							res,
 							kpis_to_analyse=None,
-					 		variant_subset=None,
 			  		 		assume_normal=True,
 			  		 		percentiles=[2.5, 97.5],
 			  		 		min_observations=20,
@@ -453,11 +452,6 @@ class Experiment(ExperimentData):
 	        Results object containing the computed deltas.
 	    """
 		kpis_to_analyse = kpis_to_analyse or self.kpi_names.copy()
-		treat_variants = self.variant_names - set([self.baseline_variant])
-		self.dbg(3, 'treat_variants before subset: ' + ','.join(treat_variants))
-		if variant_subset is not None:
-			treat_variants.intersection_update(variant_subset)
-		self.dbg(3, 'treat_variants to analyse: ' + ','.join(treat_variants))
 
 		for mname in kpis_to_analyse:
 			# the weighted approach implies that derived_kpis is not None
