@@ -432,7 +432,7 @@ class Results(object):
 		def go(table, name=None, ixes=[], mask = pd.Series([True]*len(df))):
 			if not table:
 				variant = dict(ixes)['variant']
-				return {"name": name, "value": df[mask].value[variant].values[0]}
+				return {"name": str(name), "value": df[mask].value[variant].values[0]}
 			else:
 				head, tail = table[0], table[1:]
 				f, nextDim, flter = head[0], head[1], head[2]
