@@ -112,6 +112,19 @@ If you want to **deploy to PyPI**, then follow these steps:
 
 If you wish to skip triggering a CI task (for example when you change documentation), please include ``[ci skip]`` in your commit message.
 
+The flow would then look like follows:
+
+1. :code:`git fetch`
+2. :code:`git checkout dev`
+3. :code:`git pull`
+4. :code:`bumpversion (patch|minor)`
+5. :code:`make docs`
+6. :code:`git push --tags`
+7. :code:`git push`
+8. create pull request from dev to master
+9. merge pull request
+
+
 TODOs
 =====
 
