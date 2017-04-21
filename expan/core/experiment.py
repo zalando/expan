@@ -375,42 +375,35 @@ class Experiment(ExperimentData):
 		kpis_to_analyse = self.kpi_names.copy()
 		if derived_kpis is not None:
 			for dk in derived_kpis:
-				kpis_to_analyse.update([dk['name']])
+				kpiName = dk['name']
+				kpis_to_analyse.update([kpiName])
 				# assuming the columns in the formula can all be cast into float
 				# and create the derived KPI as an additional column
-				self.kpis.loc[:,dk['name']] = eval(re.sub(pattern, r'self.kpis.\1.astype(float)', dk['formula']))
+				self.kpis.loc[:,kpiName] = eval(re.sub(pattern, r'self.kpis.\1.astype(float)', dk['formula']))
 				# store the reference metric name to be used in the weighting
 				# TODO: only works for ratios
-				res.metadata['reference_kpi'][dk['name']] = re.sub(pattern+'/', '', dk['formula'])
+				res.metadata['reference_kpi'][kpiName] = re.sub(pattern+'/', '', dk['formula'])
 
 		if kpi_subset is not None:
 			kpis_to_analyse.intersection_update(kpi_subset)
-		res.metadata['kpis_to_analyse'] = kpis_to_analyse
 		self.dbg(3, 'kpis_to_analyse: ' + ','.join(kpis_to_analyse))
 
 		method_table = {
-			'fixed_horizon': (self.fixed_horizon_delta, kpi_subset, derived_kpis),
-			'group_sequential': (self.group_sequential_delta, res, kpis_to_analyse),
-			'bayes_factor': (self.bayes_factor_delta, res, kpis_to_analyse),
-			'bayes_precision': (self.bayes_precision_delta, res, kpis_to_analyse)
+			'fixed_horizon':    self.fixed_horizon_delta,
+			'group_sequential': self.group_sequential_delta,
+			'bayes_factor':     self.bayes_factor_delta,
+			'bayes_precision':  self.bayes_precision_delta,
 		}
 
 		if not method in method_table:
 			raise NotImplementedError
 		else:
-			m = method_table[method]
-			f, a1, a2 = m[0], m[1], m[2]
-			if method == 'fixed_horizon':
-				# pass initialized results object into fixed_horizon_delta
-				return f(res, a1, a2, **kwargs)
-			else:
-				return f(a1, a2, **kwargs)
+			f = method_table[method]
+			return f(res, kpis_to_analyse, **kwargs)
 
 	def fixed_horizon_delta(self,
 							res,
-					 		kpi_subset=None,
-					 		derived_kpis=None,
-					 		variant_subset=None,
+							kpis_to_analyse=None,
 			  		 		assume_normal=True,
 			  		 		percentiles=[2.5, 97.5],
 			  		 		min_observations=20,
@@ -426,7 +419,7 @@ class Experiment(ExperimentData):
 	    TODO: Extend this function to metrics again with type-checking
 
 	    Args:
-	        kpi_subset (list): kpis for which to perfom delta. If set to
+	        kpis_to_analyse (list): kpis for which to perfom delta. If set to
 	            None all kpis are used.
 	        derived_kpis (list): definition of additional KPIs derived from the
 	        	primary ones, e.g.
@@ -458,14 +451,7 @@ class Experiment(ExperimentData):
 	    Returns:
 	        Results object containing the computed deltas.
 	    """
-		kpis_to_analyse = res.metadata['kpis_to_analyse']
-		del res.metadata['kpis_to_analyse']
-
-		treat_variants = self.variant_names - set([self.baseline_variant])
-		self.dbg(3, 'treat_variants before subset: ' + ','.join(treat_variants))
-		if variant_subset is not None:
-			treat_variants.intersection_update(variant_subset)
-		self.dbg(3, 'treat_variants to analyse: ' + ','.join(treat_variants))
+		kpis_to_analyse = kpis_to_analyse or self.kpi_names.copy()
 
 		for mname in kpis_to_analyse:
 			# the weighted approach implies that derived_kpis is not None

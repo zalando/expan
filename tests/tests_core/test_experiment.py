@@ -372,9 +372,8 @@ class ExperimentClassTestCases(ExperimentTestCase):
 
 		self.assertTrue(self.data.baseline_variant == 'B')
 
-		res = mock_results_object(self.data, kpi_subset=
-								 [m for m in self.data.kpi_names if 'normal' in m])
-		result = self.data.fixed_horizon_delta(res, kpi_subset=
+		res = mock_results_object(self.data)
+		result = self.data.fixed_horizon_delta(res, kpis_to_analyse=
 								 [m for m in self.data.kpi_names if 'normal' in m])
 
 		# check uplift
@@ -440,6 +439,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
 			res = Results(None, metadata=self.data.metadata)
 			result = self.data.group_sequential_delta(result=res, kpis_to_analyse=['normal_same'])
 
+	# @unittest.skip("sometimes takes too much time")
 	def test_bayes_factor_delta(self):
 		"""
 	    Check if Experiment.bayes_factor_delta() functions properly
@@ -473,6 +473,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
 		np.testing.assert_equal(True, all(item in result.metadata.items()
 		                                for item in self.testmetadata.items()))
 
+	# @unittest.skip("sometimes takes too much time")
 	def test_bayes_precision_delta(self):
 		"""
 	    Check if Experiment.bayes_precision_delta() functions properly
@@ -531,9 +532,9 @@ class ExperimentClassTestCases(ExperimentTestCase):
 
 		self.assertTrue(self.data.baseline_variant == 'B')
 
-		res = mock_results_object(self.data, kpi_subset=['derived'],
-			derived_kpis=[{'name':'derived','formula':'normal_same/normal_shifted'}])
-		result = self.data.fixed_horizon_delta(res, kpi_subset=['derived'],
+		res = mock_results_object(self.data,
+								  derived_kpis=[{'name': 'derived', 'formula': 'normal_same/normal_shifted'}])
+		result = self.data.delta('fixed_horizon', kpi_subset=['derived'],
 			derived_kpis=[{'name':'derived','formula':'normal_same/normal_shifted'}])
 
 		# check uplift
@@ -567,10 +568,10 @@ class ExperimentClassTestCases(ExperimentTestCase):
 
 		self.assertTrue(self.data.baseline_variant == 'B')
 
-		res = mock_results_object(self.data, kpi_subset=['derived'],
-			derived_kpis=[{'name':'derived','formula':'normal_same/normal_shifted'}],
-			weighted_kpis=['derived'])
-		result = self.data.fixed_horizon_delta(res, kpi_subset=['derived'],
+		res = mock_results_object(self.data,
+								  derived_kpis=[{'name': 'derived', 'formula': 'normal_same/normal_shifted'}],
+								  weighted_kpis=['derived'])
+		result = self.data.delta('fixed_horizon', kpi_subset=['derived'],
 			derived_kpis=[{'name':'derived','formula':'normal_same/normal_shifted'}],
 			weighted_kpis=['derived'])
 
@@ -599,10 +600,8 @@ class ExperimentClassTestCases(ExperimentTestCase):
 		"""
 		Check if the unequal variance warning message is persisted to the Results structure
     	"""
-		res = mock_results_object(self.data, kpi_subset=['normal_unequal_variance'],
-    							 variant_subset=['A'])
-		result = self.data.fixed_horizon_delta(res, kpi_subset=['normal_unequal_variance'],
-								 variant_subset=['A'])
+		res = mock_results_object(self.data, variant_subset=['A'])
+		result = self.data.fixed_horizon_delta(res, kpis_to_analyse=['normal_unequal_variance'])
 		w = result.metadata['warnings']['Experiment.delta']
 		self.assertTrue(isinstance(w, UserWarning))
 		self.assertTrue(w.args[0] == 'Sample variances differ too much to assume that population variances are equal.')
