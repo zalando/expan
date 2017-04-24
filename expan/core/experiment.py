@@ -66,10 +66,8 @@ def _binned_deltas(df, variants, n_bins=4, binning=None, cumulative=False,
 
 		for v in f['variant'].unique():
 			v_metric =  f.iloc[:, 2][ (f.iloc[:,0]==v) ]
-			print(deltaWorker(x=v_metric, y=baseline_metric))
-			df = delta_to_dataframe_all_variants(f.columns[2],
-					                             *deltaWorker(x=v_metric,
-													          y=baseline_metric))
+			df = delta_to_dataframe_all_variants(f.columns[2], *deltaWorker(x=v_metric,
+													                        y=baseline_metric))
 
 			# add new index levels for variant and binning
 			df['_tmp_bin_']=bin_name
