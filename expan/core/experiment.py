@@ -186,9 +186,6 @@ def subgroup_deltas(df, variants, n_bins=4, deltaWorker=statx.make_delta()):
 	result = _binned_deltas(df=df, variants=variants, n_bins=n_bins, binning=None,
 			                cumulative=False, label_format_str='{standard}',
 							deltaWorker=deltaWorker)
-							# assume_normal=assume_normal, percentiles=percentiles,
-							# min_observations=min_observations, nruns=nruns,
-							# relative=relative)
 
 	# TODO: Add binning to result metadata
 
@@ -243,9 +240,6 @@ def time_dependent_deltas(df, variants, time_step=1, cumulative=False,
 	result = _binned_deltas(df=df, variants=variants, binning=binning,
 	                        cumulative=cumulative, label_format_str='{mid}',
 							deltaWorker=deltaWorker)
-							# assume_normal=assume_normal, percentiles=percentiles,
-							# min_observations=min_observations, nruns=nruns,
-							# relative=relative,
 
 	# Reformating of the index names in the result data frame object
 	result.df.index.set_names('time', level=2, inplace=True)
