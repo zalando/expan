@@ -101,8 +101,7 @@ def _binned_deltas(df, variants, n_bins=4, binning=None, cumulative=False,
 
 
 def _delta_all_variants(metric_df, baseline_variant, weighted=False,
-		                assume_normal=True, percentiles=[2.5, 97.5],
-		                min_observations=20, nruns=10000, relative=False):
+		                deltaWorker=statx.make_delta()):
 	"""Applies delta to all variants, given a metric and a baseline variant.
 
 	metric_df has 4 columns: entity, variant, metric, reference_kpi
@@ -122,15 +121,11 @@ def _delta_all_variants(metric_df, baseline_variant, weighted=False,
 		y_weights = lambda f: 1
 
 	do_delta = (lambda f: delta_to_dataframe_all_variants(f.columns[2],
-		*statx.delta(x=f.iloc[:, 2],
-			y=baseline_metric,
-			assume_normal=assume_normal,
-			percentiles=percentiles,
-			min_observations=min_observations,
-			nruns=nruns,
-			relative=relative,
-			x_weights = x_weights(f),
-			y_weights = y_weights(f))))
+		*deltaWorker(x=f.iloc[:,2],
+			         y=baseline_metric,
+					 x_weights = x_weights(f),
+					 y_weights = y_weights(f))))
+
 	# Actual calculation
 	return metric_df.groupby('variant').apply(do_delta).unstack(0)
 
@@ -305,7 +300,9 @@ class Experiment(ExperimentData):
 
 		return res
 
-	def delta(self, method='fixed_horizon', kpi_subset=None, derived_kpis=None, **kwargs):
+	def delta(self, method='fixed_horizon', kpi_subset=None, derived_kpis=None,
+			  assume_normal=True, percentiles=[2.5, 97.5], min_observations =20,
+			  nruns=10000, relative=False, weighted_kpis=None):
 		"""
 		Wrapper for different delta functions with 'method' being the following:
 
@@ -316,10 +313,11 @@ class Experiment(ExperimentData):
 		"""
 		res = Results(None, metadata=self.metadata)
 		res.metadata['reference_kpi'] = {}
-		if 'weighted_kpis' in kwargs:
-			res.metadata['weighted_kpis'] = kwargs['weighted_kpis']
+		res.metadata['weighted_kpis'] = weighted_kpis
 
+		reference_kpis = {}
 		pattern = '([a-zA-Z][0-9a-zA-Z_]*)'
+
 		# determine the complete KPI name list
 		kpis_to_analyse = self.kpi_names.copy()
 		if derived_kpis is not None:
@@ -332,33 +330,36 @@ class Experiment(ExperimentData):
 				# store the reference metric name to be used in the weighting
 				# TODO: only works for ratios
 				res.metadata['reference_kpi'][kpiName] = re.sub(pattern+'/', '', dk['formula'])
+				reference_kpis[kpiName] = re.sub(pattern+'/', '', dk['formula'])
 
 		if kpi_subset is not None:
 			kpis_to_analyse.intersection_update(kpi_subset)
 		self.dbg(3, 'kpis_to_analyse: ' + ','.join(kpis_to_analyse))
 
+		defaultArgs = [res, kpis_to_analyse]
+		deltaWorker = statx.make_delta(assume_normal, percentiles, min_observations,
+				                       nruns, relative)
 		method_table = {
-			'fixed_horizon':    self.fixed_horizon_delta,
-			'group_sequential': self.group_sequential_delta,
-			'bayes_factor':     self.bayes_factor_delta,
-			'bayes_precision':  self.bayes_precision_delta,
+			'fixed_horizon':    (self.fixed_horizon_delta,    defaultArgs + [reference_kpis, weighted_kpis]),
+			'group_sequential': (self.group_sequential_delta, defaultArgs                                  ),
+			'bayes_factor':     (self.bayes_factor_delta,     defaultArgs                                  ),
+			'bayes_precision':  (self.bayes_precision_delta,  defaultArgs                                  ),
 		}
 
 		if not method in method_table:
 			raise NotImplementedError
 		else:
-			f = method_table[method]
-			return f(res, kpis_to_analyse, **kwargs)
+			entry = method_table[method]
+			f     = entry[0]
+			vargs = entry[1]
+			return f(*vargs)
 
 	def fixed_horizon_delta(self,
 							res,
-							kpis_to_analyse=None,
-			  		 		assume_normal=True,
-			  		 		percentiles=[2.5, 97.5],
-			  		 		min_observations=20,
-			  		 		nruns=10000,
-			  		 		relative=False,
-			  		 		weighted_kpis=None):
+							kpis_to_analyse = None,
+							reference_kpis  = {},
+							weighted_kpis   = None,
+							deltaWorker     = statx.make_delta()):
 		"""
 	    Compute delta (with confidence bounds) on all applicable kpis,
 	    and returns in the standard Results format.
@@ -368,34 +369,14 @@ class Experiment(ExperimentData):
 	    TODO: Extend this function to metrics again with type-checking
 
 	    Args:
+			res: a Results object which is to be extended.
 	        kpis_to_analyse (list): kpis for which to perfom delta. If set to
 	            None all kpis are used.
-	        derived_kpis (list): definition of additional KPIs derived from the
-	        	primary ones, e.g.
-	        	[{'name':'return_rate', 'formula':'returned/ordered'}]
-				the original kpi column names are alphanumerical
-				starting with a letter, i.e. [a-zA-Z][0-9a-zA-Z_]+
-	        variant_subset (list): Variants to use compare against baseline. If
-	            set to None all variants are used.
-
-	        assume_normal (boolean): specifies whether normal distribution
-	            assumptions can be made
-	        percentiles (list): list of percentile values to compute
-	        min_observations (integer): minimum observations necessary. If
-	            less observations are given, then NaN is returned
-	        nruns (integer): number of bootstrap runs to perform if assume
-	            normal is set to False.
-	        relative (boolean): If relative==True, then the values will be
-	            returned as distances below and above the mean, respectively,
-	            rather than the	absolute values. In	this case, the interval is
-	            mean-ret_val[0] to mean+ret_val[1]. This is more useful in many
-	            situations because it corresponds with the sem() and std()
-	            functions.
-	        weighted_kpis (list): a list of metric names. For each metric
-	        	in the list, the weighted mean and confidence intervals
-	        	are calculated, which is equivalent to the overall metric.
-	        	Otherwise the metrics are unweighted, this weighted approach
-	        	is only relevant for ratios.
+		    reference_kpis: dict with the names of reference KPIs parameterized
+			    by the name of the primary KPI
+			weighted_kpis: names of KPIs that should be treated as weighted
+			deltaWorker: a closure over statistics.delta() as described by
+			    statistics.make_delta()
 
 	    Returns:
 	        Results object containing the computed deltas.
@@ -405,7 +386,7 @@ class Experiment(ExperimentData):
 		for mname in kpis_to_analyse:
 			# the weighted approach implies that derived_kpis is not None
 			if weighted_kpis is not None and mname in weighted_kpis:
-				reference_kpi = res.metadata['reference_kpi'][mname]
+				reference_kpi = reference_kpis[mname]
 				weighted = True
 			else:
 				reference_kpi = mname
@@ -417,12 +398,8 @@ class Experiment(ExperimentData):
 					warnings.simplefilter("always")
 					df = (_delta_all_variants(self.kpis.reset_index()[['entity', 'variant', mname, reference_kpi]],
 											  self.baseline_variant,
-											  weighted=weighted,
-											  assume_normal=assume_normal,
-											  percentiles=percentiles,
-											  min_observations=min_observations,
-											  nruns=nruns,
-											  relative=relative))
+											  weighted,
+											  deltaWorker))
 					if len(w):
 						res.metadata['warnings']['Experiment.delta'] = w[-1].message
 
