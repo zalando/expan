@@ -9,6 +9,13 @@ def _delta_mean(x, y):
 	"Implemented as function to allow calling from bootstrap."
 	return np.nanmean(x) - np.nanmean(y)
 
+def make_delta(assume_normal=True, percentiles=[2.5, 97.5],
+		  min_observations=20, nruns=10000, relative=False):
+	""" a closure to the below delta function """
+	def f(x, y, x_weights=1, y_weights=1):
+		return delta(x, y, assume_normal, percentiles, min_observations,
+				     nruns, relative, x_weights, y_weights)
+	return f
 
 def delta(x, y, assume_normal=True, percentiles=[2.5, 97.5],
 		  min_observations=20, nruns=10000, relative=False, x_weights=1, y_weights=1):
