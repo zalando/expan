@@ -340,10 +340,10 @@ class Experiment(ExperimentData):
 		deltaWorker = statx.make_delta(assume_normal, percentiles, min_observations,
 				                       nruns, relative)
 		method_table = {
-			'fixed_horizon':    (self.fixed_horizon_delta,    defaultArgs + [reference_kpis, weighted_kpis]),
-			'group_sequential': (self.group_sequential_delta, defaultArgs                                  ),
-			'bayes_factor':     (self.bayes_factor_delta,     defaultArgs                                  ),
-			'bayes_precision':  (self.bayes_precision_delta,  defaultArgs                                  ),
+			'fixed_horizon':    (self.fixed_horizon_delta,    defaultArgs + [reference_kpis, weighted_kpis, deltaWorker]),
+			'group_sequential': (self.group_sequential_delta, defaultArgs                                               ),
+			'bayes_factor':     (self.bayes_factor_delta,     defaultArgs                                               ),
+			'bayes_precision':  (self.bayes_precision_delta,  defaultArgs                                               ),
 		}
 
 		if not method in method_table:
