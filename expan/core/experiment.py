@@ -359,7 +359,8 @@ class Experiment(ExperimentData):
 							kpis_to_analyse = None,
 							reference_kpis  = {},
 							weighted_kpis   = None,
-							deltaWorker     = statx.make_delta()):
+							deltaWorker     = statx.make_delta(),
+							**kwargs):
 		"""
 	    Compute delta (with confidence bounds) on all applicable kpis,
 	    and returns in the standard Results format.
@@ -421,7 +422,8 @@ class Experiment(ExperimentData):
 							   spending_function='obrien_fleming',
 					 		   information_fraction=1,
 							   alpha=0.05,
-					 		   cap=8):
+					 		   cap=8,
+					 		   **kwargs):
 		"""
 		Calculate the stopping criterion based on the group sequential design 
 		and the effect size.
@@ -472,7 +474,8 @@ class Experiment(ExperimentData):
 	def bayes_factor_delta(self,
 						   result,
 						   kpis_to_analyse,
-						   distribution='normal'):
+						   distribution='normal',
+						   **kwargs):
 		"""
 		Calculate the stopping criterion based on the Bayes factor 
 		and the effect size.
@@ -516,7 +519,8 @@ class Experiment(ExperimentData):
 						   	  result,
 						   	  kpis_to_analyse,
 						   	  distribution='normal',
-						   	  posterior_width=0.08):
+						   	  posterior_width=0.08,
+						   	  **kwargs):
 		"""
 		Calculate the stopping criterion based on the precision of the posterior 
 		and the effect size.
