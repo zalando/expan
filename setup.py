@@ -65,6 +65,5 @@ setup(
 		'Programming Language :: Python :: 3.5',
 	],
 	test_suite='tests',
-	tests_require=test_requirements,
-	package_data={'expan': ['models/*.stan']}
+	tests_require=test_requirements
 )
