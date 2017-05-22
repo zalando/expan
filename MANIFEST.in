@@ -6,6 +6,7 @@ include README.rst
 include requirements.txt
 
 recursive-include tests *
+recursive-include expan/models *
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
 
