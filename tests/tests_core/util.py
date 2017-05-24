@@ -1,5 +1,6 @@
-import pandas as pd
 import os
+
+import pandas as pd
 
 
 def get_norm_temp_data(fdir, fname='normtemp.dat.txt.gz'):

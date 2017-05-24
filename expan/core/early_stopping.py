@@ -9,6 +9,7 @@ import expan.core.statistics as statx
 
 __location__ = realpath(join(os.getcwd(), dirname(__file__)))
 
+
 def obrien_fleming(information_fraction, alpha=0.05):
 	"""
 	Calculate an approximation of the O'Brien-Fleming alpha spending function.
@@ -23,7 +24,7 @@ def obrien_fleming(information_fraction, alpha=0.05):
 		float: redistributed alpha value at the time point with the given 
 			   information fraction
 	"""
-	return (1-norm.cdf(norm.ppf(1-alpha/2)/np.sqrt(information_fraction)))*2
+	return (1 - norm.cdf(norm.ppf(1 - alpha / 2) / np.sqrt(information_fraction))) * 2
 
 
 def group_sequential(x,
@@ -64,9 +65,9 @@ def group_sequential(x,
 	_y = np.array(y, dtype=float)
 
 	# if scalar, assume equal spacing between the intervals
-	#if not isinstance(information_fraction, list):
+	# if not isinstance(information_fraction, list):
 	#	fraction = np.linspace(0,1,information_fraction+1)[1:]
-	#else:
+	# else:
 	#	fraction = information_fraction
 
 	# alpha spending function
@@ -77,7 +78,7 @@ def group_sequential(x,
 	alpha_new = func(information_fraction, alpha=alpha)
 
 	# calculate the z-score bound
-	bound = norm.ppf(1-alpha_new/2)
+	bound = norm.ppf(1 - alpha_new / 2)
 	# replace potential inf with an upper bound
 	if bound == np.inf:
 		bound = cap
@@ -88,36 +89,37 @@ def group_sequential(x,
 	sigma_y = np.nanstd(_y)
 	n_x = statx.sample_size(_x)
 	n_y = statx.sample_size(_y)
-	z = (mu_x-mu_y) / np.sqrt(sigma_x**2/n_x+sigma_y**2/n_y)
+	z = (mu_x - mu_y) / np.sqrt(sigma_x ** 2 / n_x + sigma_y ** 2 / n_y)
 
 	if z > bound or z < -bound:
 		stop = 1
 	else:
 		stop = 0
 
-	interval = statx.normal_difference(mu_x,sigma_x,n_x,mu_y,sigma_y,n_y,[alpha_new*100/2,100-alpha_new*100/2])
+	interval = statx.normal_difference(mu_x, sigma_x, n_x, mu_y, sigma_y, n_y,
+									   [alpha_new * 100 / 2, 100 - alpha_new * 100 / 2])
 
-	return stop, mu_x-mu_y, interval, n_x, n_y, mu_x, mu_y
+	return stop, mu_x - mu_y, interval, n_x, n_y, mu_x, mu_y
 
 
 def HDI_from_MCMC(posterior_samples, credible_mass=0.95):
-    # Computes highest density interval from a sample of representative values,
-    # estimated as the shortest credible interval
-    # Takes Arguments posterior_samples (samples from posterior) and credible mass (normally .95)
-    # http://stackoverflow.com/questions/22284502/highest-posterior-density-region-and-central-credible-region
-    sorted_points = sorted(posterior_samples)
-    ciIdxInc = np.ceil(credible_mass * len(sorted_points)).astype('int')
-    nCIs = len(sorted_points) - ciIdxInc
-    ciWidth = [0]*nCIs
-    for i in range(0, nCIs):
-        ciWidth[i] = sorted_points[i + ciIdxInc] - sorted_points[i]
+	# Computes highest density interval from a sample of representative values,
+	# estimated as the shortest credible interval
+	# Takes Arguments posterior_samples (samples from posterior) and credible mass (normally .95)
+	# http://stackoverflow.com/questions/22284502/highest-posterior-density-region-and-central-credible-region
+	sorted_points = sorted(posterior_samples)
+	ciIdxInc = np.ceil(credible_mass * len(sorted_points)).astype('int')
+	nCIs = len(sorted_points) - ciIdxInc
+	ciWidth = [0] * nCIs
+	for i in range(0, nCIs):
+		ciWidth[i] = sorted_points[i + ciIdxInc] - sorted_points[i]
 
-    #ciWidth = np.zaeros(nCIs)
-    #ciWidth[:] = sorted_points[ciIdxInc:] - sorted_points
+	# ciWidth = np.zaeros(nCIs)
+	# ciWidth[:] = sorted_points[ciIdxInc:] - sorted_points
 
-    HDImin = sorted_points[ciWidth.index(min(ciWidth))]
-    HDImax = sorted_points[ciWidth.index(min(ciWidth))+ciIdxInc]
-    return(HDImin, HDImax)
+	HDImin = sorted_points[ciWidth.index(min(ciWidth))]
+	HDImax = sorted_points[ciWidth.index(min(ciWidth)) + ciIdxInc]
+	return (HDImin, HDImax)
 
 
 def _bayes_sampling(x, y, distribution='normal'):
@@ -166,7 +168,8 @@ def _bayes_sampling(x, y, distribution='normal'):
 	model_file = __location__ + '/../models/' + distribution + '_kpi.stan'
 	sm = StanModel(file=model_file)
 
-	fit = sm.sampling(data=fit_data, iter=25000, chains=4, n_jobs=1, seed=1, control={'stepsize':0.01,'adapt_delta':0.99})
+	fit = sm.sampling(data=fit_data, iter=25000, chains=4, n_jobs=1, seed=1,
+					  control={'stepsize': 0.01, 'adapt_delta': 0.99})
 	traces = fit.extract()
 
 	return traces, n_x, n_y, mu_x, mu_y
@@ -196,12 +199,12 @@ def bayes_factor(x, y, distribution='normal'):
 	prior = cauchy.pdf(0, loc=0, scale=1)
 	# BF_01
 	bf = kde.evaluate(0)[0] / prior
-	stop = int(bf > 3 or bf < 1/3.)
+	stop = int(bf > 3 or bf < 1 / 3.)
 
 	interval = HDI_from_MCMC(traces['delta'])
 	print(bf, interval)
 
-	return stop, mu_x-mu_y, {'lower':interval[0],'upper':interval[1]}, n_x, n_y, mu_x, mu_y
+	return stop, mu_x - mu_y, {'lower': interval[0], 'upper': interval[1]}, n_x, n_y, mu_x, mu_y
 
 
 def bayes_precision(x, y, distribution='normal', posterior_width=0.08):
@@ -229,4 +232,4 @@ def bayes_precision(x, y, distribution='normal', posterior_width=0.08):
 	stop = int(interval[1] - interval[0] < posterior_width)
 	print(interval)
 
-	return stop, mu_x-mu_y, {'lower':interval[0],'upper':interval[1]}, n_x, n_y, mu_x, mu_y
+	return stop, mu_x - mu_y, {'lower': interval[0], 'upper': interval[1]}, n_x, n_y, mu_x, mu_y

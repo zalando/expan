@@ -1,10 +1,11 @@
-from os import rmdir, makedirs, getcwd, remove, walk
 import unittest
+from os import rmdir, makedirs, getcwd, remove, walk
 from os.path import dirname, join, realpath, exists
+
+import simplejson as json
 
 import expan.core.util
 import expan.data.csv_fetcher as csv_fetcher
-import simplejson as json
 
 __location__ = realpath(join(getcwd(), dirname(__file__)))
 

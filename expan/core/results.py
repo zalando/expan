@@ -37,7 +37,6 @@ class Results(object):
 		'pctile']
 	mandatory_column_levels = ['variant']
 
-
 	def __init__(self, df, metadata={}, dbg=None):
 		"""
 	    Want to be able to create results from just a single dataframe.
@@ -55,22 +54,18 @@ class Results(object):
 
 		self.dbg = dbg or Dbg()
 
-
 	@property
 	def binning(self):
 		"""Return the binning object."""
 		return self.metadata['binning']
 
-
 	def set_binning(self, binning):
 		"""Store a binning object in the metadata."""
 		self.metadata['binning'] = binning
 
-
 	def _sortlevels(self):
 		self.df.sortlevel(axis=0, inplace=True, sort_remaining=True)
 		self.df.sortlevel(axis=1, inplace=True, sort_remaining=True)
-
 
 	def append_delta(self, metric, variant, mu, pctiles,
 					 samplesize_variant,
@@ -93,10 +88,10 @@ class Results(object):
 	        subgroup:
 	    """
 		df = self._delta_to_dataframe(metric, variant, mu, pctiles,
-								samplesize_variant,
-								samplesize_baseline,
-								subgroup_metric='-',
-								subgroup=None)
+									  samplesize_variant,
+									  samplesize_baseline,
+									  subgroup_metric='-',
+									  subgroup=None)
 
 		if self.df is None:
 			self.df = df
@@ -105,20 +100,17 @@ class Results(object):
 
 		self._sortlevels()
 
-
 	def variants(self):
 		"""
 	    Return the variants represented in this object
 	    """
 		return self.df.columns.levels[0]
 
-
 	def index_values(self, level='metric'):
 		"""
 	    Return the metrics represented in this Results object
 	    """
 		return self.df.index.get_level_values(level=level).unique()
-
 
 	def relative_uplift(self, analysis_type, metric=None, subgroup_metric='-'):
 		"""Calculate the relative uplift for the given metrics and subgroup
@@ -138,7 +130,6 @@ class Results(object):
 
 		# TODO: do we return a data frame or a Results object here?
 		return df
-
 
 	def calculate_prob_uplift_over_zero(self):
 		"""
@@ -160,7 +151,6 @@ class Results(object):
 
 		self.df = df
 
-
 	def delta_means(self, metric=None, subgroup_metric='-'):
 		"""
 
@@ -172,7 +162,6 @@ class Results(object):
 
 		"""
 		return self.statistic('delta', 'variant_mean', metric, subgroup_metric)
-
 
 	def sga_means(self, metric=None, subgroup_metric='-'):
 		"""
@@ -186,7 +175,6 @@ class Results(object):
 		"""
 		return self.statistic('sga', 'variant_mean', metric, subgroup_metric)
 
-
 	def uplifts(self, metric=None, subgroup_metric='-'):
 		"""
 
@@ -198,7 +186,6 @@ class Results(object):
 
 		"""
 		return self.statistic('delta', 'uplift', metric, subgroup_metric)
-
 
 	def sga_uplifts(self, metric=None, subgroup_metric='-'):
 		"""
@@ -212,7 +199,6 @@ class Results(object):
 		"""
 		return self.statistic('sga', 'uplift', metric, subgroup_metric)
 
-
 	def sample_sizes(self, analysis_type='delta', metric=None, subgroup_metric='-'):
 		"""
 
@@ -225,7 +211,6 @@ class Results(object):
 
 		"""
 		return self.statistic(analysis_type, 'sample_size', metric, subgroup_metric)
-
 
 	def statistic(self, analysis_type, statistic=None, metric=None,
 				  subgroup_metric='-',
@@ -292,7 +277,6 @@ class Results(object):
 		# mean_results.columns = mean_results.columns.droplevel(1)
 		return mean_results
 
-
 	def bounds(self, metric=None, subgroup_metric='-'):
 		"""
 
@@ -322,7 +306,6 @@ class Results(object):
 
 		return results
 
-
 	def __str__(self):
 		return 'Results for \'{}\' with {:d} variants, {:d} metrics, {:d} subgroup metrics. Means are:\n{}'.format(
 			str(self.metadata.get('experiment')),
@@ -332,11 +315,9 @@ class Results(object):
 			str(self.means()),
 		)
 
-
 	def __repr__(self):
 		return 'Results(metadata={}, \ndf={})'.format(repr(self.metadata),
 													  repr(self.df.unstack('pctile')))
-
 
 	def to_csv(self, fpath):
 		"""
@@ -356,7 +337,6 @@ class Results(object):
 		res.columns = res.columns.droplevel(0)
 		res = res.reset_index()
 		res.to_csv(fpath, index=False)
-
 
 	def to_hdf(self, fpath):
 		"""
@@ -399,7 +379,6 @@ class Results(object):
 
 		hfile.close()
 
-
 	def to_json(self, fpath=None):
 		"""
 		Produces either a JSON string (if there is no filepath specified)
@@ -438,24 +417,25 @@ class Results(object):
 		#         |               labels for the new dimension                     |  next dimension   |       data frame index mask       |
 		#         |                                                                |                   |                                   |
 		# ----------------------------------------------------------------------------------------------------------------------------------
-		table = [ ( lambda x: df.value.keys()                                      , 'variant'         , lambda x: True                    ),
-				  ( lambda x: df.metric.unique()                                   , 'metric'          , lambda x: df.metric          == x ),
-				  ( lambda x: df[df.metric          == x].subgroup_metric.unique() , 'subgroup_metric' , lambda x: df.subgroup_metric == x ),
-				  ( lambda x: df[df.subgroup_metric == x].subgroup.unique()        , 'subgroup'        , lambda x: df.subgroup        == x ),
-				  ( lambda x: df[df.subgroup        == x].statistic.unique()       , 'statistic'       , lambda x: df.statistic       == x ),
-				  ( lambda x: df[df.statistic       == x].pctile.unique()          , 'pctile'          , lambda x: df.pctile          == x ) ]
+		table = [(lambda x: df.value.keys(), 'variant', lambda x: True),
+				 (lambda x: df.metric.unique(), 'metric', lambda x: df.metric == x),
+				 (lambda x: df[df.metric == x].subgroup_metric.unique(), 'subgroup_metric',
+				  lambda x: df.subgroup_metric == x),
+				 (lambda x: df[df.subgroup_metric == x].subgroup.unique(), 'subgroup', lambda x: df.subgroup == x),
+				 (lambda x: df[df.subgroup == x].statistic.unique(), 'statistic', lambda x: df.statistic == x),
+				 (lambda x: df[df.statistic == x].pctile.unique(), 'pctile', lambda x: df.pctile == x)]
 
 		# traverse the tree of dimensions aka indices
 		# in parallel refining the data frame view mask
-		def go(table, name=None, ixes=[], mask = pd.Series([True]*len(df))):
+		def go(table, name=None, ixes=[], mask=pd.Series([True] * len(df))):
 			if not table:
 				variant = dict(ixes)['variant']
 				return {"name": str(name), "value": df[mask].value[variant].values[0]}
 			else:
 				head, tail = table[0], table[1:]
 				f, nextDim, flter = head[0], head[1], head[2]
-				val = [go(tail, n, [(nextDim, n)]+ixes, flter(n) & mask) for n in f(name)]
-				return {"name": name, nextDim+"s": val}
+				val = [go(tail, n, [(nextDim, n)] + ixes, flter(n) & mask) for n in f(name)]
+				return {"name": name, nextDim + "s": val}
 
 		json_tree = {'variants': go(table, 'none')['variants']}
 
@@ -472,7 +452,7 @@ class Results(object):
 		try:
 			json.loads(json_string)
 		except ValueError as e:
-			self.dbg(-2,'Invalid json created in expan.results.to_json(): %s' % e)
+			self.dbg(-2, 'Invalid json created in expan.results.to_json(): %s' % e)
 			return None
 
 		if fpath:
@@ -481,8 +461,7 @@ class Results(object):
 		else:
 			return json_string
 
-
-	#Fixme: depreciated?
+	# Fixme: depreciated?
 	def from_hdf(self, fpath, dbg=None):
 		"""
 		Restores a Results object from HDF5 as created by the to_hdf method.
@@ -514,7 +493,6 @@ class Results(object):
 			metadata[k] = v
 
 		return Results(data, metadata)
-
 
 	def _prob_uplift_over_zero_single_metric(self, result_df, baseline_variant):
 		"""Calculate the probability of uplift>0 for a single metric.
@@ -557,7 +535,6 @@ class Results(object):
 		ret.sort_index(inplace=True)
 
 		return ret
-
 
 	def _delta_to_dataframe(self,
 							metric,
@@ -610,10 +587,12 @@ class Results(object):
 		return df
 
 
-
-#FIXME: The following functions should be deprecated  when new result structure is implemented.
-#==============================================================
-def delta_to_dataframe_all_variants(metric, mu, pctiles, samplesize_variant,
+# FIXME: The following functions should be deprecated  when new result structure is implemented.
+# ==============================================================
+def delta_to_dataframe_all_variants(metric,
+									mu,
+									pctiles,
+									samplesize_variant,
 									samplesize_baseline,
 									mu_variant,
 									mu_baseline,
@@ -751,7 +730,7 @@ def early_stopping_to_dataframe(metric,
 			'value': list(pctiles.values()),
 			'subgroup_metric': subgroup_metric,
 			'subgroup': subgroup
-			}))
+		}))
 
 	df.set_index(Results.mandatory_index_levels, inplace=True)
 	return df

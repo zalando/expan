@@ -75,10 +75,8 @@ class Dbg():
 		self._dbg_lvl = dbg_lvl
 		self._call_count = {}
 
-
 	def __call__(self, lvl, msg, skip_stack_lvls=0):
 		return self.out(lvl, msg, skip_stack_lvls=skip_stack_lvls + 1)
-
 
 	def out(self, lvl, msg,
 			skip_stack_lvls=0):
@@ -111,7 +109,6 @@ class Dbg():
 				else:
 					self.logger.debug('D%d|%s,%d|%s: %s' % (lvl, caller_file, caller_lineno, caller_name, msg))
 
-
 	def set_lvl(self, new_dbg_lvl):
 		"""
 		Sets new debug level.
@@ -120,7 +117,6 @@ class Dbg():
 		    new_dbg_lvl:
 		"""
 		self._dbg_lvl = new_dbg_lvl
-
 
 	def get_lvl(self):
 		"""
@@ -131,14 +127,12 @@ class Dbg():
 		"""
 		return self._dbg_lvl
 
-
 	def reset(self):
 		"""
 		Resets debug level and call count.
 		"""
 		self._dbg_lvl = default_dbg_lvl
 		self._call_count = {}
-
 
 	def log(self, lvl, msg):
 		if lvl <= self._dbg_lvl:

@@ -2,6 +2,7 @@ import unittest
 import warnings
 
 import numpy as np
+
 import expan.core.statistics as statx
 from .util import *
 
@@ -24,7 +25,6 @@ class StatisticsTestCase(unittest.TestCase):
 
 		self.rand_s1 = np.random.normal(loc=0, size=1000)
 		self.rand_s2 = np.random.normal(loc=0.1, size=1000)
-
 
 	def tearDown(self):
 		"""
@@ -50,7 +50,6 @@ class DeltaTestCases(StatisticsTestCase):
 		with self.assertRaises(ValueError):
 			statx.delta(None, self.samples.temperature)
 
-
 	def test__delta__computation_assumed_normal(self):
 		"""
     	Result of delta() assuming normality equals expected result.
@@ -72,7 +71,6 @@ class DeltaTestCases(StatisticsTestCase):
 		# Checking if sample size 2 is correct
 		self.assertEqual(result1[3], 65)
 
-
 	def test__delta__nan_handling(self):
 		"""
     	Test correct handling of nans. (ignored)
@@ -88,7 +86,6 @@ class DeltaTestCases(StatisticsTestCase):
 		self.assertAlmostEqual(uplift, -0.1, 1)
 		self.assertEqual(ss_x, 90)
 		self.assertEqual(ss_y, 1000)
-
 
 	def test__delta__computation_not_assumed_normal(self):
 		"""
@@ -128,7 +125,6 @@ class ChiSquareTestCases(StatisticsTestCase):
 		with self.assertRaises(ValueError):
 			statx.chi_square(None, self.samples.temperature)
 
-
 	def test__chi_square__computation_same_data(self):
 		"""
     	Check if p-value is 1.0 for same data entered twice.
@@ -137,7 +133,6 @@ class ChiSquareTestCases(StatisticsTestCase):
 		self.assertEqual(1.0,
 						 statx.chi_square(self.samples.temperature,
 										  self.samples.temperature)[0])
-
 
 	def test__chi_square__computation_different_data(self):
 		"""
@@ -148,7 +143,6 @@ class ChiSquareTestCases(StatisticsTestCase):
 		b = ['A'] * 16 + ['B'] * 16 + ['C'] * 16 + ['D'] * 16 + ['E'] * 16 + ['F'] * 8
 		# Computation of chi-square p-value
 		self.assertAlmostEqual(0.89852623940266074, statx.chi_square(a, b)[0])
-
 
 	def test__chi_square__computation_different_data_as_in_statistics_book(self):
 		"""
@@ -162,7 +156,6 @@ class ChiSquareTestCases(StatisticsTestCase):
 		p, chisq, nattr = statx.chi_square(a, b)
 		self.assertAlmostEqual(116.851, chisq, delta=0.001)
 		self.assertAlmostEqual(0.0, p, delta=0.00000000001)
-
 
 	def test__chi_square__computation_different_data_as_in_open_statistics_book(self):
 		"""
@@ -178,7 +171,6 @@ class ChiSquareTestCases(StatisticsTestCase):
 		self.assertAlmostEqual(6.120, chisq, delta=0.001)
 		self.assertAlmostEqual(0.0469, p, delta=0.0001)
 
-
 	def test__chi_square__computation_one_bin_not_present(self):
 		"""
     	Check if p-value is correct for test data from pandas manual page.
@@ -190,7 +182,6 @@ class ChiSquareTestCases(StatisticsTestCase):
 		self.assertAlmostEqual(0.94879980715092971, statx.chi_square(a[0:-12], b)[0])
 		# Computation of chi-square p-value (b is shortened)
 		self.assertAlmostEqual(0.94879980715092971, statx.chi_square(a, b[0:-8])[0])
-
 
 	def test__chi_square__computation_symmetric(self):
 		"""
@@ -220,14 +211,12 @@ class SampleSizeTestCases(StatisticsTestCase):
     	"""
 		self.assertEqual(statx.sample_size([]), 0)
 
-
 	def test__sample_size__list_numeric(self):
 		"""
     	Result of sample_size() is number of elements of a list.
     	"""
 		x = [1, 1, 2, 5, 8]
 		self.assertEqual(statx.sample_size(x), 5)
-
 
 	def test__sample_size__nparray_numeric_with_nan(self):
 		"""
@@ -237,7 +226,6 @@ class SampleSizeTestCases(StatisticsTestCase):
 		x = np.array([1, 1, np.nan, 2, np.nan, 5, 8])
 		self.assertEqual(statx.sample_size(x), 5)
 
-
 	def test__sample_size__list_categorical(self):
 		"""
     	Result of sample_size() is number of elements of a list of categorical
@@ -246,7 +234,6 @@ class SampleSizeTestCases(StatisticsTestCase):
 		x = ['1', '1', '3', '2', '6', '5', '8']
 		self.assertEqual(statx.sample_size(x), 7)
 
-
 	def test__sample_size__pdseries_categorical(self):
 		"""
     	Result of sample_size() is number of elements of a pandas series with
@@ -254,7 +241,6 @@ class SampleSizeTestCases(StatisticsTestCase):
     	"""
 		x = pd.Series(['1', '7', '2', '5', '8', '0'])
 		self.assertEqual(statx.sample_size(x), 6)
-
 
 	def test__sample_size__pdseries_categorical_with_na(self):
 		"""
@@ -296,7 +282,6 @@ class BootstrapTestCases(StatisticsTestCase):
 		np.random.seed(0)
 		self.samples = get_norm_temp_data(data_dir)
 		self.metrics = get_framingham_data(data_dir)
-
 
 	def test__bootstrap__computation(self):
 		"""
@@ -352,7 +337,6 @@ class PooledStdTestCases(StatisticsTestCase):
 			self.assertEqual(len(w), 1)
 			self.assertTrue(issubclass(w[-1].category, UserWarning))
 			self.assertTrue('variances differ' in str(w[-1].message))
-
 
 	def test__pooled_std__computation(self):
 		"""

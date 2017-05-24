@@ -1,7 +1,9 @@
 import re
 import warnings
+
 import numpy as np
 import pandas as pd
+
 import expan.core.binning as binmodule
 import expan.core.early_stopping as es
 import expan.core.statistics as statx
@@ -41,7 +43,6 @@ class Experiment(ExperimentData):
 
 		self.dbg = dbg or Dbg()
 
-
 	@property
 	def baseline_variant(self):
 		"""
@@ -51,7 +52,6 @@ class Experiment(ExperimentData):
 			string: baseline variant
 		"""
 		return self.metadata['baseline_variant']
-
 
 	def __str__(self):
 		res = super(Experiment, self).__str__()
@@ -68,9 +68,8 @@ class Experiment(ExperimentData):
 
 		return res
 
-
 	def delta(self, method='fixed_horizon', kpi_subset=None, derived_kpis=None,
-			  assume_normal=True, percentiles=[2.5, 97.5], min_observations =20,
+			  assume_normal=True, percentiles=[2.5, 97.5], min_observations=20,
 			  nruns=10000, relative=False, weighted_kpis=None):
 		"""
 		Wrapper for different delta functions with 'method' being the following:
@@ -95,11 +94,11 @@ class Experiment(ExperimentData):
 				kpis_to_analyse.update([kpiName])
 				# assuming the columns in the formula can all be cast into float
 				# and create the derived KPI as an additional column
-				self.kpis.loc[:,kpiName] = eval(re.sub(pattern, r'self.kpis.\1.astype(float)', dk['formula']))
+				self.kpis.loc[:, kpiName] = eval(re.sub(pattern, r'self.kpis.\1.astype(float)', dk['formula']))
 				# store the reference metric name to be used in the weighting
 				# TODO: only works for ratios
-				res.metadata['reference_kpi'][kpiName] = re.sub(pattern+'/', '', dk['formula'])
-				reference_kpis[kpiName] = re.sub(pattern+'/', '', dk['formula'])
+				res.metadata['reference_kpi'][kpiName] = re.sub(pattern + '/', '', dk['formula'])
+				reference_kpis[kpiName] = re.sub(pattern + '/', '', dk['formula'])
 
 		if kpi_subset is not None:
 			kpis_to_analyse.intersection_update(kpi_subset)
@@ -107,29 +106,28 @@ class Experiment(ExperimentData):
 
 		defaultArgs = [res, kpis_to_analyse]
 		deltaWorker = statx.make_delta(assume_normal, percentiles, min_observations,
-				                       nruns, relative)
+									   nruns, relative)
 		method_table = {
-			'fixed_horizon':    (self.fixed_horizon_delta,    defaultArgs + [reference_kpis, weighted_kpis, deltaWorker]),
-			'group_sequential': (self.group_sequential_delta, defaultArgs                                               ),
-			'bayes_factor':     (self.bayes_factor_delta,     defaultArgs                                               ),
-			'bayes_precision':  (self.bayes_precision_delta,  defaultArgs                                               ),
+			'fixed_horizon': (self.fixed_horizon_delta, defaultArgs + [reference_kpis, weighted_kpis, deltaWorker]),
+			'group_sequential': (self.group_sequential_delta, defaultArgs),
+			'bayes_factor': (self.bayes_factor_delta, defaultArgs),
+			'bayes_precision': (self.bayes_precision_delta, defaultArgs),
 		}
 
 		if not method in method_table:
 			raise NotImplementedError
 		else:
 			entry = method_table[method]
-			f     = entry[0]
+			f = entry[0]
 			vargs = entry[1]
 			return f(*vargs)
 
-
 	def fixed_horizon_delta(self,
 							res,
-							kpis_to_analyse = None,
-							reference_kpis  = {},
-							weighted_kpis   = None,
-							deltaWorker     = statx.make_delta(),
+							kpis_to_analyse=None,
+							reference_kpis={},
+							weighted_kpis=None,
+							deltaWorker=statx.make_delta(),
 							**kwargs):
 		"""
 	    Compute delta (with confidence bounds) on all applicable kpis,
@@ -168,9 +166,9 @@ class Experiment(ExperimentData):
 					# Cause all warnings to always be triggered.
 					warnings.simplefilter("always")
 					df = (self._delta_all_variants(self.kpis.reset_index()[['entity', 'variant', mname, reference_kpi]],
-											  self.baseline_variant,
-											  weighted,
-											  deltaWorker))
+												   self.baseline_variant,
+												   weighted,
+												   deltaWorker))
 					if len(w):
 						res.metadata['warnings']['Experiment.delta'] = w[-1].message
 
@@ -185,15 +183,14 @@ class Experiment(ExperimentData):
 		# res.calculate_prob_uplift_over_zero()
 		return res
 
-
 	def group_sequential_delta(self,
 							   result,
 							   kpis_to_analyse,
 							   spending_function='obrien_fleming',
-					 		   information_fraction=1,
+							   information_fraction=1,
 							   alpha=0.05,
-					 		   cap=8,
-					 		   **kwargs):
+							   cap=8,
+							   **kwargs):
 		"""
 		Calculate the stopping criterion based on the group sequential design 
 		and the effect size.
@@ -224,14 +221,16 @@ class Experiment(ExperimentData):
 																  x=f.iloc[:, 2],
 																  y=baseline_metric,
 																  spending_function=spending_function,
-					 											  information_fraction=current_sample_size/self.metadata['estimatedSampleSize'],
-					 											  alpha=alpha,
-					 											  cap=cap)))
+																  information_fraction=current_sample_size /
+																					   self.metadata[
+																						   'estimatedSampleSize'],
+																  alpha=alpha,
+																  cap=cap)))
 
 			# Actual calculation
 			df = metric_df.groupby('variant').apply(do_delta).unstack(0)
 			# force the stop label of the baseline variant to 0
-			df.loc[(mname,'-',slice(None),'stop'),('value',self.baseline_variant)] = 0
+			df.loc[(mname, '-', slice(None), 'stop'), ('value', self.baseline_variant)] = 0
 
 			if result.df is None:
 				result.df = df
@@ -239,7 +238,6 @@ class Experiment(ExperimentData):
 				result.df = result.df.append(df)
 
 		return result
-
 
 	def bayes_factor_delta(self,
 						   result,
@@ -259,14 +257,15 @@ class Experiment(ExperimentData):
 		Returns:
 			a Results object
 		"""
+
 		def do_delta(f):
-			print(f.iloc[0,1])
+			print(f.iloc[0, 1])
 			return early_stopping_to_dataframe(f.columns[2],
-												*es.bayes_factor(
-													x=f.iloc[:, 2],
-													y=baseline_metric,
-													distribution=distribution
-												))
+											   *es.bayes_factor(
+												   x=f.iloc[:, 2],
+												   y=baseline_metric,
+												   distribution=distribution
+											   ))
 
 		for mname in kpis_to_analyse:
 			metric_df = self.kpis.reset_index()[['entity', 'variant', mname]]
@@ -275,7 +274,7 @@ class Experiment(ExperimentData):
 			# Actual calculation
 			df = metric_df.groupby('variant').apply(do_delta).unstack(0)
 			# force the stop label of the baseline variant to 0
-			df.loc[(mname,'-',slice(None),'stop'),('value',self.baseline_variant)] = 0
+			df.loc[(mname, '-', slice(None), 'stop'), ('value', self.baseline_variant)] = 0
 
 			if result.df is None:
 				result.df = df
@@ -284,13 +283,12 @@ class Experiment(ExperimentData):
 
 		return result
 
-
 	def bayes_precision_delta(self,
-						   	  result,
-						   	  kpis_to_analyse,
-						   	  distribution='normal',
-						   	  posterior_width=0.08,
-						   	  **kwargs):
+							  result,
+							  kpis_to_analyse,
+							  distribution='normal',
+							  posterior_width=0.08,
+							  **kwargs):
 		"""
 		Calculate the stopping criterion based on the precision of the posterior 
 		and the effect size.
@@ -306,15 +304,16 @@ class Experiment(ExperimentData):
 		Returns:
 			a Results object
 		"""
+
 		def do_delta(f):
-			print(f.iloc[0,1])
+			print(f.iloc[0, 1])
 			return early_stopping_to_dataframe(f.columns[2],
-												*es.bayes_precision(
-													x=f.iloc[:, 2],
-													y=baseline_metric,
-													distribution=distribution,
-													posterior_width=posterior_width
-												))
+											   *es.bayes_precision(
+												   x=f.iloc[:, 2],
+												   y=baseline_metric,
+												   distribution=distribution,
+												   posterior_width=posterior_width
+											   ))
 
 		for mname in kpis_to_analyse:
 			metric_df = self.kpis.reset_index()[['entity', 'variant', mname]]
@@ -323,7 +322,7 @@ class Experiment(ExperimentData):
 			# Actual calculation
 			df = metric_df.groupby('variant').apply(do_delta).unstack(0)
 			# force the stop label of the baseline variant to 0
-			df.loc[(mname,'-',slice(None),'stop'),('value',self.baseline_variant)] = 0
+			df.loc[(mname, '-', slice(None), 'stop'), ('value', self.baseline_variant)] = 0
 
 			if result.df is None:
 				result.df = df
@@ -331,7 +330,6 @@ class Experiment(ExperimentData):
 				result.df = result.df.append(df)
 
 		return result
-
 
 	def feature_check(self, feature_subset=None, variant_subset=None,
 					  threshold=0.05, percentiles=[2.5, 97.5], assume_normal=True,
@@ -379,11 +377,11 @@ class Experiment(ExperimentData):
 			variant_subset = self.variant_names
 
 		deltaWorker = statx.make_delta(assume_normal, percentiles, min_observations,
-				                       nruns, relative)
+									   nruns, relative)
 		# Iterate over the features
 		for feature in feature_subset:
 			df = (self._feature_check_all_variants(self.features.reset_index()[['entity', 'variant', feature]],
-											  self.baseline_variant, deltaWorker))
+												   self.baseline_variant, deltaWorker))
 			if res.df is None:
 				res.df = df
 			else:
@@ -450,7 +448,7 @@ class Experiment(ExperimentData):
 		# TODO: Check if this is the right approach,
 		# groupby and unstack as an alternative?
 		deltaWorker = statx.make_delta(assume_normal, percentiles, min_observations,
-				                       nruns, relative)
+									   nruns, relative)
 		for kpi in kpi_subset:
 			for feature in feature_subset:
 				res.df = pd.concat([
@@ -524,7 +522,7 @@ class Experiment(ExperimentData):
 		# Iterate over the kpis and variants
 		# TODO: Check if this is the right approach
 		deltaWorker = statx.make_delta(assume_normal, percentiles, min_observations,
-				                       nruns, relative)
+									   nruns, relative)
 		for kpi in kpi_subset:
 			for variant in variant_subset:
 				# TODO: Add metadata to res.metadata
@@ -541,7 +539,6 @@ class Experiment(ExperimentData):
 		res.set_binning(res_obj.binning)
 		# Return the result object
 		return res
-
 
 	def _feature_check_all_variants(self, metric_df, baseline_variant, deltaWorker):
 		"""Applies delta to all variants, given a metric."""
@@ -569,7 +566,6 @@ class Experiment(ExperimentData):
 		# categorical feature
 		else:
 			return metric_df.groupby('variant').apply(do_delta_categorical).unstack(0)
-
 
 	def _delta_all_variants(self, metric_df, baseline_variant, weighted=False,
 							deltaWorker=statx.make_delta()):
@@ -600,9 +596,8 @@ class Experiment(ExperimentData):
 		# Actual calculation
 		return metric_df.groupby('variant').apply(do_delta).unstack(0)
 
-
 	def _time_dependent_deltas(self, df, variants, time_step=1, cumulative=False,
-							  deltaWorker=statx.make_delta()):
+							   deltaWorker=statx.make_delta()):
 		"""
 		Calculates the time dependent delta.
 
@@ -640,15 +635,14 @@ class Experiment(ExperimentData):
 
 		# Push computation to _binned_deltas() function
 		result = self._binned_deltas(df=df, variants=variants, binning=binning,
-								cumulative=cumulative, label_format_str='{mid}',
-								deltaWorker=deltaWorker)
+									 cumulative=cumulative, label_format_str='{mid}',
+									 deltaWorker=deltaWorker)
 
 		# Reformating of the index names in the result data frame object
 		result.df.index.set_names('time', level=2, inplace=True)
 
 		# Returning Result object containing result and the binning
 		return result
-
 
 	def _subgroup_deltas(self, df, variants, n_bins=4, deltaWorker=statx.make_delta()):
 		"""
@@ -671,8 +665,8 @@ class Experiment(ExperimentData):
 
 		# Push computation to _binned_deltas() function
 		result = self._binned_deltas(df=df, variants=variants, n_bins=n_bins, binning=None,
-								cumulative=False, label_format_str='{standard}',
-								deltaWorker=deltaWorker)
+									 cumulative=False, label_format_str='{standard}',
+									 deltaWorker=deltaWorker)
 
 		# TODO: Add binning to result metadata
 
@@ -684,7 +678,6 @@ class Experiment(ExperimentData):
 
 		# Returning Result object containing result and the binning
 		return result
-
 
 	def _binned_deltas(self, df, variants, n_bins=4, binning=None, cumulative=False,
 					   label_format_str='{standard}', deltaWorker=statx.make_delta()):
@@ -715,7 +708,7 @@ class Experiment(ExperimentData):
 		if binning is None:
 			binning = binmodule.create_binning(df.iloc[:, 1], nbins=n_bins)
 
-		if cumulative==True and type(binning)!=binmodule.NumericalBinning:
+		if cumulative == True and type(binning) != binmodule.NumericalBinning:
 			raise ValueError("Cannot calculate cumulative deltas for non-numerical binnings")
 
 		# Applying binning to feat1 and feat2 arrays
@@ -726,32 +719,32 @@ class Experiment(ExperimentData):
 		def do_delta(f, bin_name):
 			# find the corresponding bin in the baseline variant
 			baseline_metric = f.iloc[:, 2][(f.iloc[:, 0] == variants[1])]
-			out_df=pd.DataFrame()
+			out_df = pd.DataFrame()
 
 			for v in f['variant'].unique():
-				v_metric =  f.iloc[:, 2][ (f.iloc[:,0]==v) ]
+				v_metric = f.iloc[:, 2][(f.iloc[:, 0] == v)]
 				df = delta_to_dataframe_all_variants(f.columns[2], *deltaWorker(x=v_metric,
 																				y=baseline_metric))
 
 				# add new index levels for variant and binning
-				df['_tmp_bin_']=bin_name
+				df['_tmp_bin_'] = bin_name
 				df['variant'] = v
 				df.set_index(['variant', '_tmp_bin_'], append=True, inplace=True)
-				df=df.reorder_levels(['variant', '_tmp_bin_', 'metric',
-									  'subgroup_metric', 'subgroup',
-									  'statistic', 'pctile'])
+				df = df.reorder_levels(['variant', '_tmp_bin_', 'metric',
+										'subgroup_metric', 'subgroup',
+										'statistic', 'pctile'])
 
-				out_df=out_df.append(df)
+				out_df = out_df.append(df)
 			return out_df
 
 		# Actual calculation
 		result = pd.DataFrame()
-		unique_tmp_bins=df['_tmp_bin_'].unique()
+		unique_tmp_bins = df['_tmp_bin_'].unique()
 		for bin in unique_tmp_bins:
 			if not cumulative:
-				result=result.append(do_delta(df[df['_tmp_bin_'] == bin], bin))
+				result = result.append(do_delta(df[df['_tmp_bin_'] == bin], bin))
 			else:
-				result=result.append(do_delta(df[df['_tmp_bin_'] <= bin], bin))
+				result = result.append(do_delta(df[df['_tmp_bin_'] <= bin], bin))
 
 		# unstack variant
 		result = result.unstack(0)

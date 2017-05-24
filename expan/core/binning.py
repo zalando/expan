@@ -2,11 +2,13 @@
 
 import string
 import warnings
+
 import numpy as np
+
 from expan.core.debugging import Dbg
 from expan.core.util import isNumberAndIsNaN
 
-symbol_universal_set = 'ξ' # https://en.wikipedia.org/wiki/Xi_(letter)
+symbol_universal_set = 'ξ'  # https://en.wikipedia.org/wiki/Xi_(letter)
 
 
 class Binning(object):
@@ -17,10 +19,8 @@ class Binning(object):
 		self.dbg = Dbg()
 		self.dbg.set_lvl(3)
 
-
 	def __len__(self):
 		raise NotImplementedError('must implement this in subclass')
-
 
 	def label(self, data, format_str=None):
 		"""
@@ -38,7 +38,6 @@ class Binning(object):
 		    Implemented in subclass.
 		"""
 		raise NotImplementedError('must implement this in subclass')
-
 
 	def __str__(self, format_str='{standard}'):
 		res = "{} with {:d} bins:".format(self.__class__.__name__, len(self))
@@ -66,7 +65,6 @@ class CategoricalBinning(Binning):
 			self.categories = []
 		else:
 			self.categories = self._get_binning_categorical(data, nbins)
-
 
 	def _get_binning_categorical(self, x, n_bins):
 		"""Generates a dictionary of Interval objects for categorical variables,
@@ -102,26 +100,24 @@ class CategoricalBinning(Binning):
 
 		return cat_list
 
-
 	def _merge_two_smallest_intervals(self, category_list, sample_size_list):
 
 		assert len(category_list) == len(sample_size_list), 'category_list and sample_size_list of unequal lengths!'
 
-		pairs = list(zip(sample_size_list, category_list)) # Schwartzian transform aka decorate-sort-undecorate
+		pairs = list(zip(sample_size_list, category_list))  # Schwartzian transform aka decorate-sort-undecorate
 		pairs.sort()
 
-		ssl_and_cl = list(zip(*pairs)) # unzip
+		ssl_and_cl = list(zip(*pairs))  # unzip
 		ssl = list(ssl_and_cl[0])
-		cl  = list(ssl_and_cl[1])
+		cl = list(ssl_and_cl[1])
 
-		ssl[1] = ssl[0] + ssl[1] # merge [0] + [1] -> [1]
-		cl [1] =  cl[0] +  cl[1]
+		ssl[1] = ssl[0] + ssl[1]  # merge [0] + [1] -> [1]
+		cl[1] = cl[0] + cl[1]
 
-		del(ssl[0]) # drop the smallest one
-		del( cl[0])
+		del (ssl[0])  # drop the smallest one
+		del (cl[0])
 
 		return cl, ssl
-
 
 	@property
 	def categories(self):
@@ -134,15 +130,12 @@ class CategoricalBinning(Binning):
 
 		return self._categories[:-1]
 
-
 	def __len__(self):
 		return len(self._categories) - 1
-
 
 	@categories.setter
 	def categories(self, value):
 		self._categories = value + [np.inf]  # represent the universal set like this?
-
 
 	@property
 	def _mids(self):
@@ -150,7 +143,6 @@ class CategoricalBinning(Binning):
 		return np.array(
 			[None if len(c) == 0 else c[len(c) // 2] for c in self.categories]
 		)
-
 
 	def _labels(self, format_str='{standard}'):
 		"""
@@ -209,7 +201,6 @@ class CategoricalBinning(Binning):
 
 		return np.array(lbls)
 
-
 	def labels(self, format_str='{standard}'):
 		"""
 		Returns the labels of the bins defined by this binning.
@@ -230,7 +221,6 @@ class CategoricalBinning(Binning):
 		    This is not the same as label (which applies the bins to data and returns the labels of the data).
 		"""
 		return self._labels(format_str)[0:-1]
-
 
 	def _apply(self, data):
 		"""
@@ -259,12 +249,11 @@ class CategoricalBinning(Binning):
 			got = np.array([d in cats for d in data])
 
 			self.dbg.log(3, 'apply: testing {:d} {}: {:d} members'.format(ii,
-																 self._labels('{standard}')[ii],
-																 got.sum()))
+																		  self._labels('{standard}')[ii],
+																		  got.sum()))
 			out[got] = ii
 
 		return out
-
 
 	def mid(self, data):
 		"""
@@ -277,7 +266,6 @@ class CategoricalBinning(Binning):
 		    array-like: the middle category of every bin
 		"""
 		return self._mids[self._apply(data)]
-
 
 	def label(self, data, format_str='{standard}'):
 		"""
@@ -338,7 +326,7 @@ class NumericalBinning(Binning):
 		if data is None:
 			# initialize binning explicitly?
 			if (uppers is not None and lowers is not None and
-				up_closed is not None and lo_closed is not None):
+						up_closed is not None and lo_closed is not None):
 				self.uppers = uppers
 				self.lowers = lowers
 				self.up_closed = up_closed
@@ -367,7 +355,6 @@ class NumericalBinning(Binning):
 
 		# #The last bin is considered closed on its upper bound.
 		# self.up_closed[-1]=True
-
 
 	def _get_binning_numeric_recursive(self, x, n_bins, open_ends=False):
 		"""get_binning for numeric variables. All Intervals are ClosedOpenInterval
@@ -414,7 +401,6 @@ class NumericalBinning(Binning):
 		first_up_closed += next_up_closed
 		return first_lower, first_upper, first_lo_closed, first_up_closed
 
-
 	def _first_interval(self, x, n_bins):
 		"""Gets the first interval based on the percentiles, either a
 		ClosedClosedInterval containing the same value multiple times or a
@@ -433,18 +419,15 @@ class NumericalBinning(Binning):
 			# closed-open
 			return [lower], [upper], [True], [False]
 
-
 	@property
 	def uppers(self):
 		"""Return a list of upper bounds."""
 		return self._uppers[:-1]
 
-
 	@property
 	def lowers(self):
 		"""Return a list of lower bounds."""
 		return self._lowers[:-1]
-
 
 	@property
 	def up_closed(self):
@@ -453,33 +436,27 @@ class NumericalBinning(Binning):
 		"""
 		return self._up_closed[:-1]
 
-
 	@property
 	def lo_closed(self):
 		"""Return a list of booleans indicating whether the lower bounds are 
 		closed."""
 		return self._lo_closed[:-1]
 
-
 	@uppers.setter
 	def uppers(self, value):
 		self._uppers = np.hstack((value, [np.nan]))  # this effectively coerces to float array
-
 
 	@lowers.setter
 	def lowers(self, value):
 		self._lowers = np.hstack((value, [np.nan]))  # this effectively coerces to float array
 
-
 	@up_closed.setter
 	def up_closed(self, value):
 		self._up_closed = np.hstack((value, [False]))
 
-
 	@lo_closed.setter
 	def lo_closed(self, value):
 		self._lo_closed = np.hstack((value, [True]))
-
 
 	def _labels(self, format_str='{standard}'):
 		"""
@@ -572,7 +549,6 @@ class NumericalBinning(Binning):
 
 		return np.array(lbls)
 
-
 	def labels(self, format_str='{standard}'):
 		"""
 		Returns the labels of the bins defined by this binning.
@@ -599,15 +575,12 @@ class NumericalBinning(Binning):
 		"""
 		return self._labels(format_str)[0:-1]
 
-
 	@property
 	def _mids(self):
 		return (self._uppers + self._lowers) / 2.
 
-
 	def __len__(self):
 		return len(self._uppers) - 1
-
 
 	def _apply(self, data):
 		"""
@@ -644,12 +617,11 @@ class NumericalBinning(Binning):
 				got &= (data <= u) if uc else (data < u)
 
 			self.dbg.log(3, 'apply: testing {:d} {}: {:d} members'.format(ii,
-																 self._labels('{conditions}')[ii],
-																 got.sum()))
+																		  self._labels('{conditions}')[ii],
+																		  got.sum()))
 			out[got] = ii
 
 		return out
-
 
 	def _bound(self, data, which):
 		bounds = None
@@ -664,7 +636,6 @@ class NumericalBinning(Binning):
 
 		return np.array(bounds)[self._apply(data)]
 
-
 	def upper(self, data):
 		"""
 		Returns the upper bounds of the bins associated with the data
@@ -678,11 +649,9 @@ class NumericalBinning(Binning):
 		"""
 		return self._bound(data, 'upper')
 
-
 	def lower(self, data):
 		""" see upper() """
 		return self._bound(data, 'lower')
-
 
 	def mid(self, data):
 		"""
@@ -699,7 +668,6 @@ class NumericalBinning(Binning):
 			Currently doesn't take into account whether bounds are closed or open.
 		"""
 		return self._bound(data, 'mid')
-
 
 	def label(self, data, format_str='{standard}'):
 		"""Return the bin labels associated with each data point in the series,

@@ -1,16 +1,16 @@
+import imp
 import logging
 import logging.config
 import os
 
 import expan.core.debugging as dbgcls
-import imp
 
 imp.reload(dbgcls)
 
 
 ##################
 # Commented out for now since the behavior of the capsys argument is unclear,
-# and it seems to create problems when adding new unit tests/using the dbg 
+# and it seems to create problems when adding new unit tests/using the dbg
 # function.
 ##################
 # def test_default_debugging(capsys):
@@ -60,4 +60,3 @@ def test_debugging_with_file_config():
 
 if __name__ == "__main__":
 	pass  # TODO: call py.test?
-	
