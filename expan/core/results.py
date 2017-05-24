@@ -92,7 +92,7 @@ class Results(object):
 	        subgroup_metric:
 	        subgroup:
 	    """
-		df = delta_to_dataframe(metric, variant, mu, pctiles,
+		df = self._delta_to_dataframe(metric, variant, mu, pctiles,
 								samplesize_variant,
 								samplesize_baseline,
 								subgroup_metric='-',
@@ -558,58 +558,61 @@ class Results(object):
 
 		return ret
 
-#================================================
 
-def delta_to_dataframe(metric,
-					   variant,
-					   mu,
-					   pctiles,
-					   samplesize_variant,
-					   samplesize_baseline,
-					   subgroup_metric='-',
-					   subgroup=None):
-	"""Defines the Results data frame structure.
+	def _delta_to_dataframe(self,
+							metric,
+							variant,
+							mu,
+							pctiles,
+							samplesize_variant,
+							samplesize_baseline,
+							subgroup_metric='-',
+							subgroup=None):
+		"""Defines the Results data frame structure.
+	
+		Args:
+			metric:
+			variant:
+			mu:
+			pctiles:
+			samplesize_variant:
+			samplesize_baseline:
+			subgroup_metric:
+			subgroup:
+	
+		Returns:
+	
+		"""
 
-	Args:
-	    metric:
-	    variant:
-	    mu:
-	    pctiles:
-	    samplesize_variant:
-	    samplesize_baseline:
-	    subgroup_metric:
-	    subgroup:
+		df = pd.DataFrame({
+			'metric': metric,
+			'variant': variant,
+			'statistic': 'pctile',
+			'pctile': list(pctiles.keys()),
+			'value': list(pctiles.values()),
+			'subgroup_metric': subgroup_metric,
+			'subgroup': subgroup
+		})
+		# TODO: put baseline in as separate column... no need for sample_size_baseline
+		df = df.append(pd.DataFrame({
+			'metric': metric,
+			'variant': variant,
+			'statistic': ['mean', 'sample_size', 'sample_size_baseline'],
+			'value': [mu, samplesize_variant, samplesize_baseline],
+			'subgroup_metric': subgroup_metric,
+			'subgroup': subgroup
+		}), ignore_index=True)
 
-	Returns:
+		df.set_index(Results.mandatory_index_levels + ['variant'], inplace=True)
+		df = df.unstack('variant')
+		df.columns = df.columns.swaplevel(0, 1)
 
-	"""
-
-	df = pd.DataFrame({
-		'metric': metric,
-		'variant': variant,
-		'statistic': 'pctile',
-		'pctile': list(pctiles.keys()),
-		'value': list(pctiles.values()),
-		'subgroup_metric': subgroup_metric,
-		'subgroup': subgroup
-	})
-	# TODO: put baseline in as separate column... no need for sample_size_baseline
-	df = df.append(pd.DataFrame({
-		'metric': metric,
-		'variant': variant,
-		'statistic': ['mean', 'sample_size', 'sample_size_baseline'],
-		'value': [mu, samplesize_variant, samplesize_baseline],
-		'subgroup_metric': subgroup_metric,
-		'subgroup': subgroup
-	}), ignore_index=True)
-
-	df.set_index(Results.mandatory_index_levels + ['variant'], inplace=True)
-	df = df.unstack('variant')
-	df.columns = df.columns.swaplevel(0, 1)
-
-	return df
+		return df
 
 
+
+#FIXME: The following functions should be deprecated  when new result structure is implemented.
+#==============================================================
 def delta_to_dataframe_all_variants(metric, mu, pctiles, samplesize_variant,
 									samplesize_baseline,
 									mu_variant,
@@ -650,9 +653,6 @@ def delta_to_dataframe_all_variants(metric, mu, pctiles, samplesize_variant,
 	}), ignore_index=True)
 
 	df.set_index(Results.mandatory_index_levels, inplace=True)
-	# df = df.unstack('variant')
-	# df.columns = df.columns.swaplevel(0,1)
-
 	return df
 
 
@@ -703,9 +703,6 @@ def feature_check_to_dataframe(metric,
 		})
 
 	df.set_index(Results.mandatory_index_levels, inplace=True)
-	# df = df.unstack('variant')
-	# df.columns = df.columns.swaplevel(0,1)
-
 	return df
 
 
@@ -757,5 +754,4 @@ def early_stopping_to_dataframe(metric,
 			}))
 
 	df.set_index(Results.mandatory_index_levels, inplace=True)
-
 	return df

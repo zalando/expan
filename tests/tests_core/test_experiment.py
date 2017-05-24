@@ -375,7 +375,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
 			result = self.experiment.group_sequential_delta(result=res, kpis_to_analyse=['normal_same'])
 
 
-	@unittest.skip("sometimes takes too much time")
+	#@unittest.skip("sometimes takes too much time")
 	def test_bayes_factor_delta(self):
 		"""
 	    Check if Experiment.bayes_factor_delta() functions properly
@@ -410,7 +410,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
 		                                for item in self.testmetadata.items()))
 
 
-	@unittest.skip("sometimes takes too much time")
+	#@unittest.skip("sometimes takes too much time")
 	def test_bayes_precision_delta(self):
 		"""
 	    Check if Experiment.bayes_precision_delta() functions properly
