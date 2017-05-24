@@ -4,6 +4,10 @@ import numpy as np
 import pandas as pd
 
 
+def isNumberAndIsNaN(obj):
+	return obj != obj
+
+
 def scale_range(x, new_min=0.0, new_max=1.0, old_min=None, old_max=None, squash_outside_range=True, squash_inf=False, ):
 	"""
 	Scales a sequence to fit within a new range.
