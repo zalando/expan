@@ -19,12 +19,14 @@ class DataTestCase(unittest.TestCase):
 		# np.random.seed(0)
 		self.metrics, self.metadata = generate_random_data()
 
+
 	def tearDown(self):
 		"""
 	    Clean up after the test
 	    """
 		# TODO: find out if we have to remove data manually
 		pass
+
 
 	def test_create_with_insufficient_data(self):
 		# should not work:
@@ -65,6 +67,7 @@ class DataTestCase(unittest.TestCase):
 					'primary_KPI': 'something_not_there'}
 			)
 
+
 	def test_data_generation(self):
 		df, md = generate_random_data()
 		A = ExperimentData(df, md)
@@ -78,6 +81,7 @@ class DataTestCase(unittest.TestCase):
 		# with self.assertRaises(KeyError):
 		# 	ExperimentData(df.drop('variant', axis=1), md)
 
+
 	def test_direct_indexing(self):
 		A = ExperimentData(*generate_random_data())
 		# this should work
@@ -87,6 +91,7 @@ class DataTestCase(unittest.TestCase):
 		with self.assertRaises(KeyError):
 			normal_shifted = A[['normal_shifted', 'non_existent_feature']]
 
+
 	def test_initialize_without_kpi_with_feature(self):
 		"""Initialize ExperimentData with metrics=None, features=DF"""
 		metrics, _ = generate_random_data()
@@ -95,6 +100,7 @@ class DataTestCase(unittest.TestCase):
 			'experiment': 'random_data_generation'
 		}
 		D = ExperimentData(None, meta, metrics)
+
 
 	def test_initialize_without_kpi_without_feature(self):
 		"""Initialize ExperimentData with metrics=None, features=[]/'default'"""
@@ -108,10 +114,12 @@ class DataTestCase(unittest.TestCase):
 		with self.assertRaises(ValueError):
 			D = ExperimentData(None, meta, 'default')
 
+
 	def test_initialize_with_metric_with_feature_default(self):
 		"""Initialize ExperimentData with metrics=DF, features='default'"""
 		# metrics,meta = generate_random_data()
 		D = ExperimentData(self.metrics, self.metadata, 'default')
+
 
 	def test_initialize_with_metric_with_feature_list(self):
 		"""Initialize ExperimentData with metrics=DF, features=list"""
@@ -119,16 +127,19 @@ class DataTestCase(unittest.TestCase):
 		D = ExperimentData(metrics, meta, [])
 		D = ExperimentData(metrics, meta, [4, 6])
 
+
 	def test_initialize_with_metric_with_feature_df(self):
 		"""Initialize ExperimentData with metrics=DF, features=DF"""
 		metrics, meta = generate_random_data()
 		features = deepcopy(metrics)
 		D = ExperimentData(metrics, meta, features)
 
+
 	def test_init_with_aggregated_kpi(self):
 		"""Initialize ExperimentData with aggregated KPI data"""
 		D = ExperimentData(self.metrics, self.metadata, [4])
 		self.assertIsNone(D.kpis_time)
+
 
 	def test_init_with_time_resolved_kpi(self):
 		"""Initialize ExperimentData with time-resolved KPI data"""
@@ -139,6 +150,7 @@ class DataTestCase(unittest.TestCase):
 		D = ExperimentData(metrics_time, self.metadata, [4])
 		self.assertIsNotNone(D.kpis_time)
 		self.assertEqual(D.kpis.shape[0] * n, D.kpis_time.shape[0])
+
 
 	def test_outlier_filtering(self):
 		"""Check outlier filtering functionality"""
@@ -227,6 +239,7 @@ class DataTestCase(unittest.TestCase):
 		    # Verify warning exists
 		    assert len(w) == 1
 
+
 	def test_outlier_filtering_n_filtered(self):
 		"""Check if the number of filtered entities is persisted in the metadata"""
 		D = ExperimentData(self.metrics, self.metadata, 'default')
@@ -237,6 +250,7 @@ class DataTestCase(unittest.TestCase):
 			                     }
 								])
 		self.assertEqual(D.metadata['n_filtered'], [1082])
+
 
 	def test_outlier_filtering_treatment_exposure(self):
 		"""Check if scaling of the threshold works when the treatment_exposure is provided"""
@@ -274,6 +288,7 @@ class DataTestCase(unittest.TestCase):
 								])
 		self.assertEqual(len(D.metadata['outlier_filter']), 0)
 		self.assertEqual(len(D.metadata['n_filtered']), 0)
+
 
 if __name__ == '__main__':
 	unittest.main()
