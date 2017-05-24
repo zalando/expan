@@ -1,13 +1,15 @@
 from __future__ import absolute_import
+
 import datetime
 from copy import deepcopy
 
 import numpy as np
 import pandas as pd
-from expan.core.version import __version__
-import expan.core.statistics as statx
 from scipy.stats import norm
+
+import expan.core.statistics as statx
 from expan.core.debugging import Dbg
+from expan.core.version import __version__
 
 
 class Results(object):
@@ -733,34 +735,3 @@ def early_stopping_to_dataframe(metric,
 	df.set_index(Results.mandatory_index_levels, inplace=True)
 
 	return df
-
-
-if __name__ == '__main__':
-	# pass
-
-	np.random.seed(0)
-	from expan.core.util import generate_random_data
-	from expan.core.experiment import Experiment
-
-	data = Experiment('B', *generate_random_data())
-	res = data.delta(kpi_subset=['normal_same', 'normal_shifted'])
-# df = res.calculate_prob_uplift_over_zero()
-
-# from test_core.test_results import load_example_results
-# aa = load_example_results()
-# order_means = aa.means('orders').iloc[0]
-# net_sales_var = aa.statistic('var', 'net_sales')
-
-# import numpy as np
-# res = Results(None)
-# res.append_delta('dummy', 'A', *(0.1,{'2.5':0.01,'97.5':0.2},1000,1000))
-# res.append_delta('dummy', 'B', *(0,{'2.5':np.nan,'97.5':np.nan},1000,1000))
-
-# from expan.core.experiment import Experiment
-#
-# np.random.seed(0)
-# data = Experiment('B', *generate_random_data())
-# res = data.sga()
-# x = res.relative_uplift('sga', 'normal_same', 'feature')
-# res = data.delta()
-# x = res.relative_uplift('delta', 'normal_same')

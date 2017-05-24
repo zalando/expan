@@ -7,15 +7,17 @@
 # import numpy as np
 
 import re
-import expan.core.statistics as statx
-import expan.core.early_stopping as es
 import warnings
 
-import expan.core.binning as binmodule  # name conflict with binning...
 import numpy as np
 import pandas as pd
+
+import expan.core.binning as binmodule  # name conflict with binning...
+import expan.core.early_stopping as es
+import expan.core.statistics as statx
 from expan.core.experimentdata import ExperimentData
-from expan.core.results import Results, delta_to_dataframe_all_variants, feature_check_to_dataframe, early_stopping_to_dataframe
+from expan.core.results import Results, delta_to_dataframe_all_variants, feature_check_to_dataframe, \
+	early_stopping_to_dataframe
 
 # raise the same warning multiple times
 warnings.simplefilter('always', UserWarning)
@@ -771,14 +773,3 @@ class Experiment(ExperimentData):
 		res.set_binning(res_obj.binning)
 		# Return the result object
 		return res
-
-
-if __name__ == '__main__':
-	from expan.core.util import generate_random_data
-
-	np.random.seed(0)
-	metrics, metadata = generate_random_data()
-	metrics['time_since_treatment'] = metrics['treatment_start_time']
-	metadata['estimatedSampleSize'] = 100000
-	exp = Experiment('B', metrics, metadata, [4, 6])
-	res = exp.delta(method='bayes_precision', kpi_subset=['normal_same'])

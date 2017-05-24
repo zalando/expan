@@ -182,9 +182,3 @@ def generate_random_data_n_variants(n_variants=3):
 	}
 
 	return test_data_frame, metadata
-
-
-if __name__ == '__main__':
-	import doctest
-
-	doctest.testmod()

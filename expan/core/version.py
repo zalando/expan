@@ -75,10 +75,3 @@ def version(format_str='{short}'):
 		format_dict['latest_commit'] = git_latest_commit()
 
 	return format_str.format(**format_dict)
-
-
-if __name__ == '__main__':
-	print()
-	version('Short Version String: "{short}"')
-	print()
-	version('Full Version String: "{long}"')

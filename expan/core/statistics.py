@@ -480,8 +480,3 @@ def estimate_std(x, mu, pctile):
 		float: estimated standard deviation of the distribution
 	"""
 	return (x - mu) / stats.norm.ppf(pctile / 100.0)
-
-
-if __name__ == '__main__':
-	# doctest.testmod()
-	delta(None, None)

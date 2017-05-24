@@ -7,11 +7,11 @@ In other words, this is the interface between data fetching and data analysis.
 """
 
 import copy
+import warnings
 
 import numpy as np
 import pandas as pd
-import warnings
-from time import time
+
 
 class ExperimentData(object):
 	"""Main class in ExperimentData module.
@@ -396,19 +396,3 @@ def detect_features(metrics):
 	warn('not tested')
 
 	return features_present
-
-
-if __name__ == '__main__':
-	from expan.core.util import generate_random_data
-
-	np.random.seed(0)
-	metrics, meta = generate_random_data()
-	metrics['treatment_exposure'] = metrics['treatment_start_time']
-	D = ExperimentData(metrics[['entity','variant','normal_shifted','treatment_exposure']], meta, features=[3])
-	D.filter_outliers(rules=[{"metric":"normal_shifted",
-							  "type":"threshold",
-							  "value": -1.0,
-							  "kind": "lower",
-							  "time_interval": 30758400
-		                     }
-							])

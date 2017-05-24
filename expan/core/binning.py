@@ -769,33 +769,3 @@ def create_binning(x, nbins=8):
 		warnings.warn('Less bins than requested.')
 
 	return binning
-
-
-def _mapping2binning(breaks):
-	"""Converts the bin breaks (mapping between aggregated categories and
-	subcategories) to a dictionary of Interval objects.
-
-	>>> breaks = {'top':['vip','high impact'], 'bad':['bad 1','bad 2']}
-	>>> len(_mapping2binning(breaks))
-	2
-
-	TODO: also implement for numeric variables as a workaround for rounding?
-	"""
-	interval_dict = {}
-	for b in breaks:
-		interval_dict[b] = Interval(value_type='categorical', value_list=breaks[b])
-
-	return interval_dict
-
-
-if __name__ == '__main__':
-	# doctest.testmod()
-
-	# x = ['A']*50 + ['B']*10 + ['C']*20 + [np.nan]*10
-	# x = [0] * 100 + [1] * 10
-	# x = [0] * 10000 + range(300) + [301] * 10000
-	# x = [0] * 10000 + range(300)
-	x = ['A'] * 50 + ['B'] * 10 + ['C'] * 20
-	bins = create_binning(x=x, nbins=3)
-	# r = bins.label(x)
-	r = bins.label(x, '{iter.integer}: {standard}')
