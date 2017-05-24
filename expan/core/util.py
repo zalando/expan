@@ -81,39 +81,6 @@ def scale_range(x, new_min=0.0, new_max=1.0, old_min=None, old_max=None, squash_
 	return retval
 
 
-def reindex(df, axis=0):
-	"""
-
-	Args:
-	    df:
-	    axis:
-
-	Returns:
-
-	Note:
-		Partial fulfilment of: https://github.com/pydata/pandas/issues/2770
-
-	Todo:
-		* test
-		* incorporate in pandas in drop() call and issue pull request
-  	"""
-
-	if axis not in [0, 1, 'index', 'columns']:
-		raise NotImplementedError('only index and columns can be selected for axis')
-
-	axis = 0 if axis in [0, 'index'] else 1
-	axis_index = df.index if axis == 0 else df.columns  # TODO: fix for panels?
-
-	new_index = pd.MultiIndex.from_tuples(axis_index.values)
-
-	if axis == 0:
-		df.index = new_index
-	elif axis == 1:
-		df.columns = new_index
-
-	return df
-
-
 def generate_random_data():
 	np.random.seed(42)
 	size = 10000

@@ -465,6 +465,7 @@ class Results(object):
 		else:
 			return json_string
 
+
 def prob_uplift_over_zero_single_metric(result_df, baseline_variant):
 	"""Calculate the probability of uplift>0 for a single metric.
 

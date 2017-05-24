@@ -716,7 +716,6 @@ class NumericalBinning(Binning):
 		directly if midpoints are desired.
 
 		"""
-		lbls = None
 		if format_str is None:
 			# return the bin index
 			lbls = self._apply(data)
@@ -756,7 +755,6 @@ def create_binning(x, nbins=8):
 		dummy = np.array(x)
 	is_numeric = np.issubdtype(dummy.dtype, np.number)
 
-	binning = None
 	if is_numeric:
 		# only cast numeric data to a real numpy array (due to NaN handling)
 		if ~isinstance(x, np.ndarray):
