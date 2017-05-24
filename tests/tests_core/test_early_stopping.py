@@ -65,7 +65,7 @@ class BayesFactorTestCases(EarlyStoppingTestCase):
   	Test cases for the bayes_factor function in core.early_stopping.
   	"""
 
-	# @unittest.skip("sometimes takes too much time")
+	@unittest.skip("sometimes takes too much time")
 	def test_bayes_factor(self):
 		"""
     	Check the Bayes factor function.
@@ -80,7 +80,7 @@ class BayesFactorTestCases(EarlyStoppingTestCase):
 		self.assertAlmostEqual(mu_x, -0.045256707490195384)
 		self.assertAlmostEqual(mu_y, 0.11361694031616358)
 
-	# @unittest.skip("sometimes takes too much time")
+	@unittest.skip("sometimes takes too much time")
 	def test_bayes_factor_poisson(self):
 		"""
     	Check the Bayes factor function for Poisson distributions.
@@ -101,7 +101,7 @@ class BayesPrecisionTestCases(EarlyStoppingTestCase):
   	Test cases for the bayes_precision function in core.early_stopping.
   	"""
 
-	# @unittest.skip("sometimes takes too much time")
+	@unittest.skip("sometimes takes too much time")
 	def test_bayes_precision(self):
 		"""
     	Check the bayes_precision function.

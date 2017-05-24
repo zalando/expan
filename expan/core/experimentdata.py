@@ -50,6 +50,7 @@ class ExperimentData(object):
 		# I know this is somewhat controversial, but I want to insist on using PCII as KPI and CLV as a feature always meaning 'sum of PCII over lifetime up to treatment start'
 	}
 
+
 	def __init__(self, metrics=None, metadata={}, features='default',
 				 deepcopy=False):
 		"""
@@ -141,6 +142,7 @@ class ExperimentData(object):
 				raise ValueError("Column 'entity' is not unique!")
 			self.kpis_time = None
 
+
 	@property
 	def feature_names(self):
 		"""
@@ -150,6 +152,7 @@ class ExperimentData(object):
 		    set: list of feature names
 		"""
 		return set([] if self.features is None else self.features.columns)
+
 
 	@property
 	def kpi_names(self):
@@ -161,10 +164,6 @@ class ExperimentData(object):
 		"""
 		return set([] if self.kpis is None else self.kpis.columns)
 
-	# @property
-	# def variant_names(self):
-	# 	"""List of Variants"""
-	# 	return set([] if self.features is None else set(self.features.index.get_level_values('variant')))
 
 	@property
 	def metric_names(self):
@@ -176,6 +175,7 @@ class ExperimentData(object):
 		"""
 		return self.feature_names.union(self.kpi_names)
 
+
 	def __str__(self):
 		return '{} \'{}\' with {:d} features and {:d} KPIs (primary: \'{}\'), {:d} entities'.format(
 			self.__class__.__name__,
@@ -186,6 +186,7 @@ class ExperimentData(object):
 			self.features.index.nunique()  # TODO: should we explicitly count unique entities?
 		)
 
+
 	def __repr__(self):
 		# TODO: improve this
 		return 'ExperimentData(\nkpis={}\nfeatures={}\nmetadata={}'.format(
@@ -193,6 +194,7 @@ class ExperimentData(object):
 			repr(self.features),
 			repr(self.metadata),
 		)
+
 
 	@property
 	def metrics(self):
@@ -208,12 +210,14 @@ class ExperimentData(object):
 		else:
 			return self.kpis.join(self.features)
 
+
 	def __getitem__(self, key):
 		"""
 	    Allows indexing the ExperimentData directly as though it were a DataFrame
 	    composed of KPIs and Features.
 	    """
 		return self.metrics.__getitem__(key)
+
 
 	# Q: is it possible to pass a whole lot of functions to
 	# a member variable without specifying each?
@@ -227,6 +231,7 @@ class ExperimentData(object):
 		    **kwargs: additional boxplot arguments (see pandas.DataFrame.boxplot())
 		"""
 		self.metrics.set_index(feature, append=True).unstack(level=['variant', feature])[kpi].boxplot(**kwargs)
+
 
 	def _filter_threshold(self, params, drop_thresh_column=True):
 		"""
@@ -370,29 +375,29 @@ class ExperimentData(object):
 		self.metadata['n_filtered'] = n_filtered
 
 
-def detect_features(metrics):
-	"""
-	Automatically detect which of the metrics are features.
+	def detect_features(self, metrics):
+		"""
+		Automatically detect which of the metrics are features.
+	
+		Args:
+			metrics (pandas.DataFrame): ExperimentData metrics
+	
+		Returns:
+			dict: dictionary of features present in the metrics
+		"""
+		from warnings import warn
 
-	Args:
-	    metrics (pandas.DataFrame): ExperimentData metrics
+		if 'time_since_treatment' in metrics:
+			# TODO: test this!
+			# assuming that time is the only optional extra index for kpis...
+			nunique = metrics.groupby(ExperimentData.primary_indices).agg(
+				lambda x: len(x.unique())).max()
+			features_present = (nunique == 1)
+		# TODO: drop time dimension from features (i.e. take first value)
+		else:
+			features_present = {m for m in metrics if m.lower() in
+								ExperimentData.known_feature_metrics}
 
-	Returns:
-	    dict: dictionary of features present in the metrics
-	"""
-	from warnings import warn
+		warn('not tested')
 
-	if 'time_since_treatment' in metrics:
-		# TODO: test this!
-		# assuming that time is the only optional extra index for kpis...
-		nunique = metrics.groupby(ExperimentData.primary_indices).agg(
-			lambda x: len(x.unique())).max()
-		features_present = (nunique == 1)
-	# TODO: drop time dimension from features (i.e. take first value)
-	else:
-		features_present = {m for m in metrics if m.lower() in
-							ExperimentData.known_feature_metrics}
-
-	warn('not tested')
-
-	return features_present
+		return features_present
