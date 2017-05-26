@@ -50,6 +50,7 @@ class ExperimentData(object):
 		# I know this is somewhat controversial, but I want to insist on using PCII as KPI and CLV as a feature always meaning 'sum of PCII over lifetime up to treatment start'
 	}
 
+
 	def __init__(self, metrics=None, metadata={}, features='default',
 				 deepcopy=False):
 		"""
@@ -132,15 +133,15 @@ class ExperimentData(object):
 		if 'time_since_treatment' in self.kpis.index.names:
 			self.kpis_time = self.kpis
 			# discard NaNs in the time dimension
-			self.kpis_time = self.kpis_time[
-				(~self.kpis_time.reset_index('time_since_treatment').time_since_treatment.isnull()).tolist()]
+			self.kpis_time = self.kpis_time[(~self.kpis_time.reset_index('time_since_treatment').time_since_treatment.isnull()).tolist()]
 			# NOTE: for most current implemented KPIs, the sum aggregation is
 			# appropriate
 			self.kpis = self.kpis_time.groupby(level=['entity', 'variant']).sum()
 		else:
-			if self.kpis.reset_index()['entity'].nunique() < len(self.kpis):
+			if self.kpis.reset_index()['entity'].nunique()<len(self.kpis):
 				raise ValueError("Column 'entity' is not unique!")
 			self.kpis_time = None
+
 
 	@property
 	def feature_names(self):
@@ -152,6 +153,7 @@ class ExperimentData(object):
 		"""
 		return set([] if self.features is None else self.features.columns)
 
+
 	@property
 	def kpi_names(self):
 		"""
@@ -161,6 +163,7 @@ class ExperimentData(object):
 		    set: list of KPI names
 		"""
 		return set([] if self.kpis is None else self.kpis.columns)
+
 
 	@property
 	def metric_names(self):
@@ -172,6 +175,7 @@ class ExperimentData(object):
 		"""
 		return self.feature_names.union(self.kpi_names)
 
+
 	def __str__(self):
 		return '{} \'{}\' with {:d} features and {:d} KPIs (primary: \'{}\'), {:d} entities'.format(
 			self.__class__.__name__,
@@ -182,6 +186,7 @@ class ExperimentData(object):
 			self.features.index.nunique()  # TODO: should we explicitly count unique entities?
 		)
 
+
 	def __repr__(self):
 		# TODO: improve this
 		return 'ExperimentData(\nkpis={}\nfeatures={}\nmetadata={}'.format(
@@ -189,6 +194,7 @@ class ExperimentData(object):
 			repr(self.features),
 			repr(self.metadata),
 		)
+
 
 	@property
 	def metrics(self):
@@ -204,12 +210,14 @@ class ExperimentData(object):
 		else:
 			return self.kpis.join(self.features)
 
+
 	def __getitem__(self, key):
 		"""
 	    Allows indexing the ExperimentData directly as though it were a DataFrame
 	    composed of KPIs and Features.
 	    """
 		return self.metrics.__getitem__(key)
+
 
 	# Q: is it possible to pass a whole lot of functions to
 	# a member variable without specifying each?
@@ -224,6 +232,7 @@ class ExperimentData(object):
 		"""
 		self.metrics.set_index(feature, append=True).unstack(level=['variant', feature])[kpi].boxplot(**kwargs)
 
+
 	def _filter_threshold(self, params, drop_thresh_column=True):
 		"""
 		Internal method that applies a threshold filter on an ExperimentData inplace.
@@ -237,24 +246,21 @@ class ExperimentData(object):
 			int: number of entities filtered out
 		"""
 		used_rule = {}
-		is_outlier = []
+		is_outlier=[]
 
-		if 'metric' in params and 'value' in params:  # and not ('time_interval' in params and not 'treatment_stop_time' in params):
+		if 'metric' in params and 'value' in params: #and not ('time_interval' in params and not 'treatment_stop_time' in params):
 			# if the time interval is set calculate a linearly adjusted threshold and store it in a separate column
-			# TODO: check if column 'calc_thresh_value exists in self.kpis?
+			#TODO: check if column 'calc_thresh_value exists in self.kpis?
 			if 'time_interval' in params and params['time_interval'] is not None:
 				# start timestamp exists as a feature
 				# NOTE: treatment_start_time and treatment_exposure have to be epoch time in seconds
 				if 'treatment_start_time' in self.features.columns and 'treatment_stop_time' in params:
 					# set minimum scaling to time_interval defined in rule
-					scale_factors = np.maximum(
-						(params['treatment_stop_time'] - self.features['treatment_start_time']) / params[
-							'time_interval'], 1)
-					self.kpis = self.kpis.assign(calc_thresh_value=lambda x: (params['value'] * scale_factors),
-												 axis='rows')
+					scale_factors=np.maximum( (params['treatment_stop_time'] - self.features['treatment_start_time']) / params['time_interval'], 1)
+					self.kpis = self.kpis.assign(calc_thresh_value = lambda x: (params['value'] * scale_factors), axis='rows')
 				# treatment exposure exists as a feature
 				elif 'treatment_exposure' in self.features.columns:
-					scale_factors = np.maximum(self.features.treatment_exposure / params['time_interval'], 1)
+					scale_factors=np.maximum( self.features.treatment_exposure / params['time_interval'], 1)
 					self.kpis['calc_thresh_value'] = params['value'] * scale_factors
 				else:
 					warnings.warn('Scaling by time not possible, using hard threshold instead!')
@@ -297,6 +303,7 @@ class ExperimentData(object):
 			warnings.warn("Threshold filter parameters not set properly!")
 
 		return used_rule, sum(is_outlier)
+
 
 	def filter_outliers(self, rules, drop_thresh=True):
 		"""
@@ -366,6 +373,7 @@ class ExperimentData(object):
 		# store rules in the metadata
 		self.metadata['outlier_filter'] = used_rules
 		self.metadata['n_filtered'] = n_filtered
+
 
 	def detect_features(self, metrics):
 		"""

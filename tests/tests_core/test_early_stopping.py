@@ -1,7 +1,5 @@
 import unittest
-
 import numpy as np
-
 import expan.core.early_stopping as es
 
 
@@ -40,9 +38,8 @@ class GroupSequentialTestCases(EarlyStoppingTestCase):
     	Check the O'Brien-Fleming spending function.
     	"""
 		# Check array as input
-		res = es.obrien_fleming(np.linspace(0, 1, 5 + 1)[1:])
-		np.testing.assert_almost_equal(res,
-									   [1.17264468e-05, 1.94191300e-03, 1.13964185e-02, 2.84296308e-02, 5.00000000e-02])
+		res = es.obrien_fleming(np.linspace(0,1,5+1)[1:])
+		np.testing.assert_almost_equal(res, [1.17264468e-05,1.94191300e-03,1.13964185e-02,2.84296308e-02,5.00000000e-02])
 		# Check float as input
 		res = es.obrien_fleming(0.5)
 		self.assertAlmostEqual(res, 0.005574596680784305)
@@ -51,7 +48,7 @@ class GroupSequentialTestCases(EarlyStoppingTestCase):
 		"""
     	Check the group sequential function.
     	"""
-		stop, delta, CI, n_x, n_y, mu_x, mu_y = es.group_sequential(self.rand_s1, self.rand_s2)
+		stop,delta,CI,n_x,n_y,mu_x,mu_y = es.group_sequential(self.rand_s1, self.rand_s2)
 		self.assertEqual(stop, 1)
 		self.assertAlmostEqual(delta, -0.15887364780635896)
 		# np.testing.assert_almost_equal(CI.values(), [-0.24461812530841959, -0.07312917030429833], decimal=5)
@@ -68,12 +65,12 @@ class BayesFactorTestCases(EarlyStoppingTestCase):
   	Test cases for the bayes_factor function in core.early_stopping.
   	"""
 
-	# @unittest.skip("sometimes takes too much time")
+	#@unittest.skip("sometimes takes too much time")
 	def test_bayes_factor(self):
 		"""
     	Check the Bayes factor function.
     	"""
-		stop, delta, CI, n_x, n_y, mu_x, mu_y = es.bayes_factor(self.rand_s1, self.rand_s2)
+		stop,delta,CI,n_x,n_y,mu_x,mu_y = es.bayes_factor(self.rand_s1, self.rand_s2)
 		self.assertEqual(stop, 1)
 		self.assertAlmostEqual(delta, -0.15887364780635896)
 		self.assertAlmostEqual(CI['lower'], -0.2488832923198368)
@@ -83,12 +80,12 @@ class BayesFactorTestCases(EarlyStoppingTestCase):
 		self.assertAlmostEqual(mu_x, -0.045256707490195384)
 		self.assertAlmostEqual(mu_y, 0.11361694031616358)
 
-	# @unittest.skip("sometimes takes too much time")
+	#@unittest.skip("sometimes takes too much time")
 	def test_bayes_factor_poisson(self):
 		"""
     	Check the Bayes factor function for Poisson distributions.
     	"""
-		stop, delta, CI, n_x, n_y, mu_x, mu_y = es.bayes_factor(self.rand_s3, self.rand_s4, distribution='poisson')
+		stop,delta,CI,n_x,n_y,mu_x,mu_y = es.bayes_factor(self.rand_s3, self.rand_s4, distribution='poisson')
 		self.assertEqual(stop, 1)
 		self.assertAlmostEqual(delta, -1.9589999999999999)
 		self.assertAlmostEqual(CI['lower'], -2.0713332592866109)
@@ -104,12 +101,12 @@ class BayesPrecisionTestCases(EarlyStoppingTestCase):
   	Test cases for the bayes_precision function in core.early_stopping.
   	"""
 
-	# @unittest.skip("sometimes takes too much time")
+	#@unittest.skip("sometimes takes too much time")
 	def test_bayes_precision(self):
 		"""
     	Check the bayes_precision function.
     	"""
-		stop, delta, CI, n_x, n_y, mu_x, mu_y = es.bayes_precision(self.rand_s1, self.rand_s2)
+		stop,delta,CI,n_x,n_y,mu_x,mu_y = es.bayes_precision(self.rand_s1, self.rand_s2)
 		self.assertEqual(stop, 0)
 		self.assertAlmostEqual(delta, -0.15887364780635896)
 		self.assertAlmostEqual(CI['lower'], -0.2488832923198368)

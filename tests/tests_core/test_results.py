@@ -1,9 +1,9 @@
 # fileencoding: utf8
 import json
 import os
-import re
 import unittest
 import warnings
+import re
 
 import numpy as np
 
@@ -14,7 +14,7 @@ from expan.core.util import generate_random_data
 data_dir = os.getcwd() + '/tests/tests_core/'
 
 
-# Fixme: depreciated?
+#Fixme: depreciated?
 def load_example_results():
 	"""
 	This just loads example data so that we need always generate random stuff
@@ -47,10 +47,10 @@ def mock_results_object(data, derived_kpis=None, **kwargs):
 			kpis_to_analyse.update([dk['name']])
 			# assuming the columns in the formula can all be cast into float
 			# and create the derived KPI as an additional column
-			data.kpis.loc[:, dk['name']] = eval(re.sub(pattern, r'data.kpis.\1.astype(float)', dk['formula']))
+			data.kpis.loc[:,dk['name']] = eval(re.sub(pattern, r'data.kpis.\1.astype(float)', dk['formula']))
 			# store the reference metric name to be used in the weighting
 			# TODO: only works for ratios
-			res.metadata['reference_kpi'][dk['name']] = re.sub(pattern + '/', '', dk['formula'])
+			res.metadata['reference_kpi'][dk['name']] = re.sub(pattern+'/', '', dk['formula'])
 
 	return res
 
@@ -72,6 +72,7 @@ class ResultsTestCase(unittest.TestCase):
 			self.data.features['treatment_start_time']
 		# Make time part of index
 		self.data.kpis.set_index('time_since_treatment', append=True, inplace=True)
+
 
 	def tearDown(self):
 		"""
@@ -99,6 +100,7 @@ class ResultsClassTestCase(ResultsTestCase):
 		if h5py_available:
 			# aa = load_example_results()
 			warnings.warn("No data for h5 loading available... skipping tests of example h5 data")
+
 
 	def test_relative_uplift_delta(self):
 		"""Check if the calculation of relative uplift for delta results is
@@ -140,6 +142,7 @@ class ResultsClassTestCase(ResultsTestCase):
 			json_object['variants'][0]['metrics'][0]['subgroup_metrics'][0]['subgroups'][0]['statistics'][3][
 				'pctiles']))
 
+
 	def test_to_json_delta_to_file(self):
 		self.data.delta(
 			kpi_subset=['normal_same'],
@@ -161,6 +164,7 @@ class ResultsClassTestCase(ResultsTestCase):
 
 		os.remove("test_json.json")
 
+
 	def test_to_json_sga(self):
 		json_object = json.loads(
 			self.data.sga(
@@ -176,6 +180,7 @@ class ResultsClassTestCase(ResultsTestCase):
 		self.assertEqual(1, len(
 			json_object['variants'][0]['metrics'][0]['subgroup_metrics'][0]['subgroups'][0]['statistics'][3][
 				'pctiles']))
+
 
 	def test_to_json_trend(self):
 		# to_json() doesn't handle trend() results yet!

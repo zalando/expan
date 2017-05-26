@@ -137,7 +137,7 @@ def generate_random_data_n_variants(n_variants=3):
 
 	test_data_frame = pd.DataFrame()
 	test_data_frame['entity'] = list(range(size))
-	test_data_frame['variant'] = np.random.choice(list(map(chr, list(range(65, 65 + n_variants)))), size=size)
+	test_data_frame['variant'] = np.random.choice(list(map(chr, list(range(65,65+n_variants)))), size=size)
 
 	test_data_frame['normal_same'] = np.random.normal(size=size)
 	test_data_frame['poisson_same'] = np.random.poisson(size=size)

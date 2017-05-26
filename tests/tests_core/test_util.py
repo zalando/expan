@@ -1,7 +1,5 @@
 import unittest
-
 import numpy as np
-
 import expan.core.util as util
 
 
