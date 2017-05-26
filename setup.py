@@ -27,7 +27,7 @@ if not version:
 	raise RuntimeError('Cannot find version information')
 
 test_requirements = [
-	'pytest'
+	'pytest==3.0.7' #the latest version 3.1.0 will lead to fail tests with python 2.7
 ]
 
 setup(
