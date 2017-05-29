@@ -1,16 +1,16 @@
+import imp
 import logging
 import logging.config
 import os
 
 import expan.core.debugging as dbgcls
-import imp
 
 imp.reload(dbgcls)
 
 
 ##################
 # Commented out for now since the behavior of the capsys argument is unclear,
-# and it seems to create problems when adding new unit tests/using the dbg 
+# and it seems to create problems when adding new unit tests/using the dbg
 # function.
 ##################
 # def test_default_debugging(capsys):
@@ -41,23 +41,22 @@ imp.reload(dbgcls)
 
 
 def test_debugging_with_file_config():
-	"""
-	Test the debugging object created with options from logging config file.
-	TODO: test the output!
-	"""
-	logging.config.fileConfig(os.getcwd() + '/tests/tests_core/test-logging.conf')
-	logger = logging.getLogger('simple')
-	dbgf = dbgcls.Dbg(logger)
+    """
+    Test the debugging object created with options from logging config file.
+    TODO: test the output!
+    """
+    logging.config.fileConfig(os.getcwd() + '/tests/tests_core/test-logging.conf')
+    logger = logging.getLogger('simple')
+    dbgf = dbgcls.Dbg(logger)
 
-	dbgf(-2, 'This should be an error')
-	dbgf(-1, 'This should be a warning')
-	dbgf(0, 'This should be a stdout')
-	dbgf(1, 'This should be a debug message')
-	dbgf(2, 'This should be a level 2 dbg message!')
+    dbgf(-2, 'This should be an error')
+    dbgf(-1, 'This should be a warning')
+    dbgf(0, 'This should be a stdout')
+    dbgf(1, 'This should be a debug message')
+    dbgf(2, 'This should be a level 2 dbg message!')
 
-	dbgf.out(1, 'can also use like this!')
+    dbgf.out(1, 'can also use like this!')
 
 
 if __name__ == "__main__":
-	pass  # TODO: call py.test?
-	
+    pass  # TODO: call py.test?
