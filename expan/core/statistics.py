@@ -116,23 +116,16 @@ def sample_size(x):
         int: sample size of the sample excluding nans
     """
     # cast into a dummy numpy array to infer the dtype
-    if ~isinstance(x, np.ndarray):
-        dummy = np.array(x)
-    is_numeric = np.issubdtype(dummy.dtype, np.number)
+    x_as_array = np.array(x)
 
-    if is_numeric:
-        # Coercing missing values to right format
+    if np.issubdtype(x_as_array.dtype, np.number):
         _x = np.array(x, dtype=float)
         x_nan = np.isnan(_x).sum()
-
     # assuming categorical sample
     elif isinstance(x, pd.core.series.Series):
         x_nan = x.str.contains('NA').sum()
     else:
         x_nan = list(x).count('NA')
-
-    if x_nan > 0:
-        warnings.warn('Discarding ' + str(x_nan) + ' NaN(s) in the x array!')
 
     return len(x) - x_nan
 

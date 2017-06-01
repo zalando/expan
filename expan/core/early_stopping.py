@@ -4,6 +4,7 @@ from os.path import dirname, join, realpath
 import numpy as np
 from pystan import StanModel
 from scipy.stats import gaussian_kde, norm, cauchy
+from expan.core.util import drop_nan
 
 import expan.core.statistics as statx
 
@@ -147,6 +148,8 @@ def _bayes_sampling(x, y, distribution='normal'):
     # Coercing missing values to right format
     _x = np.array(x, dtype=float)
     _y = np.array(y, dtype=float)
+    _x = drop_nan(_x)
+    _y = drop_nan(_y)
 
     mu_x = np.nanmean(_x)
     mu_y = np.nanmean(_y)
