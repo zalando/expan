@@ -21,6 +21,11 @@ class EarlyStoppingTestCase(unittest.TestCase):
         self.rand_s2 = np.random.normal(loc=0.1, size=1000)
         self.rand_s3 = np.random.poisson(lam=1, size=1000)
         self.rand_s4 = np.random.poisson(lam=3, size=1000)
+        self.rand_s5 = np.random.normal(loc=0, size=1000)
+        self.rand_s6 = np.random.normal(loc=0.1, size=1000)
+        self.rand_s5[0] = np.nan
+        self.rand_s6[0] = np.nan
+        self.rand_s6[1] = np.nan
 
     def tearDown(self):
         """
@@ -41,8 +46,9 @@ class GroupSequentialTestCases(EarlyStoppingTestCase):
         """
         # Check array as input
         res = es.obrien_fleming(np.linspace(0, 1, 5 + 1)[1:])
-        np.testing.assert_almost_equal(res,
-                                       [1.17264468e-05, 1.94191300e-03, 1.13964185e-02, 2.84296308e-02, 5.00000000e-02])
+        expected_res = [1.17264468e-05, 1.94191300e-03, 1.13964185e-02, 2.84296308e-02, 5.00000000e-02]
+        np.testing.assert_almost_equal(res, expected_res)
+
         # Check float as input
         res = es.obrien_fleming(0.5)
         self.assertAlmostEqual(res, 0.005574596680784305)
@@ -83,8 +89,7 @@ class BayesFactorTestCases(EarlyStoppingTestCase):
         self.assertAlmostEqual(mu_x, -0.045256707490195384)
         self.assertAlmostEqual(mu_y, 0.11361694031616358)
 
-        # @unittest.skip("sometimes takes too much time")
-
+    # @unittest.skip("sometimes takes too much time")
     def test_bayes_factor_poisson(self):
         """
         Check the Bayes factor function for Poisson distributions.
@@ -98,6 +103,14 @@ class BayesFactorTestCases(EarlyStoppingTestCase):
         self.assertEqual(n_y, 1000)
         self.assertAlmostEqual(mu_x, 0.96599999999999997)
         self.assertAlmostEqual(mu_y, 2.9249999999999998)
+
+    # @unittest.skip("sometimes takes too much time")
+    def test_bayes_factor_with_nan_input(self):
+        """
+        Check the Bayes factor function with input that contains nan values.
+        """
+        stop, _, _, _, _, _, _ = es.bayes_factor(self.rand_s5, self.rand_s6)
+        self.assertEqual(stop, 1)
 
 
 class BayesPrecisionTestCases(EarlyStoppingTestCase):

@@ -4,8 +4,15 @@ import numpy as np
 import pandas as pd
 
 
-def isNumberAndIsNaN(obj):
+def is_number_and_nan(obj):
     return obj != obj
+
+
+def drop_nan(np_array):
+    if np_array.ndim == 1:
+        return np_array[~np.isnan(np_array)]
+    elif np_array.ndim == 2:
+        return np_array[~np.isnan(np_array).any(axis=1)]
 
 
 def scale_range(x, new_min=0.0, new_max=1.0, old_min=None, old_max=None, squash_outside_range=True, squash_inf=False, ):

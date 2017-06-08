@@ -6,7 +6,7 @@ import warnings
 import numpy as np
 
 from expan.core.debugging import Dbg
-from expan.core.util import isNumberAndIsNaN
+from expan.core.util import is_number_and_nan
 
 symbol_universal_set = 'ξ'  # https://en.wikipedia.org/wiki/Xi_(letter)
 
@@ -81,8 +81,8 @@ class CategoricalBinning(Binning):
         """
         # group NAs into a single interval, the effective n_bins will be increased
         # by 1
-        if any([isNumberAndIsNaN(xx) for xx in x]):
-            rest_list = self._get_binning_categorical([xx for xx in x if not isNumberAndIsNaN(xx)], n_bins)
+        if any([is_number_and_nan(xx) for xx in x]):
+            rest_list = self._get_binning_categorical([xx for xx in x if not is_number_and_nan(xx)], n_bins)
             return rest_list + [[np.nan]]
 
         levels = np.unique(x)
@@ -590,9 +590,7 @@ class NumericalBinning(Binning):
         Currently iterates through all bins regardless of match, and thus
         the latest bins that match will take precedence.
         """
-
-        if ~isinstance(data, np.ndarray):
-            data = np.array(data)
+        data = np.array(data)
 
         try:
             out = np.empty(data.shape, int)
@@ -729,22 +727,19 @@ def create_binning(x, nbins=8):
         raise ValueError('Less than one bin makes no sense.')
 
     insufficient_distinct = False
-    nunique = len(np.unique([xx for xx in x if not isNumberAndIsNaN(xx)]))
+    nunique = len(np.unique([xx for xx in x if not is_number_and_nan(xx)]))
     if nunique < nbins:
         insufficient_distinct = True
         warnings.warn('Insufficient distinct values for requested number of bins.')
         nbins = nunique
 
     # cast into a dummy numpy array to infer the dtype
-    if ~isinstance(x, np.ndarray):
-        dummy = np.array(x)
-    is_numeric = np.issubdtype(dummy.dtype, np.number)
+    x_as_array = np.array(x)
+    is_numeric = np.issubdtype(x_as_array.dtype, np.number)
 
     if is_numeric:
         # only cast numeric data to a real numpy array (due to NaN handling)
-        if ~isinstance(x, np.ndarray):
-            x = np.array(x)
-        binning = NumericalBinning(x, nbins)
+        binning = NumericalBinning(x_as_array, nbins)
     else:
         binning = CategoricalBinning(x, nbins)
 
