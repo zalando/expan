@@ -126,14 +126,6 @@ class Experiment(ExperimentData):
             return f(*vargs)
 
 
-
-
-
-
-
-
-
-
     def _apply_reweighting_and_all_variants(self,
                                             df_grouped_by_variant,
                                             metric_df,
@@ -177,12 +169,6 @@ class Experiment(ExperimentData):
                                                                 y=ctrl_kpis,
                                                                 x_weights=treat_weights,
                                                                 y_weights=ctrl_weights))
-
-
-
-
-
-
 
 
     def fixed_horizon_delta(self,
@@ -647,36 +633,6 @@ class Experiment(ExperimentData):
         # categorical feature
         else:
             return metric_df.groupby('variant').apply(do_delta_categorical).unstack(0)
-
-
-    def _delta_all_variants(self, metric_df, baseline_variant, weighted=False,
-                            deltaWorker=statx.make_delta()):
-        """Applies delta to all variants, given a metric and a baseline variant.
-
-        metric_df has 4 columns: entity, variant, metric, reference_kpi
-        """
-        baseline_metric = metric_df.iloc[:, 2][metric_df.iloc[:, 1] == baseline_variant]
-        baseline_weights = metric_df.iloc[:, 3][metric_df.iloc[:, 1] == baseline_variant]
-
-        if weighted:
-            # ASSUMPTIONS:
-            # - reference KPI is never NaN (such that sum works the same as np.nansum)
-            # - whenever the reference KPI is 0, it means the derived KPI is NaN,
-            #	and therefore should not be counted (only works for ratio)
-            x_weights = lambda f: f.iloc[:, 3] / sum(f.iloc[:, 3]) * sum(f.iloc[:, 3] != 0)
-            y_weights = lambda f: baseline_weights / sum(baseline_weights) * sum(baseline_weights != 0)
-        else:
-            x_weights = lambda f: 1
-            y_weights = lambda f: 1
-
-        do_delta = (lambda f: delta_to_dataframe_all_variants(f.columns[2],
-                                                              *deltaWorker(x=f.iloc[:, 2],
-                                                                           y=baseline_metric,
-                                                                           x_weights=x_weights(f),
-                                                                           y_weights=y_weights(f))))
-
-        # Actual calculation
-        return metric_df.groupby('variant').apply(do_delta).unstack(0)
 
 
     def _time_dependent_deltas(self, df, variants, time_step=1, cumulative=False,
