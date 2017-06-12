@@ -43,6 +43,7 @@ class Experiment(ExperimentData):
 
         self.dbg = dbg or Dbg()
 
+
     @property
     def baseline_variant(self):
         """
@@ -52,6 +53,7 @@ class Experiment(ExperimentData):
             string: baseline variant
         """
         return self.metadata['baseline_variant']
+
 
     def __str__(self):
         res = super(Experiment, self).__str__()
@@ -67,6 +69,7 @@ class Experiment(ExperimentData):
         #		'\n   '.join([('**'+k+'**') if (k == self.metadata.get('primary_KPI','-')) else k for k in self.kpi_names]))
 
         return res
+
 
     def delta(self, method='fixed_horizon', kpi_subset=None, derived_kpis=None,
               assume_normal=True, percentiles=[2.5, 97.5], min_observations=20,
@@ -104,11 +107,11 @@ class Experiment(ExperimentData):
             kpis_to_analyse.intersection_update(kpi_subset)
         self.dbg(3, 'kpis_to_analyse: ' + ','.join(kpis_to_analyse))
 
-        defaultArgs = [res, kpis_to_analyse]
+        defaultArgs = [res, kpis_to_analyse, reference_kpis, weighted_kpis]
         deltaWorker = statx.make_delta(assume_normal, percentiles, min_observations,
                                        nruns, relative)
         method_table = {
-            'fixed_horizon': (self.fixed_horizon_delta, defaultArgs + [reference_kpis, weighted_kpis, deltaWorker]),
+            'fixed_horizon': (self.fixed_horizon_delta, defaultArgs + [deltaWorker]),
             'group_sequential': (self.group_sequential_delta, defaultArgs),
             'bayes_factor': (self.bayes_factor_delta, defaultArgs),
             'bayes_precision': (self.bayes_precision_delta, defaultArgs),
@@ -121,6 +124,66 @@ class Experiment(ExperimentData):
             f = entry[0]
             vargs = entry[1]
             return f(*vargs)
+
+
+
+
+
+
+
+
+
+
+    def _apply_reweighting_and_all_variants(self,
+                                            df_grouped_by_variant,
+                                            metric_df,
+                                            weighted_kpis,
+                                            reference_kpis,
+                                            mname,
+                                            deltaWorker=None,
+                                            algorithm="fixed_horizon"):
+        """
+        Compute the reweighting trick to derived KPIs,
+        and apply regular delta or early stopping method to all variants.
+
+        metric_df has 4 columns: entity, variant, metric, reference_kpi
+        """
+        ctrl_kpis = metric_df.iloc[:, 2][metric_df.iloc[:, 1] == self.baseline_variant]
+        treat_kpis = df_grouped_by_variant.iloc[:, 2]
+
+        # the weighted approach implies that derived_kpis is not None
+        if weighted_kpis is not None and mname in weighted_kpis:
+            reference_kpi = reference_kpis[mname]
+
+            ctrl_reference_kpis = metric_df.loc[metric_df.variant == self.baseline_variant, reference_kpi]
+            treat_reference_kpis = df_grouped_by_variant.loc[:, reference_kpi]
+
+            n_nan_ref_ctrl = sum(ctrl_reference_kpis == 0) + np.isnan(ctrl_reference_kpis).sum()
+            n_non_nan_ref_ctrl = len(ctrl_reference_kpis) - n_nan_ref_ctrl
+
+            n_nan_ref_treat = sum(treat_reference_kpis == 0) + np.isnan(treat_reference_kpis).sum()
+            n_non_nan_ref_treat = len(treat_reference_kpis) - n_nan_ref_treat
+
+            ctrl_weights = n_non_nan_ref_ctrl * ctrl_reference_kpis / np.nansum(ctrl_reference_kpis)
+            treat_weights = n_non_nan_ref_treat * treat_reference_kpis / np.nansum(treat_reference_kpis)
+
+        else:
+            ctrl_weights = 1.
+            treat_weights = 1.
+
+        if algorithm == "fixed_horizon":
+            return delta_to_dataframe_all_variants(metric_df.columns[2],
+                                                   *deltaWorker(x=treat_kpis,
+                                                                y=ctrl_kpis,
+                                                                x_weights=treat_weights,
+                                                                y_weights=ctrl_weights))
+
+
+
+
+
+
+
 
     def fixed_horizon_delta(self,
                             res,
@@ -156,19 +219,23 @@ class Experiment(ExperimentData):
             # the weighted approach implies that derived_kpis is not None
             if weighted_kpis is not None and mname in weighted_kpis:
                 reference_kpi = reference_kpis[mname]
-                weighted = True
             else:
                 reference_kpi = mname
-                weighted = False
+
+            metric_df = self.kpis.reset_index()[['entity', 'variant', mname, reference_kpi]]
 
             try:
                 with warnings.catch_warnings(record=True) as w:
                     # Cause all warnings to always be triggered.
                     warnings.simplefilter("always")
-                    df = (self._delta_all_variants(self.kpis.reset_index()[['entity', 'variant', mname, reference_kpi]],
-                                                   self.baseline_variant,
-                                                   weighted,
-                                                   deltaWorker))
+
+                    df = metric_df.groupby('variant').apply(self._apply_reweighting_and_all_variants,
+                                                            metric_df=metric_df,
+                                                            weighted_kpis=weighted_kpis,
+                                                            reference_kpis=reference_kpis,
+                                                            mname=mname,
+                                                            deltaWorker=deltaWorker,
+                                                            algorithm="fixed_horizon").unstack(0)
                     if len(w):
                         res.metadata['warnings']['Experiment.delta'] = w[-1].message
 
@@ -183,9 +250,12 @@ class Experiment(ExperimentData):
         # res.calculate_prob_uplift_over_zero()
         return res
 
+
     def group_sequential_delta(self,
                                result,
                                kpis_to_analyse,
+                               reference_kpis={},
+                               weighted_kpis=None,
                                spending_function='obrien_fleming',
                                information_fraction=1,
                                alpha=0.05,
@@ -216,6 +286,7 @@ class Experiment(ExperimentData):
             baseline_metric = metric_df.iloc[:, 2][metric_df.iloc[:, 1] == self.baseline_variant]
             current_sample_size = float(sum(~metric_df[mname].isnull()))
 
+            # TODO: make it a def and reweight it inside
             do_delta = (lambda f: early_stopping_to_dataframe(f.columns[2],
                                                               *es.group_sequential(
                                                                   x=f.iloc[:, 2],
@@ -239,9 +310,12 @@ class Experiment(ExperimentData):
 
         return result
 
+
     def bayes_factor_delta(self,
                            result,
                            kpis_to_analyse,
+                           reference_kpis={},
+                           weighted_kpis=None,
                            distribution='normal',
                            **kwargs):
         """
@@ -258,8 +332,8 @@ class Experiment(ExperimentData):
             a Results object
         """
 
+        # TODO: reweight it inside
         def do_delta(f):
-            print(f.iloc[0, 1])
             return early_stopping_to_dataframe(f.columns[2],
                                                *es.bayes_factor(
                                                    x=f.iloc[:, 2],
@@ -283,9 +357,12 @@ class Experiment(ExperimentData):
 
         return result
 
+
     def bayes_precision_delta(self,
                               result,
                               kpis_to_analyse,
+                              reference_kpis={},
+                              weighted_kpis=None,
                               distribution='normal',
                               posterior_width=0.08,
                               **kwargs):
@@ -305,8 +382,8 @@ class Experiment(ExperimentData):
             a Results object
         """
 
+        # TODO: reweight it inside
         def do_delta(f):
-            print(f.iloc[0, 1])
             return early_stopping_to_dataframe(f.columns[2],
                                                *es.bayes_precision(
                                                    x=f.iloc[:, 2],
@@ -330,6 +407,7 @@ class Experiment(ExperimentData):
                 result.df = result.df.append(df)
 
         return result
+
 
     def feature_check(self, feature_subset=None, variant_subset=None,
                       threshold=0.05, percentiles=[2.5, 97.5], assume_normal=True,
@@ -388,6 +466,7 @@ class Experiment(ExperimentData):
                 res.df = res.df.append(df)
 
         return res
+
 
     def sga(self, feature_subset=None, kpi_subset=None, variant_subset=None,
             n_bins=4, binning=None,
@@ -460,6 +539,7 @@ class Experiment(ExperimentData):
                         deltaWorker=deltaWorker).df])
         # Return the result object
         return res
+
 
     def trend(self, kpi_subset=None, variant_subset=None, time_step=1,
               cumulative=True, assume_normal=True, percentiles=[2.5, 97.5],
@@ -540,6 +620,7 @@ class Experiment(ExperimentData):
         # Return the result object
         return res
 
+
     def _feature_check_all_variants(self, metric_df, baseline_variant, deltaWorker):
         """Applies delta to all variants, given a metric."""
         baseline_metric = metric_df.iloc[:, 2][metric_df.variant == baseline_variant]
@@ -566,6 +647,7 @@ class Experiment(ExperimentData):
         # categorical feature
         else:
             return metric_df.groupby('variant').apply(do_delta_categorical).unstack(0)
+
 
     def _delta_all_variants(self, metric_df, baseline_variant, weighted=False,
                             deltaWorker=statx.make_delta()):
@@ -595,6 +677,7 @@ class Experiment(ExperimentData):
 
         # Actual calculation
         return metric_df.groupby('variant').apply(do_delta).unstack(0)
+
 
     def _time_dependent_deltas(self, df, variants, time_step=1, cumulative=False,
                                deltaWorker=statx.make_delta()):
@@ -644,6 +727,7 @@ class Experiment(ExperimentData):
         # Returning Result object containing result and the binning
         return result
 
+
     def _subgroup_deltas(self, df, variants, n_bins=4, deltaWorker=statx.make_delta()):
         """
         Calculates the feature dependent delta.
@@ -678,6 +762,7 @@ class Experiment(ExperimentData):
 
         # Returning Result object containing result and the binning
         return result
+
 
     def _binned_deltas(self, df, variants, n_bins=4, binning=None, cumulative=False,
                        label_format_str='{standard}', deltaWorker=statx.make_delta()):
