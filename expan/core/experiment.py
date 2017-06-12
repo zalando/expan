@@ -132,8 +132,7 @@ class Experiment(ExperimentData):
                                             weighted_kpis,
                                             reference_kpis,
                                             mname,
-                                            deltaWorker=None,
-                                            algorithm="fixed_horizon"):
+                                            func_apply_variants):
         """
         Compute the reweighting trick to derived KPIs,
         and apply regular delta or early stopping method to all variants.
@@ -163,12 +162,7 @@ class Experiment(ExperimentData):
             ctrl_weights = 1.
             treat_weights = 1.
 
-        if algorithm == "fixed_horizon":
-            return delta_to_dataframe_all_variants(metric_df.columns[2],
-                                                   *deltaWorker(x=treat_kpis,
-                                                                y=ctrl_kpis,
-                                                                x_weights=treat_weights,
-                                                                y_weights=ctrl_weights))
+        return func_apply_variants(x=treat_kpis, y=ctrl_kpis, x_weights=treat_weights, y_weights=ctrl_weights)
 
 
     def fixed_horizon_delta(self,
@@ -200,28 +194,26 @@ class Experiment(ExperimentData):
             Results object containing the computed deltas.
         """
         kpis_to_analyse = kpis_to_analyse or self.kpi_names.copy()
-
         for mname in kpis_to_analyse:
-            # the weighted approach implies that derived_kpis is not None
-            if weighted_kpis is not None and mname in weighted_kpis:
-                reference_kpi = reference_kpis[mname]
-            else:
-                reference_kpi = mname
-
-            metric_df = self.kpis.reset_index()[['entity', 'variant', mname, reference_kpi]]
-
+            metric_df = self._get_metric_df(mname, reference_kpis, weighted_kpis)
             try:
                 with warnings.catch_warnings(record=True) as w:
                     # Cause all warnings to always be triggered.
                     warnings.simplefilter("always")
+
+                    def do_delta(x, y, x_weights, y_weights):
+                        return delta_to_dataframe_all_variants(metric_df.columns[2],
+                                                               *deltaWorker(x=x,
+                                                                            y=y,
+                                                                            x_weights=x_weights,
+                                                                            y_weights=y_weights))
 
                     df = metric_df.groupby('variant').apply(self._apply_reweighting_and_all_variants,
                                                             metric_df=metric_df,
                                                             weighted_kpis=weighted_kpis,
                                                             reference_kpis=reference_kpis,
                                                             mname=mname,
-                                                            deltaWorker=deltaWorker,
-                                                            algorithm="fixed_horizon").unstack(0)
+                                                            func_apply_variants=do_delta).unstack(0)
                     if len(w):
                         res.metadata['warnings']['Experiment.delta'] = w[-1].message
 
@@ -233,8 +225,17 @@ class Experiment(ExperimentData):
             except ValueError as e:
                 res.metadata['errors']['Experiment.delta'] = e
 
-        # res.calculate_prob_uplift_over_zero()
         return res
+
+
+    def _get_metric_df(self, mname, reference_kpis, weighted_kpis):
+        # the weighted approach implies that derived_kpis is not None
+        if weighted_kpis is not None and mname in weighted_kpis:
+            reference_kpi = reference_kpis[mname]
+        else:
+            reference_kpi = mname
+        metric_df = self.kpis.reset_index()[['entity', 'variant', mname, reference_kpi]]
+        return metric_df
 
 
     def group_sequential_delta(self,
