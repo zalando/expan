@@ -126,6 +126,16 @@ class Experiment(ExperimentData):
             return f(*vargs)
 
 
+    def _get_metric_df(self, mname, reference_kpis, weighted_kpis):
+        # the weighted approach implies that derived_kpis is not None
+        if weighted_kpis is not None and mname in weighted_kpis:
+            reference_kpi = reference_kpis[mname]
+        else:
+            reference_kpi = mname
+        metric_df = self.kpis.reset_index()[['entity', 'variant', mname, reference_kpi]]
+        return metric_df
+
+
     def _apply_reweighting_and_all_variants(self,
                                             df_grouped_by_variant,
                                             metric_df,
@@ -228,16 +238,6 @@ class Experiment(ExperimentData):
         return res
 
 
-    def _get_metric_df(self, mname, reference_kpis, weighted_kpis):
-        # the weighted approach implies that derived_kpis is not None
-        if weighted_kpis is not None and mname in weighted_kpis:
-            reference_kpi = reference_kpis[mname]
-        else:
-            reference_kpi = mname
-        metric_df = self.kpis.reset_index()[['entity', 'variant', mname, reference_kpi]]
-        return metric_df
-
-
     def group_sequential_delta(self,
                                result,
                                kpis_to_analyse,
@@ -269,24 +269,29 @@ class Experiment(ExperimentData):
             raise ValueError("Missing 'estimatedSampleSize' for the group sequential method!")
 
         for mname in kpis_to_analyse:
-            metric_df = self.kpis.reset_index()[['entity', 'variant', mname]]
-            baseline_metric = metric_df.iloc[:, 2][metric_df.iloc[:, 1] == self.baseline_variant]
-            current_sample_size = float(sum(~metric_df[mname].isnull()))
+            metric_df = self._get_metric_df(mname, reference_kpis, weighted_kpis)
 
-            # TODO: make it a def and reweight it inside
-            do_delta = (lambda f: early_stopping_to_dataframe(f.columns[2],
-                                                              *es.group_sequential(
-                                                                  x=f.iloc[:, 2],
-                                                                  y=baseline_metric,
-                                                                  spending_function=spending_function,
-                                                                  information_fraction=current_sample_size /
-                                                                                       self.metadata[
-                                                                                           'estimatedSampleSize'],
-                                                                  alpha=alpha,
-                                                                  cap=cap)))
+            current_sample_size = float(sum(~metric_df.iloc[:,2].isnull()))
+            information_fraction = current_sample_size / self.metadata['estimatedSampleSize']
 
-            # Actual calculation
-            df = metric_df.groupby('variant').apply(do_delta).unstack(0)
+            def do_delta(x, y, x_weights, y_weights):
+                weighted_x = np.array(x, dtype=float) * x_weights
+                weighted_y = np.array(y, dtype=float) * y_weights
+                return early_stopping_to_dataframe(metric_df.columns[2],
+                                                   *es.group_sequential(
+                                                       x=weighted_x,
+                                                       y=weighted_y,
+                                                       spending_function=spending_function,
+                                                       information_fraction=information_fraction,
+                                                       alpha=alpha,
+                                                       cap=cap))
+
+            df = metric_df.groupby('variant').apply(self._apply_reweighting_and_all_variants,
+                                                    metric_df=metric_df,
+                                                    weighted_kpis=weighted_kpis,
+                                                    reference_kpis=reference_kpis,
+                                                    mname=mname,
+                                                    func_apply_variants=do_delta).unstack(0)
             # force the stop label of the baseline variant to 0
             df.loc[(mname, '-', slice(None), 'stop'), ('value', self.baseline_variant)] = 0
 
