@@ -204,20 +204,19 @@ class Experiment(ExperimentData):
             Results object containing the computed deltas.
         """
         kpis_to_analyse = kpis_to_analyse or self.kpi_names.copy()
+
         for mname in kpis_to_analyse:
             metric_df = self._get_metric_df(mname, reference_kpis, weighted_kpis)
+            def do_delta(x, y, x_weights, y_weights):
+                return delta_to_dataframe_all_variants(metric_df.columns[2],
+                                                       *deltaWorker(x=x,
+                                                                    y=y,
+                                                                    x_weights=x_weights,
+                                                                    y_weights=y_weights))
             try:
                 with warnings.catch_warnings(record=True) as w:
                     # Cause all warnings to always be triggered.
                     warnings.simplefilter("always")
-
-                    def do_delta(x, y, x_weights, y_weights):
-                        return delta_to_dataframe_all_variants(metric_df.columns[2],
-                                                               *deltaWorker(x=x,
-                                                                            y=y,
-                                                                            x_weights=x_weights,
-                                                                            y_weights=y_weights))
-
                     df = metric_df.groupby('variant').apply(self._apply_reweighting_and_all_variants,
                                                             metric_df=metric_df,
                                                             weighted_kpis=weighted_kpis,
@@ -323,22 +322,24 @@ class Experiment(ExperimentData):
         Returns:
             a Results object
         """
-
-        # TODO: reweight it inside
-        def do_delta(f):
-            return early_stopping_to_dataframe(f.columns[2],
-                                               *es.bayes_factor(
-                                                   x=f.iloc[:, 2],
-                                                   y=baseline_metric,
-                                                   distribution=distribution
-                                               ))
-
         for mname in kpis_to_analyse:
-            metric_df = self.kpis.reset_index()[['entity', 'variant', mname]]
-            baseline_metric = metric_df.iloc[:, 2][metric_df.iloc[:, 1] == self.baseline_variant]
+            metric_df = self._get_metric_df(mname, reference_kpis, weighted_kpis)
 
-            # Actual calculation
-            df = metric_df.groupby('variant').apply(do_delta).unstack(0)
+            def do_delta(x, y, x_weights, y_weights):
+                weighted_x = np.array(x, dtype=float) * x_weights
+                weighted_y = np.array(y, dtype=float) * y_weights
+                return early_stopping_to_dataframe(metric_df.columns[2],
+                                                   *es.bayes_factor(
+                                                       x=weighted_x,
+                                                       y=weighted_y,
+                                                       distribution=distribution))
+
+            df = metric_df.groupby('variant').apply(self._apply_reweighting_and_all_variants,
+                                                    metric_df=metric_df,
+                                                    weighted_kpis=weighted_kpis,
+                                                    reference_kpis=reference_kpis,
+                                                    mname=mname,
+                                                    func_apply_variants=do_delta).unstack(0)
             # force the stop label of the baseline variant to 0
             df.loc[(mname, '-', slice(None), 'stop'), ('value', self.baseline_variant)] = 0
 
@@ -373,23 +374,25 @@ class Experiment(ExperimentData):
         Returns:
             a Results object
         """
-
-        # TODO: reweight it inside
-        def do_delta(f):
-            return early_stopping_to_dataframe(f.columns[2],
-                                               *es.bayes_precision(
-                                                   x=f.iloc[:, 2],
-                                                   y=baseline_metric,
-                                                   distribution=distribution,
-                                                   posterior_width=posterior_width
-                                               ))
-
         for mname in kpis_to_analyse:
-            metric_df = self.kpis.reset_index()[['entity', 'variant', mname]]
-            baseline_metric = metric_df.iloc[:, 2][metric_df.iloc[:, 1] == self.baseline_variant]
+            metric_df = self._get_metric_df(mname, reference_kpis, weighted_kpis)
 
-            # Actual calculation
-            df = metric_df.groupby('variant').apply(do_delta).unstack(0)
+            def do_delta(x, y, x_weights, y_weights):
+                weighted_x = np.array(x, dtype=float) * x_weights
+                weighted_y = np.array(y, dtype=float) * y_weights
+                return early_stopping_to_dataframe(metric_df.columns[2],
+                                                   *es.bayes_precision(
+                                                       x=weighted_x,
+                                                       y=weighted_y,
+                                                       distribution=distribution,
+                                                       posterior_width=posterior_width))
+
+            df = metric_df.groupby('variant').apply(self._apply_reweighting_and_all_variants,
+                                                    metric_df=metric_df,
+                                                    weighted_kpis=weighted_kpis,
+                                                    reference_kpis=reference_kpis,
+                                                    mname=mname,
+                                                    func_apply_variants=do_delta).unstack(0)
             # force the stop label of the baseline variant to 0
             df.loc[(mname, '-', slice(None), 'stop'), ('value', self.baseline_variant)] = 0
 
