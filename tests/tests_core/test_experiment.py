@@ -53,11 +53,11 @@ class ExperimentClassTestCases(ExperimentTestCase):
         # check delta
         df = result.statistic('fc', 'pre_treatment_diff', 'treatment_start_time')
         np.testing.assert_almost_equal(df.loc[:, ('value', 'A')],
-                                       np.array([-0.023670]), decimal=5)
+                                       np.array([-0.04587]), decimal=5)
         # check pctile
         df = result.statistic('fc', 'pre_treatment_diff_pctile', 'treatment_start_time')
         np.testing.assert_almost_equal(df.loc[:, ('value', 'A')],
-                                       np.array([-0.140031, 0.092690]), decimal=5)
+                                       np.array([-0.16244,  0.07069]), decimal=5)
         # check samplesize
         df = result.statistic('fc', 'sample_size', 'treatment_start_time')
         np.testing.assert_almost_equal(df.loc[:, 'value'],
@@ -65,7 +65,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
         # check variant_mean
         df = result.statistic('fc', 'variant_mean', 'treatment_start_time')
         np.testing.assert_almost_equal(df.loc[:, 'value'],
-                                       np.array([[4.493287, 4.516958]]), decimal=5)
+                                       np.array([[4.50115,  4.54702]]), decimal=5)
 
         # check chi-square p-values
         df = result.statistic('fc', 'chi_square_p', 'feature')
@@ -73,8 +73,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
                                        np.array([[0.769093, 1]]), decimal=5)
 
         # check metadata is preserved
-        np.testing.assert_equal(True, all(item in result.metadata.items()
-                                          for item in self.testmetadata.items()))
+        np.testing.assert_equal(True, all(item in result.metadata.items() for item in self.testmetadata.items()))
 
     def test__sga__index_levels(self):
         """
@@ -124,8 +123,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
                                        np.array([[0.001221, 0.981820], [-0.012310, 0.989196]]), decimal=5)
 
         # check metadata is preserved
-        np.testing.assert_equal(True, all(item in result.metadata.items()
-                                          for item in self.testmetadata.items()))
+        np.testing.assert_equal(True, all(item in result.metadata.items() for item in self.testmetadata.items()))
 
     def test__trend__index_levels(self):
         """
@@ -170,60 +168,57 @@ class ExperimentClassTestCases(ExperimentTestCase):
         # check uplift
         df = result.statistic('trend', 'uplift', 'normal_shifted')
         np.testing.assert_almost_equal(df.loc[:, ('value', 'A')],
-                                       np.array([-1.009421, -0.847400, -1.119885, -1.042597, -0.868819,
-                                                 -1.091165, -0.952307, -1.028234, -0.978774, -0.985696]), decimal=5)
+                                       np.array([-1.02175, -1.12275, -0.97611, -0.85916, -1.08909, -0.85667,
+                                                 -0.96769, -1.05598, -1.00399, -0.9566 ]), decimal=5)
         # check pctile
         df = result.statistic('trend', 'uplift_pctile', 'normal_shifted')
         np.testing.assert_almost_equal(df.loc[:, ('value', 'A')],
-                                       np.array([-1.137482, -0.881360, -0.970678, -0.724122, -1.245795,
-                                                 -0.993975, -1.178494, -0.906699, -0.993683, -0.743954, -1.225361,
-                                                 -0.956969, -1.082180, -0.822435, -1.151715, -0.904753, -1.095209,
-                                                 -0.862340, -1.109407, -0.861985]), decimal=5)
+                                       np.array([-1.14696, -0.89654, -1.24874, -0.99677, -1.10311, -0.84911,
+                                                 -0.9903 , -0.72801, -1.21351, -0.96467, -0.98513, -0.7282 ,
+                                                 -1.09129, -0.84408, -1.18276, -0.9292 , -1.13086, -0.87713,
+                                                 -1.08261, -0.83059]), decimal=5)
         # check samplesize
         df = result.statistic('trend', 'sample_size', 'normal_shifted')
         np.testing.assert_almost_equal(df.loc[:, 'value'],
-                                       np.column_stack(([649, 595, 600, 590, 625, 602, 607, 608, 616, 616],
-                                                        [405, 401, 378, 362, 377, 369, 406, 392, 414, 388])), decimal=5)
+                                       np.column_stack(([634, 637, 601, 565, 639, 595, 573, 584, 618, 662],
+                                                        [384, 362, 399, 404, 381, 370, 393, 400, 398, 401])), decimal=5)
         # check variant_mean
         df = result.statistic('trend', 'variant_mean', 'normal_shifted')
         np.testing.assert_almost_equal(df.loc[:, 'value'],
-                                       np.column_stack(([0.005761, 0.057487, -0.067107, 0.001125, 0.093085,
-                                                         -0.067894, -0.030500, -0.060996, 0.016257, -0.006091],
-                                                        [1.015182, 0.904887, 1.052778, 1.043721, 0.961904, 1.023271,
-                                                         0.921807, 0.967238, 0.995031, 0.979605])), decimal=5)
+                                       np.column_stack(([-0.052325, -0.024658, 0.033599, 0.008031, -0.075325,
+                                                         0.074325, -0.040660, 0.020174, 0.009113, 0.000389],
+                                                        [0.969424, 1.098095, 1.009712, 0.867187, 1.013762,
+                                                         0.930994, 0.927027, 1.076156, 1.013106, 0.956987])), decimal=5)
 
         # Perform sga() with cumulative results
         result = exp.trend()
         # check uplift
         df = result.statistic('trend', 'uplift', 'normal_shifted')
-
         np.testing.assert_almost_equal(df.loc[:, ('value', 'A')],
-                                       np.array([-1.009421, -0.929807, -0.991088, -1.003129, -0.976023,
-                                                 -0.994857, -0.988167, -0.993119, -0.991571, -0.990986]), decimal=5)
+                                       np.array([-1.021749, -1.070321, -1.039468, -0.993117, -1.012738,
+                                                 -0.987513, -0.984259, -0.993804, -0.994975, -0.990985]), decimal=5)
         # check pctile
         df = result.statistic('trend', 'uplift_pctile', 'normal_shifted')
         np.testing.assert_almost_equal(df.loc[:, ('value', 'A')],
-                                       np.array([-1.137482, -0.881360, -1.018794, -0.840820, -1.063820,
-                                                 -0.918356, -1.067283, -0.938976, -1.033110, -0.918936,
-                                                 -1.047413, -0.942302, -1.036888, -0.939446, -1.038455,
-                                                 -0.947784, -1.033861, -0.949280, -1.031002, -0.950970]), decimal=5)
+                                       np.array([-1.146963, -0.896535, -1.159145, -0.981496, -1.112230,
+                                                 -0.966707, -1.056767, -0.929468, -1.069403, -0.956073,
+                                                 -1.039374, -0.935652, -1.032089, -0.936429, -1.038557,
+                                                 -0.949051, -1.037176, -0.952774, -1.031001, -0.950969]), decimal=5)
         # check samplesize
         df = result.statistic('trend', 'sample_size', 'normal_shifted')
         np.testing.assert_almost_equal(df.loc[:, 'value'],
-                                       np.column_stack(([649, 1244, 1844, 2434, 3059, 3661, 4268, 4876, 5492, 6108],
-                                                        [405, 806, 1184, 1546, 1923, 2292, 2698, 3090, 3504, 3892])),
+                                       np.column_stack(([634, 1271, 1872, 2437, 3076, 3671, 4244, 4828, 5446, 6108],
+                                                        [384, 746, 1145, 1549, 1930, 2300, 2693, 3093, 3491, 3892])),
                                        decimal=5)
         # check variant_mean
         df = result.statistic('trend', 'variant_mean', 'normal_shifted')
         np.testing.assert_almost_equal(df.loc[:, 'value'],
-                                       np.column_stack(([0.005761, 0.030501, -0.001258, -0.000681, 0.018477,
-                                                         0.004274, -0.000671, -0.008193, -0.005451, -0.005515],
-                                                        [1.015182, 0.960308, 0.989830, 1.002449, 0.994500,
-                                                         0.999132, 0.987496, 0.984926, 0.986120, 0.985470])), decimal=5)
-
+                                       np.column_stack(([-0.052325, -0.038459, -0.015325, -0.009910, -0.023500,
+                                                         -0.007644, -0.012102, -0.008198, -0.006233, -0.005515],
+                                                        [0.969424, 1.031862, 1.024143, 0.983207, 0.989239,
+                                                         0.979869, 0.972158, 0.985607, 0.988742, 0.985470])), decimal=5)
         # check metadata is preserved
-        np.testing.assert_equal(True, all(item in result.metadata.items()
-                                          for item in self.testmetadata.items()))
+        np.testing.assert_equal(True, all(item in result.metadata.items() for item in self.testmetadata.items()))
 
     def test_trend_missing_time_resolved_data(self):
         """Check if missing time-resolved data in trend analysis issues a warning"""
@@ -238,7 +233,6 @@ class ExperimentClassTestCases(ExperimentTestCase):
         """
         # this should work
         self.assertTrue(isinstance(self.experiment, Experiment))  # check that the subclassing works
-
         self.assertTrue(self.experiment.baseline_variant == 'B')
 
         ########### fixed_horizon_delta ###########
@@ -262,8 +256,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
                                        np.array([[0.025219, -0.007833]]), decimal=5)
 
         # check metadata is preserved
-        np.testing.assert_equal(True, all(item in result.metadata.items()
-                                          for item in self.testmetadata.items()))
+        np.testing.assert_equal(True, all(item in result.metadata.items() for item in self.testmetadata.items()))
 
         ########### group_sequential_delta ###########
         self.experiment.metadata['estimatedSampleSize'] = 100000
@@ -287,8 +280,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
                                        np.array([[0.025219, -0.007833]]), decimal=5)
 
         # check metadata is preserved
-        np.testing.assert_equal(True, all(item in result.metadata.items()
-                                          for item in self.testmetadata.items()))
+        np.testing.assert_equal(True, all(item in result.metadata.items() for item in self.testmetadata.items()))
 
     def test_fixed_horizon_delta(self):
         """
@@ -296,7 +288,6 @@ class ExperimentClassTestCases(ExperimentTestCase):
         """
         # this should work
         self.assertTrue(isinstance(self.experiment, Experiment))  # check that the subclassing works
-
         self.assertTrue(self.experiment.baseline_variant == 'B')
 
         res = mock_results_object(self.experiment)
@@ -321,8 +312,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
                                        np.array([[0.025219, -0.007833]]), decimal=5)
 
         # check metadata is preserved
-        np.testing.assert_equal(True, all(item in result.metadata.items()
-                                          for item in self.testmetadata.items()))
+        np.testing.assert_equal(True, all(item in result.metadata.items() for item in self.testmetadata.items()))
 
     def test_group_sequential_delta(self):
         """
@@ -330,7 +320,6 @@ class ExperimentClassTestCases(ExperimentTestCase):
         """
         # this should work
         self.assertTrue(isinstance(self.experiment, Experiment))  # check that the subclassing works
-
         self.assertTrue(self.experiment.baseline_variant == 'B')
 
         self.experiment.metadata['estimatedSampleSize'] = 100000
@@ -355,8 +344,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
                                        np.array([[0.025219, -0.007833]]), decimal=5)
 
         # check metadata is preserved
-        np.testing.assert_equal(True, all(item in result.metadata.items()
-                                          for item in self.testmetadata.items()))
+        np.testing.assert_equal(True, all(item in result.metadata.items() for item in self.testmetadata.items()))
 
     def test_group_sequential_delta_no_estimatedSampleSize(self):
         """
@@ -366,15 +354,13 @@ class ExperimentClassTestCases(ExperimentTestCase):
             res = Results(None, metadata=self.experiment.metadata)
             result = self.experiment.group_sequential_delta(result=res, kpis_to_analyse=['normal_same'])
 
-            # @unittest.skip("sometimes takes too much time")
-
+    # @unittest.skip("sometimes takes too much time")
     def test_bayes_factor_delta(self):
         """
         Check if Experiment.bayes_factor_delta() functions properly
         """
         # this should work
         self.assertTrue(isinstance(self.experiment, Experiment))  # check that the subclassing works
-
         self.assertTrue(self.experiment.baseline_variant == 'B')
 
         res = Results(None, metadata=self.experiment.metadata)
@@ -398,18 +384,15 @@ class ExperimentClassTestCases(ExperimentTestCase):
                                        np.array([[0.025219, -0.007833]]), decimal=5)
 
         # check metadata is preserved
-        np.testing.assert_equal(True, all(item in result.metadata.items()
-                                          for item in self.testmetadata.items()))
+        np.testing.assert_equal(True, all(item in result.metadata.items() for item in self.testmetadata.items()))
 
-        # @unittest.skip("sometimes takes too much time")
-
+    # @unittest.skip("sometimes takes too much time")
     def test_bayes_precision_delta(self):
         """
         Check if Experiment.bayes_precision_delta() functions properly
         """
         # this should work
         self.assertTrue(isinstance(self.experiment, Experiment))  # check that the subclassing works
-
         self.assertTrue(self.experiment.baseline_variant == 'B')
 
         res = Results(None, metadata=self.experiment.metadata)
@@ -433,8 +416,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
                                        np.array([[0.025219, -0.007833]]), decimal=5)
 
         # check metadata is preserved
-        np.testing.assert_equal(True, all(item in result.metadata.items()
-                                          for item in self.testmetadata.items()))
+        np.testing.assert_equal(True, all(item in result.metadata.items() for item in self.testmetadata.items()))
 
     def test_alphanumeric_kpi_names(self):
         old_kpi = 'normal_shifted'
@@ -458,7 +440,6 @@ class ExperimentClassTestCases(ExperimentTestCase):
         """
         # this should work
         self.assertTrue(isinstance(self.experiment, Experiment))  # check that the subclassing works
-
         self.assertTrue(self.experiment.baseline_variant == 'B')
 
         res = mock_results_object(self.experiment,
@@ -484,8 +465,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
                                        np.array([[0.376876, 0.068508]]), decimal=5)
 
         # check metadata is preserved
-        np.testing.assert_equal(True, all(item in result.metadata.items()
-                                          for item in self.testmetadata.items()))
+        np.testing.assert_equal(True, all(item in result.metadata.items() for item in self.testmetadata.items()))
 
     def test_delta_derived_kpis_weighted(self):
         """
@@ -494,7 +474,6 @@ class ExperimentClassTestCases(ExperimentTestCase):
         """
         # this should work
         self.assertTrue(isinstance(self.experiment, Experiment))  # check that the subclassing works
-
         self.assertTrue(self.experiment.baseline_variant == 'B')
 
         res = mock_results_object(self.experiment,
@@ -522,8 +501,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
                                        np.array([[-4.572524, -0.007949]]), decimal=5)
 
         # check metadata is preserved
-        np.testing.assert_equal(True, all(item in result.metadata.items()
-                                          for item in self.testmetadata.items()))
+        np.testing.assert_equal(True, all(item in result.metadata.items() for item in self.testmetadata.items()))
 
     def test_unequal_variance_warning_in_results(self):
         """
@@ -546,27 +524,27 @@ class ExperimentClassTestCases(ExperimentTestCase):
         # check uplift
         df = result.statistic('trend', 'uplift', 'normal_shifted')
         np.testing.assert_almost_equal(df.loc[:, ('value', 'A')],
-                                       np.array([-1.009421, -0.847400, -1.119885, -1.042597, -0.868819,
-                                                 -1.091165, -0.952307, -1.028234, -0.978774, -0.985696]), decimal=5)
+                                       np.array([-1.02175, -1.12275, -0.97611, -0.85916, -1.08909,
+                                                 -0.85667, -0.96769, -1.05598, -1.00399, -0.9566 ]), decimal=5)
         # check pctile
         df = result.statistic('trend', 'uplift_pctile', 'normal_shifted')
         np.testing.assert_almost_equal(df.loc[:, ('value', 'A')],
-                                       np.array([-1.137482, -0.881360, -0.970678, -0.724122, -1.245795,
-                                                 -0.993975, -1.178494, -0.906699, -0.993683, -0.743954, -1.225361,
-                                                 -0.956969, -1.082180, -0.822435, -1.151715, -0.904753, -1.095209,
-                                                 -0.862340, -1.109407, -0.861985]), decimal=5)
+                                       np.array([-1.14696, -0.89654, -1.24874, -0.99677, -1.10311, -0.84911,
+                                                 -0.9903 , -0.72801, -1.21351, -0.96467, -0.98513, -0.7282 ,
+                                                 -1.09129, -0.84408, -1.18276, -0.9292 , -1.13086, -0.87713,
+                                                 -1.08261, -0.83059]), decimal=5)
         # check samplesize
         df = result.statistic('trend', 'sample_size', 'normal_shifted')
         np.testing.assert_almost_equal(df.loc[:, 'value'],
-                                       np.column_stack(([649, 595, 600, 590, 625, 602, 607, 608, 616, 616],
-                                                        [405, 401, 378, 362, 377, 369, 406, 392, 414, 388])), decimal=5)
+                                       np.column_stack(([634, 637, 601, 565, 639, 595, 573, 584, 618, 662],
+                                                        [384, 362, 399, 404, 381, 370, 393, 400, 398, 401])), decimal=5)
         # check variant_mean
         df = result.statistic('trend', 'variant_mean', 'normal_shifted')
         np.testing.assert_almost_equal(df.loc[:, 'value'],
-                                       np.column_stack(([0.005761, 0.057487, -0.067107, 0.001125, 0.093085,
-                                                         -0.067894, -0.030500, -0.060996, 0.016257, -0.006091],
-                                                        [1.015182, 0.904887, 1.052778, 1.043721, 0.961904, 1.023271,
-                                                         0.921807, 0.967238, 0.995031, 0.979605])), decimal=5)
+                                       np.column_stack(([-0.052325, -0.024658, 0.033599, 0.008031, -0.075325,
+                                                         0.074325, -0.040660, 0.020174, 0.009113, 0.000389],
+                                                        [0.969424, 1.098095, 1.009712, 0.867187, 1.013762,
+                                                         0.930994, 0.927027, 1.076156, 1.013106, 0.956987])), decimal=5)
 
     def test__subgroup_deltas__computation(self):
         """
