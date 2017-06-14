@@ -107,23 +107,13 @@ def generate_random_data():
         = np.random.normal(loc=1.0, size=test_data_frame['normal_shifted'][test_data_frame['variant'] == 'B'].shape[0])
 
     test_data_frame['feature'] = np.random.choice(['has', 'non'], size=size)
-
     test_data_frame['normal_shifted_by_feature'] = np.random.normal(size=size)
 
-    randdata = np.random.normal(loc=1.0, size=size)
     ii = (test_data_frame['variant'] == 'B') & (test_data_frame['feature'] == 'has')
+    randdata_shifted_mean = np.random.normal(loc=1.0, size=sum(ii == True))
+    test_data_frame.loc[ii, 'normal_shifted_by_feature'] = randdata_shifted_mean
 
-    with warnings.catch_warnings(record=True) as w:
-        # ignore the 'flat[index' warning that comes out of pandas (and is
-        # not ours to fix)
-        warnings.simplefilter('ignore', DeprecationWarning)
-
-        test_data_frame.loc[ii, 'normal_shifted_by_feature'] = randdata
-
-    # provides random treatment start time in the past year
-    # test_data_frame['treatment_start_time'] = np.random.choice(list(range(int(time() - 1*365*24*60*60), int(time()))), size=size)
     test_data_frame['treatment_start_time'] = np.random.choice(list(range(10)), size=size)
-
     test_data_frame['normal_unequal_variance'] = np.random.normal(size=size)
     test_data_frame.loc[test_data_frame['variant'] == 'B', 'normal_unequal_variance'] \
         = np.random.normal(scale=10,
