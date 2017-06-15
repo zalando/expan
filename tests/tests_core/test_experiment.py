@@ -3,7 +3,6 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from expan.core.debugging import Dbg
 from expan.core.experiment import Experiment
 from expan.core.results import Results
 from expan.core.util import generate_random_data
@@ -21,7 +20,7 @@ class ExperimentTestCase(unittest.TestCase):
         seed so that randomized algorithms show deterministic behaviour.
         """
         np.random.seed(0)
-        self.experiment = Experiment('B', *generate_random_data(), dbg=Dbg(dbg_lvl=5))
+        self.experiment = Experiment('B', *generate_random_data())
         # Create time column. TODO: Do this nicer
         self.experiment.kpis['time_since_treatment'] = self.experiment.features['treatment_start_time']
         # Make time part of index
@@ -46,7 +45,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
 
     def test__feature_check__computation(self):
         """
-        Check if feature check is corectly performed on test data set
+        Check if feature check is correctly performed on test data set
         """
         # Perform feature check
         result = self.experiment.feature_check()

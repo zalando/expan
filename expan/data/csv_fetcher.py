@@ -1,6 +1,7 @@
 """CSV fetcher module.
 """
 
+import logging
 from os import listdir
 from os.path import isfile, join
 
@@ -8,6 +9,7 @@ import simplejson as json
 
 from expan.core.experimentdata import *
 
+logger = logging.getLogger(__name__)
 
 def get_data(folder_path):
     """
@@ -44,5 +46,5 @@ def get_data(folder_path):
         return ExperimentData(metrics=metrics, metadata=metadata)
 
     except AssertionError as e:
-        print(e)
-        raise
+        logger.error("An error occured when fetching data from csv file.")
+        raise e
