@@ -1,23 +1,21 @@
 # fileencoding: utf8
 
+import logging
 import string
 import warnings
 
 import numpy as np
 
-from expan.core.debugging import Dbg
 from expan.core.util import is_number_and_nan
 
 symbol_universal_set = 'ξ'  # https://en.wikipedia.org/wiki/Xi_(letter)
-
+logger = logging.getLogger(__name__)
 
 class Binning(object):
     def __init__(self):
-        """The Binning class has two subclasses: CategoricalBinning and 
-        NumericalBinning.
+        """The Binning class has two subclasses: CategoricalBinning and NumericalBinning.
         """
-        self.dbg = Dbg()
-        self.dbg.set_lvl(3)
+        pass
 
     def __len__(self):
         raise NotImplementedError('must implement this in subclass')
@@ -127,7 +125,6 @@ class CategoricalBinning(Binning):
         Returns:
             array-like: list of categories
         """
-
         return self._categories[:-1]
 
     def __len__(self):
@@ -153,11 +150,8 @@ class CategoricalBinning(Binning):
         """
 
         lbls = []
-
         it = None
-
-        format_str = format_str.replace(
-            '{standard}', '{set_notation}')
+        format_str = format_str.replace('{standard}', '{set_notation}')
 
         if '{iter.' in format_str:
             if '{iter.uppercase}' in format_str:
@@ -188,7 +182,6 @@ class CategoricalBinning(Binning):
                 format_args['set_notation'] = '{unseen}'
 
             if it is not None:
-                print()
                 'ii: ' + str(ii)
                 if not is_catchall:
                     format_args['iterator'] = next(it)
@@ -196,7 +189,6 @@ class CategoricalBinning(Binning):
                     format_args['iterator'] = '?'
 
             lbl = format_str.format(**format_args)
-
             lbls += [lbl]
 
         return np.array(lbls)
@@ -238,7 +230,7 @@ class CategoricalBinning(Binning):
             # as strings
             out = np.empty(len(data), int)
 
-        self.dbg.log(3, 'apply: _categories: ' + str(self._categories))
+        logger.debug('apply: _categories: ' + str(self._categories))
 
         out[:] = -1
         for ii, (cats) in enumerate(self.categories):
@@ -248,9 +240,7 @@ class CategoricalBinning(Binning):
             # got  = np.in1d(data, cats)
             got = np.array([d in cats for d in data])
 
-            self.dbg.log(3, 'apply: testing {:d} {}: {:d} members'.format(ii,
-                                                                          self._labels('{standard}')[ii],
-                                                                          got.sum()))
+            logger.debug('apply: testing {:d} {}: {:d} members'.format(ii, self._labels('{standard}')[ii], got.sum()))
             out[got] = ii
 
         return out
@@ -307,7 +297,6 @@ class NumericalBinning(Binning):
 
         This means that the -1 indices just works, so using the indices to get labels, bounds, etc., is straightforward and fast because it is just integer-based array slicing.
     """
-
     def __init__(self, data=None, nbins=None, uppers=None, lowers=None,
                  up_closed=None, lo_closed=None):
         """NumericalBinning constructor.
@@ -380,7 +369,6 @@ class NumericalBinning(Binning):
         if len(x) == 0:
             return [], [], [], []
 
-        # print len(x),n_bins
         # the last bin is a closed-closed interval
         if n_bins == 1:
             return [min(x)], [max(x)], [True], [True]
@@ -394,7 +382,7 @@ class NumericalBinning(Binning):
             # the last interval is ClosedClosedInterval
             next_lower, next_upper, next_lo_closed, next_up_closed = self._get_binning_numeric_recursive(
                 x[x > first_upper[0]], n_bins - 1)
-        # print next_interval
+
         first_lower += next_lower
         first_upper += next_upper
         first_lo_closed += next_lo_closed
@@ -482,7 +470,6 @@ class NumericalBinning(Binning):
         """
         # TODO: has been implemented in an ugly way, but the interface should be good
         lbls = []
-
         it = None
 
         orig_format_str = format_str
@@ -520,17 +507,13 @@ class NumericalBinning(Binning):
                 '{iter.lowercase}', '?').replace(
                 '{iter.integer}', '?')
 
-        for ii, (lc, uc, l, u, m) in enumerate(
-            zip(
-                self._lo_closed,
-                self._up_closed,
-                self._lowers,
-                self._uppers,
-                self._mids
-            )):
+        for ii, (lc, uc, l, u, m) in enumerate(zip(self._lo_closed,
+                                                   self._up_closed,
+                                                   self._lowers,
+                                                   self._uppers,
+                                                   self._mids)):
 
             is_catchall = ii == len(self)
-
             format_args = {
                 'lo': l,
                 'up': u,
@@ -544,7 +527,6 @@ class NumericalBinning(Binning):
                 format_args['iterator'] = next(it)
 
             lbl = (format_str if not is_catchall else catchall_format_str).format(**format_args)
-
             lbls += [lbl]
 
         return np.array(lbls)
@@ -598,14 +580,13 @@ class NumericalBinning(Binning):
             data = np.array(data)
             out = np.empty(data.shape, int)
 
-        self.dbg.log(3, 'apply: _uppers: ' + str(self._uppers))
-        self.dbg.log(3, 'apply: _lowers: ' + str(self._lowers))
-        self.dbg.log(3, 'apply: _mids: ' + str(self._mids))
-        self.dbg.log(3, 'apply: _up_closed: ' + str(self._up_closed))
-        self.dbg.log(3, 'apply: _lo_closed: ' + str(self._lo_closed))
+        logger.debug('apply: _uppers: ' + str(self._uppers))
+        logger.debug('apply: _lowers: ' + str(self._lowers))
+        logger.debug('apply: _mids: ' + str(self._mids))
+        logger.debug('apply: _up_closed: ' + str(self._up_closed))
+        logger.debug('apply: _lo_closed: ' + str(self._lo_closed))
 
         out[:] = -1
-        # set_trace()
         for ii, (lc, uc, l, u) in enumerate(
             zip(self.lo_closed, self.up_closed, self.lowers, self.uppers)):
             if np.isnan(l) or np.isnan(u):  # if either bound is nan, only nans exist in the bin.
@@ -614,15 +595,12 @@ class NumericalBinning(Binning):
                 got = (l <= data) if lc else (l < data)
                 got &= (data <= u) if uc else (data < u)
 
-            self.dbg.log(3, 'apply: testing {:d} {}: {:d} members'.format(ii,
-                                                                          self._labels('{conditions}')[ii],
-                                                                          got.sum()))
+            logger.debug('apply: testing {:d} {}: {:d} members'.format(ii, self._labels('{conditions}')[ii], got.sum()))
             out[got] = ii
 
         return out
 
     def _bound(self, data, which):
-        bounds = None
         if which == 'upper':
             bounds = self._uppers
         elif which == 'lower':

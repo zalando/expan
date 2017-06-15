@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import datetime
+import logging
 from copy import deepcopy
 
 import numpy as np
@@ -8,9 +9,9 @@ import pandas as pd
 from scipy.stats import norm
 
 import expan.core.statistics as statx
-from expan.core.debugging import Dbg
 from expan.core.version import __version__
 
+logger = logging.getLogger(__name__)
 
 class Results(object):
     """
@@ -37,22 +38,19 @@ class Results(object):
         'pctile']
     mandatory_column_levels = ['variant']
 
-    def __init__(self, df, metadata={}, dbg=None):
+    def __init__(self, df, metadata={}):
         """
         Want to be able to create results from just a single dataframe.
 
         Args:
             df (pandas.DataFrame): input dataframe
             metadata (dict): input metadata
-            dbg:
         """
         self.df = df
         self.metadata = metadata
         self.metadata['version'] = __version__
         self.metadata['errors'] = {}
         self.metadata['warnings'] = {}
-
-        self.dbg = dbg or Dbg()
 
     @property
     def binning(self):
@@ -367,10 +365,10 @@ class Results(object):
                 continue
             if v is None:
                 continue
-            self.dbg(3, 'to_hdf: storing metadata {}'.format(k))
+            logger.debug('to_hdf: storing metadata {}'.format(k))
             if isinstance(v, pd.Timestamp) or isinstance(v, datetime.datetime):
                 v = str(v)
-                self.dbg(3, ' -> converted datetime/timestamp to string')
+                logger.debug(' -> converted datetime/timestamp to string')
                 datetime_conversions.add(k)
             md.attrs[k] = v
 
@@ -403,7 +401,7 @@ class Results(object):
                 df[column] = df.index.get_level_values(column)
         except AttributeError:
             # trend() results are stored a bit differently, this needs to be addressed
-            self.dbg(-1, "trend() results are not supported yet")
+            logger.error("trend() results are not supported yet")
             return None
 
         # reset the index
@@ -452,7 +450,7 @@ class Results(object):
         try:
             json.loads(json_string)
         except ValueError as e:
-            self.dbg(-2, 'Invalid json created in expan.results.to_json(): %s' % e)
+            logger.error('Invalid json created in expan.results.to_json(): %s' % e)
             return None
 
         if fpath:
@@ -461,22 +459,16 @@ class Results(object):
         else:
             return json_string
 
-            # Fixme: depreciated?
-
-    def from_hdf(self, fpath, dbg=None):
+    def from_hdf(self, fpath):
         """
         Restores a Results object from HDF5 as created by the to_hdf method.
     
         Args:
             fpath:
-            dbg:
     
         Returns:
     
         """
-        if dbg is None:
-            dbg = Dbg()
-
         import h5py
         data = pd.read_hdf(fpath, 'data')
 
@@ -487,9 +479,9 @@ class Results(object):
         for k, v in list(md.attrs.items()):
             if k == '_datetime_attributes':
                 continue
-            dbg(3, 'from_hdf: retrieving metadata {}'.format(k))
+            logger.debug('from_hdf: retrieving metadata {}'.format(k))
             if k in datetime_conversions:
-                dbg(3, ' -> converting to Timestamp')
+                logger.debug(' -> converting to Timestamp')
                 v = pd.Timestamp(v)
             metadata[k] = v
 

@@ -1,3 +1,4 @@
+import logging
 import re
 import warnings
 
@@ -13,8 +14,8 @@ from expan.core.results import Results, delta_to_dataframe_all_variants, feature
 
 # raise the same warning multiple times
 warnings.simplefilter('always', UserWarning)
-from expan.core.debugging import Dbg
 
+logger = logging.getLogger(__name__)
 
 # TODO: add filtering functionality: we should be able to operate on this
 # class to exclude data points, and save all these operations in a log that then
@@ -23,11 +24,8 @@ class Experiment(ExperimentData):
     """
     Class which adds the analysis functions to experimental data.
     """
-
-    # TODO: rearrange arguments
     # TODO: add a constructor that takes an ExperimentData!
-    def __init__(self, baseline_variant, metrics_or_kpis, metadata={},
-                 features='default', dbg=None):
+    def __init__(self, baseline_variant, metrics_or_kpis, metadata={}, features='default'):
         # Call constructor of super class
         super(Experiment, self).__init__(metrics_or_kpis, metadata, features)
 
@@ -40,8 +38,6 @@ class Experiment(ExperimentData):
                 baseline_variant))
         # Add baseline to metadata
         self.metadata['baseline_variant'] = baseline_variant
-
-        self.dbg = dbg or Dbg()
 
 
     @property
@@ -65,9 +61,6 @@ class Experiment(ExperimentData):
                                                  [('*' + k + '*') if (k == self.metadata.get('baseline_variant', '-'))
                                                   else k for k in variants]
                                              ))
-        # res += '\n KPIs are: \n   {}'.format(
-        #		'\n   '.join([('**'+k+'**') if (k == self.metadata.get('primary_KPI','-')) else k for k in self.kpi_names]))
-
         return res
 
 
@@ -105,7 +98,7 @@ class Experiment(ExperimentData):
 
         if kpi_subset is not None:
             kpis_to_analyse.intersection_update(kpi_subset)
-        self.dbg(3, 'kpis_to_analyse: ' + ','.join(kpis_to_analyse))
+        logger.debug('kpis_to_analyse: ' + ','.join(kpis_to_analyse))
 
         defaultArgs = [res, kpis_to_analyse, reference_kpis, weighted_kpis]
         deltaWorker = statx.make_delta(assume_normal, percentiles, min_observations,
@@ -775,7 +768,6 @@ class Experiment(ExperimentData):
                 v_metric = f.iloc[:, 2][(f.iloc[:, 0] == v)]
                 df = delta_to_dataframe_all_variants(f.columns[2], *deltaWorker(x=v_metric,
                                                                                 y=baseline_metric))
-
                 # add new index levels for variant and binning
                 df['_tmp_bin_'] = bin_name
                 df['variant'] = v
