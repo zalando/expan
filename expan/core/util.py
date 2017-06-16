@@ -1,4 +1,4 @@
-import warnings
+from warnings import warn
 
 import numpy as np
 import pandas as pd
@@ -63,9 +63,8 @@ def scale_range(x, new_min=0.0, new_max=1.0, old_min=None, old_max=None, squash_
 
   """
     if squash_inf and not squash_outside_range:
-        # TODO: "warn" is an unresolved reference
-        warn(ValueError(
-            'Makes no sense to squash infinity but not other numbers outside the source range. Will squash all outside range.'))
+        warn(ValueError('Makes no sense to squash infinity but not other numbers outside the source range. \
+         Will squash all outside range.'))
         squash_outside_range = True
 
     if isinstance(x, list):
@@ -103,8 +102,9 @@ def generate_random_data():
     test_data_frame['normal_same'] = np.random.normal(size=size)
     test_data_frame['normal_shifted'] = np.random.normal(size=size)
 
+    size_shifted_B = test_data_frame['normal_shifted'][test_data_frame['variant'] == 'B'].shape[0]
     test_data_frame.loc[test_data_frame['variant'] == 'B', 'normal_shifted'] \
-        = np.random.normal(loc=1.0, size=test_data_frame['normal_shifted'][test_data_frame['variant'] == 'B'].shape[0])
+        = np.random.normal(loc=1.0, size=size_shifted_B)
 
     test_data_frame['feature'] = np.random.choice(['has', 'non'], size=size)
     test_data_frame['normal_shifted_by_feature'] = np.random.normal(size=size)
@@ -115,9 +115,10 @@ def generate_random_data():
 
     test_data_frame['treatment_start_time'] = np.random.choice(list(range(10)), size=size)
     test_data_frame['normal_unequal_variance'] = np.random.normal(size=size)
-    test_data_frame.loc[test_data_frame['variant'] == 'B', 'normal_unequal_variance'] \
-        = np.random.normal(scale=10,
-                           size=test_data_frame['normal_unequal_variance'][test_data_frame['variant'] == 'B'].shape[0])
+
+    size_unequalvar_B = test_data_frame['normal_unequal_variance'][test_data_frame['variant'] == 'B'].shape[0]
+    test_data_frame.loc[test_data_frame['variant'] == 'B','normal_unequal_variance'] \
+        = np.random.normal(scale=10, size=size_unequalvar_B)
 
     metadata = {
         'primary_KPI': 'normal_shifted',
