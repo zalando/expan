@@ -56,10 +56,8 @@ class BinningTestCase(UtilTestCase):
         # Calculate binning
         bins = create_binning(x, 1)
         r = bins.label(x, '{simplei}')
-        # Expected result
-        e = ['0_99']
         # Comparison
-        self.assertEqual(r[0:1], e)
+        self.assertEqual(r[0], '0_99')
 
     def test_creation_range_100__nbins_2(self):
         """
@@ -83,7 +81,6 @@ class BinningTestCase(UtilTestCase):
         # Calculate binning
         bins = create_binning(x, 5)
         r = bins.label(x, '{simplei}')
-        # Expected result
         # Comparison
         self.assertEqual(r[0], '0_20')
         self.assertEqual(r[20], '20_40')
@@ -95,12 +92,13 @@ class BinningTestCase(UtilTestCase):
     def test_creation_range_100__n_bins_8(self):
         """
         Check if n_bins = 8 functions properly.
+        here we test the output of bins.lables() instead of bins.label(), which has a different structure.
         """
         # Create data
         x = list(range(100))
         # Calculate binning
         bins = create_binning(x, 8)
-        labels = bins.label(x, '{simplei}')
+        bins.label(x, '{simplei}')
         r = list(bins.labels('{simplei}'))
         r.sort()
         # Expected result
@@ -118,7 +116,6 @@ class BinningTestCase(UtilTestCase):
         # Calculate binning
         bins = create_binning(x, 10)
         r = bins.label(x, '{simplei}')
-
         # Expected result
         self.assertEqual(r[0], '0_10')
         self.assertEqual(r[10], '10_20')
@@ -130,22 +127,21 @@ class BinningTestCase(UtilTestCase):
         """
         # Create data
         x = list(range(100))
-
         # Calculate binning
         bins = create_binning(x, 20)
         r = bins.label(x, '{simplei}')
-
         # Expected result
         self.assertEqual(r[0], '0_5')
         self.assertEqual(r[6], '5_10')
         self.assertEqual(r[-1], '95_99')
 
     def test_creation_more_bins_than_data(self):
-        "Check warnings and result if data has insufficient values for bins"
+        """
+        Check warnings and result if data has insufficient values for bins
+        """
         # Create data
         x = [0] * 100 + [1] * 10
         # Calculate binning
-        w = None
         with warnings.catch_warnings(record=True) as w:
             bins = create_binning(x, 3)
 
@@ -162,7 +158,9 @@ class BinningTestCase(UtilTestCase):
         self.assertEqual(r, e)
 
     def test_creation_single_bin(self):
-        "Check result if data has single value and request single bin"
+        """
+        Check result if data has single value and request single bin
+        """
         # Create data
         x = [0] * 100
         # Calculate binning
@@ -182,87 +180,63 @@ class BinningTestCase(UtilTestCase):
         with warnings.catch_warnings(record=True) as w:
             bins = create_binning(x=x, nbins=4)
         r = bins.labels().tolist()
-        # r.sort()
         # Expected result
-        # e = ['0_1','1_100','100_200','200_300'] # DEFINE EXPECTED RESULT
         e = ['[0.0,0.0]', '[1.0,101.0)', '[101.0,200.0)', '[200.0,299.0]']
-        # e.sort()
         # Comparison
         self.assertEqual(r, e)
-
-    # How about this:
-    # zero-inflated distribution
-    # >>> dat = np.concatenate((np.random.poisson(3,1000), np.zeros(1000), np.repeat(np.nan,100)))
-
-    # >>> interval_dict = get_binning(dat, 5)
-    # >>> len(interval_dict)
-    # 6
-
-    # >>> dat = np.random.choice(['a','b','c','d','e'], 1000)
-    # >>> len(get_binning(dat))
-    # 5
-    # >>> print set_binning(dat, interval_dict)
-    # ['0.0_2.0' '2.0_3.0' '3.0_4.0' ..., '0.0_2.0' '0.0_2.0' '0.0_2.0']
 
     def test_creation_two_big_bins_noise_between(self):
         # Create data
         x = [0] * 10000 + list(range(300)) + [301] * 10000
         # Calculate binning
-
         with warnings.catch_warnings(record=True) as w:
             bins = create_binning(x=x, nbins=10)
             self.assertEqual(len(w), 1)
             self.assertTrue(issubclass(w[-1].category, UserWarning))
             self.assertTrue('less bins than requested' in str(w[-1].message).lower())
         r = bins.labels().tolist()
-        # r.sort()
         # Expected result
-        # e = ['0_1','1_100','100_200','200_300','301_301'] # DEFINE EXPECTED RESULT
         e = ['[0.0,0.0]', '[1.0,301.0)', '[301.0,301.0]']
-        # e.sort()
         # Comparison
         self.assertEqual(r, e)
 
 
 class NumericalBinningClassTestCase(UtilTestCase):
     def test_manual_creation(self):
-        "Test manual creation of numerical binning"
+        """
+        Test manual creation of numerical binning
+        """
         bb = NumericalBinning()
-
         bb.lowers = [0, 1, 2, 3]
         bb.uppers = [1, 2, 3, 4]
         bb.lo_closed = [True] * 4
         bb.up_closed = [False] * 4
         bb.up_closed[3] = True
 
-        n = np.nan
-
         with warnings.catch_warnings(record=True) as w:
             # ignore the invalid value warnings from the nan
             warnings.simplefilter('ignore', category=RuntimeWarning)
-            res = bb._apply([-1, 0, 1, 2, 3, 4, 5, n, 1.99])
+            res = bb._apply([-1, 0, 1, 2, 3, 4, 5, np.nan, 1.99])
 
         np.testing.assert_array_equal(res, [-1, 0, 1, 2, 3, 3, -1, -1, 1])
 
     def test_manual_nan_bin(self):
-        "Test handling of nan bin in numerical binning (manual creation)"
+        """
+        Test handling of nan bin in numerical binning (manual creation)
+        """
         bins = NumericalBinning()
-
-        n = np.nan
-        bins.lowers = [0, 1, 2, n]
-        bins.uppers = [1, 2, 3, n]
+        bins.lowers = [0, 1, 2, np.nan]
+        bins.uppers = [1, 2, 3, np.nan]
         bins.lo_closed = [True] * 4
         bins.up_closed = [False] * 4
 
-        # with warnings.catch_warnings(record=True) as w:
-        # ignore the invalid value warnings from the nan
-        #	warnings.simplefilter('ignore', category=RuntimeWarning)
-
-        res = bins._apply([-1, 0, 1, 2, 3, n, 1.99, 2.99999])
+        res = bins._apply([-1, 0, 1, 2, 3, np.nan, 1.99, 2.99999])
         np.testing.assert_array_equal(res, [-1, 0, 1, 2, -1, 3, 1, 2])
 
     def test_binning(self):
-        "Test various functions of numerical binning"
+        """
+        Test various functions of numerical binning
+        """
         values = np.arange(1000)
         nbins = 10
 
@@ -311,7 +285,9 @@ class NumericalBinningClassTestCase(UtilTestCase):
         self.assertEqual(labels[-1], 'J[900,999]')
 
     def test_unseen_data(self):
-        "Test unseen data with numerical binning"
+        """
+        Test unseen data with numerical binning
+        """
         seen = np.arange(1000.)
         nbins = 10
         unseen = np.arange(1100)
@@ -349,11 +325,12 @@ class NumericalBinningClassTestCase(UtilTestCase):
         self.assertEqual(labels[-1], '?')
 
     def test_numerical_nans(self):
-        "Test handling of nan in numerical binning"
-        n = np.nan
+        """
+        Test handling of nan in numerical binning
+        """
         values = np.arange(1002.)
-        values[-2] = n
-        values[-1] = n
+        values[-2] = np.nan
+        values[-1] = np.nan
         nbins = 10
 
         bins = create_binning(values, nbins)
@@ -391,23 +368,23 @@ class NumericalBinningClassTestCase(UtilTestCase):
 
 class CategoricalBinningClassTestCase(UtilTestCase):
     def test_manual_creation(self):
-        "Test manual creation of categorical binning"
+        """
+        Test manual creation of categorical binning
+        """
         bb = CategoricalBinning()
-        n = np.nan
-
         bb.categories += [['a', 'b']]
         bb.categories += [['c', 'd', 'e']]
         bb.categories += [['f', 'g']]
         bb.categories += [['h']]
 
-        res = bb._apply(['z', 'a', 'c', 'f', 'h', n, 'x', 0, 'aa'])
-
+        res = bb._apply(['z', 'a', 'c', 'f', 'h', np.nan, 'x', 0, 'aa'])
         np.testing.assert_array_equal(res, [-1, 0, 1, 2, 3, -1, -1, -1, -1])
 
     def test_manual_nan_bin(self):
-        "Test handling of nan bin in categorical binning (manual creation)"
+        """
+        Test handling of nan bin in categorical binning (manual creation)
+        """
         bins = CategoricalBinning()
-        n = np.nan
 
         bins.categories += [['a', 'b']]
         bins.categories += [['c', 'd', 'e']]
@@ -415,13 +392,13 @@ class CategoricalBinningClassTestCase(UtilTestCase):
         bins.categories += [['h', np.nan]]
         bins.categories += [['i', 'j']]
 
-        res = bins._apply(['z', 'a', 'c', 'f', 'h', n, 'x', 0, 'aa', 'j'])
+        res = bins._apply(['z', 'a', 'c', 'f', 'h', np.nan, 'x', 0, 'aa', 'j'])
         np.testing.assert_array_equal(res, [-1, 0, 1, 2, 3, 3, -1, -1, -1, 4])
 
         bins = CategoricalBinning()
         bins.categories += [['a', 'b']]
-        bins.categories += [[n]]
-        res = bins._apply(['a', 'b', 'c', n])
+        bins.categories += [[np.nan]]
+        res = bins._apply(['a', 'b', 'c', np.nan])
         np.testing.assert_array_equal(res, [0, 0, -1, 1])
 
         x = ['A'] * 50 + ['B'] * 10 + ['C'] * 20 + [np.nan] * 10
@@ -431,7 +408,9 @@ class CategoricalBinningClassTestCase(UtilTestCase):
         self.assertEqual(r, e)
 
     def test_creation_categorical_data_enough_bins(self):
-        "Test binning of normal categorical data"
+        """
+        Test binning of normal categorical data
+        """
         # Create data
         x = ['A'] * 50 + ['B'] * 10 + ['C'] * 20
 
@@ -455,8 +434,9 @@ class CategoricalBinningClassTestCase(UtilTestCase):
         self.assertEqual(r[-1], '{C}')
 
     def test_creation_categorical_data_less_bins(self):
-        "Test binning of normal categorical data"
-
+        """
+        Test binning of normal categorical data
+        """
         x = ['A'] * 50 + ['B'] * 10 + ['C'] * 20
 
         bins = create_binning(x=x, nbins=2)
@@ -469,8 +449,9 @@ class CategoricalBinningClassTestCase(UtilTestCase):
         self.assertEqual(r[-1], '{B,C}')
 
     def test_categorical_with_unseen_data(self):
-        "Test categorical binning with unseen data"
-
+        """
+        Test categorical binning with unseen data
+        """
         x = ['A'] * 50 + ['B'] * 10 + ['C'] * 20
         y = ['A'] * 10 + ['B'] * 10 + ['C'] * 10 + ['D'] * 10 + ['A,B'] * 10 + ['AB'] * 10
 
@@ -491,10 +472,16 @@ class CategoricalBinningClassTestCase(UtilTestCase):
         self.assertEqual(r[-1], '?: {unseen}')
 
     def test_categorical_order(self):
-        "Test that categorical bins requiring no merging are created in alphabetical order"
+        """
+        Test that categorical bins requiring no merging are created in alphabetical order
+        """
         x = ['C'] * 50 + ['B'] * 10 + ['A'] * 20
         bins = create_binning(x=x, nbins=3)
         r = bins.label(x, '{iter.integer}: {standard}')
         self.assertEqual(r[0], '2: {C}')
         self.assertEqual(r[50], '1: {B}')
         self.assertEqual(r[60], '0: {A}')
+
+
+if __name__ == "__main__":
+    unittest.main()
