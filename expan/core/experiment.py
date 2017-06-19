@@ -301,6 +301,7 @@ class Experiment(ExperimentData):
                            reference_kpis={},
                            weighted_kpis=None,
                            distribution='normal',
+                           num_iters=25000,
                            **kwargs):
         """
         Calculate the stopping criterion based on the Bayes factor 
@@ -311,6 +312,7 @@ class Experiment(ExperimentData):
             kpis_to_analyse: list of KPIs to be analysed
             distribution: name of the KPI distribution model, which assumes a
                 Stan model file with the same name exists
+            num_iters: number of iterations for the bayes sampling
 
         Returns:
             a Results object
@@ -325,7 +327,8 @@ class Experiment(ExperimentData):
                                                    *es.bayes_factor(
                                                        x=weighted_x,
                                                        y=weighted_y,
-                                                       distribution=distribution))
+                                                       distribution=distribution,
+                                                       num_iters=num_iters))
 
             df = metric_df.groupby('variant').apply(self._apply_reweighting_and_all_variants,
                                                     metric_df=metric_df,
@@ -351,6 +354,7 @@ class Experiment(ExperimentData):
                               weighted_kpis=None,
                               distribution='normal',
                               posterior_width=0.08,
+                              num_iters=25000,
                               **kwargs):
         """
         Calculate the stopping criterion based on the precision of the posterior 
@@ -363,6 +367,7 @@ class Experiment(ExperimentData):
                 Stan model file with the same name exists
             posterior_width: the stopping criterion, threshold of the posterior 
                 width
+            num_iters: number of iterations for the bayes sampling
 
         Returns:
             a Results object
@@ -378,7 +383,8 @@ class Experiment(ExperimentData):
                                                        x=weighted_x,
                                                        y=weighted_y,
                                                        distribution=distribution,
-                                                       posterior_width=posterior_width))
+                                                       posterior_width=posterior_width,
+                                                       num_iters=num_iters))
 
             df = metric_df.groupby('variant').apply(self._apply_reweighting_and_all_variants,
                                                     metric_df=metric_df,

@@ -79,11 +79,11 @@ class BayesFactorTestCases(EarlyStoppingTestCase):
         """
         Check the Bayes factor function.
         """
-        stop, delta, CI, n_x, n_y, mu_x, mu_y = es.bayes_factor(self.rand_s1, self.rand_s2)
+        stop, delta, CI, n_x, n_y, mu_x, mu_y = es.bayes_factor(self.rand_s1, self.rand_s2, num_iters=2000)
         self.assertEqual(stop, 1)
         self.assertAlmostEqual(delta, -0.15887364780635896)
-        self.assertAlmostEqual(CI['lower'], -0.2488832923198368)
-        self.assertAlmostEqual(CI['upper'], -0.074066551390901375)
+        self.assertAlmostEqual(CI['lower'], -0.24773660198455019)
+        self.assertAlmostEqual(CI['upper'], -0.077371302138420556)
         self.assertEqual(n_x, 1000)
         self.assertEqual(n_y, 1000)
         self.assertAlmostEqual(mu_x, -0.045256707490195384)
@@ -94,11 +94,12 @@ class BayesFactorTestCases(EarlyStoppingTestCase):
         """
         Check the Bayes factor function for Poisson distributions.
         """
-        stop, delta, CI, n_x, n_y, mu_x, mu_y = es.bayes_factor(self.rand_s3, self.rand_s4, distribution='poisson')
+        stop, delta, CI, n_x, n_y, mu_x, mu_y = es.bayes_factor(self.rand_s3, self.rand_s4, distribution='poisson',
+                                                                num_iters=2000)
         self.assertEqual(stop, 1)
         self.assertAlmostEqual(delta, -1.9589999999999999)
-        self.assertAlmostEqual(CI['lower'], -2.0713332592866109)
-        self.assertAlmostEqual(CI['upper'], -1.8258221195574416)
+        self.assertAlmostEqual(CI['lower'], -2.0732831978555764)
+        self.assertAlmostEqual(CI['upper'], -1.8275916374491907)
         self.assertEqual(n_x, 1000)
         self.assertEqual(n_y, 1000)
         self.assertAlmostEqual(mu_x, 0.96599999999999997)
@@ -123,11 +124,11 @@ class BayesPrecisionTestCases(EarlyStoppingTestCase):
         """
         Check the bayes_precision function.
         """
-        stop, delta, CI, n_x, n_y, mu_x, mu_y = es.bayes_precision(self.rand_s1, self.rand_s2)
+        stop, delta, CI, n_x, n_y, mu_x, mu_y = es.bayes_precision(self.rand_s1, self.rand_s2, num_iters=2000)
         self.assertEqual(stop, 0)
         self.assertAlmostEqual(delta, -0.15887364780635896)
-        self.assertAlmostEqual(CI['lower'], -0.2488832923198368)
-        self.assertAlmostEqual(CI['upper'], -0.074066551390901375)
+        self.assertAlmostEqual(CI['lower'], -0.24773660198455019)
+        self.assertAlmostEqual(CI['upper'], -0.077371302138420556)
         self.assertEqual(n_x, 1000)
         self.assertEqual(n_y, 1000)
         self.assertAlmostEqual(mu_x, -0.045256707490195384)

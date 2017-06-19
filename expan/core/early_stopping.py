@@ -123,7 +123,7 @@ def HDI_from_MCMC(posterior_samples, credible_mass=0.95):
     return (HDImin, HDImax)
 
 
-def _bayes_sampling(x, y, distribution='normal'):
+def _bayes_sampling(x, y, distribution='normal', num_iters=25000):
     """
     Helper function.
 
@@ -132,6 +132,7 @@ def _bayes_sampling(x, y, distribution='normal'):
         y (array_like): sample of a control group
         distribution: name of the KPI distribution model, which assumes a
             Stan model file with the same name exists
+        num_iters: number of iterations of sampling
 
     Returns:
         tuple:
@@ -171,20 +172,21 @@ def _bayes_sampling(x, y, distribution='normal'):
     model_file = __location__ + '/../models/' + distribution + '_kpi.stan'
     sm = StanModel(file=model_file)
 
-    fit = sm.sampling(data=fit_data, iter=25000, chains=4, n_jobs=1, seed=1,
+    fit = sm.sampling(data=fit_data, iter=num_iters, chains=4, n_jobs=1, seed=1,
                       control={'stepsize': 0.01, 'adapt_delta': 0.99})
     traces = fit.extract()
 
     return traces, n_x, n_y, mu_x, mu_y
 
 
-def bayes_factor(x, y, distribution='normal'):
+def bayes_factor(x, y, distribution='normal', num_iters=25000):
     """
     Args:
         x (array_like): sample of a treatment group
         y (array_like): sample of a control group
         distribution: name of the KPI distribution model, which assumes a
             Stan model file with the same name exists
+        num_iters: number of iterations of bayes sampling
 
     Returns:
         tuple: 
@@ -196,7 +198,7 @@ def bayes_factor(x, y, distribution='normal'):
             - absolute mean of x
             - absolute mean of y
     """
-    traces, n_x, n_y, mu_x, mu_y = _bayes_sampling(x, y, distribution=distribution)
+    traces, n_x, n_y, mu_x, mu_y = _bayes_sampling(x, y, distribution=distribution, num_iters=num_iters)
     kde = gaussian_kde(traces['delta'])
 
     prior = cauchy.pdf(0, loc=0, scale=1)
@@ -208,7 +210,7 @@ def bayes_factor(x, y, distribution='normal'):
     return stop, mu_x - mu_y, {'lower': interval[0], 'upper': interval[1]}, n_x, n_y, mu_x, mu_y
 
 
-def bayes_precision(x, y, distribution='normal', posterior_width=0.08):
+def bayes_precision(x, y, distribution='normal', posterior_width=0.08, num_iters=25000):
     """
     Args:
         x (array_like): sample of a treatment group
@@ -217,6 +219,7 @@ def bayes_precision(x, y, distribution='normal', posterior_width=0.08):
             Stan model file with the same name exists
         posterior_width: the stopping criterion, threshold of the posterior 
             width
+        num_iters: number of iterations of bayes sampling
 
     Returns:
         tuple: 
@@ -228,7 +231,7 @@ def bayes_precision(x, y, distribution='normal', posterior_width=0.08):
             - absolute mean of x
             - absolute mean of y
     """
-    traces, n_x, n_y, mu_x, mu_y = _bayes_sampling(x, y, distribution=distribution)
+    traces, n_x, n_y, mu_x, mu_y = _bayes_sampling(x, y, distribution=distribution, num_iters=num_iters)
     interval = HDI_from_MCMC(traces['delta'])
     stop = int(interval[1] - interval[0] < posterior_width)
 
