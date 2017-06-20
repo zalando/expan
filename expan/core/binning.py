@@ -13,7 +13,8 @@ logger = logging.getLogger(__name__)
 
 class Binning(object):
     def __init__(self):
-        """The Binning class has two subclasses: CategoricalBinning and NumericalBinning.
+        """
+        The Binning class has two subclasses: CategoricalBinning and NumericalBinning.
         """
         pass
 
@@ -46,7 +47,8 @@ class Binning(object):
 
 class CategoricalBinning(Binning):
     """
-    A CategoricalBinning is essentially a list of lists of categories. Each bin within a Binning is an ordered list of categories.
+    A CategoricalBinning is essentially a list of lists of categories. 
+    Each bin within a Binning is an ordered list of categories.
     """
 
     def __init__(self, data=None, nbins=None):
@@ -58,17 +60,15 @@ class CategoricalBinning(Binning):
         """
         super(CategoricalBinning, self).__init__()
         if data is None:
-            # NB: this will go through the property setters, so they will not be
-            # simply lists.
+            # NB: this will go through the property setters, so they will not be simply lists.
             self.categories = []
         else:
             self.categories = self._get_binning_categorical(data, nbins)
 
     def _get_binning_categorical(self, x, n_bins):
-        """Generates a dictionary of Interval objects for categorical variables,
+        """
+        Generates a dictionary of Interval objects for categorical variables,
         divides into the same number of bins as the number of unique categories.
-        If aggregation of categories is desired, _mapping2binning should rather
-        be used.
 
         Args:
             x (array_like): input array
@@ -77,8 +77,7 @@ class CategoricalBinning(Binning):
             interval_dict (dict): dictionary with the key-value pair {name : Interval}
 
         """
-        # group NAs into a single interval, the effective n_bins will be increased
-        # by 1
+        # group NAs into a single interval, the effective n_bins will be increased by 1
         if any([is_number_and_nan(xx) for xx in x]):
             rest_list = self._get_binning_categorical([xx for xx in x if not is_number_and_nan(xx)], n_bins)
             return rest_list + [[np.nan]]
@@ -136,7 +135,9 @@ class CategoricalBinning(Binning):
 
     @property
     def _mids(self):
-        "The middle category of every bin"
+        """
+        The middle category of every bin
+        """
         return np.array(
             [None if len(c) == 0 else c[len(c) // 2] for c in self.categories]
         )
@@ -182,7 +183,6 @@ class CategoricalBinning(Binning):
                 format_args['set_notation'] = '{unseen}'
 
             if it is not None:
-                'ii: ' + str(ii)
                 if not is_catchall:
                     format_args['iterator'] = next(it)
                 else:
@@ -212,7 +212,9 @@ class CategoricalBinning(Binning):
         Note:
             This is not the same as label (which applies the bins to data and returns the labels of the data).
         """
-        return self._labels(format_str)[0:-1]
+        # NB: the last item in self._labels is the universal set symbol
+        # TODO: do we really need the universal set symbol?
+        return self._labels(format_str)[: -1]
 
     def _apply(self, data):
         """
@@ -275,7 +277,6 @@ class CategoricalBinning(Binning):
         Returns:
             array-like: array of the bin label corresponding to each data point
         """
-        lbls = None
         if format_str is None:  # TODO: remove this special case?
             lbls = self.mid(data)
         else:
@@ -290,16 +291,20 @@ class NumericalBinning(Binning):
     The Binning class for numerical variables.
 
     Todo:
-        Think of a good way of exposing the _apply() method, because with the returned indices, can then get uppers/lowers/mids/labels (ie reformat) without doing the apply again.
-        Am experimenting with maintaining the lists with a single element tacked onto the end representing non-matching entries.
+        Think of a good way of exposing the _apply() method, because with the returned indices, 
+        it can then get uppers/lowers/mids/labels (ie reformat) without doing the apply again.
+        And experimenting with maintaining the lists with a single element tacked onto the end representing non-matching entries.
 
-        All access then are through properties which drop this end list, except when using the indices returned by _apply.
+        All access then are through properties which drop this end list, 
+        except when using the indices returned by _apply.
 
-        This means that the -1 indices just works, so using the indices to get labels, bounds, etc., is straightforward and fast because it is just integer-based array slicing.
+        This means that the -1 indices just works, so using the indices to get labels, bounds, etc., 
+        is straightforward and fast because it is just integer-based array slicing.
     """
     def __init__(self, data=None, nbins=None, uppers=None, lowers=None,
                  up_closed=None, lo_closed=None):
-        """NumericalBinning constructor.
+        """
+        NumericalBinning constructor.
 
         Args:
             data (array-like): array of datapoints to be binned
@@ -346,13 +351,11 @@ class NumericalBinning(Binning):
             # self.up_closed[-1]=True
 
     def _get_binning_numeric_recursive(self, x, n_bins, open_ends=False):
-        """get_binning for numeric variables. All Intervals are ClosedOpenInterval
-        except the last one containing the maximum, which is then a
-        ClosedClosedInterval.
         """
-        # group NAs into a single interval, the effective n_bins will be increased
-        # by 1
-        # set_trace()
+        get_binning for numeric variables. All Intervals are ClosedOpenInterval
+        except the last one containing the maximum, which is then a ClosedClosedInterval.
+        """
+        # group NAs into a single interval, the effective n_bins will be increased by 1
         if any(np.isnan(x)):
             na_lower = [np.nan]
             na_upper = [np.nan]
@@ -390,7 +393,8 @@ class NumericalBinning(Binning):
         return first_lower, first_upper, first_lo_closed, first_up_closed
 
     def _first_interval(self, x, n_bins):
-        """Gets the first interval based on the percentiles, either a
+        """
+        Gets the first interval based on the percentiles, either a
         ClosedClosedInterval containing the same value multiple times or a
         ClosedOpenInterval with a different lower and upper bound.
         """
@@ -555,7 +559,7 @@ class NumericalBinning(Binning):
         Note:
             This is not the same as label (which applies the bins to data and returns the labels of the data)
         """
-        return self._labels(format_str)[0:-1]
+        return self._labels(format_str)[0: -1]
 
     @property
     def _mids(self):
@@ -646,7 +650,8 @@ class NumericalBinning(Binning):
         return self._bound(data, 'mid')
 
     def label(self, data, format_str='{standard}'):
-        """Return the bin labels associated with each data point in the series,
+        """
+        Returns the bin labels associated with each data point in the series,
         essentially 'applying' the binning to data.
 
         Args:

@@ -6,7 +6,7 @@ from scipy import stats
 
 
 def _delta_mean(x, y):
-    "Implemented as function to allow calling from bootstrap."
+    """Implemented as function to allow calling from bootstrap. """
     return np.nanmean(x) - np.nanmean(y)
 
 
