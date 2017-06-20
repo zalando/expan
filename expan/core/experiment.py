@@ -8,7 +8,6 @@ import pandas as pd
 import expan.core.binning as binmodule
 import expan.core.early_stopping as es
 import expan.core.statistics as statx
-
 from expan.core.experimentdata import ExperimentData
 from expan.core.results import Results, delta_to_dataframe_all_variants, feature_check_to_dataframe, \
     early_stopping_to_dataframe
