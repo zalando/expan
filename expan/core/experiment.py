@@ -106,11 +106,15 @@ class Experiment(ExperimentData):
         logger.debug('kpis_to_analyse: ' + ','.join(kpis_to_analyse))
 
         defaultArgs = [res, kpis_to_analyse, reference_kpis, weighted_kpis]
-        deltaWorker = statx.make_delta(assume_normal, percentiles, min_observations,
-                                       nruns, relative)
+        deltaWorker = statx.make_delta(assume_normal, percentiles, min_observations, nruns, relative)
+
+        alpha = 0.05
+        if percentiles is not None and len(percentiles) == 2:
+            alpha = (percentiles[0] + 100 - percentiles[1]) / 100
+
         method_table = {
             'fixed_horizon': (self.fixed_horizon_delta, defaultArgs + [deltaWorker]),
-            'group_sequential': (self.group_sequential_delta, defaultArgs),
+            'group_sequential': (self.group_sequential_delta, defaultArgs + [alpha]),
             'bayes_factor': (self.bayes_factor_delta, defaultArgs),
             'bayes_precision': (self.bayes_precision_delta, defaultArgs),
         }
@@ -240,9 +244,9 @@ class Experiment(ExperimentData):
                                kpis_to_analyse,
                                reference_kpis={},
                                weighted_kpis=None,
+                               alpha=0.05,
                                spending_function='obrien_fleming',
                                information_fraction=1,
-                               alpha=0.05,
                                cap=8,
                                **kwargs):
         """

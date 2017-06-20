@@ -8,10 +8,10 @@ def version_numbers():
 
 def git_commit_count():
     """
-      Returns the output of `git rev-list --count HEAD` as an int.
+    Returns the output of `git rev-list --count HEAD` as an int.
 
-      Note:
-          http://programmers.stackexchange.com/a/151558
+    Note:
+        http://programmers.stackexchange.com/a/151558
     """
 
     return int(subprocess.check_output(["git", "rev-list", "--count", "HEAD"]))
@@ -19,7 +19,7 @@ def git_commit_count():
 
 def git_latest_commit():
     """"
-      Returns output of `git rev-parse HEAD`.
+    Returns output of `git rev-parse HEAD`.
 
     Note:
         http://programmers.stackexchange.com/a/151558
