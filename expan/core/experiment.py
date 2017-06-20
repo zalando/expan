@@ -1,7 +1,6 @@
 import logging
 import re
 import warnings
-import os
 
 import numpy as np
 import pandas as pd
@@ -10,12 +9,10 @@ import expan.core.binning as binmodule
 import expan.core.early_stopping as es
 import expan.core.statistics as statx
 
-from os.path import dirname, join, realpath
-
 from expan.core.experimentdata import ExperimentData
 from expan.core.results import Results, delta_to_dataframe_all_variants, feature_check_to_dataframe, \
     early_stopping_to_dataframe
-from expan.core.util import remove_pkls_from_dir
+from expan.core.util import remove_model_pkls
 
 # raise the same warning multiple times
 warnings.simplefilter('always', UserWarning)
@@ -356,7 +353,7 @@ class Experiment(ExperimentData):
 
         # Remove .pkl compiled stan model files
         if remove_pkls:
-            remove_pkls_from_dir()
+            remove_model_pkls()
 
         return result
 
@@ -417,7 +414,7 @@ class Experiment(ExperimentData):
 
         # Remove .pkl compiled stan model files
         if remove_pkls:
-            remove_pkls_from_dir()
+            remove_model_pkls()
 
         return result
 

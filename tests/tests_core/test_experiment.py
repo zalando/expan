@@ -1,23 +1,17 @@
 import unittest
-import os
 
 import numpy as np
 import pandas as pd
 
 from expan.core.experiment import Experiment
 from expan.core.results import Results
-from expan.core.util import generate_random_data
+from expan.core.util import generate_random_data, remove_model_pkls
 from tests.tests_core.test_results import mock_results_object
-from os.path import dirname, join, realpath
 
 
+# Removes .pkl compiled model files after the module tests are finished
 def tearDownModule():
-    __location__ = realpath(join(os.getcwd(), dirname(__file__)))
-    print __location__
-    models_dir = __location__ + '/../../expan/models/'
-    for f in os.listdir(models_dir):
-        if f.endswith(".pkl"):
-            os.remove(join(models_dir, f))
+    remove_model_pkls()
 
 
 class ExperimentTestCase(unittest.TestCase):
