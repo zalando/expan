@@ -1,6 +1,7 @@
 import logging
 import re
 import warnings
+import os
 
 import numpy as np
 import pandas as pd
@@ -8,9 +9,13 @@ import pandas as pd
 import expan.core.binning as binmodule
 import expan.core.early_stopping as es
 import expan.core.statistics as statx
+
+from os.path import dirname, join, realpath
+
 from expan.core.experimentdata import ExperimentData
 from expan.core.results import Results, delta_to_dataframe_all_variants, feature_check_to_dataframe, \
     early_stopping_to_dataframe
+from expan.core.util import remove_pkls_from_dir
 
 # raise the same warning multiple times
 warnings.simplefilter('always', UserWarning)
@@ -302,6 +307,7 @@ class Experiment(ExperimentData):
                            weighted_kpis=None,
                            distribution='normal',
                            num_iters=25000,
+                           remove_pkls=True,
                            **kwargs):
         """
         Calculate the stopping criterion based on the Bayes factor 
@@ -344,6 +350,10 @@ class Experiment(ExperimentData):
             else:
                 result.df = result.df.append(df)
 
+        # Remove .pkl compiled stan model files
+        if remove_pkls:
+            remove_pkls_from_dir()
+
         return result
 
 
@@ -355,6 +365,7 @@ class Experiment(ExperimentData):
                               distribution='normal',
                               posterior_width=0.08,
                               num_iters=25000,
+                              remove_pkls=True,
                               **kwargs):
         """
         Calculate the stopping criterion based on the precision of the posterior 
@@ -399,6 +410,10 @@ class Experiment(ExperimentData):
                 result.df = df
             else:
                 result.df = result.df.append(df)
+
+        # Remove .pkl compiled stan model files
+        if remove_pkls:
+            remove_pkls_from_dir()
 
         return result
 

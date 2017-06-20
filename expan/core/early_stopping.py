@@ -8,6 +8,8 @@ from expan.core.util import drop_nan
 
 import expan.core.statistics as statx
 
+import pickle
+
 __location__ = realpath(join(os.getcwd(), dirname(__file__)))
 
 
@@ -169,12 +171,25 @@ def _bayes_sampling(x, y, distribution='normal', num_iters=25000):
                     'y': _y.astype(int)}
     else:
         raise NotImplementedError
+
     model_file = __location__ + '/../models/' + distribution + '_kpi.stan'
-    sm = StanModel(file=model_file)
+    compiled_model_file = __location__ + '/../models/' + distribution + '_kpi.pkl'
+
+    if os.path.isfile(compiled_model_file):
+        # Load compiled model if it exists
+        sm = pickle.load(open(compiled_model_file, 'rb'))
+    else:
+        # Compile the model if no compiled version of it exists
+        sm = StanModel(file=model_file)
 
     fit = sm.sampling(data=fit_data, iter=num_iters, chains=4, n_jobs=1, seed=1,
                       control={'stepsize': 0.01, 'adapt_delta': 0.99})
     traces = fit.extract()
+
+    # Save compiled model
+    if not os.path.isfile(compiled_model_file):
+        with open(__location__ + '/../models/' + distribution + '_kpi.pkl', 'wb') as f:
+            pickle.dump(sm, f)
 
     return traces, n_x, n_y, mu_x, mu_y
 

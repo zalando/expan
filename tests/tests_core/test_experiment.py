@@ -1,4 +1,5 @@
 import unittest
+import os
 
 import numpy as np
 import pandas as pd
@@ -7,6 +8,16 @@ from expan.core.experiment import Experiment
 from expan.core.results import Results
 from expan.core.util import generate_random_data
 from tests.tests_core.test_results import mock_results_object
+from os.path import dirname, join, realpath
+
+
+def tearDownModule():
+    __location__ = realpath(join(os.getcwd(), dirname(__file__)))
+    print __location__
+    models_dir = __location__ + '/../../expan/models/'
+    for f in os.listdir(models_dir):
+        if f.endswith(".pkl"):
+            os.remove(join(models_dir, f))
 
 
 class ExperimentTestCase(unittest.TestCase):
@@ -363,7 +374,8 @@ class ExperimentClassTestCases(ExperimentTestCase):
         self.assertTrue(self.experiment.baseline_variant == 'B')
 
         res = Results(None, metadata=self.experiment.metadata)
-        result = self.experiment.bayes_factor_delta(result=res, kpis_to_analyse=['normal_same'], num_iters=2000)
+        result = self.experiment.bayes_factor_delta(result=res, kpis_to_analyse=['normal_same'], num_iters=2000,
+                                                    remove_pkls=False)
 
         # check uplift
         df = result.statistic('delta', 'uplift', 'normal_same')
@@ -395,7 +407,8 @@ class ExperimentClassTestCases(ExperimentTestCase):
         self.assertTrue(self.experiment.baseline_variant == 'B')
 
         res = Results(None, metadata=self.experiment.metadata)
-        result = self.experiment.bayes_precision_delta(result=res, kpis_to_analyse=['normal_same'], num_iters=2000)
+        result = self.experiment.bayes_precision_delta(result=res, kpis_to_analyse=['normal_same'], num_iters=2000,
+                                                       remove_pkls=False)
 
         # check uplift
         df = result.statistic('delta', 'uplift', 'normal_same')
