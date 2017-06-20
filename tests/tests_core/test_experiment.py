@@ -9,8 +9,12 @@ from expan.core.util import generate_random_data, remove_model_pkls
 from tests.tests_core.test_results import mock_results_object
 
 
-# Removes .pkl compiled model files after the module tests are finished
 def tearDownModule():
+    """
+    Removes .pkl compiled model files from the models folder.
+    tearDownModule() is executed once after all tests of a particular module (test_experiment.py) are finished.
+    Bayes_precision_delta and bayes_factor_delta methods in experiment.py use the compiled models.
+    """
     remove_model_pkls()
 
 

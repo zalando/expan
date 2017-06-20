@@ -156,8 +156,10 @@ def generate_random_data_n_variants(n_variants=3):
     return test_data_frame, metadata
 
 
-# Removes .pkl compiled model files
 def remove_model_pkls():
+    """
+    Removes .pkl compiled model files from the models folder.
+    """
     __location__ = realpath(join(os.getcwd(), dirname(__file__)))
     models_dir = __location__ + '/../../expan/models/'
     for f in os.listdir(models_dir):
