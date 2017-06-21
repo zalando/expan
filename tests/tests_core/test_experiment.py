@@ -5,8 +5,17 @@ import pandas as pd
 
 from expan.core.experiment import Experiment
 from expan.core.results import Results
-from expan.core.util import generate_random_data
+from expan.core.util import generate_random_data, remove_model_pkls
 from tests.tests_core.test_results import mock_results_object
+
+
+def tearDownModule():
+    """
+    Removes .pkl compiled model files from the models folder.
+    tearDownModule() is executed once after all tests of a particular module (test_experiment.py) are finished.
+    Bayes_precision_delta and bayes_factor_delta methods in experiment.py use the compiled models.
+    """
+    remove_model_pkls()
 
 
 class ExperimentTestCase(unittest.TestCase):
@@ -363,7 +372,8 @@ class ExperimentClassTestCases(ExperimentTestCase):
         self.assertTrue(self.experiment.baseline_variant == 'B')
 
         res = Results(None, metadata=self.experiment.metadata)
-        result = self.experiment.bayes_factor_delta(result=res, kpis_to_analyse=['normal_same'], num_iters=2000)
+        result = self.experiment.bayes_factor_delta(result=res, kpis_to_analyse=['normal_same'], num_iters=2000,
+                                                    remove_pkls=False)
 
         # check uplift
         df = result.statistic('delta', 'uplift', 'normal_same')
@@ -395,7 +405,8 @@ class ExperimentClassTestCases(ExperimentTestCase):
         self.assertTrue(self.experiment.baseline_variant == 'B')
 
         res = Results(None, metadata=self.experiment.metadata)
-        result = self.experiment.bayes_precision_delta(result=res, kpis_to_analyse=['normal_same'], num_iters=2000)
+        result = self.experiment.bayes_precision_delta(result=res, kpis_to_analyse=['normal_same'], num_iters=2000,
+                                                       remove_pkls=False)
 
         # check uplift
         df = result.statistic('delta', 'uplift', 'normal_same')
