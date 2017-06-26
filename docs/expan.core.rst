@@ -12,14 +12,6 @@ expan.core.binning module
     :undoc-members:
     :show-inheritance:
 
-expan.core.debugging module
----------------------------
-
-.. automodule:: expan.core.debugging
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 expan.core.experiment module
 ----------------------------
 

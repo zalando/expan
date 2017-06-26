@@ -77,7 +77,7 @@ Some mock-up data:
 Documentation
 =============
 
-The latest stable version is 0.5.2.
+The latest stable version is 0.5.3.
 
 `ExpAn main documentation <http://expan.readthedocs.io/>`__
 
