@@ -1,11 +1,84 @@
 Change Log
 ==========
 
-`Unreleased <https://github.com/zalando/expan/tree/HEAD>`__
------------------------------------------------------------
+`v0.5.3 <https://github.com/zalando/expan/tree/v0.5.3>`__ (2017-06-26)
+----------------------------------------------------------------------
 
 `Full
-Changelog <https://github.com/zalando/expan/compare/v0.5.0...HEAD>`__
+Changelog <https://github.com/zalando/expan/compare/v0.5.2...v0.5.3>`__
+
+**Implemented enhancements:**
+
+-  Weighted KPIs is only implemented in regular delta
+   `#114 <https://github.com/zalando/expan/issues/114>`__
+
+**Fixed bugs:**
+
+-  Assumption of nan when computing weighted KPIs
+   `#119 <https://github.com/zalando/expan/issues/119>`__
+-  Weighted KPIs is only implemented in regular delta
+   `#114 <https://github.com/zalando/expan/issues/114>`__
+-  Percentiles value is lost during computing group\_sequential\_delta
+   `#108 <https://github.com/zalando/expan/issues/108>`__
+
+**Closed issues:**
+
+-  Failing early stopping unit tests
+   `#85 <https://github.com/zalando/expan/issues/85>`__
+
+**Merged pull requests:**
+
+-  OCTO-1804: Optimize the loading of .stan model in expan.
+   `#126 <https://github.com/zalando/expan/pull/126>`__
+   (`daryadedik <https://github.com/daryadedik>`__)
+-  Test travis python version
+   `#125 <https://github.com/zalando/expan/pull/125>`__
+   (`shansfolder <https://github.com/shansfolder>`__)
+-  OCTO-1619 Cleanup ExpAn code
+   `#124 <https://github.com/zalando/expan/pull/124>`__
+   (`shansfolder <https://github.com/shansfolder>`__)
+-  OCTO-1748: Make number of iterations as a method argument in
+   \_bayes\_sampling
+   `#123 <https://github.com/zalando/expan/pull/123>`__
+   (`daryadedik <https://github.com/daryadedik>`__)
+-  OCTO-1615 Use Python builtin logging instead of our own debugging.py
+   `#122 <https://github.com/zalando/expan/pull/122>`__
+   (`shansfolder <https://github.com/shansfolder>`__)
+-  OCTO-1711 Support weighted KPIs in early stopping
+   `#121 <https://github.com/zalando/expan/pull/121>`__
+   (`shansfolder <https://github.com/shansfolder>`__)
+-  Fixed a few bugs `#120 <https://github.com/zalando/expan/pull/120>`__
+   (`shansfolder <https://github.com/shansfolder>`__)
+-  OCTO-1614 cleanup module structure
+   `#115 <https://github.com/zalando/expan/pull/115>`__
+   (`shansfolder <https://github.com/shansfolder>`__)
+-  OCTO-1677 : fix missing .stan files
+   `#113 <https://github.com/zalando/expan/pull/113>`__
+   (`gbordyugov <https://github.com/gbordyugov>`__)
+-  Bump version 0.5.1 -> 0.5.2
+   `#112 <https://github.com/zalando/expan/pull/112>`__
+   (`mkolarek <https://github.com/mkolarek>`__)
+
+`v0.5.2 <https://github.com/zalando/expan/tree/v0.5.2>`__ (2017-05-11)
+----------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/zalando/expan/compare/v0.5.1...v0.5.2>`__
+
+**Merged pull requests:**
+
+-  OCTO-1502 support \*\*kwargs for four delta functions
+   `#111 <https://github.com/zalando/expan/pull/111>`__
+   (`shansfolder <https://github.com/shansfolder>`__)
+-  new version 0.5.1
+   `#107 <https://github.com/zalando/expan/pull/107>`__
+   (`mkolarek <https://github.com/mkolarek>`__)
+
+`v0.5.1 <https://github.com/zalando/expan/tree/v0.5.1>`__ (2017-04-20)
+----------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/zalando/expan/compare/v0.5.0...v0.5.1>`__
 
 **Implemented enhancements:**
 
@@ -15,9 +88,6 @@ Changelog <https://github.com/zalando/expan/compare/v0.5.0...HEAD>`__
 
 **Merged pull requests:**
 
--  updated CONTRIBUTING.rst with deployment flow
-   `#106 <https://github.com/zalando/expan/pull/106>`__
-   (`mkolarek <https://github.com/mkolarek>`__)
 -  OCTO-1501: bugfix in Results.to\_json()
    `#105 <https://github.com/zalando/expan/pull/105>`__
    (`gbordyugov <https://github.com/gbordyugov>`__)
@@ -30,8 +100,6 @@ Changelog <https://github.com/zalando/expan/compare/v0.5.0...HEAD>`__
 -  OCTO-1540: cleanup of derived kpi handling in Experiment.delta() and
    … `#97 <https://github.com/zalando/expan/pull/97>`__
    (`gbordyugov <https://github.com/gbordyugov>`__)
--  Small refactoring `#95 <https://github.com/zalando/expan/pull/95>`__
-   (`shansfolder <https://github.com/shansfolder>`__)
 -  Merge dev to master for v0.5.0
    `#94 <https://github.com/zalando/expan/pull/94>`__
    (`mkolarek <https://github.com/mkolarek>`__)
@@ -66,24 +134,20 @@ Changelog <https://github.com/zalando/expan/compare/v0.4.5...v0.5.0>`__
 
 **Merged pull requests:**
 
+-  new dataframe tree traverser in to\_json()
+   `#92 <https://github.com/zalando/expan/pull/92>`__
+   (`gbordyugov <https://github.com/gbordyugov>`__)
 -  updated requirements.txt to have 'greater than' dependencies instead
    … `#89 <https://github.com/zalando/expan/pull/89>`__
    (`mkolarek <https://github.com/mkolarek>`__)
 -  pip version requirement
    `#88 <https://github.com/zalando/expan/pull/88>`__
    (`gbordyugov <https://github.com/gbordyugov>`__)
+-  Test `#86 <https://github.com/zalando/expan/pull/86>`__
+   (`s4826 <https://github.com/s4826>`__)
 -  merging in categorical binning
    `#84 <https://github.com/zalando/expan/pull/84>`__
    (`gbordyugov <https://github.com/gbordyugov>`__)
--  Add documentation of the weighting logic
-   `#83 <https://github.com/zalando/expan/pull/83>`__
-   (`jbao <https://github.com/jbao>`__)
--  Merge to\_json() changes
-   `#75 <https://github.com/zalando/expan/pull/75>`__
-   (`mkolarek <https://github.com/mkolarek>`__)
--  Feature/early stopping
-   `#73 <https://github.com/zalando/expan/pull/73>`__
-   (`jbao <https://github.com/jbao>`__)
 
 `v0.4.5 <https://github.com/zalando/expan/tree/v0.4.5>`__ (2017-02-10)
 ----------------------------------------------------------------------
@@ -95,15 +159,6 @@ Changelog <https://github.com/zalando/expan/compare/v0.4.4...v0.4.5>`__
 
 -  Numbers cannot appear in variable names for derived metrics
    `#58 <https://github.com/zalando/expan/issues/58>`__
-
-**Merged pull requests:**
-
--  Feature/results and to json refactor
-   `#74 <https://github.com/zalando/expan/pull/74>`__
-   (`mkolarek <https://github.com/mkolarek>`__)
--  regex fix, see https://github.com/zalando/expan/issues/58
-   `#70 <https://github.com/zalando/expan/pull/70>`__
-   (`gbordyugov <https://github.com/gbordyugov>`__)
 
 `v0.4.4 <https://github.com/zalando/expan/tree/v0.4.4>`__ (2017-02-09)
 ----------------------------------------------------------------------
@@ -125,15 +180,6 @@ Changelog <https://github.com/zalando/expan/compare/v0.4.3...v0.4.4>`__
 -  migrate issues from github enterprise
    `#20 <https://github.com/zalando/expan/issues/20>`__
 
-**Merged pull requests:**
-
--  Feature/results and to json refactor
-   `#71 <https://github.com/zalando/expan/pull/71>`__
-   (`mkolarek <https://github.com/mkolarek>`__)
--  new to\_json() functionality and improved vim support
-   `#67 <https://github.com/zalando/expan/pull/67>`__
-   (`mkolarek <https://github.com/mkolarek>`__)
-
 `v0.4.3 <https://github.com/zalando/expan/tree/v0.4.3>`__ (2017-02-07)
 ----------------------------------------------------------------------
 
@@ -144,13 +190,6 @@ Changelog <https://github.com/zalando/expan/compare/v0.4.2...v0.4.3>`__
 
 -  coverage % is misleading
    `#23 <https://github.com/zalando/expan/issues/23>`__
-
-**Merged pull requests:**
-
--  Vim modelines `#63 <https://github.com/zalando/expan/pull/63>`__
-   (`gbordyugov <https://github.com/gbordyugov>`__)
--  0.4.2 release `#60 <https://github.com/zalando/expan/pull/60>`__
-   (`mkolarek <https://github.com/mkolarek>`__)
 
 `v0.4.2 <https://github.com/zalando/expan/tree/v0.4.2>`__ (2016-12-08)
 ----------------------------------------------------------------------
@@ -163,31 +202,11 @@ Changelog <https://github.com/zalando/expan/compare/v0.4.1...v0.4.2>`__
 -  frequency table in the chi square test doesn't respect the order of
    categories `#56 <https://github.com/zalando/expan/issues/56>`__
 
-**Merged pull requests:**
-
--  OCTO-1143 Review outlier filtering
-   `#59 <https://github.com/zalando/expan/pull/59>`__
-   (`domheger <https://github.com/domheger>`__)
--  Workaround to fix #56
-   `#57 <https://github.com/zalando/expan/pull/57>`__
-   (`jbao <https://github.com/jbao>`__)
-
 `v0.4.1 <https://github.com/zalando/expan/tree/v0.4.1>`__ (2016-10-18)
 ----------------------------------------------------------------------
 
 `Full
 Changelog <https://github.com/zalando/expan/compare/v0.4.0...v0.4.1>`__
-
-**Merged pull requests:**
-
--  small doc cleanup `#55 <https://github.com/zalando/expan/pull/55>`__
-   (`jbao <https://github.com/jbao>`__)
--  Add comments to cli.py
-   `#54 <https://github.com/zalando/expan/pull/54>`__
-   (`igusher <https://github.com/igusher>`__)
--  Feature/octo 545 add consolidate documentation
-   `#53 <https://github.com/zalando/expan/pull/53>`__
-   (`mkolarek <https://github.com/mkolarek>`__)
 
 `v0.4.0 <https://github.com/zalando/expan/tree/v0.4.0>`__ (2016-08-19)
 ----------------------------------------------------------------------

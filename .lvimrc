@@ -7,7 +7,7 @@ set tabstop=4          " how many spaces a tab counts for
 set softtabstop=4
 set shiftwidth=4       " how many columns text is indentented with <<
                        " and >> and autoindent
-set noexpandtab        " tab in insert does not get converted into spaces
+set expandtab          " tab in insert get converted into spaces
 set textwidth=320
 set nowrap
 " set foldmethod=indent
