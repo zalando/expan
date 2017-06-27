@@ -415,13 +415,12 @@ class Results(object):
         #         |               labels for the new dimension                     |  next dimension   |       data frame index mask       |
         #         |                                                                |                   |                                   |
         # ----------------------------------------------------------------------------------------------------------------------------------
-        table = [(lambda x: df.value.keys(), 'variant', lambda x: True),
-                 (lambda x: df.metric.unique(), 'metric', lambda x: df.metric == x),
-                 (lambda x: df[df.metric == x].subgroup_metric.unique(), 'subgroup_metric',
-                  lambda x: df.subgroup_metric == x),
-                 (lambda x: df[df.subgroup_metric == x].subgroup.unique(), 'subgroup', lambda x: df.subgroup == x),
-                 (lambda x: df[df.subgroup == x].statistic.unique(), 'statistic', lambda x: df.statistic == x),
-                 (lambda x: df[df.statistic == x].pctile.unique(), 'pctile', lambda x: df.pctile == x)]
+        table = [(lambda df, x: df.value.keys()                                    , 'variant'         , lambda x: True                   ),
+                 (lambda df, x: df.metric.unique()                                 , 'metric'          , lambda x: df.metric          == x),
+                 (lambda df, x: df[df.metric == x].subgroup_metric.unique()        , 'subgroup_metric' , lambda x: df.subgroup_metric == x),
+                 (lambda df, x: df[df.subgroup_metric == x].subgroup.unique()      , 'subgroup'        , lambda x: df.subgroup        == x),
+                 (lambda df, x: df[df.subgroup == x].statistic.unique()            , 'statistic'       , lambda x: df.statistic       == x),
+                 (lambda df, x: df[df.statistic == x].pctile.unique()              , 'pctile'          , lambda x: df.pctile          == x)]
 
         # traverse the tree of dimensions aka indices
         # in parallel refining the data frame view mask
@@ -432,7 +431,7 @@ class Results(object):
             else:
                 head, tail = table[0], table[1:]
                 f, nextDim, flter = head[0], head[1], head[2]
-                val = [go(tail, n, [(nextDim, n)] + ixes, flter(n) & mask) for n in f(name)]
+                val = [go(tail, n, [(nextDim, n)] + ixes, flter(n) & mask) for n in f(df[mask], name)]
                 return {"name": name, nextDim + "s": val}
 
         json_tree = {'variants': go(table, 'none')['variants']}
