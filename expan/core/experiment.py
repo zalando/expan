@@ -323,36 +323,37 @@ class Experiment(ExperimentData):
         Returns:
             a Results object
         """
-        for mname in kpis_to_analyse:
-            metric_df = self._get_metric_df(mname, reference_kpis, weighted_kpis)
+        try:
+            for mname in kpis_to_analyse:
+                metric_df = self._get_metric_df(mname, reference_kpis, weighted_kpis)
 
-            def do_delta(x, y, x_weights, y_weights):
-                weighted_x = np.array(x, dtype=float) * x_weights
-                weighted_y = np.array(y, dtype=float) * y_weights
-                return early_stopping_to_dataframe(metric_df.columns[2],
-                                                   *es.bayes_factor(
-                                                       x=weighted_x,
-                                                       y=weighted_y,
-                                                       distribution=distribution,
-                                                       num_iters=num_iters))
+                def do_delta(x, y, x_weights, y_weights):
+                    weighted_x = np.array(x, dtype=float) * x_weights
+                    weighted_y = np.array(y, dtype=float) * y_weights
+                    return early_stopping_to_dataframe(metric_df.columns[2],
+                                                       *es.bayes_factor(
+                                                           x=weighted_x,
+                                                           y=weighted_y,
+                                                           distribution=distribution,
+                                                           num_iters=num_iters))
 
-            df = metric_df.groupby('variant').apply(self._apply_reweighting_and_all_variants,
-                                                    metric_df=metric_df,
-                                                    weighted_kpis=weighted_kpis,
-                                                    reference_kpis=reference_kpis,
-                                                    mname=mname,
-                                                    func_apply_variants=do_delta).unstack(0)
-            # force the stop label of the baseline variant to 0
-            df.loc[(mname, '-', slice(None), 'stop'), ('value', self.baseline_variant)] = 0
+                df = metric_df.groupby('variant').apply(self._apply_reweighting_and_all_variants,
+                                                        metric_df=metric_df,
+                                                        weighted_kpis=weighted_kpis,
+                                                        reference_kpis=reference_kpis,
+                                                        mname=mname,
+                                                        func_apply_variants=do_delta).unstack(0)
+                # force the stop label of the baseline variant to 0
+                df.loc[(mname, '-', slice(None), 'stop'), ('value', self.baseline_variant)] = 0
 
-            if result.df is None:
-                result.df = df
-            else:
-                result.df = result.df.append(df)
-
-        # Remove .pkl compiled stan model files
-        if remove_pkls:
-            remove_model_pkls()
+                if result.df is None:
+                    result.df = df
+                else:
+                    result.df = result.df.append(df)
+        finally:
+            # Remove .pkl compiled stan model files in the finally no matter script in try was successful or not
+            if remove_pkls:
+                remove_model_pkls()
 
         return result
 
@@ -383,37 +384,38 @@ class Experiment(ExperimentData):
         Returns:
             a Results object
         """
-        for mname in kpis_to_analyse:
-            metric_df = self._get_metric_df(mname, reference_kpis, weighted_kpis)
+        try:
+            for mname in kpis_to_analyse:
+                metric_df = self._get_metric_df(mname, reference_kpis, weighted_kpis)
 
-            def do_delta(x, y, x_weights, y_weights):
-                weighted_x = np.array(x, dtype=float) * x_weights
-                weighted_y = np.array(y, dtype=float) * y_weights
-                return early_stopping_to_dataframe(metric_df.columns[2],
-                                                   *es.bayes_precision(
-                                                       x=weighted_x,
-                                                       y=weighted_y,
-                                                       distribution=distribution,
-                                                       posterior_width=posterior_width,
-                                                       num_iters=num_iters))
+                def do_delta(x, y, x_weights, y_weights):
+                    weighted_x = np.array(x, dtype=float) * x_weights
+                    weighted_y = np.array(y, dtype=float) * y_weights
+                    return early_stopping_to_dataframe(metric_df.columns[2],
+                                                       *es.bayes_precision(
+                                                           x=weighted_x,
+                                                           y=weighted_y,
+                                                           distribution=distribution,
+                                                           posterior_width=posterior_width,
+                                                           num_iters=num_iters))
 
-            df = metric_df.groupby('variant').apply(self._apply_reweighting_and_all_variants,
-                                                    metric_df=metric_df,
-                                                    weighted_kpis=weighted_kpis,
-                                                    reference_kpis=reference_kpis,
-                                                    mname=mname,
-                                                    func_apply_variants=do_delta).unstack(0)
-            # force the stop label of the baseline variant to 0
-            df.loc[(mname, '-', slice(None), 'stop'), ('value', self.baseline_variant)] = 0
+                df = metric_df.groupby('variant').apply(self._apply_reweighting_and_all_variants,
+                                                        metric_df=metric_df,
+                                                        weighted_kpis=weighted_kpis,
+                                                        reference_kpis=reference_kpis,
+                                                        mname=mname,
+                                                        func_apply_variants=do_delta).unstack(0)
+                # force the stop label of the baseline variant to 0
+                df.loc[(mname, '-', slice(None), 'stop'), ('value', self.baseline_variant)] = 0
 
-            if result.df is None:
-                result.df = df
-            else:
-                result.df = result.df.append(df)
-
-        # Remove .pkl compiled stan model files
-        if remove_pkls:
-            remove_model_pkls()
+                if result.df is None:
+                    result.df = df
+                else:
+                    result.df = result.df.append(df)
+        finally:
+            # Remove .pkl compiled stan model files in the finally no matter script in try was successful or not
+            if remove_pkls:
+                remove_model_pkls()
 
         return result
 
