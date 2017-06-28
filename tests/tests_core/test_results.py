@@ -72,6 +72,7 @@ class ResultsTestCase(unittest.TestCase):
             self.data.features['treatment_start_time']
         # Make time part of index
         self.data.kpis.set_index('time_since_treatment', append=True, inplace=True)
+        self.data.metadata['estimatedSampleSize'] = 5*1000*1000
 
     def tearDown(self):
         """
@@ -160,6 +161,32 @@ class ResultsClassTestCase(ResultsTestCase):
                 'pctiles']))
 
         os.remove("test_json.json")
+
+    def test_to_json_group_sequential(self):
+        json_object = json.loads(
+            self.data.delta(method='group_sequential',
+                kpi_subset=['normal_same'],
+                percentiles=[2.5, 97.5]
+            ).to_json()
+        )
+
+    # @unittest.skip("sometimes takes too much time")
+    def test_to_json_bayes_factor(self):
+        json_object = json.loads(
+            self.data.delta(method='bayes_factor',
+                kpi_subset=['normal_same'],
+                percentiles=[2.5, 97.5]
+            ).to_json()
+        )
+
+    # @unittest.skip("sometimes takes too much time")
+    def test_to_json_bayes_precision(self):
+        json_object = json.loads(
+            self.data.delta(method='bayes_precision',
+                kpi_subset=['normal_same'],
+                percentiles=[2.5, 97.5]
+            ).to_json()
+        )
 
     def test_to_json_sga(self):
         json_object = json.loads(

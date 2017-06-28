@@ -374,6 +374,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
         res = Results(None, metadata=self.experiment.metadata)
         result = self.experiment.bayes_factor_delta(result=res, kpis_to_analyse=['normal_same'], num_iters=2000,
                                                     remove_pkls=False)
+
         # check uplift
         df = result.statistic('delta', 'uplift', 'normal_same')
         np.testing.assert_almost_equal(df.loc[:, ('value', 'A')],
