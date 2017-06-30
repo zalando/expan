@@ -126,7 +126,7 @@ def HDI_from_MCMC(posterior_samples, credible_mass=0.95):
     return (HDImin, HDImax)
 
 
-def compile_stan_model(model_file, distribution):
+def get_or_compile_stan_model(model_file, distribution):
     """
     Creates Stan model. Compiles a Stan model and saves it to .pkl file to the folder selected by tempfile module if
         file doesn't exist yet and load precompiled model if there is a model file in temporary dir.
@@ -206,7 +206,7 @@ def _bayes_sampling(x, y, distribution='normal', num_iters=25000):
 
     model_file = __location__ + '/../models/' + distribution + '_kpi.stan'
 
-    sm = compile_stan_model(model_file, distribution)
+    sm = get_or_compile_stan_model(model_file, distribution)
 
     fit = sm.sampling(data=fit_data, iter=num_iters, chains=4, n_jobs=1, seed=1,
                       control={'stepsize': 0.01, 'adapt_delta': 0.99})
