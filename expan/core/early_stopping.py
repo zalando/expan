@@ -9,6 +9,7 @@ from expan.core.util import drop_nan
 import expan.core.statistics as statx
 
 import pickle
+import tempfile
 
 __location__ = realpath(join(os.getcwd(), dirname(__file__)))
 
@@ -125,6 +126,37 @@ def HDI_from_MCMC(posterior_samples, credible_mass=0.95):
     return (HDImin, HDImax)
 
 
+def compile_stan_model(model_file, distribution):
+    """
+    Creates Stan model. Compiles a Stan model and saves it to .pkl file to the /tmp folder if
+        file doesn't exist yet and load precompiled model if there is a model file in the /tmp.
+    Args:
+        model_file: model file location
+        distribution: name of the KPI distribution model, which assumes a 
+            Stan model file with the same name exists
+    Returns:
+        returns compiled Stan model for the selected distribution or normal distribution
+            as a default option
+    Note: compiled_model_file is the hardcoded file path which may cause some issues in future.
+    There are 2 alternative implementations for Stan models handling:
+        1. Using global variables
+        2. Pre-compiling stan models and adding them as a part of expan project
+        (3). Using temporary files with tempfile module is not currently possible, since it 
+            generates a unique file name which is difficult to track.
+        However, compiled modules are saved in temporary directory using tempfile module 
+        which vary based on the current platform and settings. Cleaning up a temp dir is done on boot.
+    """
+    compiled_model_file = tempfile.gettempdir() + '/expan_early_stop_compiled_stan_model_' + distribution + '.pkl'
+
+    if os.path.isfile(compiled_model_file):
+        sm = pickle.load(open(compiled_model_file, 'rb'))
+    else:
+        sm = StanModel(file=model_file)
+        with open(compiled_model_file, 'wb') as f:
+            pickle.dump(sm, f)
+    return sm
+
+
 def _bayes_sampling(x, y, distribution='normal', num_iters=25000):
     """
     Helper function.
@@ -173,17 +205,8 @@ def _bayes_sampling(x, y, distribution='normal', num_iters=25000):
         raise NotImplementedError
 
     model_file = __location__ + '/../models/' + distribution + '_kpi.stan'
-    compiled_model_file = __location__ + '/../models/' + distribution + '_kpi.pkl'
 
-    if os.path.isfile(compiled_model_file):
-        # Load compiled model if it exists
-        sm = pickle.load(open(compiled_model_file, 'rb'))
-    else:
-        # Compile the model if no compiled version of it exists
-        sm = StanModel(file=model_file)
-        # Save compiled model
-        with open(__location__ + '/../models/' + distribution + '_kpi.pkl', 'wb') as f:
-            pickle.dump(sm, f)
+    sm = compile_stan_model(model_file, distribution)
 
     fit = sm.sampling(data=fit_data, iter=num_iters, chains=4, n_jobs=1, seed=1,
                       control={'stepsize': 0.01, 'adapt_delta': 0.99})

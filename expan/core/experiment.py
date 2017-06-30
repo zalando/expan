@@ -11,7 +11,6 @@ import expan.core.statistics as statx
 from expan.core.experimentdata import ExperimentData
 from expan.core.results import Results, delta_to_dataframe_all_variants, feature_check_to_dataframe, \
     early_stopping_to_dataframe
-from expan.core.util import remove_model_pkls
 
 # raise the same warning multiple times
 warnings.simplefilter('always', UserWarning)
@@ -76,6 +75,10 @@ class Experiment(ExperimentData):
         'bayes_factor':			self.bayes_factor_delta()
         'bayes_precision':		self.bayes_precision_delta()
         """
+        # Check the correct type of the kpi_subset which should be a list
+        if not isinstance(kpi_subset, list) and not all(isinstance(kpi, str) for kpi in kpi_subset):
+            raise TypeError('KPI subset should be a list of strings')
+
         res = Results(None, metadata=self.metadata)
         res.metadata['reference_kpi'] = {}
         res.metadata['weighted_kpis'] = weighted_kpis
@@ -307,7 +310,6 @@ class Experiment(ExperimentData):
                            weighted_kpis=None,
                            distribution='normal',
                            num_iters=25000,
-                           remove_pkls=True,
                            **kwargs):
         """
         Calculate the stopping criterion based on the Bayes factor 
@@ -323,37 +325,32 @@ class Experiment(ExperimentData):
         Returns:
             a Results object
         """
-        try:
-            for mname in kpis_to_analyse:
-                metric_df = self._get_metric_df(mname, reference_kpis, weighted_kpis)
+        for mname in kpis_to_analyse:
+            metric_df = self._get_metric_df(mname, reference_kpis, weighted_kpis)
 
-                def do_delta(x, y, x_weights, y_weights):
-                    weighted_x = np.array(x, dtype=float) * x_weights
-                    weighted_y = np.array(y, dtype=float) * y_weights
-                    return early_stopping_to_dataframe(metric_df.columns[2],
-                                                       *es.bayes_factor(
-                                                           x=weighted_x,
-                                                           y=weighted_y,
-                                                           distribution=distribution,
-                                                           num_iters=num_iters))
+            def do_delta(x, y, x_weights, y_weights):
+                weighted_x = np.array(x, dtype=float) * x_weights
+                weighted_y = np.array(y, dtype=float) * y_weights
+                return early_stopping_to_dataframe(metric_df.columns[2],
+                                                   *es.bayes_factor(
+                                                       x=weighted_x,
+                                                       y=weighted_y,
+                                                       distribution=distribution,
+                                                       num_iters=num_iters))
 
-                df = metric_df.groupby('variant').apply(self._apply_reweighting_and_all_variants,
-                                                        metric_df=metric_df,
-                                                        weighted_kpis=weighted_kpis,
-                                                        reference_kpis=reference_kpis,
-                                                        mname=mname,
-                                                        func_apply_variants=do_delta).unstack(0)
-                # force the stop label of the baseline variant to 0
-                df.loc[(mname, '-', slice(None), 'stop'), ('value', self.baseline_variant)] = 0
+            df = metric_df.groupby('variant').apply(self._apply_reweighting_and_all_variants,
+                                                    metric_df=metric_df,
+                                                    weighted_kpis=weighted_kpis,
+                                                    reference_kpis=reference_kpis,
+                                                    mname=mname,
+                                                    func_apply_variants=do_delta).unstack(0)
+            # force the stop label of the baseline variant to 0
+            df.loc[(mname, '-', slice(None), 'stop'), ('value', self.baseline_variant)] = 0
 
-                if result.df is None:
-                    result.df = df
-                else:
-                    result.df = result.df.append(df)
-        finally:
-            # Remove .pkl compiled stan model files in the finally no matter script in try was successful or not
-            if remove_pkls:
-                remove_model_pkls()
+            if result.df is None:
+                result.df = df
+            else:
+                result.df = result.df.append(df)
 
         return result
 
@@ -366,7 +363,6 @@ class Experiment(ExperimentData):
                               distribution='normal',
                               posterior_width=0.08,
                               num_iters=25000,
-                              remove_pkls=True,
                               **kwargs):
         """
         Calculate the stopping criterion based on the precision of the posterior 
@@ -384,38 +380,33 @@ class Experiment(ExperimentData):
         Returns:
             a Results object
         """
-        try:
-            for mname in kpis_to_analyse:
-                metric_df = self._get_metric_df(mname, reference_kpis, weighted_kpis)
+        for mname in kpis_to_analyse:
+            metric_df = self._get_metric_df(mname, reference_kpis, weighted_kpis)
 
-                def do_delta(x, y, x_weights, y_weights):
-                    weighted_x = np.array(x, dtype=float) * x_weights
-                    weighted_y = np.array(y, dtype=float) * y_weights
-                    return early_stopping_to_dataframe(metric_df.columns[2],
-                                                       *es.bayes_precision(
-                                                           x=weighted_x,
-                                                           y=weighted_y,
-                                                           distribution=distribution,
-                                                           posterior_width=posterior_width,
-                                                           num_iters=num_iters))
+            def do_delta(x, y, x_weights, y_weights):
+                weighted_x = np.array(x, dtype=float) * x_weights
+                weighted_y = np.array(y, dtype=float) * y_weights
+                return early_stopping_to_dataframe(metric_df.columns[2],
+                                                   *es.bayes_precision(
+                                                       x=weighted_x,
+                                                       y=weighted_y,
+                                                       distribution=distribution,
+                                                       posterior_width=posterior_width,
+                                                       num_iters=num_iters))
 
-                df = metric_df.groupby('variant').apply(self._apply_reweighting_and_all_variants,
-                                                        metric_df=metric_df,
-                                                        weighted_kpis=weighted_kpis,
-                                                        reference_kpis=reference_kpis,
-                                                        mname=mname,
-                                                        func_apply_variants=do_delta).unstack(0)
-                # force the stop label of the baseline variant to 0
-                df.loc[(mname, '-', slice(None), 'stop'), ('value', self.baseline_variant)] = 0
+            df = metric_df.groupby('variant').apply(self._apply_reweighting_and_all_variants,
+                                                    metric_df=metric_df,
+                                                    weighted_kpis=weighted_kpis,
+                                                    reference_kpis=reference_kpis,
+                                                    mname=mname,
+                                                    func_apply_variants=do_delta).unstack(0)
+            # force the stop label of the baseline variant to 0
+            df.loc[(mname, '-', slice(None), 'stop'), ('value', self.baseline_variant)] = 0
 
-                if result.df is None:
-                    result.df = df
-                else:
-                    result.df = result.df.append(df)
-        finally:
-            # Remove .pkl compiled stan model files in the finally no matter script in try was successful or not
-            if remove_pkls:
-                remove_model_pkls()
+            if result.df is None:
+                result.df = df
+            else:
+                result.df = result.df.append(df)
 
         return result
 

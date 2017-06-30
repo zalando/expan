@@ -163,7 +163,7 @@ class ResultsClassTestCase(ResultsTestCase):
         os.remove("test_json.json")
 
     def test_to_json_group_sequential(self):
-        json_object = json.loads(
+        json.loads(
             self.data.delta(method='group_sequential',
                 kpi_subset=['normal_same'],
                 percentiles=[2.5, 97.5]
@@ -172,19 +172,21 @@ class ResultsClassTestCase(ResultsTestCase):
 
     # @unittest.skip("sometimes takes too much time")
     def test_to_json_bayes_factor(self):
-        json_object = json.loads(
-            self.data.delta(method='bayes_factor',
-                kpi_subset=['normal_same'],
-                percentiles=[2.5, 97.5]
+        json.loads(
+            self.data.bayes_factor_delta(
+                result=results.Results(None, metadata=self.data.metadata),
+                kpis_to_analyse=['normal_same'],
+                num_iters=2000
             ).to_json()
         )
 
     # @unittest.skip("sometimes takes too much time")
     def test_to_json_bayes_precision(self):
-        json_object = json.loads(
-            self.data.delta(method='bayes_precision',
-                kpi_subset=['normal_same'],
-                percentiles=[2.5, 97.5]
+        json.loads(
+            self.data.bayes_precision_delta(
+                result=results.Results(None, metadata=self.data.metadata),
+                kpis_to_analyse=['normal_same'],
+                num_iters=2000
             ).to_json()
         )
 
