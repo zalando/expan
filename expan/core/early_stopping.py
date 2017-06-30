@@ -128,8 +128,8 @@ def HDI_from_MCMC(posterior_samples, credible_mass=0.95):
 
 def compile_stan_model(model_file, distribution):
     """
-    Creates Stan model. Compiles a Stan model and saves it to .pkl file to the /tmp folder if
-        file doesn't exist yet and load precompiled model if there is a model file in the /tmp.
+    Creates Stan model. Compiles a Stan model and saves it to .pkl file to the folder selected by tempfile module if
+        file doesn't exist yet and load precompiled model if there is a model file in temporary dir.
     Args:
         model_file: model file location
         distribution: name of the KPI distribution model, which assumes a 
