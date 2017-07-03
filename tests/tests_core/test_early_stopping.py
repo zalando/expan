@@ -110,7 +110,7 @@ class BayesFactorTestCases(EarlyStoppingTestCase):
         """
         Check the Bayes factor function with input that contains nan values.
         """
-        stop, _, _, _, _, _, _ = es.bayes_factor(self.rand_s5, self.rand_s6)
+        stop, _, _, _, _, _, _ = es.bayes_factor(self.rand_s5, self.rand_s6, num_iters=2000)
         self.assertEqual(stop, 1)
 
 
