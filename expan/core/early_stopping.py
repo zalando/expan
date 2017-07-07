@@ -7,6 +7,7 @@ from scipy.stats import gaussian_kde, norm, cauchy
 from expan.core.util import drop_nan
 
 import expan.core.statistics as statx
+from expan.core.statistic import Statistic
 
 import pickle
 import tempfile
@@ -30,6 +31,16 @@ def obrien_fleming(information_fraction, alpha=0.05):
     """
     return (1 - norm.cdf(norm.ppf(1 - alpha / 2) / np.sqrt(information_fraction))) * 2
 
+
+def group_sequential_OCTO1616(*vargs):
+    res = group_sequential(*vargs)
+    return [Statistic("stop"    , res[0]),
+            Statistic("delta"   , res[1]),
+            Statistic("interval", res[2]),
+            Statistic("n_x"     , res[3]),
+            Statistic("n_y"     , res[4]),
+            Statistic("mu_x"    , res[5]),
+            Statistic("mu_y"    , res[6])]
 
 def group_sequential(x,
                      y,
@@ -215,6 +226,16 @@ def _bayes_sampling(x, y, distribution='normal', num_iters=25000):
     return traces, n_x, n_y, mu_x, mu_y
 
 
+def bayes_factor_OCTO1616(*vargs):
+    res = bayes_factor(*vargs)
+    return [Statistic("stop"    , res[0]),
+            Statistic("delta"   , res[1]),
+            Statistic("interval", res[2]),
+            Statistic("n_x"     , res[3]),
+            Statistic("n_y"     , res[4]),
+            Statistic("mu_x"    , res[5]),
+            Statistic("mu_y"    , res[6])]
+
 def bayes_factor(x, y, distribution='normal', num_iters=25000):
     """
     Args:
@@ -245,6 +266,16 @@ def bayes_factor(x, y, distribution='normal', num_iters=25000):
 
     return stop, mu_x - mu_y, {'lower': interval[0], 'upper': interval[1]}, n_x, n_y, mu_x, mu_y
 
+
+def bayes_precision_OCTO1616(*vargs):
+    res = bayes_precision(*vargs)
+    return [Statistic("stop"    , res[0]),
+            Statistic("delta"   , res[1]),
+            Statistic("interval", res[2]),
+            Statistic("n_x"     , res[3]),
+            Statistic("n_y"     , res[4]),
+            Statistic("mu_x"    , res[5]),
+            Statistic("mu_y"    , res[6])]
 
 def bayes_precision(x, y, distribution='normal', posterior_width=0.08, num_iters=25000):
     """
