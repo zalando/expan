@@ -4,6 +4,8 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
+from expan.core.statistic import Statistic
+
 
 def _delta_mean(x, y):
     """Implemented as function to allow calling from bootstrap. """
@@ -20,6 +22,15 @@ def make_delta(assume_normal=True, percentiles=[2.5, 97.5],
 
     return f
 
+
+def delta_OCTO1616(*vargs):
+    res = delta(*vargs)
+    return [Statistic("delta",         res[0]),
+            Statistic("interval",      res[1]),
+            Statistic("sample size x", res[2]),
+            Statistic("sample size y", res[3]),
+            Statistic("mu_x",          res[4]),
+            Statistic("mu_y",          res[y])]
 
 def delta(x, y, assume_normal=True, percentiles=[2.5, 97.5],
           min_observations=20, nruns=10000, relative=False, x_weights=1, y_weights=1):
