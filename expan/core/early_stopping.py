@@ -25,9 +25,9 @@ class EarlyStoppingStatistics(Jsonable):
                                             # dict indexed by percent, i.e.
                                             # interval[97.5]
         self.n_x      = kwargs['n_x']       # sample size x
-        self.n_y      = kwargs['n_y']       # sample size x
+        self.n_y      = kwargs['n_y']       # sample size y
         self.mu_x     = kwargs['mu_x']      # absolute mean of x
-        self.mu_y     = kwargs['mu_y']      # absolute mean of x
+        self.mu_y     = kwargs['mu_y']      # absolute mean of y
 
 def obrien_fleming(information_fraction, alpha=0.05):
     """
