@@ -205,25 +205,30 @@ class Experiment(ExperimentData):
             Results object containing the computed deltas.
         """
         kpis_to_analyse = kpis_to_analyse or self.kpi_names.copy()
+        do_delta = lambda x, y, xw, yw: deltaWorker(x, y, xw, yw)
+
+        # def do_delta(x, y, x_weights, y_weights):
+        #     return delta_to_dataframe_all_variants(metric_df.columns[2],
+        #             *deltaWorker(x=x,
+        #                 y=y,
+        #                 x_weights=x_weights,
+        #                 y_weights=y_weights))
 
         for mname in kpis_to_analyse:
             metric_df = self._get_metric_df(mname, reference_kpis, weighted_kpis)
-            def do_delta(x, y, x_weights, y_weights):
-                return delta_to_dataframe_all_variants(metric_df.columns[2],
-                                                       *deltaWorker(x=x,
-                                                                    y=y,
-                                                                    x_weights=x_weights,
-                                                                    y_weights=y_weights))
             try:
                 with warnings.catch_warnings(record=True) as w:
                     # Cause all warnings to always be triggered.
                     warnings.simplefilter("always")
-                    df = metric_df.groupby('variant').apply(self._apply_reweighting_and_all_variants,
-                                                            metric_df=metric_df,
-                                                            weighted_kpis=weighted_kpis,
-                                                            reference_kpis=reference_kpis,
-                                                            mname=mname,
-                                                            func_apply_variants=do_delta).unstack(0)
+                    for df in metric_df.groupby('variant'):
+                        r = self._apply_reweighting_and_all_variants(df, metric_df, weighted_kpis,
+                                                                     reference_kpis, mname, do_delta)
+                    # df = metric_df.groupby('variant').apply(self._apply_reweighting_and_all_variants,
+                    #                                         metric_df=metric_df,
+                    #                                         weighted_kpis=weighted_kpis,
+                    #                                         reference_kpis=reference_kpis,
+                    #                                         mname=mname,
+                    #                                         func_apply_variants=do_delta).unstack(0)
                     if len(w):
                         res.metadata['warnings']['Experiment.delta'] = w[-1].message
 
