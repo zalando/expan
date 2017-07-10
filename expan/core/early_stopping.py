@@ -9,11 +9,25 @@ from expan.core.util import drop_nan
 import expan.core.statistics as statx
 from expan.core.statistic import Statistic
 
+from expan.core.jsonable import Jsonable
+
 import pickle
 import tempfile
 
 __location__ = realpath(join(os.getcwd(), dirname(__file__)))
 
+
+class EarlyStoppingStatistics(Jsonable):
+    def __init__(self, **kwargs):
+        self.stop     = kwargs['stop']      # stop label (Boolean)
+        self.delta    = kwargs['delta']     # effect size (delta)
+        self.interval = kwargs['interval']  # creditble interval of delta
+                                            # dict indexed by percent, i.e.
+                                            # interval[97.5]
+        self.n_x      = kwargs['n_x']       # sample size x
+        self.n_y      = kwargs['n_y']       # sample size x
+        self.mu_x     = kwargs['mu_x']      # absolute mean of x
+        self.mu_y     = kwargs['mu_y']      # absolute mean of x
 
 def obrien_fleming(information_fraction, alpha=0.05):
     """
@@ -31,16 +45,6 @@ def obrien_fleming(information_fraction, alpha=0.05):
     """
     return (1 - norm.cdf(norm.ppf(1 - alpha / 2) / np.sqrt(information_fraction))) * 2
 
-
-def group_sequential_OCTO1616(*vargs):
-    res = group_sequential(*vargs)
-    return [Statistic("stop"    , res[0]),
-            Statistic("delta"   , res[1]),
-            Statistic("interval", res[2]),
-            Statistic("n_x"     , res[3]),
-            Statistic("n_y"     , res[4]),
-            Statistic("mu_x"    , res[5]),
-            Statistic("mu_y"    , res[6])]
 
 def group_sequential(x,
                      y,
@@ -62,14 +66,7 @@ def group_sequential(x,
         cap: upper bound of the adapted z-score
 
     Returns:
-        tuple: 
-            - stop label
-            - effect size (delta)
-            - confidence interval of delta
-            - sample size of x
-            - sample size of y
-            - absolute mean of x
-            - absolute mean of y
+        EarlyStoppingStatistics object
     """
     # Checking if data was provided
     if x is None or y is None:
@@ -107,14 +104,22 @@ def group_sequential(x,
     z = (mu_x - mu_y) / np.sqrt(sigma_x ** 2 / n_x + sigma_y ** 2 / n_y)
 
     if z > bound or z < -bound:
-        stop = 1
+        stop = True
     else:
-        stop = 0
+        stop = False
 
     interval = statx.normal_difference(mu_x, sigma_x, n_x, mu_y, sigma_y, n_y,
                                        [alpha_new * 100 / 2, 100 - alpha_new * 100 / 2])
 
-    return stop, mu_x - mu_y, interval, n_x, n_y, mu_x, mu_y
+    # return stop, mu_x - mu_y, interval, n_x, n_y, mu_x, mu_y
+
+    return EarlyStoppingStatistics(stop    = stop,
+                                  delta    = mu_x - mu_y,
+                                  interval = interval,
+                                  n_x      = n_x,
+                                  n_y      = n_y,
+                                  mu_x     = mu_x,
+                                  mu_y     = mu_y)
 
 
 def HDI_from_MCMC(posterior_samples, credible_mass=0.95):
@@ -167,6 +172,8 @@ def get_or_compile_stan_model(model_file, distribution):
             pickle.dump(sm, f)
     return sm
 
+cacheSamplingResults = True
+samplingResults = {} # memoized sampling results
 
 def _bayes_sampling(x, y, distribution='normal', num_iters=25000):
     """
@@ -197,6 +204,11 @@ def _bayes_sampling(x, y, distribution='normal', num_iters=25000):
     _x = drop_nan(_x)
     _y = drop_nan(_y)
 
+    key = (str(_x), str(_y))
+
+    if cacheSamplingResults and key in samplingResults:
+        return samplingResults[key]
+
     mu_x = np.nanmean(_x)
     mu_y = np.nanmean(_y)
     n_x = statx.sample_size(_x)
@@ -223,18 +235,11 @@ def _bayes_sampling(x, y, distribution='normal', num_iters=25000):
                       control={'stepsize': 0.01, 'adapt_delta': 0.99})
     traces = fit.extract()
 
+    if cacheSamplingResults:
+        samplingResults[key] = (traces, n_x, n_y, mu_x, mu_y)
+
     return traces, n_x, n_y, mu_x, mu_y
 
-
-def bayes_factor_OCTO1616(*vargs):
-    res = bayes_factor(*vargs)
-    return [Statistic("stop"    , res[0]),
-            Statistic("delta"   , res[1]),
-            Statistic("interval", res[2]),
-            Statistic("n_x"     , res[3]),
-            Statistic("n_y"     , res[4]),
-            Statistic("mu_x"    , res[5]),
-            Statistic("mu_y"    , res[6])]
 
 def bayes_factor(x, y, distribution='normal', num_iters=25000):
     """
@@ -246,14 +251,7 @@ def bayes_factor(x, y, distribution='normal', num_iters=25000):
         num_iters: number of iterations of bayes sampling
 
     Returns:
-        tuple: 
-            - stop label
-            - effect size (delta)
-            - credible interval of delta
-            - sample size of x
-            - sample size of y
-            - absolute mean of x
-            - absolute mean of y
+        EarlyStoppingStatistics
     """
     traces, n_x, n_y, mu_x, mu_y = _bayes_sampling(x, y, distribution=distribution, num_iters=num_iters)
     kde = gaussian_kde(traces['delta'])
@@ -261,21 +259,24 @@ def bayes_factor(x, y, distribution='normal', num_iters=25000):
     prior = cauchy.pdf(0, loc=0, scale=1)
     # BF_01
     bf = kde.evaluate(0)[0] / prior
-    stop = int(bf > 3 or bf < 1 / 3.)
-    interval = HDI_from_MCMC(traces['delta'])
+    # stop = int(bf > 3 or bf < 1 / 3.)
+    stop = bf > 3 or bf < 1 / 3.
 
-    return stop, mu_x - mu_y, {'lower': interval[0], 'upper': interval[1]}, n_x, n_y, mu_x, mu_y
+    credibleMass = 0.95                # another magic number
+    leftOut      = 1.0 - credibleMass
+    p1           = round(leftOut/2.0, 5)
+    p2           = round(1.0 - leftOut/2.0, 5)
+    interval = HDI_from_MCMC(traces['delta'], credibleMass)
 
+    # return stop, mu_x - mu_y, {'lower': interval[0], 'upper': interval[1]}, n_x, n_y, mu_x, mu_y
+    return EarlyStoppingStatistics(stop    = stop,
+                                  delta    = mu_x - mu_y,
+                                  interval = {p1*100: interval[0], p2*100: interval[1]},
+                                  n_x      = n_x,
+                                  n_y      = n_y,
+                                  mu_x     = mu_x,
+                                  mu_y     = mu_y)
 
-def bayes_precision_OCTO1616(*vargs):
-    res = bayes_precision(*vargs)
-    return [Statistic("stop"    , res[0]),
-            Statistic("delta"   , res[1]),
-            Statistic("interval", res[2]),
-            Statistic("n_x"     , res[3]),
-            Statistic("n_y"     , res[4]),
-            Statistic("mu_x"    , res[5]),
-            Statistic("mu_y"    , res[6])]
 
 def bayes_precision(x, y, distribution='normal', posterior_width=0.08, num_iters=25000):
     """
@@ -289,17 +290,23 @@ def bayes_precision(x, y, distribution='normal', posterior_width=0.08, num_iters
         num_iters: number of iterations of bayes sampling
 
     Returns:
-        tuple: 
-            - stop label
-            - effect size (delta)
-            - credible interval of delta
-            - sample size of x
-            - sample size of y
-            - absolute mean of x
-            - absolute mean of y
+        EarlyStoppingStatistics object
     """
     traces, n_x, n_y, mu_x, mu_y = _bayes_sampling(x, y, distribution=distribution, num_iters=num_iters)
-    interval = HDI_from_MCMC(traces['delta'])
-    stop = int(interval[1] - interval[0] < posterior_width)
+    credibleMass = 0.95                # another magic number
+    leftOut      = 1.0 - credibleMass
+    p1           = round(leftOut/2.0, 5)
+    p2           = round(1.0 - leftOut/2.0, 5)
+    interval = HDI_from_MCMC(traces['delta'], credibleMass)
 
-    return stop, mu_x - mu_y, {'lower': interval[0], 'upper': interval[1]}, n_x, n_y, mu_x, mu_y
+    # stop = int(interval[1] - interval[0] < posterior_width)
+    stop = interval[1] - interval[0] < posterior_width
+
+    # return stop, mu_x - mu_y, {'lower': interval[0], 'upper': interval[1]}, n_x, n_y, mu_x, mu_y
+    return EarlyStoppingStatistics(stop    = stop,
+                                  delta    = mu_x - mu_y,
+                                  interval = {p1*100: interval[0], p2*100: interval[1]},
+                                  n_x      = n_x,
+                                  n_y      = n_y,
+                                  mu_x     = mu_x,
+                                  mu_y     = mu_y)
