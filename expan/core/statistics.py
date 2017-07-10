@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-from expan.core.statistic import Statistic
 from expan.core.jsonable  import Jsonable
 
 class DeltaStatistics(Jsonable):
