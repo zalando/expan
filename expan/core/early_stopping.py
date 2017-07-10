@@ -7,7 +7,6 @@ from scipy.stats import gaussian_kde, norm, cauchy
 from expan.core.util import drop_nan
 
 import expan.core.statistics as statx
-from expan.core.statistic import Statistic
 
 from expan.core.jsonable import Jsonable
 
