@@ -157,21 +157,21 @@ class Experiment(ExperimentData):
         if weighted_kpis is not None and mname in weighted_kpis:
             reference_kpi = reference_kpis[mname]
 
-            ctrl_reference_kpis = metric_df.loc[metric_df.variant == self.baseline_variant, reference_kpi]
+            ctrl_reference_kpis  = metric_df.loc[metric_df.variant == self.baseline_variant, reference_kpi]
             treat_reference_kpis = df_grouped_by_variant.loc[:, reference_kpi]
 
-            n_nan_ref_ctrl = sum(ctrl_reference_kpis == 0) + np.isnan(ctrl_reference_kpis).sum()
-            n_non_nan_ref_ctrl = len(ctrl_reference_kpis) - n_nan_ref_ctrl
-
+            n_nan_ref_ctrl  = sum( ctrl_reference_kpis == 0) + np.isnan( ctrl_reference_kpis).sum()
             n_nan_ref_treat = sum(treat_reference_kpis == 0) + np.isnan(treat_reference_kpis).sum()
+
+            n_non_nan_ref_ctrl  = len( ctrl_reference_kpis) - n_nan_ref_ctrl
             n_non_nan_ref_treat = len(treat_reference_kpis) - n_nan_ref_treat
 
-            ctrl_weights = n_non_nan_ref_ctrl * ctrl_reference_kpis / np.nansum(ctrl_reference_kpis)
+            ctrl_weights  = n_non_nan_ref_ctrl  *  ctrl_reference_kpis / np.nansum( ctrl_reference_kpis)
             treat_weights = n_non_nan_ref_treat * treat_reference_kpis / np.nansum(treat_reference_kpis)
 
         else:
-            ctrl_weights = 1.
-            treat_weights = 1.
+            ctrl_weights  = 1.0
+            treat_weights = 1.0
 
         return func_apply_variants(x=treat_kpis, y=ctrl_kpis, x_weights=treat_weights, y_weights=ctrl_weights)
 
