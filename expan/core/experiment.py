@@ -205,7 +205,6 @@ class Experiment(ExperimentData):
             Results object containing the computed deltas.
         """
         kpis_to_analyse = kpis_to_analyse or self.kpi_names.copy()
-        do_delta = lambda x, y, xw, yw: deltaWorker(x, y, xw, yw)
 
         # def do_delta(x, y, x_weights, y_weights):
         #     return delta_to_dataframe_all_variants(metric_df.columns[2],
@@ -222,7 +221,7 @@ class Experiment(ExperimentData):
                     warnings.simplefilter("always")
                     for df in metric_df.groupby('variant'):
                         r = self._apply_reweighting_and_all_variants(df, metric_df, weighted_kpis,
-                                                                     reference_kpis, mname, do_delta)
+                                                                     reference_kpis, mname, deltaWorker)
                     # df = metric_df.groupby('variant').apply(self._apply_reweighting_and_all_variants,
                     #                                         metric_df=metric_df,
                     #                                         weighted_kpis=weighted_kpis,
