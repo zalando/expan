@@ -55,58 +55,58 @@ class DeltaTestCases(StatisticsTestCase):
         Result of delta() assuming normality equals expected result.
         """
         # Computing delta assumed normal
-        result1 = statx.delta(
+        res = statx.delta(
             self.samples.temperature[self.samples.gender == 1],
             self.samples.temperature[self.samples.gender == 2],
             percentiles=[2.5, 97.5],
             assume_normal=True)
         # Checking if mean has right value
-        self.assertAlmostEqual(result1[0], -0.28923076923075541)
+        self.assertAlmostEqual(res.delta,          -0.28923076923075541)
         # Checking if lower percentile has right value
-        self.assertAlmostEqual(result1[1][2.5], -0.53770569567692295)
+        self.assertAlmostEqual(res.interval[2.5],  -0.53770569567692295)
         # Checking if uper percentile has right value
-        self.assertAlmostEqual(result1[1][97.5], -0.040755842784587965)
+        self.assertAlmostEqual(res.interval[97.5], -0.040755842784587965)
         # Checking if sample size 1 is correct
-        self.assertEqual(result1[2], 65)
+        self.assertEqual(res.n_x, 65)
         # Checking if sample size 2 is correct
-        self.assertEqual(result1[3], 65)
+        self.assertEqual(res.n_y, 65)
 
     def test__delta__nan_handling(self):
         """
         Test correct handling of nans. (ignored)
         """
-        result1 = statx.delta(self.rand_s1, self.rand_s2)
-        self.assertEqual(result1[2], 1000)
-        self.assertEqual(result1[3], 1000)
+        res = statx.delta(self.rand_s1, self.rand_s2)
+        self.assertEqual(res.n_x, 1000)
+        self.assertEqual(res.n_y, 1000)
 
         r1 = self.rand_s1.copy();
         r1[90:] = np.nan
-        (uplift, pctiles, ss_x, ss_y, mean_x, mean_y) = statx.delta(r1, self.rand_s2)
+        res = statx.delta(r1, self.rand_s2)
 
-        self.assertAlmostEqual(uplift, -0.1, 1)
-        self.assertEqual(ss_x, 90)
-        self.assertEqual(ss_y, 1000)
+        self.assertAlmostEqual (res.delta, -0.1, 1)
+        self.assertEqual       (res.n_x, 90)
+        self.assertEqual       (res.n_y, 1000)
 
     def test__delta__computation_not_assumed_normal(self):
         """
         Result of delta() not assuming normality equals expected result.
         """
         # Computing delta not assumed normal
-        result1 = statx.delta(
+        res = statx.delta(
             self.samples.temperature[self.samples.gender == 1],
             self.samples.temperature[self.samples.gender == 2],
             percentiles=[2.5, 97.5],
             assume_normal=True)
         # Checking if mean has right value
-        self.assertAlmostEqual(result1[0], -0.28923076923075541)
+        self.assertAlmostEqual(res.delta,          -0.28923076923075541)
         # Checking if lower percentile has right value
-        self.assertAlmostEqual(result1[1][2.5], -0.53770569567692295)
+        self.assertAlmostEqual(res.interval[2.5],  -0.53770569567692295)
         # Checking if uper percentile has right value
-        self.assertAlmostEqual(result1[1][97.5], -0.040755842784587965)
+        self.assertAlmostEqual(res.interval[97.5], -0.040755842784587965)
         # Checking if sample size 1 is correct
-        self.assertEqual(result1[2], 65)
+        self.assertEqual(res.n_x, 65)
         # Checking if sample size 2 is correct
-        self.assertEqual(result1[3], 65)
+        self.assertEqual(res.n_y, 65)
 
 
 class ChiSquareTestCases(StatisticsTestCase):

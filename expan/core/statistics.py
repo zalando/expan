@@ -5,6 +5,18 @@ import pandas as pd
 from scipy import stats
 
 from expan.core.statistic import Statistic
+from expan.core.jsonable  import Jsonable
+
+class DeltaStatistics(Jsonable):
+    def __init__(self, **kwargs):
+        self.delta    = kwargs['delta']    # mean value of the difference
+        self.interval = kwargs['interval'] # creditble interval of delta
+                                           # dict indexed by percent, i.e.
+                                           # interval[97.5]
+        self.n_x      = kwargs['n_x']      # sample size x
+        self.n_y      = kwargs['n_y']      # sample size y
+        self.mu_x     = kwargs['mu_x']     # absolute mean of x
+        self.mu_y     = kwargs['mu_y']     # absolute mean of y
 
 
 def _delta_mean(x, y):
@@ -22,15 +34,6 @@ def make_delta(assume_normal=True, percentiles=[2.5, 97.5],
 
     return f
 
-
-def delta_OCTO1616(*vargs):
-    res = delta(*vargs)
-    return [Statistic("delta",         res[0]),
-            Statistic("interval",      res[1]),
-            Statistic("sample size x", res[2]),
-            Statistic("sample size y", res[3]),
-            Statistic("mu_x",          res[4]),
-            Statistic("mu_y",          res[y])]
 
 def delta(x, y, assume_normal=True, percentiles=[2.5, 97.5],
           min_observations=20, nruns=10000, relative=False, x_weights=1, y_weights=1):
@@ -70,13 +73,7 @@ def delta(x, y, assume_normal=True, percentiles=[2.5, 97.5],
             for ratios.
 
     Returns:
-        tuple:
-            * mu (float): mean value of the difference
-            * c_i (dict): percentile levels (index) and values
-            * ss_x (int): size of x excluding NA values
-            * ss_y (int): size of y excluding NA values
-            * _x (float): absolute mean of x
-            * _y (float): absolute mean of y
+        DeltaStatistics object
     """
     # Checking if data was provided
     if x is None or y is None:
@@ -114,8 +111,13 @@ def delta(x, y, assume_normal=True, percentiles=[2.5, 97.5],
                                relative=relative)
 
     # Return the result structure
-    return mu, c_i, ss_x, ss_y, np.nanmean(_x), np.nanmean(_y)
-
+    # return mu, c_i, ss_x, ss_y, np.nanmean(_x), np.nanmean(_y)
+    return DeltaStatistics(delta    = mu,
+                           interval = c_i,
+                           n_x      = ss_x,
+                           n_y      = ss_y,
+                           mu_x     = np.nanmean(_x),
+                           mu_y     = np.nanmean(_x))
 
 def sample_size(x):
     """
@@ -468,10 +470,10 @@ def normal_difference(mean1, std1, n1, mean2, std2, n2, percentiles=[2.5, 97.5],
 
     # Mapping percentiles via standard error
     if relative:
-        return dict([(p, stats.t.ppf(p / 100.0, df=d_free) * st_error)
+        return dict([(round(p, 5), stats.t.ppf(p / 100.0, df=d_free) * st_error)
                      for p in percentiles])
     else:
-        return dict([(p, mean + stats.t.ppf(p / 100.0, df=d_free) * st_error)
+        return dict([(round(p, 5), mean + stats.t.ppf(p / 100.0, df=d_free) * st_error)
                      for p in percentiles])
 
 
