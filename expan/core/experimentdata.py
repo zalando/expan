@@ -72,8 +72,9 @@ class ExperimentData(object):
 
         feature_indices = copy.deepcopy(self.primary_indices)
         kpi_indices = copy.deepcopy(self.primary_indices)
-        if metrics is not None:
-            kpi_indices += [i for i in self.optional_kpi_indices if i in metrics.columns]
+        # (1)
+        # if metrics is not None:
+        #     kpi_indices += [i for i in self.optional_kpi_indices if i in metrics.columns]
 
         if metrics is None:
             if not isinstance(features, pd.DataFrame):
@@ -83,6 +84,8 @@ class ExperimentData(object):
                 self.features = features.copy(deep=deepcopy)
                 self.variant_names = set(np.unique(self.features.variant))
         else:
+            # (1)
+            kpi_indices += [i for i in self.optional_kpi_indices if i in metrics.columns]
             if isinstance(features, pd.DataFrame):
                 self.kpis = metrics.copy(deep=deepcopy)
                 self.features = features.copy(deep=deepcopy)

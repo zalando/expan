@@ -219,6 +219,9 @@ class Experiment(ExperimentData):
                 with warnings.catch_warnings(record=True) as w:
                     # Cause all warnings to always be triggered.
                     warnings.simplefilter("always")
+                    # variants = set(metric_df.variant)
+                    # for v in variants:
+                    #    df = metric_df[
                     for df in metric_df.groupby('variant'):
                         r = self._apply_reweighting_and_all_variants(df, metric_df, weighted_kpis,
                                                                      reference_kpis, mname, deltaWorker)
