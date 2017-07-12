@@ -5,12 +5,22 @@ import warnings
 import numpy as np
 import pandas as pd
 
+
 import expan.core.binning as binmodule
 import expan.core.early_stopping as es
 import expan.core.statistics as statx
 from expan.core.experimentdata import ExperimentData
 from expan.core.results import Results, delta_to_dataframe_all_variants, feature_check_to_dataframe, \
     early_stopping_to_dataframe
+
+from expan.core.jsonable import Jsonable
+
+class DeltaResult(Jsonable):
+    def __init__(self, **kwargs):
+        self.kpi              = kwargs['kpi']
+        self.controlVariant   = kwargs['controlVariant']
+        self.treatmentVariant = kwargs['treatmentVariant']
+        self.deltaStatistics  = kwargs['deltaStatistics']
 
 # raise the same warning multiple times
 warnings.simplefilter('always', UserWarning)
@@ -207,47 +217,26 @@ class Experiment(ExperimentData):
         """
         kpis_to_analyse = kpis_to_analyse or self.kpi_names.copy()
 
-        # def do_delta(x, y, x_weights, y_weights):
-        #     return delta_to_dataframe_all_variants(metric_df.columns[2],
-        #             *deltaWorker(x=x,
-        #                 y=y,
-        #                 x_weights=x_weights,
-        #                 y_weights=y_weights))
-
-        for mname in kpis_to_analyse:
-            print(mname)
-            metric_df = self._get_metric_df(mname, reference_kpis, weighted_kpis)
+        results = []
+        for kpi in kpis_to_analyse:
+            metric_df = self._get_metric_df(kpi, reference_kpis, weighted_kpis)
             try:
                 with warnings.catch_warnings(record=True) as w:
                     # Cause all warnings to always be triggered.
                     warnings.simplefilter("always")
-                    # variants = set(metric_df.variant)
-                    # for v in variants:
-                    #    df = metric_df[
                     for variantName in self.variant_names:
                         df = metric_df.set_index('variant').loc[variantName]
-                        print(variantName)
-                        res = self._apply_reweighting_and_all_variants(df, metric_df, weighted_kpis,
-                                                                     reference_kpis, mname, deltaWorker)
-                    # df = metric_df.groupby('variant').apply(self._apply_reweighting_and_all_variants,
-                    #                                         metric_df=metric_df,
-                    #                                         weighted_kpis=weighted_kpis,
-                    #                                         reference_kpis=reference_kpis,
-                    #                                         mname=mname,
-                    #                                         func_apply_variants=do_delta).unstack(0)
-                    # if len(w):
-                    #     res.metadata['warnings']['Experiment.delta'] = w[-1].message
-
-                    # if res.df is None:
-                    #     res.df = df
-                    # else:
-                    #     res.df = res.df.append(df)
-
+                        ds = self._apply_reweighting_and_all_variants(df, metric_df, weighted_kpis,
+                                                                      reference_kpis, kpi, deltaWorker)
+                        results.append(DeltaResult(kpi              = kpi,
+                                                   controlVariant   = self.baseline_variant,
+                                                   treatmentVariant = variantName,
+                                                   deltaStatistics  = ds))
             except ValueError as e:
                 pass
                 # res.metadata['errors']['Experiment.delta'] = e
 
-        return res
+        return results
 
 
     def group_sequential_delta(self,

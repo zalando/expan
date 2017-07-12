@@ -271,8 +271,8 @@ def bayes_factor(x, y, distribution='normal', num_iters=25000):
     return EarlyStoppingStatistics(stop     = stop,
                                    delta    = mu_x - mu_y,
                                    interval = {p1*100: interval[0], p2*100: interval[1]},
-                                   n_x      = n_x,
-                                   n_y      = n_y,
+                                   n_x      = int(n_x),
+                                   n_y      = int(n_y),
                                    mu_x     = mu_x,
                                    mu_y     = mu_y)
 
@@ -305,7 +305,7 @@ def bayes_precision(x, y, distribution='normal', posterior_width=0.08, num_iters
     return EarlyStoppingStatistics(stop     = stop,
                                    delta    = mu_x - mu_y,
                                    interval = {p1*100: interval[0], p2*100: interval[1]},
-                                   n_x      = n_x,
-                                   n_y      = n_y,
+                                   n_x      = int(n_x),
+                                   n_y      = int(n_y),
                                    mu_x     = mu_x,
                                    mu_y     = mu_y)

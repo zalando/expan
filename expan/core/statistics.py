@@ -113,10 +113,10 @@ def delta(x, y, assume_normal=True, percentiles=[2.5, 97.5],
     # return mu, c_i, ss_x, ss_y, np.nanmean(_x), np.nanmean(_y)
     return DeltaStatistics(delta    = mu,
                            interval = c_i,
-                           n_x      = ss_x,
-                           n_y      = ss_y,
-                           mu_x     = np.nanmean(_x),
-                           mu_y     = np.nanmean(_x))
+                           n_x      = int(ss_x),
+                           n_y      = int(ss_y),
+                           mu_x     = float(np.nanmean(_x)),
+                           mu_y     = float(np.nanmean(_x)))
 
 def sample_size(x):
     """
