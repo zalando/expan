@@ -176,8 +176,9 @@ class Experiment(ExperimentData):
         return func_apply_variants(x=treat_kpis, y=ctrl_kpis, x_weights=treat_weights, y_weights=ctrl_weights)
 
 
+
     def fixed_horizon_delta(self,
-                            res,
+                            #res,
                             kpis_to_analyse=None,
                             reference_kpis={},
                             weighted_kpis=None,
@@ -214,6 +215,7 @@ class Experiment(ExperimentData):
         #                 y_weights=y_weights))
 
         for mname in kpis_to_analyse:
+            print(mname)
             metric_df = self._get_metric_df(mname, reference_kpis, weighted_kpis)
             try:
                 with warnings.catch_warnings(record=True) as w:
@@ -222,8 +224,10 @@ class Experiment(ExperimentData):
                     # variants = set(metric_df.variant)
                     # for v in variants:
                     #    df = metric_df[
-                    for df in metric_df.groupby('variant'):
-                        r = self._apply_reweighting_and_all_variants(df, metric_df, weighted_kpis,
+                    for variantName in self.variant_names:
+                        df = metric_df.set_index('variant').loc[variantName]
+                        print(variantName)
+                        res = self._apply_reweighting_and_all_variants(df, metric_df, weighted_kpis,
                                                                      reference_kpis, mname, deltaWorker)
                     # df = metric_df.groupby('variant').apply(self._apply_reweighting_and_all_variants,
                     #                                         metric_df=metric_df,
@@ -231,16 +235,17 @@ class Experiment(ExperimentData):
                     #                                         reference_kpis=reference_kpis,
                     #                                         mname=mname,
                     #                                         func_apply_variants=do_delta).unstack(0)
-                    if len(w):
-                        res.metadata['warnings']['Experiment.delta'] = w[-1].message
+                    # if len(w):
+                    #     res.metadata['warnings']['Experiment.delta'] = w[-1].message
 
-                    if res.df is None:
-                        res.df = df
-                    else:
-                        res.df = res.df.append(df)
+                    # if res.df is None:
+                    #     res.df = df
+                    # else:
+                    #     res.df = res.df.append(df)
 
             except ValueError as e:
-                res.metadata['errors']['Experiment.delta'] = e
+                pass
+                # res.metadata['errors']['Experiment.delta'] = e
 
         return res
 
