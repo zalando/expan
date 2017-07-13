@@ -5,6 +5,8 @@ import warnings
 import numpy as np
 import pandas as pd
 
+from collections import defaultdict
+
 
 import expan.core.binning as binmodule
 import expan.core.early_stopping as es
@@ -14,13 +16,6 @@ from expan.core.results import Results, delta_to_dataframe_all_variants, feature
     early_stopping_to_dataframe
 
 from expan.core.jsonable import Jsonable
-
-class DeltaResult(Jsonable):
-    def __init__(self, **kwargs):
-        self.kpi              = kwargs['kpi']
-        self.controlVariant   = kwargs['controlVariant']
-        self.treatmentVariant = kwargs['treatmentVariant']
-        self.deltaStatistics  = kwargs['deltaStatistics']
 
 # raise the same warning multiple times
 warnings.simplefilter('always', UserWarning)
@@ -48,6 +43,12 @@ class Experiment(ExperimentData):
                 baseline_variant))
         # Add baseline to metadata
         self.metadata['baseline_variant'] = baseline_variant
+        self.rawDF = self.kpis.reset_index()
+
+
+    def getKPIbyNameAndVariant(self, name, variant):
+        return self.rawDF.set_index('variant').loc[variant][name]
+
 
 
     @property
@@ -112,7 +113,7 @@ class Experiment(ExperimentData):
 
         if kpi_subset is not None:
             kpis_to_analyse.intersection_update(kpi_subset)
-        logger.debug('kpis_to_analyse: ' + ','.join(kpis_to_analyse))
+        # logger.debug('kpis_to_analyse: ' + ','.join(kpis_to_analyse))
 
         defaultArgs = [res, kpis_to_analyse, reference_kpis, weighted_kpis]
         deltaWorker = statx.make_delta(assume_normal, percentiles, min_observations, nruns, relative)
@@ -122,10 +123,10 @@ class Experiment(ExperimentData):
             alpha = (percentiles[0] + 100 - percentiles[1]) / 100
 
         method_table = {
-            'fixed_horizon': (self.fixed_horizon_delta, defaultArgs + [deltaWorker]),
+            'fixed_horizon':    (self.fixed_horizon_delta,    defaultArgs + [deltaWorker]),
             'group_sequential': (self.group_sequential_delta, defaultArgs + [alpha]),
-            'bayes_factor': (self.bayes_factor_delta, defaultArgs),
-            'bayes_precision': (self.bayes_precision_delta, defaultArgs),
+            'bayes_factor':     (self.bayes_factor_delta,     defaultArgs),
+            'bayes_precision':  (self.bayes_precision_delta,  defaultArgs),
         }
 
         if not method in method_table:
@@ -135,6 +136,35 @@ class Experiment(ExperimentData):
             f = entry[0]
             vargs = entry[1]
             return f(*vargs)
+
+
+    def _getWeights(self, kpi, referenceKpiDict, variant):
+        if kpi not in referenceKpiDict:
+            return 1.0
+        referenceKpi = referenceKpiDict[kpi]
+        x            = self.getKPIbyNameAndVariant(referenceKpi, variant)
+        zerosAndNans = sum(x == 0) + np.isnan(x).sum()
+        nonZeros     = len(x) - zerosAndNans
+        return nonZeros/np.nansum(x) * x
+
+
+    def fhd(self, reportKpis=None, referenceKpis={}, deltaWorker=statx.make_delta()):
+        reportKpis = reportKpis or self.kpi_names
+
+        results = []
+        for kpi in reportKpis:
+            control       = self.getKPIbyNameAndVariant(kpi, self.baseline_variant)
+            controlWeight = self._getWeights(kpi, referenceKpis, self.baseline_variant)
+            for variant in self.variant_names:
+                treatment       = self.getKPIbyNameAndVariant(kpi, variant)
+                treatmentWeight = self._getWeights(kpi, referenceKpis, variant)
+                ds = deltaWorker(x=treatment*treatmentWeight, y=control*controlWeight)
+                results.append({'kpi'              : kpi,
+                                'controlVariant'   : self.baseline_variant,
+                                'treatmentVariant' : variant,
+                                'deltaStatistics'  : ds})
+
+        return results
 
 
     def _get_metric_df(self, mname, reference_kpis, weighted_kpis):
@@ -186,7 +216,6 @@ class Experiment(ExperimentData):
         return func_apply_variants(x=treat_kpis, y=ctrl_kpis, x_weights=treat_weights, y_weights=ctrl_weights)
 
 
-
     def fixed_horizon_delta(self,
                             #res,
                             kpis_to_analyse=None,
@@ -228,10 +257,10 @@ class Experiment(ExperimentData):
                         df = metric_df.set_index('variant').loc[variantName]
                         ds = self._apply_reweighting_and_all_variants(df, metric_df, weighted_kpis,
                                                                       reference_kpis, kpi, deltaWorker)
-                        results.append(DeltaResult(kpi              = kpi,
-                                                   controlVariant   = self.baseline_variant,
-                                                   treatmentVariant = variantName,
-                                                   deltaStatistics  = ds))
+                        results.append({'kpi'              : kpi,
+                                        'controlVariant'   : self.baseline_variant,
+                                        'treatmentVariant' : variantName,
+                                        'deltaStatistics'  : ds})
             except ValueError as e:
                 pass
                 # res.metadata['errors']['Experiment.delta'] = e
