@@ -61,31 +61,31 @@ class DeltaTestCases(StatisticsTestCase):
             percentiles=[2.5, 97.5],
             assume_normal=True)
         # Checking if mean has right value
-        self.assertAlmostEqual(res.delta,          -0.28923076923075541)
+        self.assertAlmostEqual(res['delta'],          -0.28923076923075541)
         # Checking if lower percentile has right value
-        self.assertAlmostEqual(res.interval[2.5],  -0.53770569567692295)
+        self.assertAlmostEqual(res['interval'][2.5],  -0.53770569567692295)
         # Checking if uper percentile has right value
-        self.assertAlmostEqual(res.interval[97.5], -0.040755842784587965)
+        self.assertAlmostEqual(res['interval'][97.5], -0.040755842784587965)
         # Checking if sample size 1 is correct
-        self.assertEqual(res.n_x, 65)
+        self.assertEqual(res['n_x'], 65)
         # Checking if sample size 2 is correct
-        self.assertEqual(res.n_y, 65)
+        self.assertEqual(res['n_y'], 65)
 
     def test__delta__nan_handling(self):
         """
         Test correct handling of nans. (ignored)
         """
         res = statx.delta(self.rand_s1, self.rand_s2)
-        self.assertEqual(res.n_x, 1000)
-        self.assertEqual(res.n_y, 1000)
+        self.assertEqual(res['n_x'], 1000)
+        self.assertEqual(res['n_y'], 1000)
 
         r1 = self.rand_s1.copy();
         r1[90:] = np.nan
         res = statx.delta(r1, self.rand_s2)
 
-        self.assertAlmostEqual (res.delta, -0.1, 1)
-        self.assertEqual       (res.n_x, 90)
-        self.assertEqual       (res.n_y, 1000)
+        self.assertAlmostEqual (res['delta'], -0.1, 1)
+        self.assertEqual       (res['n_x'],    90)
+        self.assertEqual       (res['n_y'],    1000)
 
     def test__delta__computation_not_assumed_normal(self):
         """
@@ -98,15 +98,15 @@ class DeltaTestCases(StatisticsTestCase):
             percentiles=[2.5, 97.5],
             assume_normal=True)
         # Checking if mean has right value
-        self.assertAlmostEqual(res.delta,          -0.28923076923075541)
+        self.assertAlmostEqual(res['delta'],          -0.28923076923075541)
         # Checking if lower percentile has right value
-        self.assertAlmostEqual(res.interval[2.5],  -0.53770569567692295)
+        self.assertAlmostEqual(res['interval'][2.5],  -0.53770569567692295)
         # Checking if uper percentile has right value
-        self.assertAlmostEqual(res.interval[97.5], -0.040755842784587965)
+        self.assertAlmostEqual(res['interval'][97.5], -0.040755842784587965)
         # Checking if sample size 1 is correct
-        self.assertEqual(res.n_x, 65)
+        self.assertEqual(res['n_x'], 65)
         # Checking if sample size 2 is correct
-        self.assertEqual(res.n_y, 65)
+        self.assertEqual(res['n_y'], 65)
 
 
 class ChiSquareTestCases(StatisticsTestCase):

@@ -4,20 +4,6 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-from expan.core.jsonable  import Jsonable
-
-class DeltaStatistics(Jsonable):
-    def __init__(self, **kwargs):
-        self.delta    = kwargs['delta']    # mean value of the difference
-        self.interval = kwargs['interval'] # creditble interval of delta
-                                           # dict indexed by percent, i.e.
-                                           # interval[97.5]
-        self.n_x      = kwargs['n_x']      # sample size x
-        self.n_y      = kwargs['n_y']      # sample size y
-        self.mu_x     = kwargs['mu_x']     # absolute mean of x
-        self.mu_y     = kwargs['mu_y']     # absolute mean of y
-
-
 def _delta_mean(x, y):
     """Implemented as function to allow calling from bootstrap. """
     return np.nanmean(x) - np.nanmean(y)
@@ -111,12 +97,12 @@ def delta(x, y, assume_normal=True, percentiles=[2.5, 97.5],
 
     # Return the result structure
     # return mu, c_i, ss_x, ss_y, np.nanmean(_x), np.nanmean(_y)
-    return DeltaStatistics(delta    = mu,
-                           interval = c_i,
-                           n_x      = int(ss_x),
-                           n_y      = int(ss_y),
-                           mu_x     = float(np.nanmean(_x)),
-                           mu_y     = float(np.nanmean(_x)))
+    return {'delta'    : mu,
+            'interval' : c_i,
+            'n_x'      : int(ss_x),
+            'n_y'      : int(ss_y),
+            'mu_x'     : float(np.nanmean(_x)),
+            'mu_y'     : float(np.nanmean(_x))}
 
 def sample_size(x):
     """
