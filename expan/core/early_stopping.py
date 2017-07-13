@@ -8,8 +8,6 @@ from expan.core.util import drop_nan
 
 import expan.core.statistics as statx
 
-from expan.core.jsonable import Jsonable
-
 import pickle
 import tempfile
 
