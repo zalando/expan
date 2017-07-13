@@ -31,6 +31,12 @@ def obrien_fleming(information_fraction, alpha=0.05):
     return (1 - norm.cdf(norm.ppf(1 - alpha / 2) / np.sqrt(information_fraction))) * 2
 
 
+def make_group_sequential(spending_function='obrien_fleming', alpha=0.05, cap=8):
+    def f(x, y, information_fraction):
+        return group_sequential(x, y, spending_function, information_fraction,
+                                alpha, cap)
+    return f
+
 def group_sequential(x,
                      y,
                      spending_function='obrien_fleming',
@@ -225,6 +231,12 @@ def _bayes_sampling(x, y, distribution='normal', num_iters=25000):
     return traces, n_x, n_y, mu_x, mu_y
 
 
+def make_bayes_factor(distribution='normal', num_iters=25000):
+    def f(x, y):
+        return bayes_factor(x, y, distribution, num_iters)
+    return f
+
+
 def bayes_factor(x, y, distribution='normal', num_iters=25000):
     """
     Args:
@@ -261,6 +273,11 @@ def bayes_factor(x, y, distribution='normal', num_iters=25000):
             'mu_x'     : mu_x,
             'mu_y'     : mu_y}
 
+
+def make_bayes_precision(distribution='normal', posterior_width=0.08, num_iters=25000):
+    def f(x, y):
+        return bayes_precision(x, y, distribution, posterior_width, num_iters)
+    return f
 
 def bayes_precision(x, y, distribution='normal', posterior_width=0.08, num_iters=25000):
     """
