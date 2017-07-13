@@ -5,8 +5,6 @@ import warnings
 import numpy as np
 import pandas as pd
 
-from collections import defaultdict
-
 
 import expan.core.binning as binmodule
 import expan.core.early_stopping as es
