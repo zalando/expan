@@ -16,18 +16,6 @@ import tempfile
 __location__ = realpath(join(os.getcwd(), dirname(__file__)))
 
 
-class EarlyStoppingStatistics(Jsonable):
-    def __init__(self, **kwargs):
-        self.stop     = kwargs['stop']      # stop label (Boolean)
-        self.delta    = kwargs['delta']     # effect size (delta)
-        self.interval = kwargs['interval']  # creditble interval of delta
-                                            # dict indexed by percent, i.e.
-                                            # interval[97.5]
-        self.n_x      = kwargs['n_x']       # sample size x
-        self.n_y      = kwargs['n_y']       # sample size y
-        self.mu_x     = kwargs['mu_x']      # absolute mean of x
-        self.mu_y     = kwargs['mu_y']      # absolute mean of y
-
 def obrien_fleming(information_fraction, alpha=0.05):
     """
     Calculate an approximation of the O'Brien-Fleming alpha spending function.
@@ -111,14 +99,13 @@ def group_sequential(x,
                                        [alpha_new * 100 / 2, 100 - alpha_new * 100 / 2])
 
     # return stop, mu_x - mu_y, interval, n_x, n_y, mu_x, mu_y
-
-    return EarlyStoppingStatistics(stop     = stop,
-                                   delta    = mu_x - mu_y,
-                                   interval = interval,
-                                   n_x      = n_x,
-                                   n_y      = n_y,
-                                   mu_x     = mu_x,
-                                   mu_y     = mu_y)
+    return {'stop'     : stop,
+            'delta'    : mu_x - mu_y,
+            'interval' : interval,
+            'n_x'      : n_x,
+            'n_y'      : n_y,
+            'mu_x'     : mu_x,
+            'mu_y'     : mu_y}
 
 
 def HDI_from_MCMC(posterior_samples, credible_mass=0.95):
@@ -250,7 +237,7 @@ def bayes_factor(x, y, distribution='normal', num_iters=25000):
         num_iters: number of iterations of bayes sampling
 
     Returns:
-        EarlyStoppingStatistics
+        dictionary with statistics
     """
     traces, n_x, n_y, mu_x, mu_y = _bayes_sampling(x, y, distribution=distribution, num_iters=num_iters)
     kde = gaussian_kde(traces['delta'])
@@ -268,13 +255,13 @@ def bayes_factor(x, y, distribution='normal', num_iters=25000):
     interval = HDI_from_MCMC(traces['delta'], credibleMass)
 
     # return stop, mu_x - mu_y, {'lower': interval[0], 'upper': interval[1]}, n_x, n_y, mu_x, mu_y
-    return EarlyStoppingStatistics(stop     = stop,
-                                   delta    = mu_x - mu_y,
-                                   interval = {p1*100: interval[0], p2*100: interval[1]},
-                                   n_x      = int(n_x),
-                                   n_y      = int(n_y),
-                                   mu_x     = mu_x,
-                                   mu_y     = mu_y)
+    return {'stop'     : stop,
+            'delta'    : mu_x - mu_y,
+            'interval' : {p1*100: interval[0], p2*100: interval[1]},
+            'n_x'      : int(n_x),
+            'n_y'      : int(n_y),
+            'mu_x'     : mu_x,
+            'mu_y'     : mu_y}
 
 
 def bayes_precision(x, y, distribution='normal', posterior_width=0.08, num_iters=25000):
@@ -289,7 +276,7 @@ def bayes_precision(x, y, distribution='normal', posterior_width=0.08, num_iters
         num_iters: number of iterations of bayes sampling
 
     Returns:
-        EarlyStoppingStatistics object
+        dictionary with statistics
     """
     traces, n_x, n_y, mu_x, mu_y = _bayes_sampling(x, y, distribution=distribution, num_iters=num_iters)
     credibleMass = 0.95                # another magic number
@@ -302,10 +289,10 @@ def bayes_precision(x, y, distribution='normal', posterior_width=0.08, num_iters
     stop = interval[1] - interval[0] < posterior_width
 
     # return stop, mu_x - mu_y, {'lower': interval[0], 'upper': interval[1]}, n_x, n_y, mu_x, mu_y
-    return EarlyStoppingStatistics(stop     = stop,
-                                   delta    = mu_x - mu_y,
-                                   interval = {p1*100: interval[0], p2*100: interval[1]},
-                                   n_x      = int(n_x),
-                                   n_y      = int(n_y),
-                                   mu_x     = mu_x,
-                                   mu_y     = mu_y)
+    return {'stop'     : stop,
+            'delta'    : mu_x - mu_y,
+            'interval' : {p1*100: interval[0], p2*100: interval[1]},
+            'n_x'      : int(n_x),
+            'n_y'      : int(n_y),
+            'mu_x'     : mu_x,
+            'mu_y'     : mu_y}
