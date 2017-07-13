@@ -73,6 +73,33 @@ class Experiment(ExperimentData):
         return res
 
 
+    def newDelta(self, method='fixed_horizon', reportKpis=None, derivedKpis=None,
+                 deltaWorkerArgs={}):
+        reportKpis  = reportKpis or self.kpi_names
+        derivedKpis = derivedKpis or []
+
+        referenceKpis = {}
+        pattern = '([a-zA-Z][0-9a-zA-Z_]*)'
+
+        for dk in derivedKpis:
+            name = dk['name']
+            self.kpis.loc[:, kpiName] = eval(re.sub(pattern, r'self.kpis.\1.astype(float)', dk['formula']))
+            referenceKpis[name] = re.sub(pattern + '/', '', dk['formula'])
+
+        deltaWorker = statx.make_delta(**deltaWorkerArgs)
+        methodTable = {
+                'fixed_horizon': (self.fhd, deltaWorker)
+                }
+
+        if not method in methodTable:
+            raise NotImplementedError
+        else:
+            entry = methodTable[method]
+            f, worker = entry[0], entry[1]
+            return f(reportKpis, referenceKpis, worker)
+
+
+
     def delta(self, method='fixed_horizon', kpi_subset=None, derived_kpis=None,
               assume_normal=True, percentiles=[2.5, 97.5], min_observations=20,
               nruns=10000, relative=False, weighted_kpis=None):
