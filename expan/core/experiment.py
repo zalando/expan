@@ -83,7 +83,7 @@ class Experiment(ExperimentData):
 
         for dk in derivedKpis:
             name = dk['name']
-            self.kpis.loc[:, kpiName] = eval(re.sub(pattern, r'self.kpis.\1.astype(float)', dk['formula']))
+            self.kpis.loc[:, name] = eval(re.sub(pattern, r'self.kpis.\1.astype(float)', dk['formula']))
             referenceKpis[name] = re.sub(pattern + '/', '', dk['formula'])
 
         deltaWorker = statx.make_delta(**deltaWorkerArgs)
