@@ -41,11 +41,10 @@ class Experiment(ExperimentData):
                 baseline_variant))
         # Add baseline to metadata
         self.metadata['baseline_variant'] = baseline_variant
-        self.rawDF = self.kpis.reset_index()
 
 
     def getKPIbyNameAndVariant(self, name, variant):
-        return self.rawDF.set_index('variant').loc[variant][name]
+        return self.kpis.reset_index().set_index('variant').loc[variant, name]
 
 
 
@@ -73,18 +72,25 @@ class Experiment(ExperimentData):
         return res
 
 
+    def addDerivedKpi(self, kpi):
+        pattern = '([a-zA-Z][0-9a-zA-Z_]*)'
+        name    = kpi['name']
+        formula = kpi['formula']
+        self.kpis.loc[:, name] = eval(re.sub(pattern, r'self.kpis.\1.astype(float)', formula))
+
+
     def newDelta(self, method='fixed_horizon', reportKpis=None, derivedKpis=None,
                  deltaWorkerArgs={}):
         reportKpis  = reportKpis or self.kpi_names
         derivedKpis = derivedKpis or []
 
         referenceKpis = {}
-        pattern = '([a-zA-Z][0-9a-zA-Z_]*)'
 
-        for dk in derivedKpis:
-            name    = dk['name']
-            formula = dk['formula']
-            self.kpis.loc[:, name] = eval(re.sub(pattern, r'self.kpis.\1.astype(float)', formula))
+        pattern = '([a-zA-Z][0-9a-zA-Z_]*)'
+        for k in derivedKpis:
+            name    = k['name']
+            formula = k['formula']
+            self.addDerivedKpi(k)
             referenceKpis[name] = re.sub(pattern + '/', '', formula)
 
         deltaWorker = statx.make_delta(**deltaWorkerArgs)
