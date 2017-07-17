@@ -67,7 +67,6 @@ class Experiment(object):
         return self.data.reset_index().set_index('variant').loc[variant, name]
 
 
-
     def __str__(self):
         # res = super(Experiment, self).__str__()
 
@@ -82,6 +81,15 @@ class Experiment(object):
 
 
 
+    def _getWeights(self, kpi, variant):
+        if kpi not in self.referenceKpis:
+            return 1.0
+        referenceKpi = self.referenceKpis[kpi]
+        x            = self.getKPIbyNameAndVariant(referenceKpi, variant)
+        zerosAndNans = sum(x == 0) + np.isnan(x).sum()
+        nonZeros     = len(x) - zerosAndNans
+        return nonZeros/np.nansum(x) * x
+
     def delta(self, method='fixed_horizon', workerArgs={}):
         workerTable = {
                 'fixed_horizon'    : statx.make_delta,
@@ -95,20 +103,18 @@ class Experiment(object):
 
         worker = workerTable[method](**workerArgs)
 
-        results = []
+        results = {}
         for kpi in self.reportKpiNames:
+            results[kpi] = []
             control       = self.getKPIbyNameAndVariant(kpi, self.controlVariantName)
-            # controlWeight = self._getWeights(kpi, referenceKpis, self.baseline_variant)
-            controlWeight = 1.0
+            controlWeight = self._getWeights(kpi, self.controlVariantName)
             for variant in self.variantNames:
                 treatment       = self.getKPIbyNameAndVariant(kpi, variant)
-                #treatmentWeight = self._getWeights(kpi, referenceKpis, variant)
-                treatmentWeight = 1.0
+                treatmentWeight = self._getWeights(kpi, variant)
                 ds = worker(x=treatment*treatmentWeight, y=control*controlWeight)
-                results.append({'kpiName'          : kpi,
-                                'controlVariant'   : self.controlVariantName,
-                                'treatmentVariant' : variant,
-                                'deltaStatistics'  : ds})
+                results[kpi].append({'controlVariant'   : self.controlVariantName,
+                                     'treatmentVariant' : variant,
+                                     'deltaStatistics'  : ds})
 
         return results
 
@@ -176,15 +182,6 @@ class Experiment(object):
             vargs = entry[1]
             return f(*vargs)
 
-
-    def _getWeights(self, kpi, referenceKpiDict, variant):
-        if kpi not in referenceKpiDict:
-            return 1.0
-        referenceKpi = referenceKpiDict[kpi]
-        x            = self.getKPIbyNameAndVariant(referenceKpi, variant)
-        zerosAndNans = sum(x == 0) + np.isnan(x).sum()
-        nonZeros     = len(x) - zerosAndNans
-        return nonZeros/np.nansum(x) * x
 
 
     def fhd(self, reportKpis=None, referenceKpis={}, deltaWorker=statx.make_delta()):

@@ -51,7 +51,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
                    'formula': 'nonExisting/normal_same'}
 
 
-    def getExperiment(self, reportKpiNames=[], derivedKpis=[]):
+    def getExperiment(self, reportKpiNames=None, derivedKpis=[]):
         np.random.seed(0)
         data, metadata = generate_random_data()
         return Experiment('B', data, metadata, reportKpiNames, derivedKpis)

@@ -7,10 +7,13 @@ from os.path import isfile, join
 
 import simplejson as json
 
-from expan.core.experimentdata import *
+# from expan.core.experimentdata import *
 
 logger = logging.getLogger(__name__)
 
+#
+# there is experimentdata anymore, please debug
+#
 def get_data(folder_path):
     """
     Expects as input a folder containing the following files:
