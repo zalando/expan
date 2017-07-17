@@ -5,15 +5,14 @@ import warnings
 import numpy as np
 import pandas as pd
 
-
 import expan.core.binning as binmodule
 import expan.core.early_stopping as es
 import expan.core.statistics as statx
-from expan.core.experimentdata import ExperimentData
-from expan.core.results import Results, delta_to_dataframe_all_variants, feature_check_to_dataframe, \
-    early_stopping_to_dataframe
+# from expan.core.experimentdata import ExperimentData
+# from expan.core.results import Results, delta_to_dataframe_all_variants, feature_check_to_dataframe, \
+#     early_stopping_to_dataframe
 
-from expan.core.jsonable import Jsonable
+# from expan.core.jsonable import Jsonable
 
 # raise the same warning multiple times
 warnings.simplefilter('always', UserWarning)
@@ -23,28 +22,42 @@ logger = logging.getLogger(__name__)
 # TODO: add filtering functionality: we should be able to operate on this
 # class to exclude data points, and save all these operations in a log that then
 # is preserved in all results.
-class Experiment(ExperimentData):
+class Experiment(object):
     """
     Class which adds the analysis functions to experimental data.
     """
-    # TODO: add a constructor that takes an ExperimentData!
-    def __init__(self, baseline_variant, metrics_or_kpis, metadata={}, features='default'):
-        # Call constructor of super class
-        super(Experiment, self).__init__(metrics_or_kpis, metadata, features)
+    def __init__(self, controlVariantName, data, metadata, reportKpiNames=[], derivedKpis=[]):
+        derivedKpiNames    = [k['name']    for k in derivedKpis]
+        derivedKpiFormulas = [k['formula'] for k in derivedKpis]
 
-        # If no baseline variant is found
-        if ((baseline_variant not in self.kpis.index.levels[
-            self.primary_indices.index('variant')])
-            and (baseline_variant not in self.features.index.levels[
-                self.primary_indices.index('variant')])):
-            raise KeyError('baseline_variant ({}) not present in KPIs or features.'.format(
-                baseline_variant))
-        # Add baseline to metadata
-        self.metadata['baseline_variant'] = baseline_variant
+        experimentColumnNames = ['entity', 'variant']
+
+        requiredColumnNames = (set(reportKpiNames) | set(experimentColumnNames)) - set(derivedKpiNames)
+        kpiNamePattern = '([a-zA-Z][0-9a-zA-Z_]*)'
+        for formula in derivedKpiFormulas:
+            names = re.findall(kpiNamePattern, formula)
+            requiredColumnNames = requiredColumnNames | set(names)
+
+        for c in requiredColumnNames:
+            if c not in data:
+                raise ValueError('No column %s provided'%c)
+
+        self.data           =     data.copy()
+        self.metadata       = metadata.copy()
+        self.reportKpiNames = reportKpiNames
+        self.derivedKpis    = derivedKpis
+
+        # add derived KPIs to the data frame
+        for name, formula in zip(derivedKpiNames, derivedKpiFormulas):
+            self.data.loc[:, name] = eval(re.sub(kpiNamePattern, r'self.data.\1.astype(float)', formula))
+
+
+
+
 
 
     def getKPIbyNameAndVariant(self, name, variant):
-        return self.kpis.reset_index().set_index('variant').loc[variant, name]
+        return self.data.reset_index().set_index('variant').loc[variant, name]
 
 
 
@@ -72,42 +85,22 @@ class Experiment(ExperimentData):
         return res
 
 
-    def addDerivedKpi(self, kpi):
-        pattern = '([a-zA-Z][0-9a-zA-Z_]*)'
-        name    = kpi['name']
-        formula = kpi['formula']
-        self.kpis.loc[:, name] = eval(re.sub(pattern, r'self.kpis.\1.astype(float)', formula))
 
-
-    def newDelta(self, method='fixed_horizon', reportKpis=None, derivedKpis=None,
-                 deltaWorkerArgs={}):
-        reportKpis  = reportKpis or self.kpi_names
-        derivedKpis = derivedKpis or []
-
-        referenceKpis = {}
-
-        pattern = '([a-zA-Z][0-9a-zA-Z_]*)'
-        for k in derivedKpis:
-            name    = k['name']
-            formula = k['formula']
-            self.addDerivedKpi(k)
-            referenceKpis[name] = re.sub(pattern + '/', '', formula)
-
-        deltaWorker = statx.make_delta(**deltaWorkerArgs)
-        methodTable = {
-                'fixed_horizon': (self.fhd, deltaWorker)
+    def delta(self, method='fixed_horizon', WorkerArgs={}):
+        workerTable = {
+                'fixed_horizon'    : statx.make_delta        (**deltaWorkerArgs)
+                'group_sequential' : es.make_group_sequential(**deltaWorkerArgs)
+                'bayes_factor    ' : es.make_bayes_factor    (**deltaWorkerArgs)
+                'bayes_precision'  : es.make_bayes_precision (**deltaWorkerArgs)
                 }
 
         if not method in methodTable:
             raise NotImplementedError
-        else:
-            entry = methodTable[method]
-            f, worker = entry[0], entry[1]
-            return f(reportKpis, referenceKpis, worker)
+        worker = methodTable[method]
 
 
 
-    def delta(self, method='fixed_horizon', kpi_subset=None, derived_kpis=None,
+    def oldDelta(self, method='fixed_horizon', kpi_subset=None, derived_kpis=None,
               assume_normal=True, percentiles=[2.5, 97.5], min_observations=20,
               nruns=10000, relative=False, weighted_kpis=None):
         """

@@ -31,8 +31,8 @@ def obrien_fleming(information_fraction, alpha=0.05):
     return (1 - norm.cdf(norm.ppf(1 - alpha / 2) / np.sqrt(information_fraction))) * 2
 
 
-def make_group_sequential(spending_function='obrien_fleming', alpha=0.05, cap=8):
-    def f(x, y, information_fraction):
+def make_group_sequential(spending_function='obrien_fleming', information_fraction=1.0, alpha=0.05, cap=8):
+    def f(x, y):
         return group_sequential(x, y, spending_function, information_fraction,
                                 alpha, cap)
     return f
