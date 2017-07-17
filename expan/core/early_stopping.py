@@ -2,6 +2,7 @@ import os
 from os.path import dirname, join, realpath
 
 import numpy as np
+import sys
 from pystan import StanModel
 from scipy.stats import gaussian_kde, norm, cauchy
 from expan.core.util import drop_nan
@@ -152,7 +153,9 @@ def get_or_compile_stan_model(model_file, distribution):
         However, compiled modules are saved in temporary directory using tempfile module 
         which vary based on the current platform and settings. Cleaning up a temp dir is done on boot.
     """
-    compiled_model_file = tempfile.gettempdir() + '/expan_early_stop_compiled_stan_model_' + distribution + '.pkl'
+    python_version = '{0[0]}.{0[1]}'.format(sys.version_info)
+    compiled_model_file = tempfile.gettempdir() + '/expan_early_stop_compiled_stan_model_' \
+                          + distribution + '_' + python_version + '.pkl'
 
     if os.path.isfile(compiled_model_file):
         sm = pickle.load(open(compiled_model_file, 'rb'))
