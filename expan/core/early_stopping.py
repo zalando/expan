@@ -162,7 +162,7 @@ def get_or_compile_stan_model(model_file, distribution):
             pickle.dump(sm, f)
     return sm
 
-cacheSamplingResults = True
+cacheSamplingResults = False
 samplingResults = {} # memoized sampling results
 
 def _bayes_sampling(x, y, distribution='normal', num_iters=25000):

@@ -51,10 +51,15 @@ class ExperimentClassTestCases(ExperimentTestCase):
                    'formula': 'nonExisting/normal_same'}
 
 
+    def assertNumericalEqual(self, a, b, decimals):
+        self.assertEqual(round(a, decimals), round(b, decimals))
+
+
     def getExperiment(self, reportKpiNames=None, derivedKpis=[]):
         np.random.seed(0)
         data, metadata = generate_random_data()
         return Experiment('B', data, metadata, reportKpiNames, derivedKpis)
+
 
     def test_constructor(self):
         self.getExperiment()
@@ -77,22 +82,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
                                                    self.derivedKpi2['name']],
                                [self.derivedKpi4, self.derivedKpi2])
 
-    def test_fixed_horizon_delta(self):
-        self.getExperiment(['normal_same']).delta(method='fixed_horizon')
-        self.getExperiment(self.numericColumnNames + [self.derivedKpi1['name'],
-                                                      self.derivedKpi2['name']],
-                           [self.derivedKpi1, self.derivedKpi2]).delta()
-
-    def test_group_sequential_delta(self):
-        self.getExperiment(self.numericColumnNames).delta(method='group_sequential')
-        self.getExperiment(self.numericColumnNames + [self.derivedKpi1['name'],
-                                                      self.derivedKpi2['name']],
-                           [self.derivedKpi1, self.derivedKpi2]).delta()
-
-    def test_bayes_precision_delta(self):
-        self.getExperiment(['normal_same']).delta(method='bayes_precision')
-        self.getExperiment([self.derivedKpi1['name']], [self.derivedKpi1]).delta()
-
+    @unittest.skip("sometimes takes too much time")
     def test_bayes_factor_delta(self):
         self.getExperiment(['normal_same']).delta(method='bayes_factor')
         self.getExperiment([self.derivedKpi2['name']], [self.derivedKpi2]).delta()
@@ -285,6 +275,43 @@ class ExperimentClassTestCases(ExperimentTestCase):
 ##         self.assertTrue(isinstance(w, UserWarning))
 ##         self.assertTrue(w.args[0] == 'Empty data set entered to analysis.')
 ## 
+    def test_fixed_horizon_delta(self):
+        ndecimals = 5
+        res = self.getExperiment(['normal_same']).delta(method='fixed_horizon')
+
+        aStats = res['normal_same']['A']['deltaStatistics']
+        self.assertNumericalEqual(aStats['delta'],           0.033053, ndecimals)
+
+        self.assertNumericalEqual(aStats['interval'][02.5], -0.007135, ndecimals)
+        self.assertNumericalEqual(aStats['interval'][97.5],  0.073240, ndecimals)
+
+        self.assertEqual(aStats['n_x'], 6108)
+        self.assertEqual(aStats['n_y'], 3892)
+
+        self.assertNumericalEqual(aStats['mu_x'],  0.025219, ndecimals)
+        self.assertNumericalEqual(aStats['mu_y'], -0.007833, ndecimals)
+
+    def test_group_sequential_delta(self):
+        ndecimals = 5
+        res = self.getExperiment(['normal_same']).delta(method='group_sequential')
+
+        aStats = res['normal_same']['A']['deltaStatistics']
+        self.assertNumericalEqual(aStats['delta'],           0.033053, ndecimals)
+
+        self.assertNumericalEqual(aStats['interval'][02.5], -0.007135, ndecimals)
+        self.assertNumericalEqual(aStats['interval'][97.5],  0.073240, ndecimals)
+
+        self.assertEqual(aStats['n_x'], 6108)
+        self.assertEqual(aStats['n_y'], 3892)
+
+        self.assertNumericalEqual(aStats['mu_x'],  0.025219, ndecimals)
+        self.assertNumericalEqual(aStats['mu_y'], -0.007833, ndecimals)
+
+
+        ## self.getExperiment(self.numericColumnNames + [self.derivedKpi1['name'],
+        ##                                               self.derivedKpi2['name']],
+        ##                    [self.derivedKpi1, self.derivedKpi2]).delta()
+
 ##     def test_delta(self):
 ##         """
 ##         Check if Experiment.delta() functions properly
@@ -443,6 +470,28 @@ class ExperimentClassTestCases(ExperimentTestCase):
 ##         # check metadata is preserved
 ##         np.testing.assert_equal(True, all(item in result.metadata.items() for item in self.testmetadata.items()))
 ## 
+    # @unittest.skip("sometimes takes too much time")
+    def test_bayes_precision_delta(self):
+        ndecimals = 5
+        res = self.getExperiment(['normal_same']).delta(method='bayes_precision', workerArgs={'num_iters' : 2000})
+
+        aStats = res['normal_same']['A']['deltaStatistics']
+        self.assertNumericalEqual(aStats['delta'], 0.033053, ndecimals)
+
+        self.assertEqual(aStats['stop'], True, ndecimals)
+
+        self.assertNumericalEqual(aStats['interval'][02.5], -0.007079081, ndecimals)
+        self.assertNumericalEqual(aStats['interval'][97.5],  0.072703576, ndecimals)
+
+        self.assertEqual(aStats['n_x'], 6108)
+        self.assertEqual(aStats['n_y'], 3892)
+
+        self.assertNumericalEqual(aStats['mu_x'],  0.025219, ndecimals)
+        self.assertNumericalEqual(aStats['mu_y'], -0.007833, ndecimals)
+
+
+        # self.getExperiment([self.derivedKpi1['name']], [self.derivedKpi1]).delta()
+
 ##     # @unittest.skip("sometimes takes too much time")
 ##     def test_bayes_precision_delta(self):
 ##         """

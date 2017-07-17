@@ -103,20 +103,20 @@ class Experiment(object):
 
         worker = workerTable[method](**workerArgs)
 
-        results = {}
+        result = {}
         for kpi in self.reportKpiNames:
-            results[kpi] = []
+            result[kpi] = {}
             control       = self.getKPIbyNameAndVariant(kpi, self.controlVariantName)
             controlWeight = self._getWeights(kpi, self.controlVariantName)
             for variant in self.variantNames:
                 treatment       = self.getKPIbyNameAndVariant(kpi, variant)
                 treatmentWeight = self._getWeights(kpi, variant)
                 ds = worker(x=treatment*treatmentWeight, y=control*controlWeight)
-                results[kpi].append({'controlVariant'   : self.controlVariantName,
-                                     'treatmentVariant' : variant,
-                                     'deltaStatistics'  : ds})
+                result[kpi][variant] = {'controlVariant'   : self.controlVariantName,
+                                        'treatmentVariant' : variant,
+                                        'deltaStatistics'  : ds}
 
-        return results
+        return result
 
 
 
