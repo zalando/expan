@@ -82,11 +82,6 @@ class ExperimentClassTestCases(ExperimentTestCase):
                                                    self.derivedKpi2['name']],
                                [self.derivedKpi4, self.derivedKpi2])
 
-    @unittest.skip("sometimes takes too much time")
-    def test_bayes_factor_delta(self):
-        self.getExperiment(['normal_same']).delta(method='bayes_factor')
-        self.getExperiment([self.derivedKpi2['name']], [self.derivedKpi2]).delta()
-
 
 ##     def test_newDelta(self):
 ##         experiment = self.getExperiment(['normal_same'])
@@ -291,6 +286,13 @@ class ExperimentClassTestCases(ExperimentTestCase):
         self.assertNumericalEqual(aStats['mu_x'],  0.025219, ndecimals)
         self.assertNumericalEqual(aStats['mu_y'], -0.007833, ndecimals)
 
+
+    def test_fixed_horizon_delta_derived_kpis(self):
+        self.getExperiment(self.numericColumnNames + [self.derivedKpi1['name'],
+                                                      self.derivedKpi2['name']],
+                           [self.derivedKpi1, self.derivedKpi2]).delta()
+
+
     def test_group_sequential_delta(self):
         ndecimals = 5
         res = self.getExperiment(['normal_same']).delta(method='group_sequential')
@@ -308,168 +310,37 @@ class ExperimentClassTestCases(ExperimentTestCase):
         self.assertNumericalEqual(aStats['mu_y'], -0.007833, ndecimals)
 
 
-        ## self.getExperiment(self.numericColumnNames + [self.derivedKpi1['name'],
-        ##                                               self.derivedKpi2['name']],
-        ##                    [self.derivedKpi1, self.derivedKpi2]).delta()
+    def test_group_sequential_delta_derived_kpis(self):
+        self.getExperiment(self.numericColumnNames + [self.derivedKpi1['name'],
+                                                      self.derivedKpi2['name']],
+                           [self.derivedKpi1, self.derivedKpi2]).delta('group_sequential')
 
-##     def test_delta(self):
-##         """
-##         Check if Experiment.delta() functions properly
-##         """
-##         # this should work
-##         self.assertTrue(isinstance(self.experiment, Experiment))  # check that the subclassing works
-##         self.assertTrue(self.experiment.baseline_variant == 'B')
-## 
-##         ########### fixed_horizon_delta ###########
-##         result = self.experiment.delta(method='fixed_horizon', kpi_subset=['normal_same'])
-## 
-##         # check uplift
-##         df = result.statistic('delta', 'uplift', 'normal_same')
-##         np.testing.assert_almost_equal(df.loc[:, ('value', 'A')],
-##                                        np.array([0.033053]), decimal=5)
-##         # check pctile
-##         df = result.statistic('delta', 'uplift_pctile', 'normal_same')
-##         np.testing.assert_almost_equal(df.loc[:, ('value', 'A')],
-##                                        np.array([-0.007135, 0.073240]), decimal=5)
-##         # check samplesize
-##         df = result.statistic('delta', 'sample_size', 'normal_same')
-##         np.testing.assert_almost_equal(df.loc[:, 'value'],
-##                                        np.array([[6108, 3892]]), decimal=5)
-##         # check variant_mean
-##         df = result.statistic('delta', 'variant_mean', 'normal_same')
-##         np.testing.assert_almost_equal(df.loc[:, 'value'],
-##                                        np.array([[0.025219, -0.007833]]), decimal=5)
-## 
-##         # check metadata is preserved
-##         np.testing.assert_equal(True, all(item in result.metadata.items() for item in self.testmetadata.items()))
-## 
-##         ########### group_sequential_delta ###########
-##         self.experiment.metadata['estimatedSampleSize'] = 100000
-##         result = self.experiment.delta(method='group_sequential', kpi_subset=['normal_same'])
-## 
-##         # check uplift
-##         df = result.statistic('delta', 'uplift', 'normal_same')
-##         np.testing.assert_almost_equal(df.loc[:, ('value', 'A')],
-##                                        np.array([0.033053]), decimal=5)
-##         # check stop
-##         df = result.statistic('delta', 'stop', 'normal_same')
-##         np.testing.assert_equal(df.loc[:, 'value'],
-##                                 np.array([[0, 0]]))
-##         # check samplesize
-##         df = result.statistic('delta', 'sample_size', 'normal_same')
-##         np.testing.assert_almost_equal(df.loc[:, 'value'],
-##                                        np.array([[6108, 3892]]), decimal=5)
-##         # check variant_mean
-##         df = result.statistic('delta', 'variant_mean', 'normal_same')
-##         np.testing.assert_almost_equal(df.loc[:, 'value'],
-##                                        np.array([[0.025219, -0.007833]]), decimal=5)
-## 
-##         # check metadata is preserved
-##         np.testing.assert_equal(True, all(item in result.metadata.items() for item in self.testmetadata.items()))
-## 
-##     def test_fixed_horizon_delta(self):
-##         """
-##         Check if Experiment.fixed_horizon_delta() functions properly
-##         """
-##         # this should work
-##         self.assertTrue(isinstance(self.experiment, Experiment))  # check that the subclassing works
-##         self.assertTrue(self.experiment.baseline_variant == 'B')
-## 
-##         res = mock_results_object(self.experiment)
-##         result = self.experiment.fixed_horizon_delta(res, kpis_to_analyse= [m for m in self.experiment.kpi_names if 'normal' in m])
-## 
-##         # check uplift
-##         df = result.statistic('delta', 'uplift', 'normal_same')
-##         np.testing.assert_almost_equal(df.loc[:, ('value', 'A')],
-##                                        np.array([0.033053]), decimal=5)
-##         # check pctile
-##         df = result.statistic('delta', 'uplift_pctile', 'normal_same')
-##         np.testing.assert_almost_equal(df.loc[:, ('value', 'A')],
-##                                        np.array([-0.007135, 0.073240]), decimal=5)
-##         # check samplesize
-##         df = result.statistic('delta', 'sample_size', 'normal_same')
-##         np.testing.assert_almost_equal(df.loc[:, 'value'],
-##                                        np.array([[6108, 3892]]), decimal=5)
-##         # check variant_mean
-##         df = result.statistic('delta', 'variant_mean', 'normal_same')
-##         np.testing.assert_almost_equal(df.loc[:, 'value'],
-##                                        np.array([[0.025219, -0.007833]]), decimal=5)
-## 
-##         # check metadata is preserved
-##         np.testing.assert_equal(True, all(item in result.metadata.items() for item in self.testmetadata.items()))
+    # @unittest.skip("sometimes takes too much time")
+    def test_bayes_factor_delta(self):
+        ndecimals = 5
+        res = self.getExperiment(['normal_same']).delta(method='bayes_factor', workerArgs={'num_iters' : 2000})
 
-##     def test_group_sequential_delta(self):
-##         """
-##         Check if Experiment.group_sequential_delta() functions properly
-##         """
-##         # this should work
-##         self.assertTrue(isinstance(self.experiment, Experiment))  # check that the subclassing works
-##         self.assertTrue(self.experiment.baseline_variant == 'B')
-## 
-##         self.experiment.metadata['estimatedSampleSize'] = 100000
-##         res = Results(None, metadata=self.experiment.metadata)
-##         result = self.experiment.group_sequential_delta(result=res, kpis_to_analyse=['normal_same'])
-## 
-##         # check uplift
-##         df = result.statistic('delta', 'uplift', 'normal_same')
-##         np.testing.assert_almost_equal(df.loc[:, ('value', 'A')],
-##                                        np.array([0.033053]), decimal=5)
-##         # check stop
-##         df = result.statistic('delta', 'stop', 'normal_same')
-##         np.testing.assert_equal(df.loc[:, 'value'],
-##                                 np.array([[0, 0]]))
-##         # check samplesize
-##         df = result.statistic('delta', 'sample_size', 'normal_same')
-##         np.testing.assert_almost_equal(df.loc[:, 'value'],
-##                                        np.array([[6108, 3892]]), decimal=5)
-##         # check variant_mean
-##         df = result.statistic('delta', 'variant_mean', 'normal_same')
-##         np.testing.assert_almost_equal(df.loc[:, 'value'],
-##                                        np.array([[0.025219, -0.007833]]), decimal=5)
-## 
-##         # check metadata is preserved
-##         np.testing.assert_equal(True, all(item in result.metadata.items() for item in self.testmetadata.items()))
-## 
-##     def test_group_sequential_delta_no_estimatedSampleSize(self):
-##         """
-##         group_sequential_delta should raise error if estimatedSampleSize is not present in the metadata.
-##         """
-##         with self.assertRaises(ValueError):
-##             res = Results(None, metadata=self.experiment.metadata)
-##             result = self.experiment.group_sequential_delta(result=res, kpis_to_analyse=['normal_same'])
-## 
-##     # @unittest.skip("sometimes takes too much time")
-##     def test_bayes_factor_delta(self):
-##         """
-##         Check if Experiment.bayes_factor_delta() functions properly
-##         """
-##         # this should work
-##         self.assertTrue(isinstance(self.experiment, Experiment))  # check that the subclassing works
-##         self.assertTrue(self.experiment.baseline_variant == 'B')
-## 
-##         res = Results(None, metadata=self.experiment.metadata)
-##         result = self.experiment.bayes_factor_delta(result=res, kpis_to_analyse=['normal_same'], num_iters=2000)
-## 
-##         # check uplift
-##         df = result.statistic('delta', 'uplift', 'normal_same')
-##         np.testing.assert_almost_equal(df.loc[:, ('value', 'A')],
-##                                        np.array([0.033053]), decimal=5)
-##         # check stop
-##         df = result.statistic('delta', 'stop', 'normal_same')
-##         np.testing.assert_equal(df.loc[:, 'value'],
-##                                 np.array([[1, 0]]))
-##         # check samplesize
-##         df = result.statistic('delta', 'sample_size', 'normal_same')
-##         np.testing.assert_almost_equal(df.loc[:, 'value'],
-##                                        np.array([[6108, 3892]]), decimal=5)
-##         # check variant_mean
-##         df = result.statistic('delta', 'variant_mean', 'normal_same')
-##         np.testing.assert_almost_equal(df.loc[:, 'value'],
-##                                        np.array([[0.025219, -0.007833]]), decimal=5)
-## 
-##         # check metadata is preserved
-##         np.testing.assert_equal(True, all(item in result.metadata.items() for item in self.testmetadata.items()))
-## 
+        aStats = res['normal_same']['A']['deltaStatistics']
+        self.assertNumericalEqual(aStats['delta'], 0.033053, ndecimals)
+
+        self.assertEqual(aStats['stop'], True, ndecimals)
+
+        self.assertNumericalEqual(aStats['interval'][02.5], -0.007079081, ndecimals)
+        self.assertNumericalEqual(aStats['interval'][97.5],  0.072703576, ndecimals)
+
+        self.assertEqual(aStats['n_x'], 6108)
+        self.assertEqual(aStats['n_y'], 3892)
+
+        self.assertNumericalEqual(aStats['mu_x'],  0.025219, ndecimals)
+        self.assertNumericalEqual(aStats['mu_y'], -0.007833, ndecimals)
+
+
+    # @unittest.skip("sometimes takes too much time")
+    def test_bayes_factor_delta_derived_kpis(self):
+        exp = self.getExperiment([self.derivedKpi1['name']], [self.derivedKpi1])
+        res = exp.delta(method='bayes_factor', workerArgs={'num_iters' : 2000})
+
+
     # @unittest.skip("sometimes takes too much time")
     def test_bayes_precision_delta(self):
         ndecimals = 5
@@ -490,56 +361,14 @@ class ExperimentClassTestCases(ExperimentTestCase):
         self.assertNumericalEqual(aStats['mu_y'], -0.007833, ndecimals)
 
 
+    # @unittest.skip("sometimes takes too much time")
+    def test_bayes_precision_delta_derived_kpis(self):
+        exp = self.getExperiment([self.derivedKpi1['name']], [self.derivedKpi1])
+        res = exp.delta(method='bayes_precision', workerArgs={'num_iters' : 2000})
+
         # self.getExperiment([self.derivedKpi1['name']], [self.derivedKpi1]).delta()
 
-##     # @unittest.skip("sometimes takes too much time")
-##     def test_bayes_precision_delta(self):
-##         """
-##         Check if Experiment.bayes_precision_delta() functions properly
-##         """
-##         # this should work
-##         self.assertTrue(isinstance(self.experiment, Experiment))  # check that the subclassing works
-##         self.assertTrue(self.experiment.baseline_variant == 'B')
-## 
-##         res = Results(None, metadata=self.experiment.metadata)
-##         result = self.experiment.bayes_precision_delta(result=res, kpis_to_analyse=['normal_same'], num_iters=2000)
-## 
-##         # check uplift
-##         df = result.statistic('delta', 'uplift', 'normal_same')
-##         np.testing.assert_almost_equal(df.loc[:, ('value', 'A')],
-##                                        np.array([0.033053]), decimal=5)
-##         # check stop
-##         df = result.statistic('delta', 'stop', 'normal_same')
-##         np.testing.assert_equal(df.loc[:, 'value'],
-##                                 np.array([[1, 0]]))
-##         # check samplesize
-##         df = result.statistic('delta', 'sample_size', 'normal_same')
-##         np.testing.assert_almost_equal(df.loc[:, 'value'],
-##                                        np.array([[6108, 3892]]), decimal=5)
-##         # check variant_mean
-##         df = result.statistic('delta', 'variant_mean', 'normal_same')
-##         np.testing.assert_almost_equal(df.loc[:, 'value'],
-##                                        np.array([[0.025219, -0.007833]]), decimal=5)
-## 
-##         # check metadata is preserved
-##         np.testing.assert_equal(True, all(item in result.metadata.items() for item in self.testmetadata.items()))
-## 
-##     def test_alphanumeric_kpi_names(self):
-##         old_kpi = 'normal_shifted'
-##         new_kpi = 'normal_shifted_01'
-## 
-##         self.experiment.kpis[new_kpi] = self.experiment.kpis[old_kpi]
-## 
-##         result = self.experiment.delta(kpi_subset=['derived'],
-##                                        derived_kpis=[{'name': 'derived', 'formula': 'normal_same/' + new_kpi}])
-## 
-##         # check uplift
-##         df = result.statistic('delta', 'uplift', 'derived')
-##         np.testing.assert_almost_equal(df.loc[:, ('value', 'A')],
-##                                        np.array([0.308368]), decimal=5)
-##         # clean up
-##         del self.experiment.kpis[new_kpi]
-## 
+
 ##     def test_delta_derived_kpis(self):
 ##         """
 ##         Check if Experiment.fixed_horizon_delta() functions properly for derived KPIs
