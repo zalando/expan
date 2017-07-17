@@ -7,6 +7,8 @@ import pandas as pd
 def is_number_and_nan(obj):
     return obj != obj
 
+def getColumnNamesByType(df, dtype):
+    return [c for c in df.columns if df.dtypes[c] == dtype]
 
 def drop_nan(np_array):
     if np_array.ndim == 1:

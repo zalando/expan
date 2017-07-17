@@ -5,7 +5,7 @@ import pandas as pd
 
 from expan.core.experiment import Experiment
 # from expan.core.results import Results
-from expan.core.util import generate_random_data
+from expan.core.util import generate_random_data, getColumnNamesByType
 # from tests.tests_core.test_results import mock_results_object
 
 
@@ -19,8 +19,9 @@ class ExperimentTestCase(unittest.TestCase):
         Load the needed datasets for all StatisticsTestCases and set the random
         seed so that randomized algorithms show deterministic behaviour.
         """
-        data, metadata = generate_random_data()
+        data, _ = generate_random_data()
         self.columnNames = list(set(data.columns) - set(['variant', 'entity']))
+        self.numericColumnNames = getColumnNamesByType(data, np.float64)
 
     def tearDown(self):
         """
@@ -35,36 +36,68 @@ class ExperimentClassTestCases(ExperimentTestCase):
     Test cases for the Experiment class functions.
     """
 
+    # valid ones
+    derivedKpi1 = {'name'   : 'derivedKpi1',
+                   'formula': 'normal_same/normal_shifted'}
+
+    derivedKpi2 = {'name'   : 'derivedKpi2',
+                   'formula': 'normal_shifted/normal_same'}
+
+    # bad ones
+    derivedKpi3 = {'name'   : 'derivedKpi3',
+                   'formula': 'normal_shifted/nonExisting'}
+
+    derivedKpi4 = {'name'   : 'derivedKpi4',
+                   'formula': 'nonExisting/normal_same'}
+
+
     def getExperiment(self, reportKpiNames=[], derivedKpis=[]):
         np.random.seed(0)
         data, metadata = generate_random_data()
         return Experiment('B', data, metadata, reportKpiNames, derivedKpis)
 
     def test_constructor(self):
-        self.getExperiment(self.columnNames)
+        self.getExperiment()
 
         with self.assertRaises(ValueError):
             experiment = self.getExperiment(self.columnNames + ['nonExisting'])
 
-        derivedKpi1 = {'name'   : 'derivedKpi1',
-                       'formula': 'normal_same/normal_shifted'}
-
-        derivedKpi2 = {'name'   : 'derivedKpi2',
-                       'formula': 'normal_shifted/normal_same'}
-
-        self.getExperiment(self.columnNames, [derivedKpi1, derivedKpi2])
-
-        derivedKpi3 = {'name'   : 'derivedKpi3',
-                       'formula': 'normal_shifted/nonExisting'}
+        self.getExperiment(self.columnNames + [self.derivedKpi1['name'],
+                                               self.derivedKpi2['name']],
+                          [self.derivedKpi1, self.derivedKpi2])
 
         with self.assertRaises(ValueError):
-            self.getExperiment(self.columnNames, [derivedKpi1, derivedKpi2, derivedKpi3])
+            self.getExperiment(self.columnNames + [self.derivedKpi1['name'],
+                                                   self.derivedKpi3['name']],
+                               [self.derivedKpi1, self.derivedKpi3])
 
-        derivedKpi4 = {'name'   : 'derivedKpi4',
-                       'formula': 'nonExisting/normal_same'}
 
         with self.assertRaises(ValueError):
-            self.getExperiment(self.columnNames, [derivedKpi1, derivedKpi2, derivedKpi4])
+            self.getExperiment(self.columnNames + [self.derivedKpi4['name'],
+                                                   self.derivedKpi2['name']],
+                               [self.derivedKpi4, self.derivedKpi2])
+
+    def test_fixed_horizon_delta(self):
+        self.getExperiment(['normal_same']).delta(method='fixed_horizon')
+        self.getExperiment(self.numericColumnNames + [self.derivedKpi1['name'],
+                                                      self.derivedKpi2['name']],
+                           [self.derivedKpi1, self.derivedKpi2]).delta()
+
+    def test_group_sequential_delta(self):
+        self.getExperiment(self.numericColumnNames).delta(method='group_sequential')
+        self.getExperiment(self.numericColumnNames + [self.derivedKpi1['name'],
+                                                      self.derivedKpi2['name']],
+                           [self.derivedKpi1, self.derivedKpi2]).delta()
+
+    def test_bayes_precision_delta(self):
+        self.getExperiment(['normal_same']).delta(method='bayes_precision')
+        self.getExperiment([self.derivedKpi1['name']], [self.derivedKpi1]).delta()
+
+    def test_bayes_factor_delta(self):
+        self.getExperiment(['normal_same']).delta(method='bayes_factor')
+        self.getExperiment([self.derivedKpi2['name']], [self.derivedKpi2]).delta()
+
+
 ##     def test_newDelta(self):
 ##         experiment = self.getExperiment(['normal_same'])
 ##         res = experiment.newDelta()
