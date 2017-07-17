@@ -7,14 +7,13 @@ from os.path import isfile, join
 
 import simplejson as json
 
-# from expan.core.experimentdata import *
+import pandas as pd
+
+from expan.core.experiment import Experiment
 
 logger = logging.getLogger(__name__)
 
-#
-# there is experimentdata anymore, please debug
-#
-def get_data(folder_path):
+def get_data(controlVariantName, folder_path):
     """
     Expects as input a folder containing the following files:
      - one .csv or .csv.gz with 'metrics' in the filename
@@ -46,7 +45,7 @@ def get_data(folder_path):
                 with open(join(folder_path, f), 'r') as input_json:
                     metadata = json.load(input_json)
 
-        return ExperimentData(metrics=metrics, metadata=metadata)
+        return Experiment(controlVariantName, metrics, metadata)
 
     except AssertionError as e:
         logger.error("An error occured when fetching data from csv file.")
