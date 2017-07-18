@@ -19,9 +19,12 @@ class ExperimentTestCase(unittest.TestCase):
         Load the needed datasets for all StatisticsTestCases and set the random
         seed so that randomized algorithms show deterministic behaviour.
         """
-        data, _ = generate_random_data()
+        np.random.seed(0)
+        data, metadata = generate_random_data()
         self.columnNames = list(set(data.columns) - set(['variant', 'entity']))
         self.numericColumnNames = getColumnNamesByType(data, np.float64)
+
+        self.data, self.metadata = data, metadata
 
     def tearDown(self):
         """
@@ -56,9 +59,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
 
 
     def getExperiment(self, reportKpiNames=None, derivedKpis=[]):
-        np.random.seed(0)
-        data, metadata = generate_random_data()
-        return Experiment('B', data, metadata, reportKpiNames, derivedKpis)
+        return Experiment('B', self.data, self.metadata, reportKpiNames, derivedKpis)
 
 
     def test_constructor(self):
