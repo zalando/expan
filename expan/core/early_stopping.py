@@ -104,13 +104,13 @@ def group_sequential(x,
                                        [alpha_new * 100 / 2, 100 - alpha_new * 100 / 2])
 
     # return stop, mu_x - mu_y, interval, n_x, n_y, mu_x, mu_y
-    return {'stop'     : stop,
-            'delta'    : mu_x - mu_y,
+    return {'stop'     : bool(stop),
+            'delta'    : float(mu_x - mu_y),
             'interval' : interval,
-            'n_x'      : n_x,
-            'n_y'      : n_y,
-            'mu_x'     : mu_x,
-            'mu_y'     : mu_y}
+            'n_x'      : int(n_x),
+            'n_y'      : int(n_y),
+            'mu_x'     : float(mu_x),
+            'mu_y'     : float(mu_y)}
 
 
 def HDI_from_MCMC(posterior_samples, credible_mass=0.95):
@@ -268,13 +268,13 @@ def bayes_factor(x, y, distribution='normal', num_iters=25000):
     interval = HDI_from_MCMC(traces['delta'], credibleMass)
 
     # return stop, mu_x - mu_y, {'lower': interval[0], 'upper': interval[1]}, n_x, n_y, mu_x, mu_y
-    return {'stop'     : stop,
-            'delta'    : mu_x - mu_y,
+    return {'stop'     : bool(stop),
+            'delta'    : float(mu_x - mu_y),
             'interval' : {p1*100: interval[0], p2*100: interval[1]},
             'n_x'      : int(n_x),
             'n_y'      : int(n_y),
-            'mu_x'     : mu_x,
-            'mu_y'     : mu_y}
+            'mu_x'     : float(mu_x),
+            'mu_y'     : float(mu_y)}
 
 
 def make_bayes_precision(distribution='normal', posterior_width=0.08, num_iters=25000):
@@ -307,10 +307,10 @@ def bayes_precision(x, y, distribution='normal', posterior_width=0.08, num_iters
     stop = interval[1] - interval[0] < posterior_width
 
     # return stop, mu_x - mu_y, {'lower': interval[0], 'upper': interval[1]}, n_x, n_y, mu_x, mu_y
-    return {'stop'     : stop,
-            'delta'    : mu_x - mu_y,
+    return {'stop'     : bool(stop),
+            'delta'    : float(mu_x - mu_y),
             'interval' : {p1*100: interval[0], p2*100: interval[1]},
             'n_x'      : int(n_x),
             'n_y'      : int(n_y),
-            'mu_x'     : mu_x,
-            'mu_y'     : mu_y}
+            'mu_x'     : float(mu_x),
+            'mu_y'     : float(mu_y)}
