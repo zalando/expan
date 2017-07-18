@@ -22,7 +22,7 @@ class ExperimentTestCase(unittest.TestCase):
         np.random.seed(0)
         data, metadata = generate_random_data()
         self.columnNames = list(set(data.columns) - set(['variant', 'entity']))
-        self.numericColumnNames = getColumnNamesByType(data, np.float64)
+        self.numericColumnNames = getColumnNamesByType(data, np.number)
 
         self.data, self.metadata = data, metadata
 

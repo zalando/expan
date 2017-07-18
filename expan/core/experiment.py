@@ -29,7 +29,7 @@ class Experiment(object):
     Class which adds the analysis functions to experimental data.
     """
     def __init__(self, controlVariantName, data, metadata, reportKpiNames=None, derivedKpis=[]):
-        reportKpiNames = reportKpiNames or getColumnNamesByType(data, np.float64)
+        reportKpiNames = reportKpiNames or getColumnNamesByType(data, np.number)
 
         derivedKpiNames    = [k['name']    for k in derivedKpis]
         derivedKpiFormulas = [k['formula'] for k in derivedKpis]
