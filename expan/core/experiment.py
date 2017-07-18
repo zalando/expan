@@ -90,7 +90,7 @@ class Experiment(object):
         nonZeros     = len(x) - zerosAndNans
         return nonZeros/np.nansum(x) * x
 
-    def delta(self, method='fixed_horizon', workerArgs={}):
+    def delta(self, method='fixed_horizon', **workerArgs):
         workerTable = {
                 'fixed_horizon'    : statx.make_delta,
                 'group_sequential' : es.make_group_sequential,
