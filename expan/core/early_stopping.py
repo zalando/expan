@@ -197,7 +197,7 @@ def _bayes_sampling(x, y, distribution='normal', num_iters=25000):
     _x = drop_nan(_x)
     _y = drop_nan(_y)
 
-    key = (str(_x), str(_y))
+    key = (str(_x), str(_y), num_iters)
 
     if cacheSamplingResults and key in samplingResults:
         return samplingResults[key]
