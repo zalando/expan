@@ -29,15 +29,19 @@ class Experiment(object):
     Class which adds the analysis functions to experimental data.
     """
     def __init__(self, controlVariantName, data, metadata, reportKpiNames=None, derivedKpis=[]):
-        reportKpiNames = reportKpiNames or getColumnNamesByType(data, np.float64)
+        experimentColumnNames = set(['entity', 'variant'])
+        numericalColumnNames  = set(getColumnNamesByType(data, np.number))
+
+        if reportKpiNames:
+            reportKpiNames = set(reportKpiNames)
+        else:
+            reportKpiNames =  numericalColumnNames - experimentColumnNames
 
         derivedKpiNames    = [k['name']    for k in derivedKpis]
         derivedKpiFormulas = [k['formula'] for k in derivedKpis]
 
-        experimentColumnNames = ['entity', 'variant']
-
         # what columns do we expect to find in the data frame?
-        requiredColumnNames = (set(reportKpiNames) | set(experimentColumnNames)) - set(derivedKpiNames)
+        requiredColumnNames = (reportKpiNames | experimentColumnNames) - set(derivedKpiNames)
         kpiNamePattern = '([a-zA-Z][0-9a-zA-Z_]*)'
         # add names from all formulas
         for formula in derivedKpiFormulas:
@@ -52,7 +56,7 @@ class Experiment(object):
         self.metadata           = metadata.copy()
         self.reportKpiNames     = reportKpiNames
         self.derivedKpis        = derivedKpis
-        self.variantNames       = list(set(self.data.variant))
+        self.variantNames       = set(self.data.variant)
         self.controlVariantName = controlVariantName
         self.referenceKpis      = {}
 
