@@ -165,8 +165,8 @@ def get_or_compile_stan_model(model_file, distribution):
             pickle.dump(sm, f)
     return sm
 
-cacheSamplingResults = False
-samplingResults = {} # memoized sampling results
+cache_sampling_results = False
+sampling_results = {} # memoized sampling results
 
 def _bayes_sampling(x, y, distribution='normal', num_iters=25000):
     """
@@ -199,8 +199,8 @@ def _bayes_sampling(x, y, distribution='normal', num_iters=25000):
 
     key = (str(_x), str(_y), num_iters)
 
-    if cacheSamplingResults and key in samplingResults:
-        return samplingResults[key]
+    if cache_sampling_results and key in sampling_results:
+        return sampling_results[key]
 
     mu_x = np.nanmean(_x)
     mu_y = np.nanmean(_y)
@@ -228,8 +228,8 @@ def _bayes_sampling(x, y, distribution='normal', num_iters=25000):
                       control={'stepsize': 0.01, 'adapt_delta': 0.99})
     traces = fit.extract()
 
-    if cacheSamplingResults:
-        samplingResults[key] = (traces, n_x, n_y, mu_x, mu_y)
+    if cache_sampling_results:
+        sampling_results[key] = (traces, n_x, n_y, mu_x, mu_y)
 
     return traces, n_x, n_y, mu_x, mu_y
 
@@ -274,7 +274,8 @@ def bayes_factor(x, y, distribution='normal', num_iters=25000):
             'n_x'      : int(n_x),
             'n_y'      : int(n_y),
             'mu_x'     : float(mu_x),
-            'mu_y'     : float(mu_y)}
+            'mu_y'     : float(mu_y),
+            'num_iters': num_iters}
 
 
 def make_bayes_precision(distribution='normal', posterior_width=0.08, num_iters=25000):
@@ -313,4 +314,5 @@ def bayes_precision(x, y, distribution='normal', posterior_width=0.08, num_iters
             'n_x'      : int(n_x),
             'n_y'      : int(n_y),
             'mu_x'     : float(mu_x),
-            'mu_y'     : float(mu_y)}
+            'mu_y'     : float(mu_y),
+            'num_iters': num_iters}

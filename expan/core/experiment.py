@@ -9,7 +9,7 @@ import expan.core.binning as binmodule
 import expan.core.early_stopping as es
 import expan.core.statistics as statx
 
-from expan.core.util import getColumnNamesByType
+from expan.core.util import get_column_names_by_type
 # from expan.core.experimentdata import ExperimentData
 # from expan.core.results import Results, delta_to_dataframe_all_variants, feature_check_to_dataframe, \
 #     early_stopping_to_dataframe
@@ -28,46 +28,46 @@ class Experiment(object):
     """
     Class which adds the analysis functions to experimental data.
     """
-    def __init__(self, controlVariantName, data, metadata, reportKpiNames=None, derivedKpis=[]):
-        experimentColumnNames = set(['entity', 'variant'])
-        numericalColumnNames  = set(getColumnNamesByType(data, np.number))
+    def __init__(self, control_variant_name, data, metadata, report_kpi_names=None, derived_kpis=[]):
+        experiment_column_names = set(['entity', 'variant'])
+        numerical_column_names  = set(get_column_names_by_type(data, np.number))
 
-        if reportKpiNames:
-            reportKpiNames = set(reportKpiNames)
+        if report_kpi_names:
+            report_kpi_names = set(report_kpi_names)
         else:
-            reportKpiNames =  numericalColumnNames - experimentColumnNames
+            report_kpi_names =  numerical_column_names - experiment_column_names
 
-        derivedKpiNames    = [k['name']    for k in derivedKpis]
-        derivedKpiFormulas = [k['formula'] for k in derivedKpis]
+        derived_kpi_names    = [k['name']    for k in derived_kpis]
+        derived_kpi_formulas = [k['formula'] for k in derived_kpis]
 
         # what columns do we expect to find in the data frame?
-        requiredColumnNames = (reportKpiNames | experimentColumnNames) - set(derivedKpiNames)
-        kpiNamePattern = '([a-zA-Z][0-9a-zA-Z_]*)'
+        required_column_names = (report_kpi_names | experiment_column_names) - set(derived_kpi_names)
+        kpi_name_pattern = '([a-zA-Z][0-9a-zA-Z_]*)'
         # add names from all formulas
-        for formula in derivedKpiFormulas:
-            names = re.findall(kpiNamePattern, formula)
-            requiredColumnNames = requiredColumnNames | set(names)
+        for formula in derived_kpi_formulas:
+            names = re.findall(kpi_name_pattern, formula)
+            required_column_names = required_column_names | set(names)
 
-        for c in requiredColumnNames:
+        for c in required_column_names:
             if c not in data:
                 raise ValueError('No column %s provided'%c)
 
-        self.data               =     data.copy()
-        self.metadata           = metadata.copy()
-        self.reportKpiNames     = reportKpiNames
-        self.derivedKpis        = derivedKpis
-        self.variantNames       = set(self.data.variant)
-        self.controlVariantName = controlVariantName
-        self.referenceKpis      = {}
+        self.data                 =     data.copy()
+        self.metadata             = metadata.copy()
+        self.report_kpi_names     = report_kpi_names
+        self.derived_kpis         = derived_kpis
+        self.variant_names        = set(self.data.variant)
+        self.control_variant_name = control_variant_name
+        self.reference_kpis       = {}
 
         # add derived KPIs to the data frame
-        for name, formula in zip(derivedKpiNames, derivedKpiFormulas):
-            self.data.loc[:, name] = eval(re.sub(kpiNamePattern, r'self.data.\1.astype(float)', formula))
-            self.referenceKpis[name] = re.sub(kpiNamePattern + '/', '', formula)
+        for name, formula in zip(derived_kpi_names, derived_kpi_formulas):
+            self.data.loc[:, name] = eval(re.sub(kpi_name_pattern, r'self.data.\1.astype(float)', formula))
+            self.reference_kpis[name] = re.sub(kpi_name_pattern + '/', '', formula)
 
 
 
-    def getKPIbyNameAndVariant(self, name, variant):
+    def get_kpi_by_name_and_variant(self, name, variant):
         return self.data.reset_index().set_index('variant').loc[variant, name]
 
 
@@ -85,39 +85,39 @@ class Experiment(object):
 
 
 
-    def _getWeights(self, kpi, variant):
-        if kpi not in self.referenceKpis:
+    def _get_weights(self, kpi, variant):
+        if kpi not in self.reference_kpis:
             return 1.0
-        referenceKpi = self.referenceKpis[kpi]
-        x            = self.getKPIbyNameAndVariant(referenceKpi, variant)
-        zerosAndNans = sum(x == 0) + np.isnan(x).sum()
-        nonZeros     = len(x) - zerosAndNans
-        return nonZeros/np.nansum(x) * x
+        reference_kpi  = self.reference_kpis[kpi]
+        x              = self.get_kpi_by_name_and_variant(reference_kpi, variant)
+        zeros_and_nans = sum(x == 0) + np.isnan(x).sum()
+        non_zeros      = len(x) - zeros_and_nans
+        return non_zeros/np.nansum(x) * x
 
     def delta(self, method='fixed_horizon', **workerArgs):
-        workerTable = {
+        worker_table = {
                 'fixed_horizon'    : statx.make_delta,
                 'group_sequential' : es.make_group_sequential,
                 'bayes_factor'     : es.make_bayes_factor,
                 'bayes_precision'  : es.make_bayes_precision,
                 }
 
-        if not method in workerTable:
+        if not method in worker_table:
             raise NotImplementedError
 
-        worker = workerTable[method](**workerArgs)
+        worker = worker_table[method](**workerArgs)
 
         result = {}
-        for kpi in self.reportKpiNames:
+        for kpi in self.report_kpi_names:
             result[kpi] = {}
-            control       = self.getKPIbyNameAndVariant(kpi, self.controlVariantName)
-            controlWeight = self._getWeights(kpi, self.controlVariantName)
-            for variant in self.variantNames:
-                treatment       = self.getKPIbyNameAndVariant(kpi, variant)
-                treatmentWeight = self._getWeights(kpi, variant)
+            control       = self.get_kpi_by_name_and_variant(kpi, self.control_variant_name)
+            controlWeight = self._get_weights(kpi, self.control_variant_name)
+            for variant in self.variant_names:
+                treatment       = self.get_kpi_by_name_and_variant(kpi, variant)
+                treatmentWeight = self._get_weights(kpi, variant)
                 ds = worker(x=treatment*treatmentWeight, y=control*controlWeight)
-                result[kpi][variant] = {'controlVariant'   : self.controlVariantName,
-                                        'treatmentVariant' : variant,
-                                        'deltaStatistics'  : ds}
+                result[kpi][variant] = {'control_variant'   : self.control_variant_name,
+                                        'treatment_variant' : variant,
+                                        'delta_statistics'  : ds}
 
         return result
