@@ -35,7 +35,7 @@ class Experiment(object):
         if report_kpi_names:
             report_kpi_names = set(report_kpi_names)
         else:
-            report_kpi_names =  numerical_column_names - experiment_column_names
+            report_kpi_names = numerical_column_names - experiment_column_names
 
         derived_kpi_names    = [k['name']    for k in derived_kpis]
         derived_kpi_formulas = [k['formula'] for k in derived_kpis]
