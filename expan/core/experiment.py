@@ -94,7 +94,7 @@ class Experiment(object):
         non_zeros      = len(x) - zeros_and_nans
         return non_zeros/np.nansum(x) * x
 
-    def delta(self, method='fixed_horizon', **workerArgs):
+    def delta(self, method='fixed_horizon', **worker_args):
         worker_table = {
                 'fixed_horizon'    : statx.make_delta,
                 'group_sequential' : es.make_group_sequential,
@@ -105,7 +105,7 @@ class Experiment(object):
         if not method in worker_table:
             raise NotImplementedError
 
-        worker = worker_table[method](**workerArgs)
+        worker = worker_table[method](**worker_args)
 
         result = {}
         for kpi in self.report_kpi_names:
