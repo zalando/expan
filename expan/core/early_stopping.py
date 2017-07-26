@@ -80,7 +80,7 @@ def group_sequential(x,
     if not estimated_sample_size:
         information_fraction = 1.0
     else:
-        information_fraction = min(n_x, n_y) / estimated_sample_size
+        information_fraction = max(1.0, min(n_x, n_y) / estimated_sample_size)
 
     # alpha spending function
     if spending_function in ('obrien_fleming'):
