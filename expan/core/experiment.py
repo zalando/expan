@@ -9,6 +9,8 @@ import expan.core.binning as binmodule
 import expan.core.early_stopping as es
 import expan.core.statistics as statx
 
+from expan.core.version import __version__
+
 from expan.core.util import get_column_names_by_type
 # from expan.core.experimentdata import ExperimentData
 # from expan.core.results import Results, delta_to_dataframe_all_variants, feature_check_to_dataframe, \
@@ -120,4 +122,7 @@ class Experiment(object):
                                         'treatment_variant' : variant,
                                         'delta_statistics'  : ds}
 
+        result['warnings']      = "none so far"
+        result['errors']        = "none so far"
+        result['expan_version'] = __version__
         return result
