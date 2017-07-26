@@ -52,7 +52,8 @@ def group_sequential(x,
         y (array_like): sample of a control group
         spending_function: name of the alpha spending function, currently
             supports: 'obrien_fleming'
-        estimated_sample_size: self-explanatory
+        estimated_sample_size: sample size to be achieved towards
+            the end of experiment
         alpha: type-I error rate
         cap: upper bound of the adapted z-score
 
