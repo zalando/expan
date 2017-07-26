@@ -2,14 +2,13 @@ from warnings import warn
 
 import numpy as np
 import pandas as pd
-import os
-
-from os.path import dirname, join, realpath
 
 
 def is_number_and_nan(obj):
     return obj != obj
 
+def get_column_names_by_type(df, dtype):
+    return [c for c in df.columns if np.issubdtype(df.dtypes[c], dtype)]
 
 def drop_nan(np_array):
     if np_array.ndim == 1:
@@ -154,14 +153,3 @@ def generate_random_data_n_variants(n_variants=3):
     }
 
     return test_data_frame, metadata
-
-
-def remove_model_pkls():
-    """
-    Removes .pkl compiled model files from the models folder.
-    """
-    __location__ = realpath(join(os.getcwd(), dirname(__file__)))
-    models_dir = __location__ + '/../../expan/models/'
-    for f in os.listdir(models_dir):
-        if f.endswith(".pkl"):
-            os.remove(join(models_dir, f))

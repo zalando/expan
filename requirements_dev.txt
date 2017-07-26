@@ -1,3 +1,4 @@
+cryptography==1.0.1
 bumpversion==0.5.3
 wheel==0.23.0
 watchdog==0.8.3
@@ -5,7 +6,6 @@ flake8==2.4.1
 tox==2.1.1
 coverage==4.0
 Sphinx==1.4
-cryptography==1.0.1
 PyYAML==3.11
 alabaster==0.7.7
 sphinx_rtd_theme==0.1.9

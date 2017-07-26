@@ -7,7 +7,7 @@ import pickle
 
 import pandas as pd
 
-from expan.core.experiment import Experiment
+from expan.core.experiment     import Experiment
 from expan.core.experimentdata import ExperimentData
 
 
