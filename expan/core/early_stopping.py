@@ -32,16 +32,16 @@ def obrien_fleming(information_fraction, alpha=0.05):
     return (1 - norm.cdf(norm.ppf(1 - alpha / 2) / np.sqrt(information_fraction))) * 2
 
 
-def make_group_sequential(spending_function='obrien_fleming', information_fraction=1.0, alpha=0.05, cap=8):
+def make_group_sequential(spending_function='obrien_fleming', estimated_sample_size=None, alpha=0.05, cap=8):
     def f(x, y):
-        return group_sequential(x, y, spending_function, information_fraction,
+        return group_sequential(x, y, spending_function, estimated_sample_size,
                                 alpha, cap)
     return f
 
 def group_sequential(x,
                      y,
                      spending_function='obrien_fleming',
-                     information_fraction=1,
+                     estimated_sample_size=None,
                      alpha=0.05,
                      cap=8):
     """
@@ -52,8 +52,7 @@ def group_sequential(x,
         y (array_like): sample of a control group
         spending_function: name of the alpha spending function, currently
             supports: 'obrien_fleming'
-        information_fraction: share of the information amount at the point 
-            of evaluation, e.g. the share of the maximum sample size
+        estimated_sample_size: self-explanatory
         alpha: type-I error rate
         cap: upper bound of the adapted z-score
 
@@ -74,6 +73,14 @@ def group_sequential(x,
     # else:
     #	fraction = information_fraction
 
+    n_x = statx.sample_size(_x)
+    n_y = statx.sample_size(_y)
+
+    if not estimated_sample_size:
+        information_fraction = 1.0
+    else:
+        information_fraction = min(n_x, n_y) / estimated_sample_size
+
     # alpha spending function
     if spending_function in ('obrien_fleming'):
         func = eval(spending_function)
@@ -91,8 +98,6 @@ def group_sequential(x,
     mu_y = np.nanmean(_y)
     sigma_x = np.nanstd(_x)
     sigma_y = np.nanstd(_y)
-    n_x = statx.sample_size(_x)
-    n_y = statx.sample_size(_y)
     z = (mu_x - mu_y) / np.sqrt(sigma_x ** 2 / n_x + sigma_y ** 2 / n_y)
 
     if z > bound or z < -bound:
