@@ -32,10 +32,16 @@ def obrien_fleming(information_fraction, alpha=0.05):
     return (1 - norm.cdf(norm.ppf(1 - alpha / 2) / np.sqrt(information_fraction))) * 2
 
 
+def make_group_sequential(spending_function='obrien_fleming', estimated_sample_size=None, alpha=0.05, cap=8):
+    def f(x, y):
+        return group_sequential(x, y, spending_function, estimated_sample_size,
+                                alpha, cap)
+    return f
+
 def group_sequential(x,
                      y,
                      spending_function='obrien_fleming',
-                     information_fraction=1,
+                     estimated_sample_size=None,
                      alpha=0.05,
                      cap=8):
     """
@@ -46,20 +52,13 @@ def group_sequential(x,
         y (array_like): sample of a control group
         spending_function: name of the alpha spending function, currently
             supports: 'obrien_fleming'
-        information_fraction: share of the information amount at the point 
-            of evaluation, e.g. the share of the maximum sample size
+        estimated_sample_size: sample size to be achieved towards
+            the end of experiment
         alpha: type-I error rate
         cap: upper bound of the adapted z-score
 
     Returns:
-        tuple: 
-            - stop label
-            - effect size (delta)
-            - confidence interval of delta
-            - sample size of x
-            - sample size of y
-            - absolute mean of x
-            - absolute mean of y
+        EarlyStoppingStatistics object
     """
     # Checking if data was provided
     if x is None or y is None:
@@ -74,6 +73,14 @@ def group_sequential(x,
     #	fraction = np.linspace(0,1,information_fraction+1)[1:]
     # else:
     #	fraction = information_fraction
+
+    n_x = statx.sample_size(_x)
+    n_y = statx.sample_size(_y)
+
+    if not estimated_sample_size:
+        information_fraction = 1.0
+    else:
+        information_fraction = max(1.0, min(n_x, n_y) / estimated_sample_size)
 
     # alpha spending function
     if spending_function in ('obrien_fleming'):
@@ -92,19 +99,24 @@ def group_sequential(x,
     mu_y = np.nanmean(_y)
     sigma_x = np.nanstd(_x)
     sigma_y = np.nanstd(_y)
-    n_x = statx.sample_size(_x)
-    n_y = statx.sample_size(_y)
     z = (mu_x - mu_y) / np.sqrt(sigma_x ** 2 / n_x + sigma_y ** 2 / n_y)
 
     if z > bound or z < -bound:
-        stop = 1
+        stop = True
     else:
-        stop = 0
+        stop = False
 
     interval = statx.normal_difference(mu_x, sigma_x, n_x, mu_y, sigma_y, n_y,
                                        [alpha_new * 100 / 2, 100 - alpha_new * 100 / 2])
 
-    return stop, mu_x - mu_y, interval, n_x, n_y, mu_x, mu_y
+    # return stop, mu_x - mu_y, interval, n_x, n_y, mu_x, mu_y
+    return {'stop'     : bool(stop),
+            'delta'    : float(mu_x - mu_y),
+            'interval' : interval,
+            'n_x'      : int(n_x),
+            'n_y'      : int(n_y),
+            'mu_x'     : float(mu_x),
+            'mu_y'     : float(mu_y)}
 
 
 def HDI_from_MCMC(posterior_samples, credible_mass=0.95):
@@ -159,6 +171,8 @@ def get_or_compile_stan_model(model_file, distribution):
             pickle.dump(sm, f)
     return sm
 
+cache_sampling_results = False
+sampling_results = {} # memoized sampling results
 
 def _bayes_sampling(x, y, distribution='normal', num_iters=25000):
     """
@@ -189,6 +203,11 @@ def _bayes_sampling(x, y, distribution='normal', num_iters=25000):
     _x = drop_nan(_x)
     _y = drop_nan(_y)
 
+    key = (str(_x), str(_y), num_iters)
+
+    if cache_sampling_results and key in sampling_results:
+        return sampling_results[key]
+
     mu_x = np.nanmean(_x)
     mu_y = np.nanmean(_y)
     n_x = statx.sample_size(_x)
@@ -215,7 +234,16 @@ def _bayes_sampling(x, y, distribution='normal', num_iters=25000):
                       control={'stepsize': 0.01, 'adapt_delta': 0.99})
     traces = fit.extract()
 
+    if cache_sampling_results:
+        sampling_results[key] = (traces, n_x, n_y, mu_x, mu_y)
+
     return traces, n_x, n_y, mu_x, mu_y
+
+
+def make_bayes_factor(distribution='normal', num_iters=25000):
+    def f(x, y):
+        return bayes_factor(x, y, distribution, num_iters)
+    return f
 
 
 def bayes_factor(x, y, distribution='normal', num_iters=25000):
@@ -228,14 +256,7 @@ def bayes_factor(x, y, distribution='normal', num_iters=25000):
         num_iters: number of iterations of bayes sampling
 
     Returns:
-        tuple: 
-            - stop label
-            - effect size (delta)
-            - credible interval of delta
-            - sample size of x
-            - sample size of y
-            - absolute mean of x
-            - absolute mean of y
+        dictionary with statistics
     """
     traces, n_x, n_y, mu_x, mu_y = _bayes_sampling(x, y, distribution=distribution, num_iters=num_iters)
     kde = gaussian_kde(traces['delta'])
@@ -243,11 +264,30 @@ def bayes_factor(x, y, distribution='normal', num_iters=25000):
     prior = cauchy.pdf(0, loc=0, scale=1)
     # BF_01
     bf = kde.evaluate(0)[0] / prior
-    stop = int(bf > 3 or bf < 1 / 3.)
-    interval = HDI_from_MCMC(traces['delta'])
+    # stop = int(bf > 3 or bf < 1 / 3.)
+    stop = bf > 3 or bf < 1 / 3.
 
-    return stop, mu_x - mu_y, {'lower': interval[0], 'upper': interval[1]}, n_x, n_y, mu_x, mu_y
+    credibleMass = 0.95                # another magic number
+    leftOut      = 1.0 - credibleMass
+    p1           = round(leftOut/2.0, 5)
+    p2           = round(1.0 - leftOut/2.0, 5)
+    interval = HDI_from_MCMC(traces['delta'], credibleMass)
 
+    # return stop, mu_x - mu_y, {'lower': interval[0], 'upper': interval[1]}, n_x, n_y, mu_x, mu_y
+    return {'stop'     : bool(stop),
+            'delta'    : float(mu_x - mu_y),
+            'interval' : {p1*100: interval[0], p2*100: interval[1]},
+            'n_x'      : int(n_x),
+            'n_y'      : int(n_y),
+            'mu_x'     : float(mu_x),
+            'mu_y'     : float(mu_y),
+            'num_iters': num_iters}
+
+
+def make_bayes_precision(distribution='normal', posterior_width=0.08, num_iters=25000):
+    def f(x, y):
+        return bayes_precision(x, y, distribution, posterior_width, num_iters)
+    return f
 
 def bayes_precision(x, y, distribution='normal', posterior_width=0.08, num_iters=25000):
     """
@@ -261,17 +301,24 @@ def bayes_precision(x, y, distribution='normal', posterior_width=0.08, num_iters
         num_iters: number of iterations of bayes sampling
 
     Returns:
-        tuple: 
-            - stop label
-            - effect size (delta)
-            - credible interval of delta
-            - sample size of x
-            - sample size of y
-            - absolute mean of x
-            - absolute mean of y
+        dictionary with statistics
     """
     traces, n_x, n_y, mu_x, mu_y = _bayes_sampling(x, y, distribution=distribution, num_iters=num_iters)
-    interval = HDI_from_MCMC(traces['delta'])
-    stop = int(interval[1] - interval[0] < posterior_width)
+    credibleMass = 0.95                # another magic number
+    leftOut      = 1.0 - credibleMass
+    p1           = round(leftOut/2.0, 5)
+    p2           = round(1.0 - leftOut/2.0, 5)
+    interval = HDI_from_MCMC(traces['delta'], credibleMass)
 
-    return stop, mu_x - mu_y, {'lower': interval[0], 'upper': interval[1]}, n_x, n_y, mu_x, mu_y
+    # stop = int(interval[1] - interval[0] < posterior_width)
+    stop = interval[1] - interval[0] < posterior_width
+
+    # return stop, mu_x - mu_y, {'lower': interval[0], 'upper': interval[1]}, n_x, n_y, mu_x, mu_y
+    return {'stop'     : bool(stop),
+            'delta'    : float(mu_x - mu_y),
+            'interval' : {p1*100: interval[0], p2*100: interval[1]},
+            'n_x'      : int(n_x),
+            'n_y'      : int(n_y),
+            'mu_x'     : float(mu_x),
+            'mu_y'     : float(mu_y),
+            'num_iters': num_iters}

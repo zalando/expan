@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-
 def _delta_mean(x, y):
     """Implemented as function to allow calling from bootstrap. """
     return np.nanmean(x) - np.nanmean(y)
@@ -59,13 +58,7 @@ def delta(x, y, assume_normal=True, percentiles=[2.5, 97.5],
             for ratios.
 
     Returns:
-        tuple:
-            * mu (float): mean value of the difference
-            * c_i (dict): percentile levels (index) and values
-            * ss_x (int): size of x excluding NA values
-            * ss_y (int): size of y excluding NA values
-            * _x (float): absolute mean of x
-            * _y (float): absolute mean of y
+        DeltaStatistics object
     """
     # Checking if data was provided
     if x is None or y is None:
@@ -103,8 +96,13 @@ def delta(x, y, assume_normal=True, percentiles=[2.5, 97.5],
                                relative=relative)
 
     # Return the result structure
-    return mu, c_i, ss_x, ss_y, np.nanmean(_x), np.nanmean(_y)
-
+    # return mu, c_i, ss_x, ss_y, np.nanmean(_x), np.nanmean(_y)
+    return {'delta'    : float(mu),
+            'interval' : c_i,
+            'n_x'      : int(ss_x),
+            'n_y'      : int(ss_y),
+            'mu_x'     : float(np.nanmean(_x)),
+            'mu_y'     : float(np.nanmean(_y))}
 
 def sample_size(x):
     """
@@ -457,10 +455,10 @@ def normal_difference(mean1, std1, n1, mean2, std2, n2, percentiles=[2.5, 97.5],
 
     # Mapping percentiles via standard error
     if relative:
-        return dict([(p, stats.t.ppf(p / 100.0, df=d_free) * st_error)
+        return dict([(round(p, 5), stats.t.ppf(p / 100.0, df=d_free) * st_error)
                      for p in percentiles])
     else:
-        return dict([(p, mean + stats.t.ppf(p / 100.0, df=d_free) * st_error)
+        return dict([(round(p, 5), mean + stats.t.ppf(p / 100.0, df=d_free) * st_error)
                      for p in percentiles])
 
 

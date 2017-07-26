@@ -41,8 +41,8 @@ class CsvFetcherTestCase(unittest.TestCase):
 
     def test_csv_fetcher(self):
         # should work:
-        csv_fetcher.get_data(TEST_FOLDER)
+        csv_fetcher.get_data('B', TEST_FOLDER)
 
         # should not work:
         with self.assertRaises(AssertionError):
-            csv_fetcher.get_data(join(__location__, '..'))
+            csv_fetcher.get_data('B', join(__location__, '..'))
