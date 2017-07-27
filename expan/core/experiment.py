@@ -110,19 +110,28 @@ class Experiment(object):
         worker = worker_table[method](**worker_args)
 
         result = {}
+        result['warnings']        = []
+        result['errors']          = []
+        result['expan_version']   = __version__
+        result['control_variant'] = self.control_variant_name
+        kpis = []
+
         for kpi in self.report_kpi_names:
-            result[kpi] = {}
+            res = {}
+            res['name']     = kpi
+            res['variants'] = []
             control       = self.get_kpi_by_name_and_variant(kpi, self.control_variant_name)
             controlWeight = self._get_weights(kpi, self.control_variant_name)
             for variant in self.variant_names:
                 treatment       = self.get_kpi_by_name_and_variant(kpi, variant)
                 treatmentWeight = self._get_weights(kpi, variant)
-                ds = worker(x=treatment*treatmentWeight, y=control*controlWeight)
-                result[kpi][variant] = {'control_variant'   : self.control_variant_name,
-                                        'treatment_variant' : variant,
-                                        'delta_statistics'  : ds}
+                with warnings.catch_warnings(record=True) as w:
+                    ds = worker(x=treatment*treatmentWeight, y=control*controlWeight)
+                if len(w):
+                    result['warnings'].append('kpi: ' + kpi + ', variant: '+ variant + ': ' + str(w[-1].message))
+                res['variants'].append({'name'             : variant,
+                                        'delta_statistics' : ds})
+            kpis.append(res)
 
-        result['warnings']      = "none so far"
-        result['errors']        = "none so far"
-        result['expan_version'] = __version__
+        result['kpis'] = kpis
         return result

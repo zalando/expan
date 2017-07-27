@@ -4,6 +4,7 @@ import warnings
 import numpy as np
 
 import expan.core.statistics as statx
+from expan.core.util import find_list_of_dicts_element
 from .util import *
 
 data_dir = os.getcwd() + '/tests/tests_core/data'
@@ -62,10 +63,14 @@ class DeltaTestCases(StatisticsTestCase):
             assume_normal=True)
         # Checking if mean has right value
         self.assertAlmostEqual(res['delta'],          -0.28923076923075541)
+
+        value025 = find_list_of_dicts_element(res['interval'], 'percentile',  2.5, 'value')
+        value975 = find_list_of_dicts_element(res['interval'], 'percentile', 97.5, 'value')
+
         # Checking if lower percentile has right value
-        self.assertAlmostEqual(res['interval'][2.5],  -0.53770569567692295)
+        self.assertAlmostEqual(value025, -0.53770569567692295)
         # Checking if uper percentile has right value
-        self.assertAlmostEqual(res['interval'][97.5], -0.040755842784587965)
+        self.assertAlmostEqual(value975, -0.040755842784587965)
         # Checking if sample size 1 is correct
         self.assertEqual(res['n_x'], 65)
         # Checking if sample size 2 is correct
@@ -99,10 +104,14 @@ class DeltaTestCases(StatisticsTestCase):
             assume_normal=True)
         # Checking if mean has right value
         self.assertAlmostEqual(res['delta'],          -0.28923076923075541)
+
+        value025 = find_list_of_dicts_element(res['interval'], 'percentile',  2.5, 'value')
+        value975 = find_list_of_dicts_element(res['interval'], 'percentile', 97.5, 'value')
+
         # Checking if lower percentile has right value
-        self.assertAlmostEqual(res['interval'][2.5],  -0.53770569567692295)
+        self.assertAlmostEqual(value025, -0.53770569567692295)
         # Checking if uper percentile has right value
-        self.assertAlmostEqual(res['interval'][97.5], -0.040755842784587965)
+        self.assertAlmostEqual(value975, -0.040755842784587965)
         # Checking if sample size 1 is correct
         self.assertEqual(res['n_x'], 65)
         # Checking if sample size 2 is correct

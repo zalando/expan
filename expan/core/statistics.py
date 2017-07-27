@@ -97,6 +97,8 @@ def delta(x, y, assume_normal=True, percentiles=[2.5, 97.5],
 
     # Return the result structure
     # return mu, c_i, ss_x, ss_y, np.nanmean(_x), np.nanmean(_y)
+    c_i = [{'percentile': p, 'value': v} for (p, v) in c_i.items()]
+
     return {'delta'    : float(mu),
             'interval' : c_i,
             'n_x'      : int(ss_x),

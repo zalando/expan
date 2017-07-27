@@ -110,6 +110,7 @@ def group_sequential(x,
                                        [alpha_new * 100 / 2, 100 - alpha_new * 100 / 2])
 
     # return stop, mu_x - mu_y, interval, n_x, n_y, mu_x, mu_y
+    interval = [{'percentile': p, 'value': v} for (p, v) in interval.items()]
     return {'stop'     : bool(stop),
             'delta'    : float(mu_x - mu_y),
             'interval' : interval,
@@ -264,7 +265,6 @@ def bayes_factor(x, y, distribution='normal', num_iters=25000):
     prior = cauchy.pdf(0, loc=0, scale=1)
     # BF_01
     bf = kde.evaluate(0)[0] / prior
-    # stop = int(bf > 3 or bf < 1 / 3.)
     stop = bf > 3 or bf < 1 / 3.
 
     credibleMass = 0.95                # another magic number
@@ -273,10 +273,9 @@ def bayes_factor(x, y, distribution='normal', num_iters=25000):
     p2           = round(1.0 - leftOut/2.0, 5)
     interval = HDI_from_MCMC(traces['delta'], credibleMass)
 
-    # return stop, mu_x - mu_y, {'lower': interval[0], 'upper': interval[1]}, n_x, n_y, mu_x, mu_y
     return {'stop'     : bool(stop),
             'delta'    : float(mu_x - mu_y),
-            'interval' : {p1*100: interval[0], p2*100: interval[1]},
+            'interval' : [{'percentile': p*100, 'value': v} for p, v in zip([p1, p2], interval)],
             'n_x'      : int(n_x),
             'n_y'      : int(n_y),
             'mu_x'     : float(mu_x),
@@ -310,13 +309,11 @@ def bayes_precision(x, y, distribution='normal', posterior_width=0.08, num_iters
     p2           = round(1.0 - leftOut/2.0, 5)
     interval = HDI_from_MCMC(traces['delta'], credibleMass)
 
-    # stop = int(interval[1] - interval[0] < posterior_width)
     stop = interval[1] - interval[0] < posterior_width
 
-    # return stop, mu_x - mu_y, {'lower': interval[0], 'upper': interval[1]}, n_x, n_y, mu_x, mu_y
     return {'stop'     : bool(stop),
             'delta'    : float(mu_x - mu_y),
-            'interval' : {p1*100: interval[0], p2*100: interval[1]},
+            'interval' : [{'percentile': p*100, 'value': v} for p, v in zip([p1, p2], interval)],
             'n_x'      : int(n_x),
             'n_y'      : int(n_y),
             'mu_x'     : float(mu_x),
