@@ -5,9 +5,8 @@ import pandas as pd
 
 from expan.core.experiment import Experiment
 # from expan.core.results import Results
-from expan.core.util import generate_random_data, get_column_names_by_type
+from expan.core.util import generate_random_data, get_column_names_by_type, find_list_of_dicts_element
 # from tests.tests_core.test_results import mock_results_object
-
 
 class ExperimentTestCase(unittest.TestCase):
     """
@@ -96,11 +95,13 @@ class ExperimentClassTestCases(ExperimentTestCase):
         ndecimals = 5
         res = self.getExperiment(['normal_same']).delta(method='fixed_horizon')
 
-        aStats = res['normal_same']['A']['delta_statistics']
+        variants = find_list_of_dicts_element(res['kpis'], 'name', 'normal_same', 'variants')
+        aStats   = find_list_of_dicts_element(variants, 'name', 'A', 'delta_statistics')
+
         self.assertNumericalEqual(aStats['delta'],           0.033053, ndecimals)
 
-        self.assertNumericalEqual(aStats['interval'][02.5], -0.007135, ndecimals)
-        self.assertNumericalEqual(aStats['interval'][97.5],  0.073240, ndecimals)
+        self.assertNumericalEqual(aStats['interval'][0]['value'], -0.007135, ndecimals)
+        self.assertNumericalEqual(aStats['interval'][1]['value'],  0.073240, ndecimals)
 
         self.assertEqual(aStats['n_x'], 6108)
         self.assertEqual(aStats['n_y'], 3892)
@@ -119,11 +120,12 @@ class ExperimentClassTestCases(ExperimentTestCase):
         ndecimals = 5
         res = self.getExperiment(['normal_same']).delta(method='group_sequential')
 
-        aStats = res['normal_same']['A']['delta_statistics']
+        variants = find_list_of_dicts_element(res['kpis'], 'name', 'normal_same', 'variants')
+        aStats   = find_list_of_dicts_element(variants, 'name', 'A', 'delta_statistics')
         self.assertNumericalEqual(aStats['delta'],           0.033053, ndecimals)
 
-        self.assertNumericalEqual(aStats['interval'][02.5], -0.007135, ndecimals)
-        self.assertNumericalEqual(aStats['interval'][97.5],  0.073240, ndecimals)
+        self.assertNumericalEqual(aStats['interval'][0]['value'], -0.007135, ndecimals)
+        self.assertNumericalEqual(aStats['interval'][1]['value'],  0.073240, ndecimals)
 
         self.assertEqual(aStats['n_x'], 6108)
         self.assertEqual(aStats['n_y'], 3892)
@@ -142,7 +144,8 @@ class ExperimentClassTestCases(ExperimentTestCase):
         ndecimals = 5
         res = self.getExperiment(['normal_same']).delta(method='bayes_factor', num_iters=2000)
 
-        aStats = res['normal_same']['A']['delta_statistics']
+        variants = find_list_of_dicts_element(res['kpis'], 'name', 'normal_same', 'variants')
+        aStats   = find_list_of_dicts_element(variants, 'name', 'A', 'delta_statistics')
         self.assertNumericalEqual(aStats['delta'], 0.033053, ndecimals)
 
         self.assertEqual(aStats['stop'],      True, ndecimals)
@@ -151,8 +154,8 @@ class ExperimentClassTestCases(ExperimentTestCase):
         #
         # this can result in different numerical values depending on Python version
         #
-        # self.assertNumericalEqual(aStats['interval'][02.5], -0.007079081, ndecimals)
-        # self.assertNumericalEqual(aStats['interval'][97.5],  0.072703576, ndecimals)
+        # self.assertNumericalEqual(aStats['interval'][0]['value'], -0.007079081, ndecimals)
+        # self.assertNumericalEqual(aStats['interval'][1]['value'],  0.072703576, ndecimals)
 
         self.assertEqual(aStats['n_x'], 6108)
         self.assertEqual(aStats['n_y'], 3892)
@@ -172,7 +175,8 @@ class ExperimentClassTestCases(ExperimentTestCase):
         ndecimals = 5
         res = self.getExperiment(['normal_same']).delta(method='bayes_precision', num_iters=2000)
 
-        aStats = res['normal_same']['A']['delta_statistics']
+        variants = find_list_of_dicts_element(res['kpis'], 'name', 'normal_same', 'variants')
+        aStats   = find_list_of_dicts_element(variants, 'name', 'A', 'delta_statistics')
         self.assertNumericalEqual(aStats['delta'], 0.033053, ndecimals)
 
         self.assertEqual(aStats['stop'], True, ndecimals)
@@ -181,8 +185,8 @@ class ExperimentClassTestCases(ExperimentTestCase):
         #
         # this can result in different numerical values depending on Python version
         #
-        # self.assertNumericalEqual(aStats['interval'][02.5], -0.007079081, ndecimals)
-        # self.assertNumericalEqual(aStats['interval'][97.5],  0.072703576, ndecimals)
+        # self.assertNumericalEqual(aStats['interval'][0]['value'], -0.007079081, ndecimals)
+        # self.assertNumericalEqual(aStats['interval'][1]['value'],  0.072703576, ndecimals)
 
         self.assertEqual(aStats['n_x'], 6108)
         self.assertEqual(aStats['n_y'], 3892)
