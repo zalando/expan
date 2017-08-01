@@ -37,6 +37,9 @@ class Experiment(object):
         if type(report_kpi_names) is str:
             report_kpi_names = [report_kpi_names]
 
+        if type(report_kpi_names) is not list:
+            raise TypeError('report_kpi_names should be a list of str')
+
         if report_kpi_names:
             report_kpi_names_needed = set(report_kpi_names)
         else:
