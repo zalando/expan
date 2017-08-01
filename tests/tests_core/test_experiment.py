@@ -57,7 +57,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
         self.assertEqual(round(a, decimals), round(b, decimals))
 
 
-    def getExperiment(self, report_kpi_names=None, derived_kpis=[]):
+    def getExperiment(self, report_kpi_names=[], derived_kpis=[]):
         return Experiment('B', self.data, self.metadata, report_kpi_names, derived_kpis)
 
 
@@ -65,7 +65,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
         self.getExperiment()
 
         with self.assertRaises(ValueError):
-            experiment = self.getExperiment(self.column_names + ['non_existing'])
+            self.getExperiment(self.column_names + ['non_existing'])
 
         self.getExperiment(self.column_names + [self.derived_kpi_1['name'],
                                                 self.derived_kpi_2['name']],
@@ -81,6 +81,14 @@ class ExperimentClassTestCases(ExperimentTestCase):
             self.getExperiment(self.column_names + [self.derived_kpi_4['name'],
                                                     self.derived_kpi_2['name']],
                                [self.derived_kpi_4, self.derived_kpi_2])
+
+        with self.assertRaises(TypeError):
+            self.getExperiment(123)
+
+        self.getExperiment(['normal_same'])
+
+        # implicit do the conversion if there is one str
+        self.getExperiment('normal_same')
 
 
     def test_errors_warnings_expan_version(self):

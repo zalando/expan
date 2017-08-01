@@ -30,20 +30,26 @@ class Experiment(object):
     """
     Class which adds the analysis functions to experimental data.
     """
-    def __init__(self, control_variant_name, data, metadata, report_kpi_names=None, derived_kpis=[]):
+    def __init__(self, control_variant_name, data, metadata, report_kpi_names=[], derived_kpis=[]):
         experiment_column_names = set(['entity', 'variant'])
         numerical_column_names  = set(get_column_names_by_type(data, np.number))
 
+        if type(report_kpi_names) is str:
+            report_kpi_names = [report_kpi_names]
+
+        if type(report_kpi_names) is not list:
+            raise TypeError('report_kpi_names should be a list of str')
+
         if report_kpi_names:
-            report_kpi_names = set(report_kpi_names)
+            report_kpi_names_needed = set(report_kpi_names)
         else:
-            report_kpi_names = numerical_column_names - experiment_column_names
+            report_kpi_names_needed = numerical_column_names - experiment_column_names
 
         derived_kpi_names    = [k['name']    for k in derived_kpis]
         derived_kpi_formulas = [k['formula'] for k in derived_kpis]
 
         # what columns do we expect to find in the data frame?
-        required_column_names = (report_kpi_names | experiment_column_names) - set(derived_kpi_names)
+        required_column_names = (report_kpi_names_needed | experiment_column_names) - set(derived_kpi_names)
         kpi_name_pattern = '([a-zA-Z][0-9a-zA-Z_]*)'
         # add names from all formulas
         for formula in derived_kpi_formulas:
@@ -56,7 +62,7 @@ class Experiment(object):
 
         self.data                 =     data.copy()
         self.metadata             = metadata.copy()
-        self.report_kpi_names     = report_kpi_names
+        self.report_kpi_names     = report_kpi_names_needed
         self.derived_kpis         = derived_kpis
         self.variant_names        = set(self.data.variant)
         self.control_variant_name = control_variant_name
