@@ -260,8 +260,10 @@ def bayes_factor(x, y, distribution='normal', num_iters=25000):
         dictionary with statistics
     """
     traces, n_x, n_y, mu_x, mu_y = _bayes_sampling(x, y, distribution=distribution, num_iters=num_iters)
-    kde = gaussian_kde(traces['delta'])
+    trace_to_evaluate_bf = traces['alpha'] if distribution == 'normal' else traces['delta']
+    trace_to_compute_credible_interval = traces['delta']
 
+    kde = gaussian_kde(trace_to_evaluate_bf)
     prior = cauchy.pdf(0, loc=0, scale=1)
     # BF_01
     bf = kde.evaluate(0)[0] / prior
@@ -271,7 +273,7 @@ def bayes_factor(x, y, distribution='normal', num_iters=25000):
     leftOut      = 1.0 - credibleMass
     p1           = round(leftOut/2.0, 5)
     p2           = round(1.0 - leftOut/2.0, 5)
-    interval = HDI_from_MCMC(traces['delta'], credibleMass)
+    interval = HDI_from_MCMC(trace_to_compute_credible_interval, credibleMass)
 
     return {'stop'                  : bool(stop),
             'delta'                 : float(mu_x - mu_y),
