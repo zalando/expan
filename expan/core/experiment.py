@@ -1,6 +1,7 @@
 import logging
 import re
 import warnings
+import json
 
 import numpy as np
 import pandas as pd
@@ -45,6 +46,13 @@ class Experiment(object):
         else:
             report_kpi_names_needed = numerical_column_names - experiment_column_names
 
+        # check derived_kpis structure (should have keys namely 'name' and 'formula')
+        for i in derived_kpis:
+            if not isinstance(i, dict):
+                raise TypeError('Derived kpis should be an array of dictionaries')
+            if 'name' not in i or 'formula' not in i:
+                raise ValueError('Dictionaries should have keys "name" and "formula"')
+
         derived_kpi_names    = [k['name']    for k in derived_kpis]
         derived_kpi_formulas = [k['formula'] for k in derived_kpis]
 
@@ -78,19 +86,15 @@ class Experiment(object):
     def get_kpi_by_name_and_variant(self, name, variant):
         return self.data.reset_index().set_index('variant').loc[variant, name]
 
-
     def __str__(self):
-        # res = super(Experiment, self).__str__()
+        res = super(Experiment, self).__str__()
 
         variants = self.variant_names
 
-        res += '\n {:d} variants: {}'.format(len(variants),
-                                             ', '.join(
-                                                 [('*' + k + '*') if (k == self.metadata.get('baseline_variant', '-'))
-                                                  else k for k in variants]
-                                             ))
+        res += '{:d} variants: {}'.format(len(variants),
+                                          ', '.join([('*' + k + '*') if (k == self.control_variant_name) else k
+                                                    for k in variants]))
         return res
-
 
 
     def _get_weights(self, kpi, variant):

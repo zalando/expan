@@ -8,19 +8,19 @@ data {
 parameters {
 	real mu;			// population mean
 	real<lower=0> sigma;// population variance
-	real delta;
+	real alpha;         // normalized version of delta
 }
 
 transformed parameters {
-	real alpha;			// total effect size
-	alpha = delta * sigma;
+	real delta;			// absolute difference of mean
+	delta = alpha * sigma;
 }
 
 model {
-	delta ~ cauchy(0, 1);
+	alpha ~ cauchy(0, 1);
 	mu ~ cauchy(0, 1);
 	sigma ~ gamma(2, 2);
-	x ~ normal(mu+alpha, sigma);
+	x ~ normal(mu+delta, sigma);
 	y ~ normal(mu, sigma);
 }
 
