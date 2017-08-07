@@ -85,14 +85,11 @@ class Experiment(object):
         return self.data.reset_index().set_index('variant').loc[variant, name]
 
     def __str__(self):
-        res = super(Experiment, self).__str__()
-
         variants = self.variant_names
 
-        res += '{:d} variants: {}'.format(len(variants),
-                                          ', '.join([('*' + k + '*') if (k == self.control_variant_name) else k
-                                                    for k in variants]))
-        return res
+        return 'Experiment "{:s}" with {:d} derived kpis, {:d} report kpis, {:d} entities and {:d} variants: {}'.format(
+            self.metadata['experiment'], len(self.derived_kpis), len(self.report_kpi_names), len(self.data),
+            len(variants), ', '.join([('*' + k + '*') if (k == self.control_variant_name) else k for k in variants]))
 
     def _get_weights(self, kpi, variant):
         if kpi not in self.reference_kpis:
