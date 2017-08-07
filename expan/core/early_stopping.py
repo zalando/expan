@@ -260,8 +260,10 @@ def bayes_factor(x, y, distribution='normal', num_iters=25000):
         dictionary with statistics
     """
     traces, n_x, n_y, mu_x, mu_y = _bayes_sampling(x, y, distribution=distribution, num_iters=num_iters)
-    kde = gaussian_kde(traces['delta'])
+    trace_normalized_effect_size = get_trace_normalized_effect_size(distribution, traces)
+    trace_normalized_effect_size = traces['delta']
 
+    kde = gaussian_kde(trace_normalized_effect_size)
     prior = cauchy.pdf(0, loc=0, scale=1)
     # BF_01
     bf = kde.evaluate(0)[0] / prior
@@ -271,16 +273,26 @@ def bayes_factor(x, y, distribution='normal', num_iters=25000):
     leftOut      = 1.0 - credibleMass
     p1           = round(leftOut/2.0, 5)
     p2           = round(1.0 - leftOut/2.0, 5)
-    interval = HDI_from_MCMC(traces['delta'], credibleMass)
+    credible_interval = HDI_from_MCMC(trace_normalized_effect_size, credibleMass)
 
     return {'stop'                  : bool(stop),
             'delta'                 : float(mu_x - mu_y),
-            'confidence_interval'   : [{'percentile': p*100, 'value': v} for p, v in zip([p1, p2], interval)],
+            'confidence_interval'   : [{'percentile': p*100, 'value': v} for p, v in zip([p1, p2], credible_interval)],
             'treatment_sample_size' : int(n_x),
             'control_sample_size'   : int(n_y),
             'treatment_mean'        : float(mu_x),
             'control_mean'          : float(mu_y),
             'number_of_iterations'  : num_iters}
+
+
+def get_trace_normalized_effect_size(distribution, traces):
+    if distribution == 'normal':
+        return traces['alpha']
+    elif distribution == 'poisson':
+        variance = np.array(traces['delta']).mean()
+        return traces['delta'] / np.sqrt(variance)
+    else:
+        raise ValueError("model " + distribution + " is not implemented.")
 
 
 def make_bayes_precision(distribution='normal', posterior_width=0.08, num_iters=25000):
@@ -303,17 +315,22 @@ def bayes_precision(x, y, distribution='normal', posterior_width=0.08, num_iters
         dictionary with statistics
     """
     traces, n_x, n_y, mu_x, mu_y = _bayes_sampling(x, y, distribution=distribution, num_iters=num_iters)
+    trace_normalized_effect_size = get_trace_normalized_effect_size(distribution, traces)
+    trace_absolute_effect_size = traces['delta']
+
     credibleMass = 0.95                # another magic number
     leftOut      = 1.0 - credibleMass
     p1           = round(leftOut/2.0, 5)
     p2           = round(1.0 - leftOut/2.0, 5)
-    interval = HDI_from_MCMC(traces['delta'], credibleMass)
 
-    stop = interval[1] - interval[0] < posterior_width
+    credible_interval_delta            = HDI_from_MCMC(trace_absolute_effect_size, credibleMass)
+    credible_interval_delta_normalized = HDI_from_MCMC(trace_normalized_effect_size, credibleMass)
+
+    stop = credible_interval_delta_normalized[1] - credible_interval_delta_normalized[0] < posterior_width
 
     return {'stop'                  : bool(stop),
             'delta'                 : float(mu_x - mu_y),
-            'confidence_interval'   : [{'percentile': p*100, 'value': v} for p, v in zip([p1, p2], interval)],
+            'confidence_interval'   : [{'percentile': p*100, 'value': v} for p, v in zip([p1, p2], credible_interval_delta)],
             'treatment_sample_size' : int(n_x),
             'control_sample_size'   : int(n_y),
             'treatment_mean'        : float(mu_x),
