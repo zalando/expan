@@ -1,7 +1,6 @@
 import logging
 import re
 import warnings
-import json
 
 import numpy as np
 import pandas as pd
@@ -23,6 +22,7 @@ from expan.core.util import get_column_names_by_type
 warnings.simplefilter('always', UserWarning)
 
 logger = logging.getLogger(__name__)
+
 
 # TODO: add filtering functionality: we should be able to operate on this
 # class to exclude data points, and save all these operations in a log that then
@@ -81,8 +81,6 @@ class Experiment(object):
             self.data.loc[:, name] = eval(re.sub(kpi_name_pattern, r'self.data.\1.astype(float)', formula))
             self.reference_kpis[name] = re.sub(kpi_name_pattern + '/', '', formula)
 
-
-
     def get_kpi_by_name_and_variant(self, name, variant):
         return self.data.reset_index().set_index('variant').loc[variant, name]
 
@@ -95,7 +93,6 @@ class Experiment(object):
                                           ', '.join([('*' + k + '*') if (k == self.control_variant_name) else k
                                                     for k in variants]))
         return res
-
 
     def _get_weights(self, kpi, variant):
         if kpi not in self.reference_kpis:
