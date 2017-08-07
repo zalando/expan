@@ -260,7 +260,7 @@ def bayes_factor(x, y, distribution='normal', num_iters=25000):
         dictionary with statistics
     """
     traces, n_x, n_y, mu_x, mu_y = _bayes_sampling(x, y, distribution=distribution, num_iters=num_iters)
-    trace_normalized_effect_size = get_trace_normalzed_effect_size(distribution, traces)
+    trace_normalized_effect_size = get_trace_normalized_effect_size(distribution, traces)
     trace_normalized_effect_size = traces['delta']
 
     kde = gaussian_kde(trace_normalized_effect_size)
@@ -285,7 +285,7 @@ def bayes_factor(x, y, distribution='normal', num_iters=25000):
             'number_of_iterations'  : num_iters}
 
 
-def get_trace_normalzed_effect_size(distribution, traces):
+def get_trace_normalized_effect_size(distribution, traces):
     if distribution == 'normal':
         return traces['alpha']
     elif distribution == 'poisson':
@@ -315,7 +315,7 @@ def bayes_precision(x, y, distribution='normal', posterior_width=0.08, num_iters
         dictionary with statistics
     """
     traces, n_x, n_y, mu_x, mu_y = _bayes_sampling(x, y, distribution=distribution, num_iters=num_iters)
-    trace_normalized_effect_size = get_trace_normalzed_effect_size(distribution, traces)
+    trace_normalized_effect_size = get_trace_normalized_effect_size(distribution, traces)
     trace_absolute_effect_size = traces['delta']
 
     credibleMass = 0.95                # another magic number
