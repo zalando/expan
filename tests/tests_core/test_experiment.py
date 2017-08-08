@@ -52,6 +52,17 @@ class ExperimentClassTestCases(ExperimentTestCase):
     derived_kpi_4 = {'name'   : 'derived_kpi_4',
                      'formula': 'non_existing/normal_same'}
 
+    # badly structured cases
+    # not a dictionary
+    derived_kpi_5_1,  derived_kpi_5_2 = ['name', 'derived_kpi_5'], ['formula', 'normal_same/normal_same']
+    derived_kpi_6 = ['name', 'derived_kpi_6']
+
+    # do not have proper keys
+    derived_kpi_7 = {'name': 'derived_kpi_7'}
+    derived_kpi_8 = {'name_': 'derived_kpi_8',
+                     'formula_': 'normal_shifted/normal_same'}
+    derived_kpi_9 = {'derived_kpi_8': 'normal_shifted/normal_same'}
+
 
     def assertNumericalEqual(self, a, b, decimals):
         self.assertEqual(round(a, decimals), round(b, decimals))
@@ -90,6 +101,26 @@ class ExperimentClassTestCases(ExperimentTestCase):
         # implicit do the conversion if there is one str
         self.getExperiment('normal_same')
 
+        # check of dictionary structure
+        with self.assertRaises(TypeError):
+            self.getExperiment(self.numeric_column_names + ['normal_same'],
+                               [self.derived_kpi_5_1, self.derived_kpi_5_2])
+
+        with self.assertRaises(TypeError):
+            self.getExperiment(self.numeric_column_names + ['normal_same'],
+                               [self.derived_kpi_6])
+
+        with self.assertRaises(KeyError):
+            self.getExperiment(self.numeric_column_names + [self.derived_kpi_7['name'], 'normal_same'],
+                               [self.derived_kpi_7])
+
+        with self.assertRaises(KeyError):
+            self.getExperiment(self.numeric_column_names + [self.derived_kpi_1['name'], 'normal_same'],
+                               [self.derived_kpi_1, self.derived_kpi_8])
+
+        with self.assertRaises(KeyError):
+            self.getExperiment(self.numeric_column_names + ['normal_same'],
+                               [self.derived_kpi_9])
 
     def test_errors_warnings_expan_version(self):
         ndecimals = 5

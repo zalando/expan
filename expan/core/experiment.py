@@ -23,6 +23,7 @@ warnings.simplefilter('always', UserWarning)
 
 logger = logging.getLogger(__name__)
 
+
 # TODO: add filtering functionality: we should be able to operate on this
 # class to exclude data points, and save all these operations in a log that then
 # is preserved in all results.
@@ -44,6 +45,15 @@ class Experiment(object):
             report_kpi_names_needed = set(report_kpi_names)
         else:
             report_kpi_names_needed = numerical_column_names - experiment_column_names
+
+        # check derived_kpis structure (should have keys namely 'name' and 'formula')
+        for i in derived_kpis:
+            if not isinstance(i, dict):
+                raise TypeError('Derived kpis should be an array of dictionaries')
+            if 'formula' not in i:
+                raise KeyError('Dictionary should have key "formula"')
+            if 'name' not in i:
+                raise KeyError('Dictionary should have key "name"')
 
         derived_kpi_names    = [k['name']    for k in derived_kpis]
         derived_kpi_formulas = [k['formula'] for k in derived_kpis]
@@ -73,25 +83,15 @@ class Experiment(object):
             self.data.loc[:, name] = eval(re.sub(kpi_name_pattern, r'self.data.\1.astype(float)', formula))
             self.reference_kpis[name] = re.sub(kpi_name_pattern + '/', '', formula)
 
-
-
     def get_kpi_by_name_and_variant(self, name, variant):
         return self.data.reset_index().set_index('variant').loc[variant, name]
 
-
     def __str__(self):
-        # res = super(Experiment, self).__str__()
-
         variants = self.variant_names
 
-        res += '\n {:d} variants: {}'.format(len(variants),
-                                             ', '.join(
-                                                 [('*' + k + '*') if (k == self.metadata.get('baseline_variant', '-'))
-                                                  else k for k in variants]
-                                             ))
-        return res
-
-
+        return 'Experiment "{:s}" with {:d} derived kpis, {:d} report kpis, {:d} entities and {:d} variants: {}'.format(
+            self.metadata['experiment'], len(self.derived_kpis), len(self.report_kpi_names), len(self.data),
+            len(variants), ', '.join([('*' + k + '*') if (k == self.control_variant_name) else k for k in variants]))
 
     def _get_weights(self, kpi, variant):
         if kpi not in self.reference_kpis:
