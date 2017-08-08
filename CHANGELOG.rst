@@ -1,6 +1,62 @@
 Change Log
 ==========
 
+`Unreleased <https://github.com/zalando/expan/tree/HEAD>`__
+-----------------------------------------------------------
+
+`Full
+Changelog <https://github.com/zalando/expan/compare/v0.6.1...HEAD>`__
+
+**Merged pull requests:**
+
+-  Add static html file from intro doc for v0.6.1
+   `#146 <https://github.com/zalando/expan/pull/146>`__
+   (`shansfolder <https://github.com/shansfolder>`__)
+
+`v0.6.1 <https://github.com/zalando/expan/tree/v0.6.1>`__ (2017-08-08)
+----------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/zalando/expan/compare/v0.6.0...v0.6.1>`__
+
+**Implemented enhancements:**
+
+-  Optimizing the control flow from ``Experiment`` to ``Results``
+   `#82 <https://github.com/zalando/expan/issues/82>`__
+-  more meaningful dict keys for results
+   `#139 <https://github.com/zalando/expan/pull/139>`__
+   (`gbordyugov <https://github.com/gbordyugov>`__)
+
+**Fixed bugs:**
+
+-  reenable means and bounds functions on Results object
+   `#9 <https://github.com/zalando/expan/issues/9>`__
+
+**Closed issues:**
+
+-  Results.to\_json() implementation not flexible
+   `#65 <https://github.com/zalando/expan/issues/65>`__
+-  Results.to\_json() doesn't support trend() results
+   `#64 <https://github.com/zalando/expan/issues/64>`__
+
+**Merged pull requests:**
+
+-  Documentation updates for Expan 0.6.x. Covers OCTO-1961, OCTO-1970
+   `#145 <https://github.com/zalando/expan/pull/145>`__
+   (`daryadedik <https://github.com/daryadedik>`__)
+-  Fix delta/alpha model para inconsistency
+   `#144 <https://github.com/zalando/expan/pull/144>`__
+   (`shansfolder <https://github.com/shansfolder>`__)
+-  Small improvement on default type of report\_kpi\_names
+   `#140 <https://github.com/zalando/expan/pull/140>`__
+   (`shansfolder <https://github.com/shansfolder>`__)
+-  slightly different json structure for results
+   `#138 <https://github.com/zalando/expan/pull/138>`__
+   (`gbordyugov <https://github.com/gbordyugov>`__)
+-  merging dev to master
+   `#137 <https://github.com/zalando/expan/pull/137>`__
+   (`gbordyugov <https://github.com/gbordyugov>`__)
+
 `v0.6.0 <https://github.com/zalando/expan/tree/v0.6.0>`__ (2017-07-26)
 ----------------------------------------------------------------------
 

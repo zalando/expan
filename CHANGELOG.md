@@ -1,5 +1,38 @@
 # Change Log
 
+## [Unreleased](https://github.com/zalando/expan/tree/HEAD)
+
+[Full Changelog](https://github.com/zalando/expan/compare/v0.6.1...HEAD)
+
+**Merged pull requests:**
+
+- Add static html file from intro doc for v0.6.1 [\#146](https://github.com/zalando/expan/pull/146) ([shansfolder](https://github.com/shansfolder))
+
+## [v0.6.1](https://github.com/zalando/expan/tree/v0.6.1) (2017-08-08)
+[Full Changelog](https://github.com/zalando/expan/compare/v0.6.0...v0.6.1)
+
+**Implemented enhancements:**
+
+- Optimizing the control flow from `Experiment` to `Results` [\#82](https://github.com/zalando/expan/issues/82)
+- more meaningful dict keys for results [\#139](https://github.com/zalando/expan/pull/139) ([gbordyugov](https://github.com/gbordyugov))
+
+**Fixed bugs:**
+
+- reenable means and bounds functions on Results object [\#9](https://github.com/zalando/expan/issues/9)
+
+**Closed issues:**
+
+- Results.to\_json\(\) implementation not flexible [\#65](https://github.com/zalando/expan/issues/65)
+- Results.to\_json\(\) doesn't support trend\(\) results [\#64](https://github.com/zalando/expan/issues/64)
+
+**Merged pull requests:**
+
+- Documentation updates for Expan 0.6.x. Covers OCTO-1961, OCTO-1970 [\#145](https://github.com/zalando/expan/pull/145) ([daryadedik](https://github.com/daryadedik))
+- Fix delta/alpha model para inconsistency [\#144](https://github.com/zalando/expan/pull/144) ([shansfolder](https://github.com/shansfolder))
+- Small improvement on default type of report\_kpi\_names [\#140](https://github.com/zalando/expan/pull/140) ([shansfolder](https://github.com/shansfolder))
+- slightly different json structure for results [\#138](https://github.com/zalando/expan/pull/138) ([gbordyugov](https://github.com/gbordyugov))
+- merging dev to master [\#137](https://github.com/zalando/expan/pull/137) ([gbordyugov](https://github.com/gbordyugov))
+
 ## [v0.6.0](https://github.com/zalando/expan/tree/v0.6.0) (2017-07-26)
 [Full Changelog](https://github.com/zalando/expan/compare/v0.5.3...v0.6.0)
 
