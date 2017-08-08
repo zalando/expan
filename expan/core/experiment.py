@@ -50,8 +50,10 @@ class Experiment(object):
         for i in derived_kpis:
             if not isinstance(i, dict):
                 raise TypeError('Derived kpis should be an array of dictionaries')
-            if 'name' not in i or 'formula' not in i:
-                raise ValueError('Dictionaries should have keys "name" and "formula"')
+            if 'formula' not in i:
+                raise KeyError('Dictionary should have key "formula"')
+            if 'name' not in i:
+                raise KeyError('Dictionary should have key "name"')
 
         derived_kpi_names    = [k['name']    for k in derived_kpis]
         derived_kpi_formulas = [k['formula'] for k in derived_kpis]
