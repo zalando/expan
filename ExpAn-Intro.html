@@ -12146,8 +12146,20 @@ div#notebook {
 <td>Name of the experiment, as known to stakeholders. It can be anything meaningful to you.</td>
 </tr>
 <tr>
-<td><strong>[<code>sources</code>]</strong></td>
+<td><strong><code>[sources]</code></strong></td>
 <td>Names of the data sources used in the preparation of this data.</td>
+</tr>
+<tr>
+<td><strong><code>[experiment_id]</code></strong></td>
+<td>This uniquely identifies the experiment. Could be a concatenation of the experiment name and the experiment start timestamp.</td>
+</tr>
+<tr>
+<td><strong><code>[retrieval_time]</code></strong></td>
+<td>Time that data was fetched from original sources... perhaps this should be a list with entry per source?</td>
+</tr>
+<tr>
+<td><strong><code>[primary_KPI]</code></strong></td>
+<td>Overall Evaluation Criteria.</td>
 </tr>
 </tbody>
 </table>
@@ -12416,75 +12428,104 @@ Control or baseline variant: A
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Interpreting-the-output">Interpreting the output<a class="anchor-link" href="#Interpreting-the-output">&#182;</a></h3><table>
+<p>Currently <strong><code>deltaKPI</code></strong> supports 4 methods to compute <code>delta</code>: <code>fixed_horizon</code> (default), <code>group_sequential</code>, <code>bayes_factor</code> and <code>bayes_precision</code>. All methods requires different additional parameters.</p>
+<p><strong><code>fixed_horizon</code></strong> is a default method which has default settings/parameters:</p>
+<table>
 <thead><tr>
-<th>Metric</th>
+<th>Parameter</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong><code>treatment_mean</code></strong></td>
-<td>the mean of the treatment group</td>
+<td><code>assume_normal=True</code></td>
+<td>Specifies whether normal distribution assumptions can be made.</td>
 </tr>
 <tr>
-<td><strong><code>control_mean</code></strong></td>
-<td>the mean of the control group</td>
+<td><code>percentiles=[2.5, 97.5]</code></td>
+<td>A list of percentile values for confidence bounds.</td>
 </tr>
 <tr>
-<td><strong><code>control_sample_size</code></strong></td>
-<td>the sample size for the control group</td>
+<td><code>min_observations=20</code></td>
+<td>Minimum number of observations needed.</td>
 </tr>
 <tr>
-<td><strong><code>treatment_sample_size</code></strong></td>
-<td>the sample size for the treatment group</td>
+<td><code>nruns=10000</code></td>
+<td>Only used if assume normal is false.</td>
 </tr>
 <tr>
-<td><strong><code>delta</code></strong></td>
-<td>the difference between the treatment_mean and control_mean</td>
-</tr>
-<tr>
-<td><strong><code>confidence_interval</code></strong></td>
-<td>the confidence interval: <strong><code>percentile</code></strong> - lower percentile and upper percentile; <strong><code>value</code></strong> - value for each percentile</td>
+<td><code>relative=False</code></td>
+<td>If relative==True, then the values will be returned as distances below and above the mean, respectively, rather than the absolute values.</td>
 </tr>
 </tbody>
 </table>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Currently <strong><code>deltaKPI</code></strong> supports 4 methods to compute <code>delta</code>: <code>fixed_horizon</code> (default), <code>group_sequential</code>, <code>bayes_factor</code> and <code>bayes_precision</code>. All methods requires different additional parameters.</p>
-<p><strong><code>fixed_horizon</code></strong> is a default method which has default settings/parameters:</p>
-<ul>
-<li><code>assume_normal=True</code> - specifies whether normal distribution assumptions can be made.</li>
-<li><code>percentiles=[2.5, 97.5]</code> - list of percentile values for confidence bounds.</li>
-<li><code>min_observations=20</code> - minimum number of observations needed.</li>
-<li><code>nruns=10000</code> - only used if assume normal is false.</li>
-<li><code>relative=False</code> - if relative==True, then the values will be returned as distances below and above the mean, respectively, rather than the absolute values. </li>
-</ul>
 <p><strong><code>group_sequential</code></strong>:</p>
-<ul>
-<li><code>spending_function='obrien_fleming</code> - currently we support only Obrient-Fleming alpha spending function for the frequentist early stopping decision. </li>
-<li><code>estimated_sample_size=None</code> - sample size to be achieved towards the end of experiment.</li>
-<li><code>alpha=0.05</code> - type-I error rate</li>
-<li><code>cap=8</code> - upper bound of the adapted z-score</li>
-</ul>
-<p><strong><code>bayes_factor</code></strong></p>
-<ul>
-<li><code>distribution='normal'</code> - name of the KPI distribution model, which assumes a Stan model file with the same name exists.</li>
-<li><code>num_iters=25000</code> - number of iterations of bayes sampling.</li>
-</ul>
-<p><strong><code>bayes_precision</code></strong></p>
-<ul>
-<li><code>distribution='normal'</code> - name of the KPI distribution model, which assumes a Stan model file with the same name exists.</li>
-<li><code>posterior_width=0.08</code> - the stopping criterion, threshold of the posterior width.</li>
-<li><code>num_iters=25000</code> - number of iterations of bayes sampling.</li>
-</ul>
+<table>
+<thead><tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>spending_function='obrien_fleming</code></td>
+<td>Currently we support only Obrient-Fleming alpha spending function for the frequentist early stopping decision.</td>
+</tr>
+<tr>
+<td><code>estimated_sample_size=None</code></td>
+<td>Sample size to be achieved towards the end of experiment.</td>
+</tr>
+<tr>
+<td><code>alpha=0.05</code></td>
+<td>Type-I error rate.</td>
+</tr>
+<tr>
+<td><code>cap=8</code></td>
+<td>Upper bound of the adapted z-score.</td>
+</tr>
+</tbody>
+</table>
+<p><strong><code>bayes_factor</code></strong>:</p>
+<table>
+<thead><tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>distribution='normal'</code></td>
+<td>The name of the KPI distribution model, which assumes a Stan model file with the same name exists.<code>*</code></td>
+</tr>
+<tr>
+<td><code>num_iters=25000</code></td>
+<td>Number of iterations of bayes sampling.</td>
+</tr>
+</tbody>
+</table>
+<p><strong><code>bayes_precision</code></strong>:</p>
+<table>
+<thead><tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>distribution='normal'</code></td>
+<td>The name of the KPI distribution model, which assumes a Stan model file with the same name exists.<code>*</code></td>
+</tr>
+<tr>
+<td><code>posterior_width=0.08</code></td>
+<td>The stopping criterion, threshold of the posterior width.</td>
+</tr>
+<tr>
+<td><code>num_iters=25000</code></td>
+<td>Number of iterations of bayes sampling.</td>
+</tr>
+</tbody>
+</table>
+<p><code>*</code> currently we support <strong><code>normal</code></strong> and <strong><code>poisson</code></strong> models.</p>
 
 </div>
 </div>
@@ -12620,6 +12661,56 @@ Control or baseline variant: A
 </div>
 </div>
 
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Interpreting-the-output">Interpreting the output<a class="anchor-link" href="#Interpreting-the-output">&#182;</a></h3><table>
+<thead><tr>
+<th>Metric</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>treatment_mean</code></strong></td>
+<td>the mean of the treatment group</td>
+</tr>
+<tr>
+<td><strong><code>control_mean</code></strong></td>
+<td>the mean of the control group</td>
+</tr>
+<tr>
+<td><strong><code>control_sample_size</code></strong></td>
+<td>the sample size for the control group</td>
+</tr>
+<tr>
+<td><strong><code>treatment_sample_size</code></strong></td>
+<td>the sample size for the treatment group</td>
+</tr>
+<tr>
+<td><strong><code>delta</code></strong></td>
+<td>the difference between the treatment_mean and control_mean</td>
+</tr>
+<tr>
+<td><strong><code>confidence_interval</code></strong></td>
+<td>the confidence interval: <strong><code>percentile</code></strong> - lower percentile and upper percentile; <strong><code>value</code></strong> - value for each percentile</td>
+</tr>
+<tr>
+<td><strong><code>number_of_iterations</code></strong></td>
+<td>number of iterations used for bayes sampling for <strong><code>bayes_factor</code></strong> and <strong><code>bayes_precision</code></strong> methods.</td>
+</tr>
+<tr>
+<td><strong><code>stop</code></strong></td>
+<td>when <strong><code>True</code></strong> means the early stopping was done</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
 </div>
 <div class="cell border-box-sizing text_cell rendered">
 <div class="prompt input_prompt">
