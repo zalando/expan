@@ -97,12 +97,14 @@ def delta(x, y, assume_normal=True, percentiles=[2.5, 97.5],
 
     # Return the result structure
     # return mu, c_i, ss_x, ss_y, np.nanmean(_x), np.nanmean(_y)
-    return {'delta'    : float(mu),
-            'interval' : c_i,
-            'n_x'      : int(ss_x),
-            'n_y'      : int(ss_y),
-            'mu_x'     : float(np.nanmean(_x)),
-            'mu_y'     : float(np.nanmean(_y))}
+    c_i = [{'percentile': p, 'value': v} for (p, v) in c_i.items()]
+
+    return {'delta'                 : float(mu),
+            'confidence_interval'   : c_i,
+            'treatment_sample_size' : int(ss_x),
+            'control_sample_size'   : int(ss_y),
+            'treatment_mean'        : float(np.nanmean(_x)),
+            'control_mean'          : float(np.nanmean(_y))}
 
 def sample_size(x):
     """

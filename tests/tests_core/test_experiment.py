@@ -5,9 +5,8 @@ import pandas as pd
 
 from expan.core.experiment import Experiment
 # from expan.core.results import Results
-from expan.core.util import generate_random_data, get_column_names_by_type
+from expan.core.util import generate_random_data, get_column_names_by_type, find_list_of_dicts_element
 # from tests.tests_core.test_results import mock_results_object
-
 
 class ExperimentTestCase(unittest.TestCase):
     """
@@ -53,12 +52,23 @@ class ExperimentClassTestCases(ExperimentTestCase):
     derived_kpi_4 = {'name'   : 'derived_kpi_4',
                      'formula': 'non_existing/normal_same'}
 
+    # badly structured cases
+    # not a dictionary
+    derived_kpi_5_1,  derived_kpi_5_2 = ['name', 'derived_kpi_5'], ['formula', 'normal_same/normal_same']
+    derived_kpi_6 = ['name', 'derived_kpi_6']
+
+    # do not have proper keys
+    derived_kpi_7 = {'name': 'derived_kpi_7'}
+    derived_kpi_8 = {'name_': 'derived_kpi_8',
+                     'formula_': 'normal_shifted/normal_same'}
+    derived_kpi_9 = {'derived_kpi_8': 'normal_shifted/normal_same'}
+
 
     def assertNumericalEqual(self, a, b, decimals):
         self.assertEqual(round(a, decimals), round(b, decimals))
 
 
-    def getExperiment(self, report_kpi_names=None, derived_kpis=[]):
+    def getExperiment(self, report_kpi_names=[], derived_kpis=[]):
         return Experiment('B', self.data, self.metadata, report_kpi_names, derived_kpis)
 
 
@@ -66,7 +76,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
         self.getExperiment()
 
         with self.assertRaises(ValueError):
-            experiment = self.getExperiment(self.column_names + ['non_existing'])
+            self.getExperiment(self.column_names + ['non_existing'])
 
         self.getExperiment(self.column_names + [self.derived_kpi_1['name'],
                                                 self.derived_kpi_2['name']],
@@ -83,6 +93,34 @@ class ExperimentClassTestCases(ExperimentTestCase):
                                                     self.derived_kpi_2['name']],
                                [self.derived_kpi_4, self.derived_kpi_2])
 
+        with self.assertRaises(TypeError):
+            self.getExperiment(123)
+
+        self.getExperiment(['normal_same'])
+
+        # implicit do the conversion if there is one str
+        self.getExperiment('normal_same')
+
+        # check of dictionary structure
+        with self.assertRaises(TypeError):
+            self.getExperiment(self.numeric_column_names + ['normal_same'],
+                               [self.derived_kpi_5_1, self.derived_kpi_5_2])
+
+        with self.assertRaises(TypeError):
+            self.getExperiment(self.numeric_column_names + ['normal_same'],
+                               [self.derived_kpi_6])
+
+        with self.assertRaises(KeyError):
+            self.getExperiment(self.numeric_column_names + [self.derived_kpi_7['name'], 'normal_same'],
+                               [self.derived_kpi_7])
+
+        with self.assertRaises(KeyError):
+            self.getExperiment(self.numeric_column_names + [self.derived_kpi_1['name'], 'normal_same'],
+                               [self.derived_kpi_1, self.derived_kpi_8])
+
+        with self.assertRaises(KeyError):
+            self.getExperiment(self.numeric_column_names + ['normal_same'],
+                               [self.derived_kpi_9])
 
     def test_errors_warnings_expan_version(self):
         ndecimals = 5
@@ -96,17 +134,19 @@ class ExperimentClassTestCases(ExperimentTestCase):
         ndecimals = 5
         res = self.getExperiment(['normal_same']).delta(method='fixed_horizon')
 
-        aStats = res['normal_same']['A']['delta_statistics']
+        variants = find_list_of_dicts_element(res['kpis'], 'name', 'normal_same', 'variants')
+        aStats   = find_list_of_dicts_element(variants, 'name', 'A', 'delta_statistics')
+
         self.assertNumericalEqual(aStats['delta'],           0.033053, ndecimals)
 
-        self.assertNumericalEqual(aStats['interval'][02.5], -0.007135, ndecimals)
-        self.assertNumericalEqual(aStats['interval'][97.5],  0.073240, ndecimals)
+        self.assertNumericalEqual(aStats['confidence_interval'][0]['value'], -0.007135, ndecimals)
+        self.assertNumericalEqual(aStats['confidence_interval'][1]['value'],  0.073240, ndecimals)
 
-        self.assertEqual(aStats['n_x'], 6108)
-        self.assertEqual(aStats['n_y'], 3892)
+        self.assertEqual(aStats['treatment_sample_size'], 6108)
+        self.assertEqual(aStats['control_sample_size'],   3892)
 
-        self.assertNumericalEqual(aStats['mu_x'],  0.025219, ndecimals)
-        self.assertNumericalEqual(aStats['mu_y'], -0.007833, ndecimals)
+        self.assertNumericalEqual(aStats['treatment_mean'],  0.025219, ndecimals)
+        self.assertNumericalEqual(aStats['control_mean'],   -0.007833, ndecimals)
 
 
     def test_fixed_horizon_delta_derived_kpis(self):
@@ -119,17 +159,18 @@ class ExperimentClassTestCases(ExperimentTestCase):
         ndecimals = 5
         res = self.getExperiment(['normal_same']).delta(method='group_sequential')
 
-        aStats = res['normal_same']['A']['delta_statistics']
+        variants = find_list_of_dicts_element(res['kpis'], 'name', 'normal_same', 'variants')
+        aStats   = find_list_of_dicts_element(variants, 'name', 'A', 'delta_statistics')
         self.assertNumericalEqual(aStats['delta'],           0.033053, ndecimals)
 
-        self.assertNumericalEqual(aStats['interval'][02.5], -0.007135, ndecimals)
-        self.assertNumericalEqual(aStats['interval'][97.5],  0.073240, ndecimals)
+        self.assertNumericalEqual(aStats['confidence_interval'][0]['value'], -0.007135, ndecimals)
+        self.assertNumericalEqual(aStats['confidence_interval'][1]['value'],  0.073240, ndecimals)
 
-        self.assertEqual(aStats['n_x'], 6108)
-        self.assertEqual(aStats['n_y'], 3892)
+        self.assertEqual(aStats['treatment_sample_size'], 6108)
+        self.assertEqual(aStats['control_sample_size'],   3892)
 
-        self.assertNumericalEqual(aStats['mu_x'],  0.025219, ndecimals)
-        self.assertNumericalEqual(aStats['mu_y'], -0.007833, ndecimals)
+        self.assertNumericalEqual(aStats['treatment_mean'],  0.025219, ndecimals)
+        self.assertNumericalEqual(aStats['control_mean'],   -0.007833, ndecimals)
 
 
     def test_group_sequential_delta_derived_kpis(self):
@@ -142,23 +183,24 @@ class ExperimentClassTestCases(ExperimentTestCase):
         ndecimals = 5
         res = self.getExperiment(['normal_same']).delta(method='bayes_factor', num_iters=2000)
 
-        aStats = res['normal_same']['A']['delta_statistics']
+        variants = find_list_of_dicts_element(res['kpis'], 'name', 'normal_same', 'variants')
+        aStats   = find_list_of_dicts_element(variants, 'name', 'A', 'delta_statistics')
         self.assertNumericalEqual(aStats['delta'], 0.033053, ndecimals)
 
         self.assertEqual(aStats['stop'],      True, ndecimals)
-        self.assertEqual(aStats['num_iters'], 2000, ndecimals)
+        self.assertEqual(aStats['number_of_iterations'], 2000, ndecimals)
 
         #
         # this can result in different numerical values depending on Python version
         #
-        # self.assertNumericalEqual(aStats['interval'][02.5], -0.007079081, ndecimals)
-        # self.assertNumericalEqual(aStats['interval'][97.5],  0.072703576, ndecimals)
+        # self.assertNumericalEqual(aStats['confidence_interval'][0]['value'], -0.007079081, ndecimals)
+        # self.assertNumericalEqual(aStats['confidence_interval'][1]['value'],  0.072703576, ndecimals)
 
-        self.assertEqual(aStats['n_x'], 6108)
-        self.assertEqual(aStats['n_y'], 3892)
+        self.assertEqual(aStats['treatment_sample_size'], 6108)
+        self.assertEqual(aStats['control_sample_size'],   3892)
 
-        self.assertNumericalEqual(aStats['mu_x'],  0.025219, ndecimals)
-        self.assertNumericalEqual(aStats['mu_y'], -0.007833, ndecimals)
+        self.assertNumericalEqual(aStats['treatment_mean'],  0.025219, ndecimals)
+        self.assertNumericalEqual(aStats['control_mean'],   -0.007833, ndecimals)
 
 
     # @unittest.skip("sometimes takes too much time")
@@ -172,23 +214,24 @@ class ExperimentClassTestCases(ExperimentTestCase):
         ndecimals = 5
         res = self.getExperiment(['normal_same']).delta(method='bayes_precision', num_iters=2000)
 
-        aStats = res['normal_same']['A']['delta_statistics']
+        variants = find_list_of_dicts_element(res['kpis'], 'name', 'normal_same', 'variants')
+        aStats   = find_list_of_dicts_element(variants, 'name', 'A', 'delta_statistics')
         self.assertNumericalEqual(aStats['delta'], 0.033053, ndecimals)
 
         self.assertEqual(aStats['stop'], True, ndecimals)
-        self.assertEqual(aStats['num_iters'], 2000, ndecimals)
+        self.assertEqual(aStats['number_of_iterations'], 2000, ndecimals)
 
         #
         # this can result in different numerical values depending on Python version
         #
-        # self.assertNumericalEqual(aStats['interval'][02.5], -0.007079081, ndecimals)
-        # self.assertNumericalEqual(aStats['interval'][97.5],  0.072703576, ndecimals)
+        # self.assertNumericalEqual(aStats['confidence_interval'][0]['value'], -0.007079081, ndecimals)
+        # self.assertNumericalEqual(aStats['confidence_interval'][1]['value'],  0.072703576, ndecimals)
 
-        self.assertEqual(aStats['n_x'], 6108)
-        self.assertEqual(aStats['n_y'], 3892)
+        self.assertEqual(aStats['treatment_sample_size'], 6108)
+        self.assertEqual(aStats['control_sample_size'],   3892)
 
-        self.assertNumericalEqual(aStats['mu_x'],  0.025219, ndecimals)
-        self.assertNumericalEqual(aStats['mu_y'], -0.007833, ndecimals)
+        self.assertNumericalEqual(aStats['treatment_mean'],  0.025219, ndecimals)
+        self.assertNumericalEqual(aStats['control_mean'],   -0.007833, ndecimals)
 
 
     # @unittest.skip("sometimes takes too much time")

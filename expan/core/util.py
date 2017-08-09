@@ -4,6 +4,9 @@ import numpy as np
 import pandas as pd
 
 
+def find_list_of_dicts_element(items, key1, value, key2):
+    return [item[key2] for item in items if item[key1] == value][0]
+
 def is_number_and_nan(obj):
     return obj != obj
 

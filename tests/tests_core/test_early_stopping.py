@@ -3,6 +3,7 @@ import unittest
 import numpy as np
 
 import expan.core.early_stopping as es
+from expan.core.util import find_list_of_dicts_element
 
 
 class EarlyStoppingTestCase(unittest.TestCase):
@@ -59,14 +60,16 @@ class GroupSequentialTestCases(EarlyStoppingTestCase):
         """
         res = es.group_sequential(self.rand_s1, self.rand_s2)
 
-        self.assertEqual               (res['stop'],            True)
-        self.assertAlmostEqual         (res['delta'],          -0.15887364780635896)
-        np.testing.assert_almost_equal (res['interval'][02.5], -0.24461812530841959, decimal=5)
-        np.testing.assert_almost_equal (res['interval'][97.5], -0.07312917030429833, decimal=5)
-        self.assertEqual               (res['n_x'],             1000)
-        self.assertEqual               (res['n_y'],             1000)
-        self.assertAlmostEqual         (res['mu_x'],           -0.045256707490195384)
-        self.assertAlmostEqual         (res['mu_y'],            0.11361694031616358)
+        self.assertEqual               (res['stop'],                  True)
+        self.assertAlmostEqual         (res['delta'],                -0.15887364780635896)
+        value025 = find_list_of_dicts_element(res['confidence_interval'], 'percentile',  2.5, 'value')
+        value975 = find_list_of_dicts_element(res['confidence_interval'], 'percentile', 97.5, 'value')
+        np.testing.assert_almost_equal (value025,                     -0.24461812530841959, decimal=5)
+        np.testing.assert_almost_equal (value975,                     -0.07312917030429833, decimal=5)
+        self.assertEqual               (res['treatment_sample_size'],  1000)
+        self.assertEqual               (res['control_sample_size'],    1000)
+        self.assertAlmostEqual         (res['treatment_mean'],        -0.045256707490195384)
+        self.assertAlmostEqual         (res['control_mean'],           0.11361694031616358)
 
 
 class BayesFactorTestCases(EarlyStoppingTestCase):
@@ -81,14 +84,16 @@ class BayesFactorTestCases(EarlyStoppingTestCase):
         """
         res = es.bayes_factor(self.rand_s1, self.rand_s2, num_iters=2000)
 
-        self.assertEqual       (res['stop'],            True)
-        self.assertAlmostEqual (res['delta'],          -0.15887364780635896)
-        self.assertAlmostEqual (res['interval'][02.5], -0.24644586591251214)
-        self.assertAlmostEqual (res['interval'][97.5], -0.075698253541557695)
-        self.assertEqual       (res['n_x'],             1000)
-        self.assertEqual       (res['n_y'],             1000)
-        self.assertAlmostEqual (res['mu_x'],           -0.045256707490195384)
-        self.assertAlmostEqual (res['mu_y'],            0.11361694031616358)
+        self.assertEqual       (res['stop'],                  True)
+        self.assertAlmostEqual (res['delta'],                -0.15887364780635896)
+        value025 = find_list_of_dicts_element(res['confidence_interval'], 'percentile',  2.5, 'value')
+        value975 = find_list_of_dicts_element(res['confidence_interval'], 'percentile', 97.5, 'value')
+        self.assertAlmostEqual (value025,                     -0.24293384641452503)
+        self.assertAlmostEqual (value975,                     -0.075064346336461404)
+        self.assertEqual       (res['treatment_sample_size'],  1000)
+        self.assertEqual       (res['control_sample_size'],    1000)
+        self.assertAlmostEqual (res['treatment_mean'],        -0.045256707490195384)
+        self.assertAlmostEqual (res['control_mean'],           0.11361694031616358)
 
     # @unittest.skip("sometimes takes too much time")
     def test_bayes_factor_poisson(self):
@@ -97,14 +102,16 @@ class BayesFactorTestCases(EarlyStoppingTestCase):
         """
         res= es.bayes_factor(self.rand_s3, self.rand_s4, distribution='poisson',
                                                                 num_iters=2000)
-        self.assertEqual       (res['stop'],            True)
-        self.assertAlmostEqual (res['delta'],          -1.9589999999999999)
-        self.assertAlmostEqual (res['interval'][02.5], -2.0713281392132465)
-        self.assertAlmostEqual (res['interval'][97.5], -1.8279692168150592)
-        self.assertEqual       (res['n_x'],             1000)
-        self.assertEqual       (res['n_y'],             1000)
-        self.assertAlmostEqual (res['mu_x'],            0.96599999999999997)
-        self.assertAlmostEqual (res['mu_y'],            2.9249999999999998)
+        self.assertEqual       (res['stop'],                  True)
+        self.assertAlmostEqual (res['delta'],                -1.9589999999999999)
+        value025 = find_list_of_dicts_element(res['confidence_interval'], 'percentile',  2.5, 'value')
+        value975 = find_list_of_dicts_element(res['confidence_interval'], 'percentile', 97.5, 'value')
+        self.assertAlmostEqual (value025,                     -2.0713281392132465)
+        self.assertAlmostEqual (value975,                     -1.8279692168150592)
+        self.assertEqual       (res['treatment_sample_size'],  1000)
+        self.assertEqual       (res['control_sample_size'],    1000)
+        self.assertAlmostEqual (res['treatment_mean'],         0.96599999999999997)
+        self.assertAlmostEqual (res['control_mean'],           2.9249999999999998)
 
     # @unittest.skip("sometimes takes too much time")
     def test_bayes_factor_with_nan_input(self):
@@ -127,14 +134,16 @@ class BayesPrecisionTestCases(EarlyStoppingTestCase):
         """
         res = es.bayes_precision(self.rand_s1, self.rand_s2, num_iters=2000)
 
-        self.assertEqual       (res['stop'],            0)
-        self.assertAlmostEqual (res['delta'],          -0.15887364780635896)
-        self.assertAlmostEqual (res['interval'][02.5], -0.24644586591251214)
-        self.assertAlmostEqual (res['interval'][97.5], -0.075698253541557695)
-        self.assertEqual       (res['n_x'],             1000)
-        self.assertEqual       (res['n_y'],             1000)
-        self.assertAlmostEqual (res['mu_x'],           -0.045256707490195384)
-        self.assertAlmostEqual (res['mu_y'],            0.11361694031616358)
+        self.assertEqual       (res['stop'],                  0)
+        self.assertAlmostEqual (res['delta'],                -0.15887364780635896)
+        value025 = find_list_of_dicts_element(res['confidence_interval'], 'percentile',  2.5, 'value')
+        value975 = find_list_of_dicts_element(res['confidence_interval'], 'percentile', 97.5, 'value')
+        self.assertAlmostEqual (value025,                     -0.24293384641452503)
+        self.assertAlmostEqual (value975,                     -0.075064346336461404)
+        self.assertEqual       (res['treatment_sample_size'],  1000)
+        self.assertEqual       (res['control_sample_size'],    1000)
+        self.assertAlmostEqual (res['treatment_mean'],         -0.045256707490195384)
+        self.assertAlmostEqual (res['control_mean'],           0.11361694031616358)
 
 
 if __name__ == '__main__':

@@ -34,6 +34,12 @@ class UtilFunctionsTestCase(unittest.TestCase):
         res = util.scale_range([5], old_max=4)
         np.testing.assert_allclose(res, [1.])
 
+    def test_find_dict_element(self):
+        list_of_dicts = [{'bla': 1, 'blu': 2},
+                         {'bla': 3, 'blu': 4},
+                         {'bla': 5, 'blu': 6}]
+        self.assertEqual(util.find_list_of_dicts_element(list_of_dicts, 'bla', 5, 'blu'), 6)
+
 
 if __name__ == '__main__':
     unittest.main()

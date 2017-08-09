@@ -23,6 +23,7 @@ warnings.simplefilter('always', UserWarning)
 
 logger = logging.getLogger(__name__)
 
+
 # TODO: add filtering functionality: we should be able to operate on this
 # class to exclude data points, and save all these operations in a log that then
 # is preserved in all results.
@@ -30,20 +31,35 @@ class Experiment(object):
     """
     Class which adds the analysis functions to experimental data.
     """
-    def __init__(self, control_variant_name, data, metadata, report_kpi_names=None, derived_kpis=[]):
+    def __init__(self, control_variant_name, data, metadata, report_kpi_names=[], derived_kpis=[]):
         experiment_column_names = set(['entity', 'variant'])
         numerical_column_names  = set(get_column_names_by_type(data, np.number))
 
+        if type(report_kpi_names) is str:
+            report_kpi_names = [report_kpi_names]
+
+        if type(report_kpi_names) is not list:
+            raise TypeError('report_kpi_names should be a list of str')
+
         if report_kpi_names:
-            report_kpi_names = set(report_kpi_names)
+            report_kpi_names_needed = set(report_kpi_names)
         else:
-            report_kpi_names = numerical_column_names - experiment_column_names
+            report_kpi_names_needed = numerical_column_names - experiment_column_names
+
+        # check derived_kpis structure (should have keys namely 'name' and 'formula')
+        for i in derived_kpis:
+            if not isinstance(i, dict):
+                raise TypeError('Derived kpis should be an array of dictionaries')
+            if 'formula' not in i:
+                raise KeyError('Dictionary should have key "formula"')
+            if 'name' not in i:
+                raise KeyError('Dictionary should have key "name"')
 
         derived_kpi_names    = [k['name']    for k in derived_kpis]
         derived_kpi_formulas = [k['formula'] for k in derived_kpis]
 
         # what columns do we expect to find in the data frame?
-        required_column_names = (report_kpi_names | experiment_column_names) - set(derived_kpi_names)
+        required_column_names = (report_kpi_names_needed | experiment_column_names) - set(derived_kpi_names)
         kpi_name_pattern = '([a-zA-Z][0-9a-zA-Z_]*)'
         # add names from all formulas
         for formula in derived_kpi_formulas:
@@ -56,7 +72,7 @@ class Experiment(object):
 
         self.data                 =     data.copy()
         self.metadata             = metadata.copy()
-        self.report_kpi_names     = report_kpi_names
+        self.report_kpi_names     = report_kpi_names_needed
         self.derived_kpis         = derived_kpis
         self.variant_names        = set(self.data.variant)
         self.control_variant_name = control_variant_name
@@ -67,25 +83,15 @@ class Experiment(object):
             self.data.loc[:, name] = eval(re.sub(kpi_name_pattern, r'self.data.\1.astype(float)', formula))
             self.reference_kpis[name] = re.sub(kpi_name_pattern + '/', '', formula)
 
-
-
     def get_kpi_by_name_and_variant(self, name, variant):
         return self.data.reset_index().set_index('variant').loc[variant, name]
 
-
     def __str__(self):
-        # res = super(Experiment, self).__str__()
-
         variants = self.variant_names
 
-        res += '\n {:d} variants: {}'.format(len(variants),
-                                             ', '.join(
-                                                 [('*' + k + '*') if (k == self.metadata.get('baseline_variant', '-'))
-                                                  else k for k in variants]
-                                             ))
-        return res
-
-
+        return 'Experiment "{:s}" with {:d} derived kpis, {:d} report kpis, {:d} entities and {:d} variants: {}'.format(
+            self.metadata['experiment'], len(self.derived_kpis), len(self.report_kpi_names), len(self.data),
+            len(variants), ', '.join([('*' + k + '*') if (k == self.control_variant_name) else k for k in variants]))
 
     def _get_weights(self, kpi, variant):
         if kpi not in self.reference_kpis:
@@ -110,19 +116,28 @@ class Experiment(object):
         worker = worker_table[method](**worker_args)
 
         result = {}
+        result['warnings']        = []
+        result['errors']          = []
+        result['expan_version']   = __version__
+        result['control_variant'] = self.control_variant_name
+        kpis = []
+
         for kpi in self.report_kpi_names:
-            result[kpi] = {}
+            res = {}
+            res['name']     = kpi
+            res['variants'] = []
             control       = self.get_kpi_by_name_and_variant(kpi, self.control_variant_name)
             controlWeight = self._get_weights(kpi, self.control_variant_name)
             for variant in self.variant_names:
                 treatment       = self.get_kpi_by_name_and_variant(kpi, variant)
                 treatmentWeight = self._get_weights(kpi, variant)
-                ds = worker(x=treatment*treatmentWeight, y=control*controlWeight)
-                result[kpi][variant] = {'control_variant'   : self.control_variant_name,
-                                        'treatment_variant' : variant,
-                                        'delta_statistics'  : ds}
+                with warnings.catch_warnings(record=True) as w:
+                    ds = worker(x=treatment*treatmentWeight, y=control*controlWeight)
+                if len(w):
+                    result['warnings'].append('kpi: ' + kpi + ', variant: '+ variant + ': ' + str(w[-1].message))
+                res['variants'].append({'name'             : variant,
+                                        'delta_statistics' : ds})
+            kpis.append(res)
 
-        result['warnings']      = "none so far"
-        result['errors']        = "none so far"
-        result['expan_version'] = __version__
+        result['kpis'] = kpis
         return result
