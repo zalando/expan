@@ -298,8 +298,8 @@ def get_trace_normalized_effect_size(distribution, traces):
     if distribution == 'normal':
         return traces['alpha']
     elif distribution == 'poisson':
-        variance = np.array(traces['delta']).mean()
-        return traces['delta'] / np.sqrt(variance)
+        variance = np.nanmean(np.array(traces['delta']))
+        return traces['delta'] / np.sqrt(np.absolute(variance))
     else:
         raise ValueError("model " + distribution + " is not implemented.")
 
