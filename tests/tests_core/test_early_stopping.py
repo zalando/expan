@@ -130,7 +130,6 @@ class BayesFactorTestCases(EarlyStoppingTestCase):
         self.assertEqual(len(traces['delta']), 1001)
         self.assertEqual(n_x, 1000)
         self.assertEqual(n_y, 1000)
-        self.assertAlmostEqual(traces['delta'].mean(), -0.1679942063780176)
 
 
 class BayesPrecisionTestCases(EarlyStoppingTestCase):
