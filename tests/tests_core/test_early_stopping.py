@@ -125,7 +125,12 @@ class BayesFactorTestCases(EarlyStoppingTestCase):
         Check bayesian sampling using variational bayes.
         """
         traces, n_x, n_y, mu_x, mu_y = es._bayes_sampling(self.rand_s1, self.rand_s2, num_iters=2000, inference="variational")
+
+        self.assertEqual(len(traces), 4)
         self.assertEqual(len(traces['delta']), 1001)
+        self.assertEqual(n_x, 1000)
+        self.assertEqual(n_y, 1000)
+        self.assertAlmostEqual(traces['delta'].mean(), -0.1679942063780176)
 
 
 class BayesPrecisionTestCases(EarlyStoppingTestCase):

@@ -238,10 +238,10 @@ def _bayes_sampling(x, y, distribution='normal', num_iters=25000, inference="sam
 
     elif inference == "variational":
         results_dict = sm.vb(data=fit_data, iter=10000)
+        traces = {}
         for i in range(len(results_dict['sampler_param_names'])):
             para_name = results_dict['sampler_param_names'][i]
             para_values = np.array(results_dict['sampler_params'][i])
-            traces = {}
             traces[para_name] = para_values
 
     if cache_sampling_results:
