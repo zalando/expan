@@ -135,15 +135,57 @@ def assign_bins(data, bins):
 def _create_numerical_bins(data_as_array, n_bins):
     return _create_next_numerical_bin(data_as_array, n_bins, 0, [])
 
-def _create_next_numerical_bin(x, n_bins, id, result):
+
+def _create_next_numerical_bin(x, n_bins, bin_id, result):
     '''
     Create bins for numerical data
     :param x: array of data
     :param n_bins: number of bins
-    :param id: id of the next bin
+    :param bin_id: id of the next bin
     :return: a list of bins object
     '''
-    return
+    # no more data
+    if len(x) == 0:
+        return result
+
+    # if data has nan
+    if any(np.isnan(x)):
+        cur_bin = Bin(bin_id, "numerical", NumericalRepresenation(np.nan, np.nan, True, True))
+        result.append(cur_bin)
+        return _create_next_numerical_bin(x[~np.isnan(x)], n_bins-1, bin_id+1, result)
+
+    # the last bin is a closed-closed interval
+    if n_bins == 1:
+        cur_bin_repr = NumericalRepresenation(min(x), max(x), True, True)
+        cur_bin = Bin(bin_id, "numerical", cur_bin_repr)
+        result.append(cur_bin)
+        return result
+
+    lower, upper, lower_closed, upper_closed = _first_interval(x, n_bins)
+    cur_bin = Bin(bin_id, "numerical", NumericalRepresenation(lower, upper, lower_closed, upper_closed))
+    result.append(cur_bin)
+
+    next_data = x[x > upper] if upper_closed else x[x >= upper]
+    return _create_next_numerical_bin(next_data, n_bins-1, bin_id+1, result)
+
+
+def _first_interval(self, x, n_bins):
+    '''
+    Gets the first interval based on the percentiles, 
+    either a closed interval containing the same value multiple times
+    or a closed-open interval with a different lower and upper bound.
+    '''
+    # calculate the percentiles
+    percentiles = np.linspace(0., 100., n_bins + 1)
+    bounds = np.percentile(x, q=percentiles, interpolation='higher')
+    lower = bounds[0]
+    upper = bounds[1]
+
+    if lower == upper:
+        return lower, upper, True, True
+    else:
+        return lower, upper, True, False
+
 
 def _assign_numerical_bins(data_as_array, bins):
     return
