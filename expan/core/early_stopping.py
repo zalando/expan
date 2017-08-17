@@ -175,7 +175,7 @@ def get_or_compile_stan_model(model_file, distribution):
 cache_sampling_results = False
 sampling_results = {} # memoized sampling results
 
-def _bayes_sampling(x, y, distribution='normal', num_iters=25000):
+def _bayes_sampling(x, y, distribution='normal', num_iters=25000, inference="sampling"):
     """
     Helper function.
 
@@ -204,7 +204,7 @@ def _bayes_sampling(x, y, distribution='normal', num_iters=25000):
     _x = drop_nan(_x)
     _y = drop_nan(_y)
 
-    key = (str(_x), str(_y), num_iters)
+    key = (str(_x), str(_y), num_iters, inference)
 
     if cache_sampling_results and key in sampling_results:
         return sampling_results[key]
@@ -231,9 +231,18 @@ def _bayes_sampling(x, y, distribution='normal', num_iters=25000):
 
     sm = get_or_compile_stan_model(model_file, distribution)
 
-    fit = sm.sampling(data=fit_data, iter=num_iters, chains=4, n_jobs=1, seed=1,
-                      control={'stepsize': 0.01, 'adapt_delta': 0.99})
-    traces = fit.extract()
+    if inference == "sampling":
+        fit = sm.sampling(data=fit_data, iter=num_iters, chains=4, n_jobs=1, seed=1,
+                          control={'stepsize': 0.01, 'adapt_delta': 0.99})
+        traces = fit.extract()
+
+    elif inference == "variational":
+        results_dict = sm.vb(data=fit_data, iter=10000)
+        traces = {}
+        for i in range(len(results_dict['sampler_param_names'])):
+            para_name = results_dict['sampler_param_names'][i]
+            para_values = np.array(results_dict['sampler_params'][i])
+            traces[para_name] = para_values
 
     if cache_sampling_results:
         sampling_results[key] = (traces, n_x, n_y, mu_x, mu_y)
@@ -261,7 +270,7 @@ def bayes_factor(x, y, distribution='normal', num_iters=25000):
     """
     traces, n_x, n_y, mu_x, mu_y = _bayes_sampling(x, y, distribution=distribution, num_iters=num_iters)
     trace_normalized_effect_size = get_trace_normalized_effect_size(distribution, traces)
-    trace_normalized_effect_size = traces['delta']
+    trace_absolute_effect_size = traces['delta']
 
     kde = gaussian_kde(trace_normalized_effect_size)
     prior = cauchy.pdf(0, loc=0, scale=1)
@@ -273,7 +282,7 @@ def bayes_factor(x, y, distribution='normal', num_iters=25000):
     leftOut      = 1.0 - credibleMass
     p1           = round(leftOut/2.0, 5)
     p2           = round(1.0 - leftOut/2.0, 5)
-    credible_interval = HDI_from_MCMC(trace_normalized_effect_size, credibleMass)
+    credible_interval = HDI_from_MCMC(trace_absolute_effect_size, credibleMass)
 
     return {'stop'                  : bool(stop),
             'delta'                 : float(mu_x - mu_y),
@@ -289,8 +298,8 @@ def get_trace_normalized_effect_size(distribution, traces):
     if distribution == 'normal':
         return traces['alpha']
     elif distribution == 'poisson':
-        variance = np.array(traces['delta']).mean()
-        return traces['delta'] / np.sqrt(variance)
+        variance = np.nanmean(np.array(traces['delta']))
+        return traces['delta'] / np.sqrt(np.absolute(variance))
     else:
         raise ValueError("model " + distribution + " is not implemented.")
 

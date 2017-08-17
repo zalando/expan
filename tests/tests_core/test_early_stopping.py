@@ -100,8 +100,7 @@ class BayesFactorTestCases(EarlyStoppingTestCase):
         """
         Check the Bayes factor function for Poisson distributions.
         """
-        res= es.bayes_factor(self.rand_s3, self.rand_s4, distribution='poisson',
-                                                                num_iters=2000)
+        res= es.bayes_factor(self.rand_s3, self.rand_s4, distribution='poisson', num_iters=2000)
         self.assertEqual       (res['stop'],                  True)
         self.assertAlmostEqual (res['delta'],                -1.9589999999999999)
         value025 = find_list_of_dicts_element(res['confidence_interval'], 'percentile',  2.5, 'value')
@@ -120,6 +119,17 @@ class BayesFactorTestCases(EarlyStoppingTestCase):
         """
         res= es.bayes_factor(self.rand_s5, self.rand_s6, num_iters=2000)
         self.assertEqual(res['stop'], True)
+
+    def test_variational_inference(self):
+        """
+        Check bayesian sampling using variational bayes.
+        """
+        traces, n_x, n_y, mu_x, mu_y = es._bayes_sampling(self.rand_s1, self.rand_s2, num_iters=2000, inference="variational")
+
+        self.assertEqual(len(traces), 4)
+        self.assertEqual(len(traces['delta']), 1001)
+        self.assertEqual(n_x, 1000)
+        self.assertEqual(n_y, 1000)
 
 
 class BayesPrecisionTestCases(EarlyStoppingTestCase):
