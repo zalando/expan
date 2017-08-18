@@ -116,7 +116,8 @@ def assign_bins(data, bins):
     Assign each data point to one of the bins.
     :param data: a list or a 1-dim array of data to be labeled
     :param bins: a list of Bin object
-    :return: a dataframe that associates each data point to a bin.
+    :return labeled_data: a list of Bin object. Each data point is labeled by the corresponding bin in the result. 
+             e.g. data[i] will be labeled by the bin result[i]
     '''
     # cast into a numpy array to infer the dtype
     data_as_array = np.array(data)

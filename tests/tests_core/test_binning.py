@@ -10,24 +10,79 @@ warnings.simplefilter('always')
 from expan.core.binning import *
 
 
-class UtilTestCase(unittest.TestCase):
+class BinningTestCase(unittest.TestCase):
     """
     Defines the setUp() and tearDown() functions for the statistics test cases.
     """
 
     def setUp(self):
-        """
-        Load the needed datasets for all UtilTestCases and set the random
-        seed so that randomized algorithms show deterministic behaviour.
-        """
-        np.random.seed(0)
+        np.random.seed(41)
 
     def tearDown(self):
-        """
-        Clean up after the test
-        """
-        # TODO: find out if we have to remove data manually
         pass
+
+
+
+
+class GeneralBinningTestCase(BinningTestCase):
+    """
+    Test cases for general binning functions such as bin class representation and invalid inputs.
+    """
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 class BinningTestCase(UtilTestCase):
