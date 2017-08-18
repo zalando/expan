@@ -31,7 +31,10 @@ class Experiment(object):
     """
     Class which adds the analysis functions to experimental data.
     """
-    def __init__(self, control_variant_name, data, metadata, report_kpi_names=[], derived_kpis=[]):
+    def __init__(self, control_variant_name, data, metadata, report_kpi_names=None, derived_kpis=None):
+        report_kpi_names = report_kpi_names or []
+        derived_kpis  = derived_kpis or []
+
         experiment_column_names = set(['entity', 'variant'])
         numerical_column_names  = set(get_column_names_by_type(data, np.number))
 
