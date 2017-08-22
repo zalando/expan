@@ -116,18 +116,19 @@ def assign_bins(data, bins):
     Assign each data point to one of the bins.
     :param data: a list or a 1-dim array of data to be labeled
     :param bins: a list of Bin object
-    :return labeled_data: a list of Bin object. Each data point is labeled by the corresponding bin in the result. 
-             e.g. data[i] will be labeled by the bin result[i]
+    :return labels: a list of Bin object. Each data point is labeled by one of the bins in the given parameter. 
+             i.e. data[i] will be labeled by the bin in labels[i]. 
+             If data[i] can not be put into any of the bins, labels[i] will be None.
     '''
     # cast into a numpy array to infer the dtype
     data_as_array = np.array(data)
     is_numeric = np.issubdtype(data_as_array.dtype, np.number)
 
     if is_numeric:
-        labeled_data = _assign_numerical_bins(data_as_array, bins)
+        labels = _assign_numerical_bins(data_as_array, bins)
     else:
-        labeled_data = _assign_categorical_bins(data_as_array, bins)
-    return labeled_data
+        labels = _assign_categorical_bins(data_as_array, bins)
+    return labels
 
 
 
@@ -170,7 +171,7 @@ def _create_next_numerical_bin(x, n_bins, bin_id, result):
     return _create_next_numerical_bin(next_data, n_bins-1, bin_id+1, result)
 
 
-def _first_interval(self, x, n_bins):
+def _first_interval(x, n_bins):
     '''
     Gets the first interval based on the percentiles, 
     either a closed interval containing the same value multiple times
