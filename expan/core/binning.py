@@ -9,7 +9,6 @@ from expan.core.util import is_number_and_nan
 logger = logging.getLogger(__name__)
 
 
-
 #------- bin representations -------#
 class Bin(object):
     def __init__(self, id, bin_type, representation):
@@ -17,7 +16,7 @@ class Bin(object):
         Constructor for a bin object.
         :param id: identifier (e.g. bin number) of the bin
         :param bin_type: "numerical" or "categorical"
-        :param representation: representation of the bin. depends on the bin type.
+        :param representation: representation of the bin. can be NumericalRepresenation or CategoricalRepresenation.
         '''
         if bin_type == "numerical" and type(representation) is not NumericalRepresenation:
             raise ValueError("Use NumericalRepresenation object to initialize a numerical bin.")
@@ -29,6 +28,14 @@ class Bin(object):
 
     def __repr__(self):
         return "\nbin id: " + str(self.id) + ", bin: " + str(self.representation)
+
+    def __eq__(self, other):
+        return (isinstance(other, self.__class__)
+            and self.__dict__ == other.__dict__)
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
 
 
 class NumericalRepresenation(object):
@@ -60,6 +67,13 @@ class NumericalRepresenation(object):
             repr += ")"
         return repr
 
+    def __eq__(self, other):
+        return (isinstance(other, self.__class__)
+            and self.__dict__ == other.__dict__)
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
 
 class CategoricalRepresenation(object):
     def __init__(self, values):
@@ -71,6 +85,13 @@ class CategoricalRepresenation(object):
 
     def __repr__(self):
         return str(self.values)
+
+    def __eq__(self, other):
+        return (isinstance(other, self.__class__)
+            and self.__dict__ == other.__dict__)
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
 
 
