@@ -70,7 +70,20 @@ class AssignNumericalBinsTestCase(BinningTestCase):
     Test cases for assigning bins to numerical data.
     """
     def test_assign_numerical_bins(self):
-        pass
+        data = np.arange(1000)
+        nbins = 10
+        bins = create_bins(data, nbins)
+        self.assertEqual(len(bins), nbins)
+
+        labels = assign_bins(data, bins)
+        self.assertEqual(labels[0].representation, NumericalRepresenation(0, 100, True, False))
+        self.assertEqual(labels[100].representation, NumericalRepresenation(100, 200, True, False))
+        self.assertEqual(labels[200].representation, NumericalRepresenation(200, 300, True, False))
+        self.assertEqual(labels[450].representation, NumericalRepresenation(400, 500, True, False))
+        self.assertEqual(labels[799].representation, NumericalRepresenation(700, 800, True, False))
+        self.assertEqual(labels[800].representation, NumericalRepresenation(800, 900, True, False))
+        self.assertEqual(labels[999].representation, NumericalRepresenation(900, 999, True, True))
+
 
 
 class CreateCategoricalBinsTestCase(BinningTestCase):

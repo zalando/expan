@@ -211,11 +211,24 @@ def _first_interval(x, n_bins):
 
 
 def _assign_numerical_bins(data_as_array, bins):
-    return
+    labels = np.full(data_as_array.shape, None)
+    for bin in bins:
+        l = bin.representation.lower
+        u = bin.representation.upper
+        lc = bin.representation.lower_closed
+        uc = bin.representation.upper_closed
+        if np.isnan(l) or np.isnan(u):  # if either bound is nan, only nans exist in the bin.
+            got = np.isnan(data_as_array)
+        else:
+            got = (l <= data_as_array) if lc else (l < data_as_array)
+            got &= (data_as_array <= u) if uc else (data_as_array < u)
+        labels[got] = bin
+    return labels.tolist()
 
 
 
 #------- private methods for categorical binnings-------#
+
 def _create_categorical_bins(data_as_array, n_bins):
     return
 
