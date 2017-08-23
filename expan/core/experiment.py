@@ -144,3 +144,30 @@ class Experiment(object):
 
         result['kpis'] = kpis
         return result
+
+    @staticmethod
+    def _quant_apply(value, threshold):
+        if value < threshold:
+            return False
+        else:
+            return True
+
+    def _quantile_filtering(self, df, percentile):
+        flags = pd.Series()
+        for column in df.columns:
+            flags = flags | df[column].apply(
+                self._quant_apply,
+                threshold=np.percentile(df[column], percentile)
+            )
+        return flags
+
+    def filter(self, kpis, percentile=99.0):
+        for kpi in kpis:
+            if kpi not in self.data.columns:
+                raise KeyError('kpi not in dataframe')
+
+        flags = self._quantile_filtering(df=self.data[kpis], percentile=percentile)
+        metadata = {
+            # how the filtering should be logged
+        }
+        return self.data[flags == False], metadata
