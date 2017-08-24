@@ -241,7 +241,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
 
         # self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1]).delta()
 
-    def test_quantile_filtering(self):
+    def test_quantile_filtering_multiple_columns(self):
         exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
         exp.filter(
             kpis=[
@@ -253,7 +253,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
         )
         self.assertEqual(len(self.data) - len(exp.data), exp.metadata['filtered_entities_number'])
 
-    def test_quantile_filtering_2(self):
+    def test_quantile_filtering_unsupported_kpi(self):
         exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
         with self.assertRaises(KeyError):
             exp.filter(
@@ -262,7 +262,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
                 ]
             )
 
-    def test_quantile_filtering_3(self):
+    def test_quantile_filtering_unsupported_percentile(self):
         exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
         with self.assertRaises(ValueError):
             exp.filter(
@@ -272,7 +272,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
                 percentile=101.0
             )
 
-    # def test_quantile_filtering_4(self):
+    # def test_quantile_filtering_high_filtering_percentage(self):
     #     exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
     #     with self.assertWarns(UserWarning):
     #         exp.filter(

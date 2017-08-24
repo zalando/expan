@@ -145,26 +145,13 @@ class Experiment(object):
         result['kpis'] = kpis
         return result
 
-    @staticmethod
-    def _quant_apply(value, threshold):
-        if value < threshold:
-            return False
-        else:
-            return True
-
-    def _quantile_filtering(self, df, percentile):
-        flags = None
-        for column in df.columns:
-            if flags is None:
-                flags = df[column].apply(
-                    self._quant_apply,
-                    threshold=np.percentile(df[column], percentile)
+    def _quantile_filtering(self, kpis, percentile):
+        flags = pd.Series(data=[False]*len(self.data))
+        for column in self.data[kpis].columns:
+            threshold = np.percentile(self.data[column], percentile)
+            flags = flags | self.data[column].apply(
+                lambda x: x >= threshold,
             )
-            else:
-                flags = flags | df[column].apply(
-                    self._quant_apply,
-                    threshold=np.percentile(df[column], percentile)
-                )
         return flags
 
     def filter(self, kpis, percentile=99.0):
@@ -189,17 +176,15 @@ class Experiment(object):
         if 0.0 < percentile <= 100.0 is False:
             raise ValueError("Percentile value needs to be between 0.0 and 100.0!")
 
-        flags = self._quantile_filtering(df=self.data[kpis], percentile=percentile)
+        # run quantile filtering
+        flags = self._quantile_filtering(kpis=kpis, percentile=percentile)
 
         # log which columns were filtered and how many entities were filtered out
-        metadata = {
-            'filtered_columns': kpis,
-            'filtered_entities_number': len(flags[flags == True])
-        }
+        self.metadata['filtered_columns'] = kpis
+        self.metadata['filtered_entities_number'] = len(flags[flags == True])
 
         # throw warning if too many entities have been filtered out
         if (len(flags[flags == True]) / len(self.data)) > 0.02:
             warnings.warn('More than 2% of entities have been filtered out, consider adjusting the percentile value.')
 
-        self.metadata = metadata
         self.data = self.data[flags == False]
