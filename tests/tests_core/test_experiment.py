@@ -68,7 +68,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
         self.assertEqual(round(a, decimals), round(b, decimals))
 
 
-    def getExperiment(self, report_kpi_names=[], derived_kpis=[]):
+    def getExperiment(self, report_kpi_names=None, derived_kpis=None):
         return Experiment('B', self.data, self.metadata, report_kpi_names, derived_kpis)
 
 
