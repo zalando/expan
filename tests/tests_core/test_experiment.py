@@ -178,7 +178,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
                                                       self.derived_kpi_2['name']],
                            [self.derived_kpi_1, self.derived_kpi_2]).delta('group_sequential')
 
-    @unittest.skip("sometimes takes too much time")
+    # @unittest.skip("sometimes takes too much time")
     def test_bayes_factor_delta(self):
         ndecimals = 5
         res = self.getExperiment(['normal_same']).delta(method='bayes_factor', num_iters=2000)
@@ -203,13 +203,13 @@ class ExperimentClassTestCases(ExperimentTestCase):
         self.assertNumericalEqual(aStats['control_mean'],   -0.007833, ndecimals)
 
 
-    @unittest.skip("sometimes takes too much time")
+    # @unittest.skip("sometimes takes too much time")
     def test_bayes_factor_delta_derived_kpis(self):
         exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
         res = exp.delta(method='bayes_factor', num_iters=2000)
 
 
-    @unittest.skip("sometimes takes too much time")
+    # @unittest.skip("sometimes takes too much time")
     def test_bayes_precision_delta(self):
         ndecimals = 5
         res = self.getExperiment(['normal_same']).delta(method='bayes_precision', num_iters=2000)
@@ -234,7 +234,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
         self.assertNumericalEqual(aStats['control_mean'],   -0.007833, ndecimals)
 
 
-    @unittest.skip("sometimes takes too much time")
+    # @unittest.skip("sometimes takes too much time")
     def test_bayes_precision_delta_derived_kpis(self):
         exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
         res = exp.delta(method='bayes_precision', num_iters=2000)
