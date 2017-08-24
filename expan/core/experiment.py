@@ -153,21 +153,53 @@ class Experiment(object):
             return True
 
     def _quantile_filtering(self, df, percentile):
-        flags = pd.Series()
+        flags = None
         for column in df.columns:
-            flags = flags | df[column].apply(
-                self._quant_apply,
-                threshold=np.percentile(df[column], percentile)
+            if flags is None:
+                flags = df[column].apply(
+                    self._quant_apply,
+                    threshold=np.percentile(df[column], percentile)
             )
+            else:
+                flags = flags | df[column].apply(
+                    self._quant_apply,
+                    threshold=np.percentile(df[column], percentile)
+                )
         return flags
 
     def filter(self, kpis, percentile=99.0):
+        """
+        Method that filters out entities whose KPIs exceed the value at a given percentile.
+        If any of the KPIs exceeds its threshold the entity is filtered out.
+
+        Args:
+            kpis (list): list of KPI names
+            percentile (float): percentile considered as threshold
+
+        Returns:
+
+        """
+
+        # check if provided KPIs are present in the data
         for kpi in kpis:
             if kpi not in self.data.columns:
-                raise KeyError('kpi not in dataframe')
+                raise KeyError(kpi + ' identifier not present in dataframe columns.')
+
+        # check if provided percentile is valid
+        if 0.0 < percentile <= 100.0 is False:
+            raise ValueError("Percentile value needs to be between 0.0 and 100.0!")
 
         flags = self._quantile_filtering(df=self.data[kpis], percentile=percentile)
+
+        # log which columns were filtered and how many entities were filtered out
         metadata = {
-            # how the filtering should be logged
+            'filtered_columns': kpis,
+            'filtered_entities_number': len(flags[flags == True])
         }
-        return self.data[flags == False], metadata
+
+        # throw warning if too many entities have been filtered out
+        if (len(flags[flags == True]) / len(self.data)) > 0.02:
+            warnings.warn('More than 2% of entities have been filtered out, consider adjusting the percentile value.')
+
+        self.metadata = metadata
+        self.data = self.data[flags == False]

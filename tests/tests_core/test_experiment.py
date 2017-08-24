@@ -6,7 +6,10 @@ import pandas as pd
 from expan.core.experiment import Experiment
 # from expan.core.results import Results
 from expan.core.util import generate_random_data, get_column_names_by_type, find_list_of_dicts_element
+
+
 # from tests.tests_core.test_results import mock_results_object
+
 
 class ExperimentTestCase(unittest.TestCase):
     """
@@ -63,14 +66,13 @@ class ExperimentClassTestCases(ExperimentTestCase):
                      'formula_': 'normal_shifted/normal_same'}
     derived_kpi_9 = {'derived_kpi_8': 'normal_shifted/normal_same'}
 
-
     def assertNumericalEqual(self, a, b, decimals):
         self.assertEqual(round(a, decimals), round(b, decimals))
 
+    def getExperiment(self, report_kpi_names=[], derived_kpis=[]):
 
     def getExperiment(self, report_kpi_names=None, derived_kpis=None):
         return Experiment('B', self.data, self.metadata, report_kpi_names, derived_kpis)
-
 
     def test_constructor(self):
         self.getExperiment()
@@ -86,7 +88,6 @@ class ExperimentClassTestCases(ExperimentTestCase):
             self.getExperiment(self.column_names + [self.derived_kpi_1['name'],
                                                     self.derived_kpi_3['name']],
                                [self.derived_kpi_1, self.derived_kpi_3])
-
 
         with self.assertRaises(ValueError):
             self.getExperiment(self.column_names + [self.derived_kpi_4['name'],
@@ -129,7 +130,6 @@ class ExperimentClassTestCases(ExperimentTestCase):
         a = 'warnings'      in res
         a = 'expan_version' in res
 
-
     def test_fixed_horizon_delta(self):
         ndecimals = 5
         res = self.getExperiment(['normal_same']).delta(method='fixed_horizon')
@@ -148,12 +148,10 @@ class ExperimentClassTestCases(ExperimentTestCase):
         self.assertNumericalEqual(aStats['treatment_mean'],  0.025219, ndecimals)
         self.assertNumericalEqual(aStats['control_mean'],   -0.007833, ndecimals)
 
-
     def test_fixed_horizon_delta_derived_kpis(self):
         self.getExperiment(self.numeric_column_names + [self.derived_kpi_1['name'],
                                                       self.derived_kpi_2['name']],
                            [self.derived_kpi_1, self.derived_kpi_2]).delta()
-
 
     def test_group_sequential_delta(self):
         ndecimals = 5
@@ -202,12 +200,10 @@ class ExperimentClassTestCases(ExperimentTestCase):
         self.assertNumericalEqual(aStats['treatment_mean'],  0.025219, ndecimals)
         self.assertNumericalEqual(aStats['control_mean'],   -0.007833, ndecimals)
 
-
     @unittest.skip("sometimes takes too much time")
     def test_bayes_factor_delta_derived_kpis(self):
         exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
         res = exp.delta(method='bayes_factor', num_iters=2000)
-
 
     @unittest.skip("sometimes takes too much time")
     def test_bayes_precision_delta(self):
@@ -233,7 +229,6 @@ class ExperimentClassTestCases(ExperimentTestCase):
         self.assertNumericalEqual(aStats['treatment_mean'],  0.025219, ndecimals)
         self.assertNumericalEqual(aStats['control_mean'],   -0.007833, ndecimals)
 
-
     @unittest.skip("sometimes takes too much time")
     def test_bayes_precision_delta_derived_kpis(self):
         exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
@@ -243,7 +238,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
 
     def test_quantile_filtering(self):
         exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
-        res, metadata = exp.filter(
+        exp.filter(
             kpis=[
                 'normal_same',
                 'normal_shifted',
@@ -251,7 +246,36 @@ class ExperimentClassTestCases(ExperimentTestCase):
                 'normal_unequal_variance'
             ]
         )
-        print(res.describe())
+        self.assertEqual(len(self.data) - len(exp.data), exp.metadata['filtered_entities_number'])
+
+    def test_quantile_filtering_2(self):
+        exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
+        with self.assertRaises(KeyError):
+            exp.filter(
+                kpis=[
+                    'revenue'
+                ]
+            )
+
+    def test_quantile_filtering_3(self):
+        exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
+        with self.assertRaises(ValueError):
+            exp.filter(
+                kpis=[
+                    'normal_same'
+                ],
+                percentile=101.0
+            )
+
+    def test_quantile_filtering_4(self):
+        exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
+        with self.assertWarns(UserWarning):
+            exp.filter(
+                kpis=[
+                    'normal_same'
+                ],
+                percentile=97.9
+            )
 
 
 if __name__ == '__main__':
