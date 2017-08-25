@@ -265,7 +265,6 @@ class ExperimentClassTestCases(ExperimentTestCase):
             percentile=0.1,
             kind='lower'
         )
-        print(exp.metadata)
         self.assertEqual(len(self.data) - len(exp.data), exp.metadata['filtered_entities_number'])
 
     def test_quantile_filtering_unsupported_kpi(self):
