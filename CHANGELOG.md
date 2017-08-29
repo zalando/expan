@@ -4,8 +4,24 @@
 
 [Full Changelog](https://github.com/zalando/expan/compare/v0.6.1...HEAD)
 
+**Fixed bugs:**
+
+- Result statistics in Baeysian methods [\#142](https://github.com/zalando/expan/issues/142)
+
+**Closed issues:**
+
+- Default Parameters of Constructor of Experiment class [\#151](https://github.com/zalando/expan/issues/151)
+- Update to ExpAn-Intro.ipynb [\#141](https://github.com/zalando/expan/issues/141)
+
 **Merged pull requests:**
 
+- make development requirements open ended [\#154](https://github.com/zalando/expan/pull/154) ([mkolarek](https://github.com/mkolarek))
+- Octo 1930 implement quantile filtering [\#153](https://github.com/zalando/expan/pull/153) ([mkolarek](https://github.com/mkolarek))
+- Not use empty list for method parameter [\#152](https://github.com/zalando/expan/pull/152) ([shansfolder](https://github.com/shansfolder))
+- OCTO-1971 Add variational inference for early stopping [\#150](https://github.com/zalando/expan/pull/150) ([shansfolder](https://github.com/shansfolder))
+- Updated intro documentation covering delta methods. [\#149](https://github.com/zalando/expan/pull/149) ([daryadedik](https://github.com/daryadedik))
+- Release v0.6.1 [\#148](https://github.com/zalando/expan/pull/148) ([shansfolder](https://github.com/shansfolder))
+- Merge pull request \#137 from zalando/dev [\#147](https://github.com/zalando/expan/pull/147) ([shansfolder](https://github.com/shansfolder))
 - Add static html file from intro doc for v0.6.1 [\#146](https://github.com/zalando/expan/pull/146) ([shansfolder](https://github.com/shansfolder))
 
 ## [v0.6.1](https://github.com/zalando/expan/tree/v0.6.1) (2017-08-08)
