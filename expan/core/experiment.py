@@ -144,3 +144,52 @@ class Experiment(object):
 
         result['kpis'] = kpis
         return result
+
+    def _quantile_filtering(self, kpis, percentile, threshold_type):
+        method_table = {'upper': lambda x: x > threshold, 'lower': lambda x: x <= threshold}
+        flags = pd.Series(data=[False]*len(self.data))
+        for column in self.data[kpis].columns:
+            threshold = np.percentile(self.data[column], percentile)
+            flags = flags | self.data[column].apply(method_table[threshold_type])
+        return flags
+
+    def filter(self, kpis, percentile=99.0, threshold_type='upper'):
+        """
+        Method that filters out entities whose KPIs exceed the value at a given percentile.
+        If any of the KPIs exceeds its threshold the entity is filtered out.
+
+        Args:
+            kpis (list): list of KPI names
+            percentile (float): percentile considered as threshold
+            threshold_type (string): type of threshold used ('lower' or 'upper')
+
+        Returns:
+
+        """
+
+        # check if provided KPIs are present in the data
+        for kpi in kpis:
+            if kpi not in self.data.columns:
+                raise KeyError(kpi + ' identifier not present in dataframe columns!')
+
+        # check if provided percentile is valid
+        if 0.0 < percentile <= 100.0 is False:
+            raise ValueError("Percentile value needs to be between 0.0 and 100.0!")
+
+        # check if provided filtering kind is valid
+        if threshold_type not in ['upper', 'lower']:
+            raise ValueError("Threshold type needs to be either 'upper' or 'lower'!")
+
+        # run quantile filtering
+        flags = self._quantile_filtering(kpis=kpis, percentile=percentile, threshold_type=threshold_type)
+
+        # log which columns were filtered and how many entities were filtered out
+        self.metadata['filtered_columns'] = kpis
+        self.metadata['filtered_entities_number'] = len(flags[flags == True])
+        self.metadata['filtered_threshold_kind'] = threshold_type
+
+        # throw warning if too many entities have been filtered out
+        if (len(flags[flags == True]) / float(len(self.data))) > 0.02:
+            warnings.warn('More than 2% of entities have been filtered out, consider adjusting the percentile value.')
+
+        self.data = self.data[flags == False]
