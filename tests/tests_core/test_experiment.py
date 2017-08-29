@@ -1,5 +1,5 @@
 import unittest
-
+import warnings
 import numpy as np
 import pandas as pd
 
@@ -240,6 +240,71 @@ class ExperimentClassTestCases(ExperimentTestCase):
         res = exp.delta(method='bayes_precision', num_iters=2000)
 
         # self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1]).delta()
+
+    def test_quantile_filtering_multiple_columns(self):
+        exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
+        exp.filter(
+            kpis=[
+                'normal_same',
+                'normal_shifted',
+                'normal_shifted_by_feature',
+                'normal_unequal_variance'
+            ]
+        )
+        self.assertEqual(len(self.data) - len(exp.data), exp.metadata['filtered_entities_number'])
+
+    def test_quantile_filtering_lower_threshold(self):
+        exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
+        exp.filter(
+            kpis=[
+                'normal_same',
+                'normal_shifted',
+                'normal_shifted_by_feature',
+                'normal_unequal_variance'
+            ],
+            percentile=0.1,
+            threshold_type='lower'
+        )
+        self.assertEqual(len(self.data) - len(exp.data), exp.metadata['filtered_entities_number'])
+
+    def test_quantile_filtering_unsupported_kpi(self):
+        exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
+        with self.assertRaises(KeyError):
+            exp.filter(
+                kpis=[
+                    'revenue'
+                ]
+            )
+
+    def test_quantile_filtering_unsupported_percentile(self):
+        exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
+        with self.assertRaises(ValueError):
+            exp.filter(
+                kpis=[
+                    'normal_same'
+                ],
+                percentile=101.0
+            )
+
+    def test_quantile_filtering_unsupported_threshold_kind(self):
+        exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
+        with self.assertRaises(ValueError):
+            exp.filter(
+                kpis=[
+                    'normal_same'
+                ],
+                threshold_type='uppper'
+            )
+
+    # def test_quantile_filtering_high_filtering_percentage(self):
+    #     exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
+    #     with self.assertWarns(UserWarning):
+    #         exp.filter(
+    #             kpis=[
+    #                 'normal_same'
+    #             ],
+    #             percentile=97.9
+    #         )
 
 
 if __name__ == '__main__':
