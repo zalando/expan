@@ -1,5 +1,7 @@
 import unittest
 
+import sys
+
 from expan.core.binning import *
 
 #---------- test util function ------------#
@@ -26,6 +28,14 @@ class BinningTestCase(unittest.TestCase):
 
     def tearDown(self):
         pass
+
+    def assertCollectionEqual(self, source, expected):
+        is_python3 = sys.version_info[0] == 3
+        if is_python3:
+            return self.assertCountEqual(source, expected)
+        else:
+            return self.assertItemsEqual(source, expected)
+
 
 
 #---------- Numerical binning tests ------------#
@@ -57,7 +67,7 @@ class CreateNumericalBinsTestCase(BinningTestCase):
             NumericalRepresenation(800, 900, True, False),
             NumericalRepresenation(900, 999, True, True)
         ]
-        self.assertCountEqual(bins_repr_source, bins_repr_expected)
+        self.assertCollectionEqual(bins_repr_source, bins_repr_expected)
 
     def test_create_nan(self):
         data = np.arange(1002.)
@@ -80,7 +90,7 @@ class CreateNumericalBinsTestCase(BinningTestCase):
             NumericalRepresenation(900, 999, True, True),
             NumericalRepresenation(np.nan, np.nan, True, True)  # bin for nans
         ]
-        self.assertCountEqual(bins_repr_source, bins_repr_expected)
+        self.assertCollectionEqual(bins_repr_source, bins_repr_expected)
 
     def test_creation_two_big_bins_noise_between(self):
         data = [0] * 10000 + list(range(300)) + [301] * 10000
@@ -93,10 +103,10 @@ class CreateNumericalBinsTestCase(BinningTestCase):
         bins_repr_source = toBinRepresentation(bins)
         bins_repr_expected = [
             NumericalRepresenation(0, 0, True, True),
-            NumericalRepresenation(1.0, 301.0, True, False),
-            NumericalRepresenation(301.0, 301.0, True, True)
+            NumericalRepresenation(1, 301, True, False),
+            NumericalRepresenation(301, 301, True, True)
         ]
-        self.assertCountEqual(bins_repr_source, bins_repr_expected)
+        self.assertCollectionEqual(bins_repr_source, bins_repr_expected)
 
     def test_creation_very_skewed_data(self):
         data = [0] * 10000 + list(range(300))
@@ -104,20 +114,20 @@ class CreateNumericalBinsTestCase(BinningTestCase):
         bins = create_bins(data, nbins)
         bins_repr_source = toBinRepresentation(bins)
         bins_repr_expected = [
-            NumericalRepresenation(0.0, 0.0, True, True),
-            NumericalRepresenation(1.0, 101.0, True, False),
-            NumericalRepresenation(101.0, 200.0, True, False),
-            NumericalRepresenation(200.0, 299.0, True, True)
+            NumericalRepresenation(0, 0, True, True),
+            NumericalRepresenation(1, 101, True, False),
+            NumericalRepresenation(101, 200, True, False),
+            NumericalRepresenation(200, 299, True, True)
         ]
-        self.assertCountEqual(bins_repr_source, bins_repr_expected)
+        self.assertCollectionEqual(bins_repr_source, bins_repr_expected)
 
     def test_creation_single_bin(self):
         data = [0] * 100
         nbins = 1
         bins = create_bins(data, nbins)
         bins_repr_source = toBinRepresentation(bins)
-        bins_repr_expected = [NumericalRepresenation(0.0, 0.0, True, True)]
-        self.assertCountEqual(bins_repr_source, bins_repr_expected)
+        bins_repr_expected = [NumericalRepresenation(0, 0, True, True)]
+        self.assertCollectionEqual(bins_repr_source, bins_repr_expected)
 
     def test_creation_more_bins_than_data(self):
         data = [0] * 100 + [1] * 10
@@ -129,10 +139,10 @@ class CreateNumericalBinsTestCase(BinningTestCase):
             self.assertTrue('unique values' in str(w[-1].message))
         bins_repr_source = toBinRepresentation(bins)
         bins_repr_expected = [
-            NumericalRepresenation(0.0, 0.0, True, True),
-            NumericalRepresenation(1.0, 1.0, True, True)
+            NumericalRepresenation(0, 0, True, True),
+            NumericalRepresenation(1, 1, True, True)
         ]
-        self.assertCountEqual(bins_repr_source, bins_repr_expected)
+        self.assertCollectionEqual(bins_repr_source, bins_repr_expected)
 
     def test_creation_range_100__n_bins_8(self):
         data = list(range(100))
@@ -149,7 +159,7 @@ class CreateNumericalBinsTestCase(BinningTestCase):
             NumericalRepresenation(76, 88, True, False),
             NumericalRepresenation(88, 99, True, True)
         ]
-        self.assertCountEqual(bins_repr_source, bins_repr_expected)
+        self.assertCollectionEqual(bins_repr_source, bins_repr_expected)
 
     def test_creation_range_100__n_bins_2(self):
         data = list(range(100))
@@ -160,7 +170,7 @@ class CreateNumericalBinsTestCase(BinningTestCase):
             NumericalRepresenation(0, 50, True, False),
             NumericalRepresenation(50, 99, True, True)
         ]
-        self.assertCountEqual(bins_repr_source, bins_repr_expected)
+        self.assertCollectionEqual(bins_repr_source, bins_repr_expected)
 
 
 class AssignNumericalBinsTestCase(BinningTestCase):
@@ -215,7 +225,7 @@ class AssignNumericalBinsTestCase(BinningTestCase):
         data[0] = 2000
         with warnings.catch_warnings(record=True) as w:
             labels = assign_bins(data, bins)
-            self.assertEqual(len(w), 2)
+            self.assertEqual(len(w), 3)
 
         self.assertEqual(labels[1].representation, NumericalRepresenation(0, 100, True, False))
         self.assertEqual(labels[100].representation, NumericalRepresenation(100, 200, True, False))

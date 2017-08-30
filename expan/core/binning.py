@@ -11,6 +11,11 @@ logger = logging.getLogger(__name__)
 
 #------- bin representations -------#
 class Bin(object):
+    # this is a necessary hack for the buggy implementation of assertItemsEqual in python2
+    # see https://stackoverflow.com/a/29690198
+    # note that if we only use python3, assertCountEqual in python3 solves this problem
+    __hash__ = None
+
     def __init__(self, id, bin_type, representation):
         '''
         Constructor for a bin object.
@@ -30,8 +35,7 @@ class Bin(object):
         return "\nbin id: " + str(self.id) + ", bin: " + str(self.representation)
 
     def __eq__(self, other):
-        return (isinstance(other, self.__class__)
-            and self.__dict__ == other.__dict__)
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -39,6 +43,11 @@ class Bin(object):
 
 
 class NumericalRepresenation(object):
+    # this is a necessary hack for the buggy implementation of assertItemsEqual in python2
+    # see https://stackoverflow.com/a/29690198
+    # note that if we only use python3, assertCountEqual in python3 solves this problem
+    __hash__ = None
+
     def __init__(self, lower, upper, lower_closed, upper_closed):
         '''
         Constructor for representation of a numerical bin.
@@ -68,14 +77,18 @@ class NumericalRepresenation(object):
         return repr
 
     def __eq__(self, other):
-        return (isinstance(other, self.__class__)
-            and self.__dict__ == other.__dict__)
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
 
     def __ne__(self, other):
         return not self.__eq__(other)
 
 
 class CategoricalRepresenation(object):
+    # this is a necessary hack for the buggy implementation of assertItemsEqual in python2
+    # see https://stackoverflow.com/a/29690198
+    # note that if we only use python3, assertCountEqual in python3 solves this problem
+    __hash__ = None
+
     def __init__(self, values):
         '''
         Constructor for representation of a categorical bin.
@@ -87,8 +100,7 @@ class CategoricalRepresenation(object):
         return str(self.values)
 
     def __eq__(self, other):
-        return (isinstance(other, self.__class__)
-            and self.__dict__ == other.__dict__)
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
 
     def __ne__(self, other):
         return not self.__eq__(other)
