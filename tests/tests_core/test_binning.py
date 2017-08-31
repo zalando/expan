@@ -8,6 +8,7 @@ import warnings
 warnings.simplefilter('always')
 
 from expan.core.binning import *
+from expan.core.categorical_binning import categorical_binning
 
 
 class UtilTestCase(unittest.TestCase):
@@ -482,6 +483,25 @@ class CategoricalBinningClassTestCase(UtilTestCase):
         self.assertEqual(r[50], '1: {B}')
         self.assertEqual(r[60], '0: {A}')
 
+class CategoricalBinningClassTestCaseNew(UtilTestCase):
+
+    def test_categorical_binning_1(self):
+        data = ['a']*10 + ['b']*10
+        bins = categorical_binning(data, 2)
+        self.assertEqual(bins[0][0], 10)
+        self.assertEqual(bins[1][0], 10)
+
+    def test_categorical_binning_2(self):
+        data = ['a']*10 + ['b']*5 + ['c']*5
+        bins = categorical_binning(data, 2)
+        self.assertEqual(bins[0][0], 10)
+        self.assertEqual(bins[1][0], 10)
+
+    def test_categorical_binning_to_little_data(self):
+        data = ['a']*10 + ['b']*5 + ['c']*5
+
+        bins = categorical_binning(data, 4)
+        self.assertEqual(len(bins), 3)
 
 if __name__ == "__main__":
     unittest.main()
