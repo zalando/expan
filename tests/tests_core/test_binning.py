@@ -502,7 +502,6 @@ class CategoricalBinningClassTestCaseNew(UtilTestCase):
 
         bins = categorical_binning(data, 4)
         self.assertEqual(len(bins), 3)
-        self.assertEqual(bins[0][0], 10)
 
 if __name__ == "__main__":
     unittest.main()
