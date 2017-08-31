@@ -497,6 +497,12 @@ class CategoricalBinningClassTestCaseNew(UtilTestCase):
         self.assertEqual(bins[0][0], 10)
         self.assertEqual(bins[1][0], 10)
 
+    def test_categorical_binning_to_little_data(self):
+        data = ['a']*10 + ['b']*5 + ['c']*5
+
+        bins = categorical_binning(data, 4)
+        self.assertEqual(len(bins), 3)
+        self.assertEqual(bins[0][0], 10)
 
 if __name__ == "__main__":
     unittest.main()
