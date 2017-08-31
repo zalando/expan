@@ -16,29 +16,42 @@ class Bin(object):
     # note that if we only use python3, assertCountEqual in python3 solves this problem
     __hash__ = None
 
-    def __init__(self, id, bin_type, representation):
+    def __init__(self, bin_type, *repr_args):
         '''
         Constructor for a bin object.
         :param id: identifier (e.g. bin number) of the bin
         :param bin_type: "numerical" or "categorical"
-        :param representation: representation of the bin. can be NumericalRepresenation or CategoricalRepresenation.
+        :param repr_args: arguments to represent this bin. 
+                          args for numerical bin includes lower, upper, lower_closed, upper_closed
+                          args for categorical bin includes a list of values
         '''
-        if bin_type == "numerical" and type(representation) is not NumericalRepresentation:
-            raise ValueError("Use NumericalRepresenation object to initialize a numerical bin.")
-        if bin_type == "categorical" and type(representation) is not CategoricalRepresentation:
-            raise ValueError("Use CategoricalRepresenation object to initialize a categorical bin.")
-        self.id = id
+        if bin_type == "numerical" and len(repr_args) != 4:
+            raise ValueError("args for numerical bin includes lower, upper, lower_closed, upper_closed.")
+        if bin_type == "categorical" and type(repr_args) is not list:
+            raise ValueError("args for categorical bin includes a list of values.")
         self.bin_type = bin_type
-        self.representation = representation
+
+        if bin_type == "numerical":
+            self.representation = NumericalRepresentation(*repr_args)
+        elif bin_type == "categorical":
+            self.representation = CategoricalRepresentation(*repr_args)
 
     def __repr__(self):
-        return "\nbin id: " + str(self.id) + ", bin: " + str(self.representation)
+        return "\nbin: " + str(self.representation)
 
     def __eq__(self, other):
         return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
 
     def __ne__(self, other):
         return not self.__eq__(other)
+
+    def apply(self, data):
+        """
+        Apply the bin to data.
+        :param data: a single-column data frame
+        :return: subset of input data which belongs to this bin
+        """
+        return self.representation.apply_to_data(data)
 
 
 
@@ -82,6 +95,27 @@ class NumericalRepresentation(object):
     def __ne__(self, other):
         return not self.__eq__(other)
 
+    def apply_to_data(self, data):
+        """
+        Apply the bin to data.
+        :param data: a single-column data frame
+        :return: subset of input data which belongs to this bin
+        """
+        # if either bound is nan, only nans exist in the bin.
+        if np.isnan(self.lower) or np.isnan(self.upper):
+            return data[np.isnan(data)]
+
+        if self.lower_closed:
+            filter_lower = (data >= self.lower)
+        else:
+            filter_lower = (data > self.lower)
+        if self.upper_closed:
+            filter_upper = (data <= self.upper)
+        else:
+            filter_upper = (data < self.upper)
+        return data[filter_lower & filter_upper]
+
+
 
 class CategoricalRepresentation(object):
     # this is a necessary hack for the buggy implementation of assertItemsEqual in python2
@@ -104,6 +138,15 @@ class CategoricalRepresentation(object):
 
     def __ne__(self, other):
         return not self.__eq__(other)
+
+    def apply_to_data(self, data):
+        """
+        Apply the bin to data.
+        :param data: a single-column data frame
+        :return: subset of input data which belongs to this bin
+        """
+        # TODO
+        pass
 
 
 
@@ -144,39 +187,18 @@ def create_bins(data, n_bins):
     return bins
 
 
-def assign_bins(data, bins):
-    '''
-    Assign each data point to one of the bins.
-    :param data: a list or a 1-dim array of data to be labeled
-    :param bins: a list of Bin object
-    :return labels: a list of Bin object. Each data point is labeled by one of the bins in the given parameter. 
-             i.e. data[i] will be labeled by the bin in labels[i]. 
-             If data[i] can not be put into any of the bins, labels[i] will be None.
-    '''
-    # cast into a numpy array to infer the dtype
-    data_as_array = np.array(data)
-    is_numeric = np.issubdtype(data_as_array.dtype, np.number)
-
-    if is_numeric:
-        labels = _assign_numerical_bins(data_as_array, bins)
-    else:
-        labels = _assign_categorical_bins(data_as_array, bins)
-    return labels
-
-
 
 #------- private methods for numerical binnings-------#
 
 def _create_numerical_bins(data_as_array, n_bins):
-    return _create_next_numerical_bin(data_as_array, n_bins, 0, [])
+    return _create_next_numerical_bin(data_as_array, n_bins, [])
 
 
-def _create_next_numerical_bin(x, n_bins, bin_id, result):
+def _create_next_numerical_bin(x, n_bins, result):
     '''
     Create bins for numerical data
     :param x: array of data
     :param n_bins: number of bins
-    :param bin_id: id of the next bin
     :return: a list of bins object
     '''
     # no more data
@@ -185,23 +207,22 @@ def _create_next_numerical_bin(x, n_bins, bin_id, result):
 
     # if data has nan
     if any(np.isnan(x)):
-        cur_bin = Bin(bin_id, "numerical", NumericalRepresentation(np.nan, np.nan, True, True))
+        cur_bin = Bin("numerical", np.nan, np.nan, True, True)
         result.append(cur_bin)
-        return _create_next_numerical_bin(x[~np.isnan(x)], n_bins-1, bin_id+1, result)
+        return _create_next_numerical_bin(x[~np.isnan(x)], n_bins-1, result)
 
     # the last bin is a closed-closed interval
     if n_bins == 1:
-        cur_bin_repr = NumericalRepresentation(min(x), max(x), True, True)
-        cur_bin = Bin(bin_id, "numerical", cur_bin_repr)
+        cur_bin = Bin("numerical", min(x), max(x), True, True)
         result.append(cur_bin)
         return result
 
     lower, upper, lower_closed, upper_closed = _first_interval(x, n_bins)
-    cur_bin = Bin(bin_id, "numerical", NumericalRepresentation(lower, upper, lower_closed, upper_closed))
+    cur_bin = Bin("numerical", lower, upper, lower_closed, upper_closed)
     result.append(cur_bin)
 
     next_data = x[x > upper] if upper_closed else x[x >= upper]
-    return _create_next_numerical_bin(next_data, n_bins-1, bin_id+1, result)
+    return _create_next_numerical_bin(next_data, n_bins-1, result)
 
 
 def _first_interval(x, n_bins):
@@ -222,27 +243,7 @@ def _first_interval(x, n_bins):
         return lower, upper, True, False
 
 
-def _assign_numerical_bins(data_as_array, bins):
-    labels = np.full(data_as_array.shape, None)
-    for bin in bins:
-        l = bin.representation.lower
-        u = bin.representation.upper
-        lc = bin.representation.lower_closed
-        uc = bin.representation.upper_closed
-        if np.isnan(l) or np.isnan(u):  # if either bound is nan, only nans exist in the bin.
-            got = np.isnan(data_as_array)
-        else:
-            got = (l <= data_as_array) if lc else (l < data_as_array)
-            got &= (data_as_array <= u) if uc else (data_as_array < u)
-        labels[got] = bin
-    return labels.tolist()
-
-
-
 #------- private methods for categorical binnings-------#
 
 def _create_categorical_bins(data_as_array, n_bins):
-    return
-
-def _assign_categorical_bins(data_as_array, bins):
     return

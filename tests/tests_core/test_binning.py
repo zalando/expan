@@ -179,64 +179,35 @@ class AssignNumericalBinsTestCase(BinningTestCase):
     """
     def test_assign_regular(self):
         data = np.arange(1000)
-        nbins = 10
 
-        bins = create_bins(data, nbins)
-        self.assertEqual(len(bins), nbins)
+        bin1 = Bin("numerical", 0, 10, True, False)
+        np.testing.assert_array_equal(np.arange(10), bin1.apply(data))
 
-        labels = assign_bins(data, bins)
-        self.assertEqual(labels[0].representation, NumericalRepresentation(0, 100, True, False))
-        self.assertEqual(labels[100].representation, NumericalRepresentation(100, 200, True, False))
-        self.assertEqual(labels[200].representation, NumericalRepresentation(200, 300, True, False))
-        self.assertEqual(labels[450].representation, NumericalRepresentation(400, 500, True, False))
-        self.assertEqual(labels[799].representation, NumericalRepresentation(700, 800, True, False))
-        self.assertEqual(labels[800].representation, NumericalRepresentation(800, 900, True, False))
-        self.assertEqual(labels[999].representation, NumericalRepresentation(900, 999, True, True))
+        bin2 = Bin("numerical", 40, 50, True, False)
+        np.testing.assert_array_equal(np.arange(40, 50), bin2.apply(data))
+
+        bin3 = Bin("numerical", 300, 500, False, True)
+        np.testing.assert_array_equal(np.arange(301, 501), bin3.apply(data))
+
+        bin4 = Bin("numerical", 900, 999, True, True)
+        np.testing.assert_array_equal(np.arange(900, 1000), bin4.apply(data))
 
     def test_assign_unseen_data(self):
-        seen = np.arange(1000)
-        nbins = 10
-        unseen = np.arange(1100)
+        data = np.arange(1000)
 
-        bins = create_bins(seen, nbins)
-        self.assertEqual(len(bins), nbins)
-
-        labels = assign_bins(unseen, bins)
-        self.assertEqual(labels[0].representation, NumericalRepresentation(0, 100, True, False))
-        self.assertEqual(labels[100].representation, NumericalRepresentation(100, 200, True, False))
-        self.assertEqual(labels[200].representation, NumericalRepresentation(200, 300, True, False))
-        self.assertEqual(labels[450].representation, NumericalRepresentation(400, 500, True, False))
-        self.assertEqual(labels[799].representation, NumericalRepresentation(700, 800, True, False))
-        self.assertEqual(labels[800].representation, NumericalRepresentation(800, 900, True, False))
-        self.assertEqual(labels[999].representation, NumericalRepresentation(900, 999, True, True))
-        self.assertEqual(labels[1000], None)
-        self.assertEqual(labels[1050], None)
-        self.assertEqual(labels[1099], None)
+        bin = Bin("numerical", 1000, 2000, False, False)
+        np.testing.assert_array_equal(None, bin.apply(data))
 
     def test_assign_nan(self):
         data = np.arange(1002.)
         data[-2] = np.nan
         data[-1] = np.nan
-        nbins = 11
 
-        bins = create_bins(data, nbins)
-        self.assertEqual(len(bins), nbins)
+        bin_regular = Bin("numerical", 0, 10, True, False)
+        np.testing.assert_array_equal(np.arange(10), bin_regular.apply(data))
 
-        data[0] = 2000
-        with warnings.catch_warnings(record=True) as w:
-            labels = assign_bins(data, bins)
-            self.assertEqual(len(w), 3)
-
-        self.assertEqual(labels[1].representation, NumericalRepresentation(0, 100, True, False))
-        self.assertEqual(labels[100].representation, NumericalRepresentation(100, 200, True, False))
-        self.assertEqual(labels[200].representation, NumericalRepresentation(200, 300, True, False))
-        self.assertEqual(labels[450].representation, NumericalRepresentation(400, 500, True, False))
-        self.assertEqual(labels[799].representation, NumericalRepresentation(700, 800, True, False))
-        self.assertEqual(labels[800].representation, NumericalRepresentation(800, 900, True, False))
-        self.assertEqual(labels[999].representation, NumericalRepresentation(900, 999, True, True))
-        self.assertEqual(labels[0], None)
-        self.assertEqual(labels[1000].representation, NumericalRepresentation(np.nan, np.nan, True, True))
-        self.assertEqual(labels[1001].representation, NumericalRepresentation(np.nan, np.nan, True, True))
+        bin_nan = Bin("numerical", np.nan, np.nan, True, True)
+        np.testing.assert_array_equal(np.array([np.nan, np.nan]), bin_nan.apply(data))
 
 
 #---------- Categorical binning tests ------------#
