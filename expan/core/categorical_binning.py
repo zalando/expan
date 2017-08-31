@@ -17,8 +17,7 @@ def categorical_binning(items, n_bins):
     # we need items sorted in decreasing order
     pairs = sorted([(weight, [item]) for (item, weight) in weights.items()], reverse=True)
 
-    # take min(n_bins, len(pairs)) haviest pairs as initial bins
-    bins = [(weight, labels) for (_, (weight, labels)) in zip(range(n_bins), pairs)]
+    bins = pairs[:min(n_bins, len(pairs))]
 
     # too little data, just return what we have so far
     if len(pairs) <= n_bins:
