@@ -56,16 +56,16 @@ class CreateNumericalBinsTestCase(BinningTestCase):
         self.assertEqual(len(bins), nbins)
         bins_repr_source = toBinRepresentation(bins)
         bins_repr_expected = [
-            NumericalRepresenation(0, 100, True, False),
-            NumericalRepresenation(100, 200, True, False),
-            NumericalRepresenation(200, 300, True, False),
-            NumericalRepresenation(300, 400, True, False),
-            NumericalRepresenation(400, 500, True, False),
-            NumericalRepresenation(500, 600, True, False),
-            NumericalRepresenation(600, 700, True, False),
-            NumericalRepresenation(700, 800, True, False),
-            NumericalRepresenation(800, 900, True, False),
-            NumericalRepresenation(900, 999, True, True)
+            NumericalRepresentation(0, 100, True, False),
+            NumericalRepresentation(100, 200, True, False),
+            NumericalRepresentation(200, 300, True, False),
+            NumericalRepresentation(300, 400, True, False),
+            NumericalRepresentation(400, 500, True, False),
+            NumericalRepresentation(500, 600, True, False),
+            NumericalRepresentation(600, 700, True, False),
+            NumericalRepresentation(700, 800, True, False),
+            NumericalRepresentation(800, 900, True, False),
+            NumericalRepresentation(900, 999, True, True)
         ]
         self.assertCollectionEqual(bins_repr_source, bins_repr_expected)
 
@@ -78,17 +78,17 @@ class CreateNumericalBinsTestCase(BinningTestCase):
         self.assertEqual(len(bins), nbins)
         bins_repr_source = toBinRepresentation(bins)
         bins_repr_expected = [
-            NumericalRepresenation(0, 100, True, False),
-            NumericalRepresenation(100, 200, True, False),
-            NumericalRepresenation(200, 300, True, False),
-            NumericalRepresenation(300, 400, True, False),
-            NumericalRepresenation(400, 500, True, False),
-            NumericalRepresenation(500, 600, True, False),
-            NumericalRepresenation(600, 700, True, False),
-            NumericalRepresenation(700, 800, True, False),
-            NumericalRepresenation(800, 900, True, False),
-            NumericalRepresenation(900, 999, True, True),
-            NumericalRepresenation(np.nan, np.nan, True, True)  # bin for nans
+            NumericalRepresentation(0, 100, True, False),
+            NumericalRepresentation(100, 200, True, False),
+            NumericalRepresentation(200, 300, True, False),
+            NumericalRepresentation(300, 400, True, False),
+            NumericalRepresentation(400, 500, True, False),
+            NumericalRepresentation(500, 600, True, False),
+            NumericalRepresentation(600, 700, True, False),
+            NumericalRepresentation(700, 800, True, False),
+            NumericalRepresentation(800, 900, True, False),
+            NumericalRepresentation(900, 999, True, True),
+            NumericalRepresentation(np.nan, np.nan, True, True)  # bin for nans
         ]
         self.assertCollectionEqual(bins_repr_source, bins_repr_expected)
 
@@ -102,9 +102,9 @@ class CreateNumericalBinsTestCase(BinningTestCase):
             self.assertTrue('less bins than requested' in str(w[-1].message).lower())
         bins_repr_source = toBinRepresentation(bins)
         bins_repr_expected = [
-            NumericalRepresenation(0, 0, True, True),
-            NumericalRepresenation(1, 301, True, False),
-            NumericalRepresenation(301, 301, True, True)
+            NumericalRepresentation(0, 0, True, True),
+            NumericalRepresentation(1, 301, True, False),
+            NumericalRepresentation(301, 301, True, True)
         ]
         self.assertCollectionEqual(bins_repr_source, bins_repr_expected)
 
@@ -114,10 +114,10 @@ class CreateNumericalBinsTestCase(BinningTestCase):
         bins = create_bins(data, nbins)
         bins_repr_source = toBinRepresentation(bins)
         bins_repr_expected = [
-            NumericalRepresenation(0, 0, True, True),
-            NumericalRepresenation(1, 101, True, False),
-            NumericalRepresenation(101, 200, True, False),
-            NumericalRepresenation(200, 299, True, True)
+            NumericalRepresentation(0, 0, True, True),
+            NumericalRepresentation(1, 101, True, False),
+            NumericalRepresentation(101, 200, True, False),
+            NumericalRepresentation(200, 299, True, True)
         ]
         self.assertCollectionEqual(bins_repr_source, bins_repr_expected)
 
@@ -126,7 +126,7 @@ class CreateNumericalBinsTestCase(BinningTestCase):
         nbins = 1
         bins = create_bins(data, nbins)
         bins_repr_source = toBinRepresentation(bins)
-        bins_repr_expected = [NumericalRepresenation(0, 0, True, True)]
+        bins_repr_expected = [NumericalRepresentation(0, 0, True, True)]
         self.assertCollectionEqual(bins_repr_source, bins_repr_expected)
 
     def test_creation_more_bins_than_data(self):
@@ -139,8 +139,8 @@ class CreateNumericalBinsTestCase(BinningTestCase):
             self.assertTrue('unique values' in str(w[-1].message))
         bins_repr_source = toBinRepresentation(bins)
         bins_repr_expected = [
-            NumericalRepresenation(0, 0, True, True),
-            NumericalRepresenation(1, 1, True, True)
+            NumericalRepresentation(0, 0, True, True),
+            NumericalRepresentation(1, 1, True, True)
         ]
         self.assertCollectionEqual(bins_repr_source, bins_repr_expected)
 
@@ -150,14 +150,14 @@ class CreateNumericalBinsTestCase(BinningTestCase):
         bins = create_bins(data, nbins)
         bins_repr_source = toBinRepresentation(bins)
         bins_repr_expected = [
-            NumericalRepresenation(0, 13, True, False),
-            NumericalRepresenation(13, 26, True, False),
-            NumericalRepresenation(26, 39, True, False),
-            NumericalRepresenation(39, 51, True, False),
-            NumericalRepresenation(51, 63, True, False),
-            NumericalRepresenation(63, 76, True, False),
-            NumericalRepresenation(76, 88, True, False),
-            NumericalRepresenation(88, 99, True, True)
+            NumericalRepresentation(0, 13, True, False),
+            NumericalRepresentation(13, 26, True, False),
+            NumericalRepresentation(26, 39, True, False),
+            NumericalRepresentation(39, 51, True, False),
+            NumericalRepresentation(51, 63, True, False),
+            NumericalRepresentation(63, 76, True, False),
+            NumericalRepresentation(76, 88, True, False),
+            NumericalRepresentation(88, 99, True, True)
         ]
         self.assertCollectionEqual(bins_repr_source, bins_repr_expected)
 
@@ -167,8 +167,8 @@ class CreateNumericalBinsTestCase(BinningTestCase):
         bins = create_bins(data, nbins)
         bins_repr_source = toBinRepresentation(bins)
         bins_repr_expected = [
-            NumericalRepresenation(0, 50, True, False),
-            NumericalRepresenation(50, 99, True, True)
+            NumericalRepresentation(0, 50, True, False),
+            NumericalRepresentation(50, 99, True, True)
         ]
         self.assertCollectionEqual(bins_repr_source, bins_repr_expected)
 
@@ -185,13 +185,13 @@ class AssignNumericalBinsTestCase(BinningTestCase):
         self.assertEqual(len(bins), nbins)
 
         labels = assign_bins(data, bins)
-        self.assertEqual(labels[0].representation, NumericalRepresenation(0, 100, True, False))
-        self.assertEqual(labels[100].representation, NumericalRepresenation(100, 200, True, False))
-        self.assertEqual(labels[200].representation, NumericalRepresenation(200, 300, True, False))
-        self.assertEqual(labels[450].representation, NumericalRepresenation(400, 500, True, False))
-        self.assertEqual(labels[799].representation, NumericalRepresenation(700, 800, True, False))
-        self.assertEqual(labels[800].representation, NumericalRepresenation(800, 900, True, False))
-        self.assertEqual(labels[999].representation, NumericalRepresenation(900, 999, True, True))
+        self.assertEqual(labels[0].representation, NumericalRepresentation(0, 100, True, False))
+        self.assertEqual(labels[100].representation, NumericalRepresentation(100, 200, True, False))
+        self.assertEqual(labels[200].representation, NumericalRepresentation(200, 300, True, False))
+        self.assertEqual(labels[450].representation, NumericalRepresentation(400, 500, True, False))
+        self.assertEqual(labels[799].representation, NumericalRepresentation(700, 800, True, False))
+        self.assertEqual(labels[800].representation, NumericalRepresentation(800, 900, True, False))
+        self.assertEqual(labels[999].representation, NumericalRepresentation(900, 999, True, True))
 
     def test_assign_unseen_data(self):
         seen = np.arange(1000)
@@ -202,13 +202,13 @@ class AssignNumericalBinsTestCase(BinningTestCase):
         self.assertEqual(len(bins), nbins)
 
         labels = assign_bins(unseen, bins)
-        self.assertEqual(labels[0].representation, NumericalRepresenation(0, 100, True, False))
-        self.assertEqual(labels[100].representation, NumericalRepresenation(100, 200, True, False))
-        self.assertEqual(labels[200].representation, NumericalRepresenation(200, 300, True, False))
-        self.assertEqual(labels[450].representation, NumericalRepresenation(400, 500, True, False))
-        self.assertEqual(labels[799].representation, NumericalRepresenation(700, 800, True, False))
-        self.assertEqual(labels[800].representation, NumericalRepresenation(800, 900, True, False))
-        self.assertEqual(labels[999].representation, NumericalRepresenation(900, 999, True, True))
+        self.assertEqual(labels[0].representation, NumericalRepresentation(0, 100, True, False))
+        self.assertEqual(labels[100].representation, NumericalRepresentation(100, 200, True, False))
+        self.assertEqual(labels[200].representation, NumericalRepresentation(200, 300, True, False))
+        self.assertEqual(labels[450].representation, NumericalRepresentation(400, 500, True, False))
+        self.assertEqual(labels[799].representation, NumericalRepresentation(700, 800, True, False))
+        self.assertEqual(labels[800].representation, NumericalRepresentation(800, 900, True, False))
+        self.assertEqual(labels[999].representation, NumericalRepresentation(900, 999, True, True))
         self.assertEqual(labels[1000], None)
         self.assertEqual(labels[1050], None)
         self.assertEqual(labels[1099], None)
@@ -227,16 +227,16 @@ class AssignNumericalBinsTestCase(BinningTestCase):
             labels = assign_bins(data, bins)
             self.assertEqual(len(w), 3)
 
-        self.assertEqual(labels[1].representation, NumericalRepresenation(0, 100, True, False))
-        self.assertEqual(labels[100].representation, NumericalRepresenation(100, 200, True, False))
-        self.assertEqual(labels[200].representation, NumericalRepresenation(200, 300, True, False))
-        self.assertEqual(labels[450].representation, NumericalRepresenation(400, 500, True, False))
-        self.assertEqual(labels[799].representation, NumericalRepresenation(700, 800, True, False))
-        self.assertEqual(labels[800].representation, NumericalRepresenation(800, 900, True, False))
-        self.assertEqual(labels[999].representation, NumericalRepresenation(900, 999, True, True))
+        self.assertEqual(labels[1].representation, NumericalRepresentation(0, 100, True, False))
+        self.assertEqual(labels[100].representation, NumericalRepresentation(100, 200, True, False))
+        self.assertEqual(labels[200].representation, NumericalRepresentation(200, 300, True, False))
+        self.assertEqual(labels[450].representation, NumericalRepresentation(400, 500, True, False))
+        self.assertEqual(labels[799].representation, NumericalRepresentation(700, 800, True, False))
+        self.assertEqual(labels[800].representation, NumericalRepresentation(800, 900, True, False))
+        self.assertEqual(labels[999].representation, NumericalRepresentation(900, 999, True, True))
         self.assertEqual(labels[0], None)
-        self.assertEqual(labels[1000].representation, NumericalRepresenation(np.nan, np.nan, True, True))
-        self.assertEqual(labels[1001].representation, NumericalRepresenation(np.nan, np.nan, True, True))
+        self.assertEqual(labels[1000].representation, NumericalRepresentation(np.nan, np.nan, True, True))
+        self.assertEqual(labels[1001].representation, NumericalRepresentation(np.nan, np.nan, True, True))
 
 
 #---------- Categorical binning tests ------------#

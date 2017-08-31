@@ -23,9 +23,9 @@ class Bin(object):
         :param bin_type: "numerical" or "categorical"
         :param representation: representation of the bin. can be NumericalRepresenation or CategoricalRepresenation.
         '''
-        if bin_type == "numerical" and type(representation) is not NumericalRepresenation:
+        if bin_type == "numerical" and type(representation) is not NumericalRepresentation:
             raise ValueError("Use NumericalRepresenation object to initialize a numerical bin.")
-        if bin_type == "categorical" and type(representation) is not CategoricalRepresenation:
+        if bin_type == "categorical" and type(representation) is not CategoricalRepresentation:
             raise ValueError("Use CategoricalRepresenation object to initialize a categorical bin.")
         self.id = id
         self.bin_type = bin_type
@@ -42,7 +42,7 @@ class Bin(object):
 
 
 
-class NumericalRepresenation(object):
+class NumericalRepresentation(object):
     # this is a necessary hack for the buggy implementation of assertItemsEqual in python2
     # see https://stackoverflow.com/a/29690198
     # note that if we only use python3, assertCountEqual in python3 solves this problem
@@ -83,7 +83,7 @@ class NumericalRepresenation(object):
         return not self.__eq__(other)
 
 
-class CategoricalRepresenation(object):
+class CategoricalRepresentation(object):
     # this is a necessary hack for the buggy implementation of assertItemsEqual in python2
     # see https://stackoverflow.com/a/29690198
     # note that if we only use python3, assertCountEqual in python3 solves this problem
@@ -185,19 +185,19 @@ def _create_next_numerical_bin(x, n_bins, bin_id, result):
 
     # if data has nan
     if any(np.isnan(x)):
-        cur_bin = Bin(bin_id, "numerical", NumericalRepresenation(np.nan, np.nan, True, True))
+        cur_bin = Bin(bin_id, "numerical", NumericalRepresentation(np.nan, np.nan, True, True))
         result.append(cur_bin)
         return _create_next_numerical_bin(x[~np.isnan(x)], n_bins-1, bin_id+1, result)
 
     # the last bin is a closed-closed interval
     if n_bins == 1:
-        cur_bin_repr = NumericalRepresenation(min(x), max(x), True, True)
+        cur_bin_repr = NumericalRepresentation(min(x), max(x), True, True)
         cur_bin = Bin(bin_id, "numerical", cur_bin_repr)
         result.append(cur_bin)
         return result
 
     lower, upper, lower_closed, upper_closed = _first_interval(x, n_bins)
-    cur_bin = Bin(bin_id, "numerical", NumericalRepresenation(lower, upper, lower_closed, upper_closed))
+    cur_bin = Bin(bin_id, "numerical", NumericalRepresentation(lower, upper, lower_closed, upper_closed))
     result.append(cur_bin)
 
     next_data = x[x > upper] if upper_closed else x[x >= upper]
