@@ -182,7 +182,6 @@ def create_bins(data, n_bins):
     if is_numeric:
         bins = _create_numerical_bins(data_as_array, n_bins)
     else:
-        print("asdfasdf")
         bins = _create_categorical_bins(data_as_array, n_bins)
 
     if (not insufficient_distinct) and (len(bins) < n_bins):
@@ -286,13 +285,6 @@ def _create_categorical_bins(data_as_array, n_bins):
 def toBinObject(bins):
     result = []
     for bin in bins:
-        print(bin)
         categories = bin[1]
         result.append(Bin("categorical", categories))
     return result
-
-
-if __name__ == "__main__":
-    data = ['a'] * 10 + ['b'] * 10
-    bins = create_bins(data, 2)
-    print(bins)
