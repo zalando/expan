@@ -242,3 +242,9 @@ class ApplyCategoricalBinsTestCase(BinningTestCase):
 
         bin = Bin("categorical", ["d"])
         np.testing.assert_array_equal(None, bin.apply(data))
+
+    def test_assign_multiple(self):
+        data = pd.Series(["a", "b", "c", "a", "b"])
+
+        bin = Bin("categorical", ["a", "b"])
+        np.testing.assert_array_equal(np.array(["a", "b", "a", "b"]), bin.apply(data))

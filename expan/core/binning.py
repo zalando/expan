@@ -23,7 +23,7 @@ class Bin(object):
         :param bin_type: "numerical" or "categorical"
         :param repr_args: arguments to represent this bin. 
                           args for numerical bin includes lower, upper, lower_closed, upper_closed
-                          args for categorical bin includes a list of values
+                          args for categorical bin includes a list of categories for this bin.
         '''
         if bin_type == "numerical" and len(repr_args) != 4:
             raise ValueError("args for numerical bin are lower, upper, lower_closed, upper_closed.")
@@ -122,17 +122,17 @@ class CategoricalRepresentation(object):
     # note that if we only use python3, assertCountEqual in python3 solves this problem
     __hash__ = None
 
-    def __init__(self, values):
+    def __init__(self, categories):
         '''
         Constructor for representation of a categorical bin.
-        :param values: list of categorical values that belong to this bin
+        :param categories: list of categorical values that belong to this bin
         '''
-        if type(values) is not list:
+        if type(categories) is not list:
             raise ValueError("args for categorical bin is a list of categorical values.")
-        self.values = values
+        self.categories = categories
 
     def __repr__(self):
-        return str(self.values)
+        return str(self.categories)
 
     def __eq__(self, other):
         return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
@@ -146,10 +146,10 @@ class CategoricalRepresentation(object):
         :param data: a pandas Series
         :return: subset of input data which belongs to this bin
         """
-        if len(self.values) == 1:
-            return data[data == self.values[0]]
+        if len(self.categories) == 1:
+            return data[data == self.categories[0]]
         else:
-            return data[data.isin(self.values)]
+            return data[data.isin(self.categories)]
 
 
 
