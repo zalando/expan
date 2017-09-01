@@ -217,8 +217,30 @@ class CreateCategoricalBinsTestCase(BinningTestCase):
     """
     Test cases for creating categorical bins.
     """
-    #TODO
-    pass
+    def test_categorical_binning_1(self):
+        data = ['a'] * 10 + ['b'] * 10
+        bins = create_bins(data, 2)
+        bins_repr_source = toBinRepresentation(bins)
+        bins_repr_expected = [
+            CategoricalRepresentation(["a"]),
+            CategoricalRepresentation(["b"])
+        ]
+        self.assertCollectionEqual(bins_repr_source, bins_repr_expected)
+
+    def test_categorical_binning_2(self):
+        data = ['a'] * 10 + ['b'] * 5 + ['c'] * 5
+        bins = create_bins(data, 2)
+        bins_repr_source = toBinRepresentation(bins)
+        bins_repr_expected = [
+            CategoricalRepresentation(["a"]),
+            CategoricalRepresentation(["c", "b"])
+        ]
+        self.assertCollectionEqual(bins_repr_source, bins_repr_expected)
+
+    def test_categorical_binning_too_little_data(self):
+        data = ['a'] * 10 + ['b'] * 5 + ['c'] * 5
+        bins = create_bins(data, 4)
+        self.assertEqual(len(bins), 3)
 
 
 class ApplyCategoricalBinsTestCase(BinningTestCase):

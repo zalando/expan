@@ -1,6 +1,6 @@
 import logging
-import string
 import warnings
+from heapq import heapify, heappush, heappop
 
 import numpy as np
 
@@ -182,6 +182,7 @@ def create_bins(data, n_bins):
     if is_numeric:
         bins = _create_numerical_bins(data_as_array, n_bins)
     else:
+        print("asdfasdf")
         bins = _create_categorical_bins(data_as_array, n_bins)
 
     if (not insufficient_distinct) and (len(bins) < n_bins):
@@ -249,5 +250,49 @@ def _first_interval(x, n_bins):
 #------- private methods for categorical binnings-------#
 
 def _create_categorical_bins(data_as_array, n_bins):
-    #TODO
-    return
+    """ 
+    Performs greedy (non-optimal) binning
+    :param data_as_array: array of data to bin according to their frequencies
+    :return: a list of Bin object
+    """
+    # count items
+    weights = {}
+    for item in data_as_array:
+        if not item in weights:
+            weights[item] = 1
+        else:
+            weights[item] += 1
+
+    # we need items sorted in decreasing order
+    pairs = sorted([(weight, [item]) for (item, weight) in weights.items()], reverse=True)
+    bins = pairs[:min(n_bins, len(pairs))]
+
+    # too little data, just return what we have so far
+    if len(pairs) <= n_bins:
+        return toBinObject(bins)
+
+    heapify(bins)
+
+    # go through pairs, from heaviest to lightest
+    for (pair_weight, pair_labels) in pairs[n_bins:]:
+        # take the lightest bin
+        bin_weight, bin_labels = heappop(bins)
+        # add the heaviest item to it
+        heappush(bins, (bin_weight + pair_weight, bin_labels + pair_labels))
+
+    return toBinObject(bins)
+
+
+def toBinObject(bins):
+    result = []
+    for bin in bins:
+        print(bin)
+        categories = bin[1]
+        result.append(Bin("categorical", categories))
+    return result
+
+
+if __name__ == "__main__":
+    data = ['a'] * 10 + ['b'] * 10
+    bins = create_bins(data, 2)
+    print(bins)
