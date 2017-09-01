@@ -2,6 +2,8 @@ import unittest
 
 import sys
 
+import pandas as pd
+
 from expan.core.binning import *
 
 #---------- test util function ------------#
@@ -173,12 +175,12 @@ class CreateNumericalBinsTestCase(BinningTestCase):
         self.assertCollectionEqual(bins_repr_source, bins_repr_expected)
 
 
-class AssignNumericalBinsTestCase(BinningTestCase):
+class ApplyNumericalBinsTestCase(BinningTestCase):
     """
-    Test cases for assigning bins to numerical data.
+    Test cases for applying bins to numerical data.
     """
     def test_assign_regular(self):
-        data = np.arange(1000)
+        data = pd.Series(np.arange(1000))
 
         bin1 = Bin("numerical", 0, 10, True, False)
         np.testing.assert_array_equal(np.arange(10), bin1.apply(data))
@@ -193,13 +195,13 @@ class AssignNumericalBinsTestCase(BinningTestCase):
         np.testing.assert_array_equal(np.arange(900, 1000), bin4.apply(data))
 
     def test_assign_unseen_data(self):
-        data = np.arange(1000)
+        data = pd.Series(np.arange(1000))
 
         bin = Bin("numerical", 1000, 2000, False, False)
         np.testing.assert_array_equal(None, bin.apply(data))
 
     def test_assign_nan(self):
-        data = np.arange(1002.)
+        data = pd.Series(np.arange(1002))
         data[-2] = np.nan
         data[-1] = np.nan
 
@@ -215,11 +217,28 @@ class CreateCategoricalBinsTestCase(BinningTestCase):
     """
     Test cases for creating categorical bins.
     """
+    #TODO
     pass
 
 
-class AssignCategoricalBinsTestCase(BinningTestCase):
+class ApplyCategoricalBinsTestCase(BinningTestCase):
     """
-    Test cases for assigning bins to categorical data.
+    Test cases for applying bins to categorical data.
     """
-    pass
+    def test_assign_regular(self):
+        data = pd.Series(["a", "b", "c", "a", "b"])
+
+        bin_a = Bin("categorical", ["a"])
+        np.testing.assert_array_equal(np.array(["a", "a"]), bin_a.apply(data))
+
+        bin_b = Bin("categorical", ["b"])
+        np.testing.assert_array_equal(np.array(["b", "b"]), bin_b.apply(data))
+
+        bin_c = Bin("categorical", ["c"])
+        np.testing.assert_array_equal(np.array(["c"]), bin_c.apply(data))
+
+    def test_assign_unseen(self):
+        data = pd.Series(["a", "b", "c"])
+
+        bin = Bin("categorical", ["d"])
+        np.testing.assert_array_equal(None, bin.apply(data))

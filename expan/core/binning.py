@@ -26,9 +26,9 @@ class Bin(object):
                           args for categorical bin includes a list of values
         '''
         if bin_type == "numerical" and len(repr_args) != 4:
-            raise ValueError("args for numerical bin includes lower, upper, lower_closed, upper_closed.")
-        if bin_type == "categorical" and type(repr_args) is not list:
-            raise ValueError("args for categorical bin includes a list of values.")
+            raise ValueError("args for numerical bin are lower, upper, lower_closed, upper_closed.")
+        if bin_type == "categorical" and len(repr_args) != 1 and type(repr_args[0]) is not list:
+            raise ValueError("args for categorical bin is a list of categorical values for this bin.")
         self.bin_type = bin_type
 
         if bin_type == "numerical":
@@ -48,7 +48,7 @@ class Bin(object):
     def apply(self, data):
         """
         Apply the bin to data.
-        :param data: a single-column data frame
+        :param data: a pandas Series
         :return: subset of input data which belongs to this bin
         """
         return self.representation.apply_to_data(data)
@@ -98,7 +98,7 @@ class NumericalRepresentation(object):
     def apply_to_data(self, data):
         """
         Apply the bin to data.
-        :param data: a single-column data frame
+        :param data: a pandas Series
         :return: subset of input data which belongs to this bin
         """
         # if either bound is nan, only nans exist in the bin.
@@ -116,7 +116,6 @@ class NumericalRepresentation(object):
         return data[filter_lower & filter_upper]
 
 
-
 class CategoricalRepresentation(object):
     # this is a necessary hack for the buggy implementation of assertItemsEqual in python2
     # see https://stackoverflow.com/a/29690198
@@ -128,6 +127,8 @@ class CategoricalRepresentation(object):
         Constructor for representation of a categorical bin.
         :param values: list of categorical values that belong to this bin
         '''
+        if type(values) is not list:
+            raise ValueError("args for categorical bin is a list of categorical values.")
         self.values = values
 
     def __repr__(self):
@@ -142,11 +143,13 @@ class CategoricalRepresentation(object):
     def apply_to_data(self, data):
         """
         Apply the bin to data.
-        :param data: a single-column data frame
+        :param data: a pandas Series
         :return: subset of input data which belongs to this bin
         """
-        # TODO
-        pass
+        if len(self.values) == 1:
+            return data[data == self.values[0]]
+        else:
+            return data[data.isin(self.values)]
 
 
 
@@ -246,4 +249,5 @@ def _first_interval(x, n_bins):
 #------- private methods for categorical binnings-------#
 
 def _create_categorical_bins(data_as_array, n_bins):
+    #TODO
     return
