@@ -1,9 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head><meta charset="utf-8" />
-<title>ExpAn-Intro</title>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<title>ExpAn-Intro</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
 
 <style type="text/css">
@@ -13,8 +11,8 @@
 *
 */
 /*!
- * Bootstrap v3.3.6 (http://getbootstrap.com)
- * Copyright 2011-2015 Twitter, Inc.
+ * Bootstrap v3.3.7 (http://getbootstrap.com)
+ * Copyright 2011-2016 Twitter, Inc.
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
  */
 /*! normalize.css v3.0.3 | MIT License | github.com/necolas/normalize.css */
@@ -1109,7 +1107,6 @@ a:focus {
   text-decoration: underline;
 }
 a:focus {
-  outline: thin dotted;
   outline: 5px auto -webkit-focus-ring-color;
   outline-offset: -2px;
 }
@@ -2538,7 +2535,6 @@ select[size] {
 input[type="file"]:focus,
 input[type="radio"]:focus,
 input[type="checkbox"]:focus {
-  outline: thin dotted;
   outline: 5px auto -webkit-focus-ring-color;
   outline-offset: -2px;
 }
@@ -3029,7 +3025,6 @@ select[multiple].input-lg {
 .btn.focus,
 .btn:active.focus,
 .btn.active.focus {
-  outline: thin dotted;
   outline: 5px auto -webkit-focus-ring-color;
   outline-offset: -2px;
 }
@@ -8760,6 +8755,9 @@ body > #header .header-bar {
     margin-left: 10px;
   }
 }
+[dir="rtl"] #ipython_notebook {
+  float: right !important;
+}
 #noscript {
   width: auto;
   padding-top: 16px;
@@ -8962,8 +8960,14 @@ span#login_widget > .button .badge,
  *
  * Author: Jupyter Development Team
  */
+[dir="rtl"] #tabs li {
+  float: right;
+}
 ul#tabs {
   margin-bottom: 4px;
+}
+[dir="rtl"] ul#tabs {
+  margin-right: 0px;
 }
 ul#tabs a {
   padding-top: 6px;
@@ -8986,6 +8990,16 @@ ul.breadcrumb span {
 }
 .list_toolbar .tree-buttons {
   padding-top: 1px;
+}
+[dir="rtl"] .list_toolbar .tree-buttons {
+  float: left !important;
+}
+[dir="rtl"] .list_toolbar .pull-right {
+  padding-top: 1px;
+  float: left !important;
+}
+[dir="rtl"] .list_toolbar .pull-left {
+  float: right !important;
 }
 .dynamic-buttons {
   padding-top: 3px;
@@ -9122,6 +9136,9 @@ ul.breadcrumb span {
 #tree-selector {
   padding-right: 0px;
 }
+[dir="rtl"] #tree-selector a {
+  float: right;
+}
 #button-select-all {
   min-width: 50px;
 }
@@ -9211,6 +9228,9 @@ ul#new-menu {
   left: auto;
   right: 0;
 }
+[dir="rtl"] #new-menu {
+  text-align: right;
+}
 .kernel-menu-icon {
   padding-right: 12px;
   width: 24px;
@@ -9255,6 +9275,9 @@ ul#new-menu {
 }
 #running .panel-group .panel .panel-body .list_container .list_item:last-child {
   border-bottom: 0px;
+}
+[dir="rtl"] #running .col-sm-8 {
+  float: right !important;
 }
 .delete-button {
   display: none;
@@ -9551,6 +9574,7 @@ div.cell.selected.jupyter-soft-selected {
   }
 }
 div.inner_cell {
+  min-width: 0;
   /* Old browsers */
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -9571,11 +9595,6 @@ div.inner_cell {
   box-flex: 1;
   /* Modern browsers */
   flex: 1;
-}
-@-moz-document url-prefix() {
-  div.inner_cell {
-    overflow-x: hidden;
-  }
 }
 /* input_area and input_prompt must match in top border and margin for alignment */
 div.input_area {
@@ -11246,7 +11265,7 @@ div#pager .ui-resizable-handle::after {
 }
 .shortcut_key {
   display: inline-block;
-  width: 20ex;
+  width: 21ex;
   text-align: right;
   font-family: monospace;
 }
@@ -11558,6 +11577,7 @@ ul.typeahead-list > li > a {
   box-shadow: 0px 0px 12px 1px rgba(87, 87, 87, 0.2);
 }
 .terminal-app .terminal {
+  width: 100%;
   float: left;
   font-family: monospace;
   color: white;
@@ -11571,6 +11591,9 @@ ul.typeahead-list > li > a {
 .terminal-app .terminal dummy-screen {
   line-height: 1em;
   font-size: 14px;
+}
+.terminal-app .terminal .xterm-rows {
+  padding: 10px;
 }
 .terminal-app .terminal-cursor {
   color: black;
@@ -11631,8 +11654,10 @@ ul.typeahead-list > li > a {
 .highlight .mh { color: #666666 } /* Literal.Number.Hex */
 .highlight .mi { color: #666666 } /* Literal.Number.Integer */
 .highlight .mo { color: #666666 } /* Literal.Number.Oct */
+.highlight .sa { color: #BA2121 } /* Literal.String.Affix */
 .highlight .sb { color: #BA2121 } /* Literal.String.Backtick */
 .highlight .sc { color: #BA2121 } /* Literal.String.Char */
+.highlight .dl { color: #BA2121 } /* Literal.String.Delimiter */
 .highlight .sd { color: #BA2121; font-style: italic } /* Literal.String.Doc */
 .highlight .s2 { color: #BA2121 } /* Literal.String.Double */
 .highlight .se { color: #BB6622; font-weight: bold } /* Literal.String.Escape */
@@ -11643,9 +11668,11 @@ ul.typeahead-list > li > a {
 .highlight .s1 { color: #BA2121 } /* Literal.String.Single */
 .highlight .ss { color: #19177C } /* Literal.String.Symbol */
 .highlight .bp { color: #008000 } /* Name.Builtin.Pseudo */
+.highlight .fm { color: #0000FF } /* Name.Function.Magic */
 .highlight .vc { color: #19177C } /* Name.Variable.Class */
 .highlight .vg { color: #19177C } /* Name.Variable.Global */
 .highlight .vi { color: #19177C } /* Name.Variable.Instance */
+.highlight .vm { color: #19177C } /* Name.Variable.Magic */
 .highlight .il { color: #666666 } /* Literal.Number.Integer.Long */
     </style>
 <style type="text/css">
@@ -11877,17 +11904,7 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Details-of-Components">Details of Components<a class="anchor-link" href="#Details-of-Components">&#182;</a></h1><p>In this section we will go deep into the details of the components and present some examples of the usage.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="data.loaders"><code>data.loaders</code><a class="anchor-link" href="#data.loaders">&#182;</a></h2><p>Data loaders can be written as needed to handle different formats (CSV, Parquet, HDF5, etc) and different internal structures, so long as they return an <code>ExperimentData</code> object.</p>
+<h1 id="Data-loaders">Data loaders<a class="anchor-link" href="#Data-loaders">&#182;</a></h1><p>Data loaders can be written as needed to handle different formats (CSV, Parquet, HDF5, etc) and different internal structures, so long as they return an <code>ExperimentData</code> object.</p>
 <p>Currently, only a simply CSV loader (<code>data.csv_fetcher</code>) has been implemented.</p>
 <p>We'll bypass this and work with synthesized data for now:</p>
 
@@ -11899,12 +11916,12 @@ div#notebook {
 <div class="prompt input_prompt">In&nbsp;[1]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython2"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
-<span class="kn">from</span> <span class="nn">expan.core.util</span> <span class="kn">import</span> <span class="n">generate_random_data</span>
-<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">join</span><span class="p">,</span> <span class="n">realpath</span>
+<span class="kn">from</span> <span class="nn">expan.core.util</span> <span class="k">import</span> <span class="n">generate_random_data</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">join</span><span class="p">,</span> <span class="n">realpath</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="s1">&#39;tests&#39;</span><span class="p">))</span>
 
 <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -11919,7 +11936,9 @@ div#notebook {
 <div class="output">
 
 
-<div class="output_area"><div class="prompt"></div>
+<div class="output_area">
+<div class="prompt"></div>
+
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>ExpAn core init: v0.6.1
 </pre>
@@ -11935,7 +11954,7 @@ div#notebook {
 <div class="prompt input_prompt">In&nbsp;[2]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython2"><pre><span></span><span class="n">data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 
 </div>
@@ -11946,23 +11965,12 @@ div#notebook {
 <div class="output">
 
 
-<div class="output_area"><div class="prompt output_prompt">Out[2]:</div>
+<div class="output_area">
+<div class="prompt output_prompt">Out[2]:</div>
+
 
 <div class="output_html rendered_html output_subarea output_execute_result">
 <div>
-<style>
-    .dataframe thead tr:only-child th {
-        text-align: right;
-    }
-
-    .dataframe thead th {
-        text-align: left;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-</style>
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
@@ -12049,7 +12057,7 @@ div#notebook {
 <div class="prompt input_prompt">In&nbsp;[3]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython2"><pre><span></span><span class="n">metadata</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">metadata</span>
 </pre></div>
 
 </div>
@@ -12060,7 +12068,9 @@ div#notebook {
 <div class="output">
 
 
-<div class="output_area"><div class="prompt output_prompt">Out[3]:</div>
+<div class="output_area">
+<div class="prompt output_prompt">Out[3]:</div>
+
 
 
 <div class="output_text output_subarea output_execute_result">
@@ -12080,17 +12090,7 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="core.experiment.Experiment">core.experiment.Experiment<a class="anchor-link" href="#core.experiment.Experiment">&#182;</a></h2><p>This class provides methods for the analysis of experiment data.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Constructing-Experiment">Constructing <code>Experiment</code><a class="anchor-link" href="#Constructing-Experiment">&#182;</a></h3><p>The <code>Experiment</code> class has the following parameters to construct an experiment:</p>
+<h1 id="Constructing-Experiment">Constructing <code>Experiment</code><a class="anchor-link" href="#Constructing-Experiment">&#182;</a></h1><p>The <code>Experiment</code> class has the following parameters to construct an experiment:</p>
 <table>
 <thead><tr>
 <th>Parameter</th>
@@ -12172,7 +12172,7 @@ div#notebook {
 <div class="prompt input_prompt">In&nbsp;[4]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython2"><pre><span></span><span class="kn">import</span> <span class="nn">expan</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">expan</span>
 
 <span class="n">exp</span> <span class="o">=</span> <span class="n">expan</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">Experiment</span><span class="p">(</span><span class="n">control_variant_name</span><span class="o">=</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> 
                                   <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> 
@@ -12191,7 +12191,7 @@ div#notebook {
 <div class="prompt input_prompt">In&nbsp;[5]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython2"><pre><span></span><span class="k">print</span><span class="p">(</span><span class="n">exp</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">exp</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12202,9 +12202,11 @@ div#notebook {
 <div class="output">
 
 
-<div class="output_area"><div class="prompt"></div>
+<div class="output_area">
+<div class="prompt"></div>
+
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Experiment &#34;random_data_generation&#34; with 1 derived kpis, 1 report kpis, 10000 entities and 2 variants: *A*, B
+<pre>Experiment &#34;random_data_generation&#34; with 1 derived kpis, 1 report kpis, 10000 entities and 2 variants: B, *A*
 </pre>
 </div>
 </div>
@@ -12228,7 +12230,7 @@ div#notebook {
 <div class="prompt input_prompt">In&nbsp;[6]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython2"><pre><span></span><span class="n">exp</span> <span class="o">=</span> <span class="n">expan</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">Experiment</span><span class="p">(</span><span class="n">control_variant_name</span><span class="o">=</span><span class="s1">&#39;A&#39;</span><span class="p">,</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">exp</span> <span class="o">=</span> <span class="n">expan</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">Experiment</span><span class="p">(</span><span class="n">control_variant_name</span><span class="o">=</span><span class="s1">&#39;A&#39;</span><span class="p">,</span>
                                   <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> 
                                   <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span>
                                   <span class="n">report_kpi_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;normal_shifted&#39;</span><span class="p">,</span> <span class="s1">&#39;normal_same&#39;</span><span class="p">],</span>
@@ -12243,7 +12245,9 @@ div#notebook {
 <div class="output">
 
 
-<div class="output_area"><div class="prompt"></div>
+<div class="output_area">
+<div class="prompt"></div>
+
 <div class="output_subarea output_text output_error">
 <pre>
 <span class="ansi-red-fg">---------------------------------------------------------------------------</span>
@@ -12253,12 +12257,12 @@ div#notebook {
 <span class="ansi-green-intense-fg ansi-bold">      4</span>                                   report_kpi_names<span class="ansi-blue-fg">=</span><span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">&#39;normal_shifted&#39;</span><span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">&#39;normal_same&#39;</span><span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">,</span>
 <span class="ansi-green-fg">----&gt; 5</span><span class="ansi-red-fg">                                   derived_kpis=[{&#39;name&#39;:&#39;derived_kpi_1&#39;}])
 </span>
-<span class="ansi-green-fg">/Users/ddedik/Documents/Zalando/new_expan/expan/expan/core/experiment.pyc</span> in <span class="ansi-cyan-fg">__init__</span><span class="ansi-blue-fg">(self, control_variant_name, data, metadata, report_kpi_names, derived_kpis)</span>
-<span class="ansi-green-intense-fg ansi-bold">     52</span>                 <span class="ansi-green-fg">raise</span> TypeError<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">&#39;Derived kpis should be an array of dictionaries&#39;</span><span class="ansi-blue-fg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">     53</span>             <span class="ansi-green-fg">if</span> <span class="ansi-blue-fg">&#39;formula&#39;</span> <span class="ansi-green-fg">not</span> <span class="ansi-green-fg">in</span> i<span class="ansi-blue-fg">:</span>
-<span class="ansi-green-fg">---&gt; 54</span><span class="ansi-red-fg">                 </span><span class="ansi-green-fg">raise</span> KeyError<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">&#39;Dictionary should have key &#34;formula&#34;&#39;</span><span class="ansi-blue-fg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">     55</span>             <span class="ansi-green-fg">if</span> <span class="ansi-blue-fg">&#39;name&#39;</span> <span class="ansi-green-fg">not</span> <span class="ansi-green-fg">in</span> i<span class="ansi-blue-fg">:</span>
-<span class="ansi-green-intense-fg ansi-bold">     56</span>                 <span class="ansi-green-fg">raise</span> KeyError<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">&#39;Dictionary should have key &#34;name&#34;&#39;</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-fg">/Users/shuang/ZalandoWorkSpace/real_expan/expan/expan/core/experiment.py</span> in <span class="ansi-cyan-fg">__init__</span><span class="ansi-blue-fg">(self, control_variant_name, data, metadata, report_kpi_names, derived_kpis)</span>
+<span class="ansi-green-intense-fg ansi-bold">     55</span>                 <span class="ansi-green-fg">raise</span> TypeError<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">&#39;Derived kpis should be an array of dictionaries&#39;</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">     56</span>             <span class="ansi-green-fg">if</span> <span class="ansi-blue-fg">&#39;formula&#39;</span> <span class="ansi-green-fg">not</span> <span class="ansi-green-fg">in</span> i<span class="ansi-blue-fg">:</span>
+<span class="ansi-green-fg">---&gt; 57</span><span class="ansi-red-fg">                 </span><span class="ansi-green-fg">raise</span> KeyError<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">&#39;Dictionary should have key &#34;formula&#34;&#39;</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">     58</span>             <span class="ansi-green-fg">if</span> <span class="ansi-blue-fg">&#39;name&#39;</span> <span class="ansi-green-fg">not</span> <span class="ansi-green-fg">in</span> i<span class="ansi-blue-fg">:</span>
+<span class="ansi-green-intense-fg ansi-bold">     59</span>                 <span class="ansi-green-fg">raise</span> KeyError<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">&#39;Dictionary should have key &#34;name&#34;&#39;</span><span class="ansi-blue-fg">)</span>
 
 <span class="ansi-red-fg">KeyError</span>: &#39;Dictionary should have key &#34;formula&#34;&#39;</pre>
 </div>
@@ -12283,8 +12287,8 @@ div#notebook {
 <div class="prompt input_prompt">In&nbsp;[7]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython2"><pre><span></span><span class="k">print</span><span class="p">(</span><span class="s1">&#39;Variants: {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">variant_names</span><span class="p">))</span>
-<span class="k">print</span><span class="p">(</span><span class="s1">&#39;Control or baseline variant: {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">control_variant_name</span><span class="p">))</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Variants: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">variant_names</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Control or baseline variant: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">control_variant_name</span><span class="p">))</span>
 </pre></div>
 
 </div>
@@ -12295,9 +12299,11 @@ div#notebook {
 <div class="output">
 
 
-<div class="output_area"><div class="prompt"></div>
+<div class="output_area">
+<div class="prompt"></div>
+
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Variants: set([&#39;A&#39;, &#39;B&#39;])
+<pre>Variants: {&#39;B&#39;, &#39;A&#39;}
 Control or baseline variant: A
 </pre>
 </div>
@@ -12321,7 +12327,7 @@ Control or baseline variant: A
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Let's-start-with-a-single-DeltaKPI-of-orders:">Let's start with a single DeltaKPI of orders:<a class="anchor-link" href="#Let's-start-with-a-single-DeltaKPI-of-orders:">&#182;</a></h2>
+<h3 id="Let's-start-with-a-single-DeltaKPI-of-orders:">Let's start with a single DeltaKPI of orders:<a class="anchor-link" href="#Let's-start-with-a-single-DeltaKPI-of-orders:">&#182;</a></h3>
 </div>
 </div>
 </div>
@@ -12330,7 +12336,7 @@ Control or baseline variant: A
 <div class="prompt input_prompt">In&nbsp;[8]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython2"><pre><span></span><span class="kn">import</span> <span class="nn">warnings</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">import</span> <span class="nn">json</span>
 
 <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s1">&#39;once&#39;</span><span class="p">,</span> <span class="ne">UserWarning</span><span class="p">)</span>
@@ -12346,8 +12352,8 @@ Control or baseline variant: A
 <div class="prompt input_prompt">In&nbsp;[9]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython2"><pre><span></span><span class="n">res_delta</span> <span class="o">=</span> <span class="n">exp</span><span class="o">.</span><span class="n">delta</span><span class="p">()</span>
-<span class="k">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">res_delta</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">res_delta</span> <span class="o">=</span> <span class="n">exp</span><span class="o">.</span><span class="n">delta</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">res_delta</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
 </pre></div>
 
 </div>
@@ -12358,61 +12364,63 @@ Control or baseline variant: A
 <div class="output">
 
 
-<div class="output_area"><div class="prompt"></div>
+<div class="output_area">
+<div class="prompt"></div>
+
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>{
-  &#34;kpis&#34;: [
-    {
-      &#34;variants&#34;: [
-        {
-          &#34;delta_statistics&#34;: {
-            &#34;treatment_mean&#34;: -4.572524000045541, 
-            &#34;control_sample_size&#34;: 6108, 
-            &#34;treatment_sample_size&#34;: 6108, 
-            &#34;delta&#34;: 0.0, 
-            &#34;confidence_interval&#34;: [
-              {
-                &#34;percentile&#34;: 2.5, 
-                &#34;value&#34;: -6.445256794169719
-              }, 
-              {
-                &#34;percentile&#34;: 97.5, 
-                &#34;value&#34;: 6.445256794169717
-              }
-            ], 
-            &#34;control_mean&#34;: -4.572524000045541
-          }, 
-          &#34;name&#34;: &#34;A&#34;
-        }, 
-        {
-          &#34;delta_statistics&#34;: {
-            &#34;treatment_mean&#34;: -0.007948584804651233, 
-            &#34;control_sample_size&#34;: 6108, 
-            &#34;treatment_sample_size&#34;: 3892, 
-            &#34;delta&#34;: 4.564575415240889, 
-            &#34;confidence_interval&#34;: [
-              {
-                &#34;percentile&#34;: 2.5, 
-                &#34;value&#34;: -1.1450816040987393
-              }, 
-              {
-                &#34;percentile&#34;: 97.5, 
-                &#34;value&#34;: 10.274232434580517
-              }
-            ], 
-            &#34;control_mean&#34;: -4.572524000045541
-          }, 
-          &#34;name&#34;: &#34;B&#34;
-        }
-      ], 
-      &#34;name&#34;: &#34;derived_kpi_one&#34;
-    }
-  ], 
-  &#34;control_variant&#34;: &#34;A&#34;, 
-  &#34;errors&#34;: [], 
-  &#34;expan_version&#34;: &#34;0.6.1&#34;, 
   &#34;warnings&#34;: [
     &#34;kpi: derived_kpi_one, variant: B: Sample variances differ too much to assume that population variances are equal.&#34;
+  ],
+  &#34;errors&#34;: [],
+  &#34;expan_version&#34;: &#34;0.6.1&#34;,
+  &#34;control_variant&#34;: &#34;A&#34;,
+  &#34;kpis&#34;: [
+    {
+      &#34;name&#34;: &#34;derived_kpi_one&#34;,
+      &#34;variants&#34;: [
+        {
+          &#34;name&#34;: &#34;B&#34;,
+          &#34;delta_statistics&#34;: {
+            &#34;delta&#34;: 4.564575415240889,
+            &#34;confidence_interval&#34;: [
+              {
+                &#34;percentile&#34;: 2.5,
+                &#34;value&#34;: -1.1450816040987393
+              },
+              {
+                &#34;percentile&#34;: 97.5,
+                &#34;value&#34;: 10.274232434580517
+              }
+            ],
+            &#34;treatment_sample_size&#34;: 3892,
+            &#34;control_sample_size&#34;: 6108,
+            &#34;treatment_mean&#34;: -0.007948584804651233,
+            &#34;control_mean&#34;: -4.572524000045541
+          }
+        },
+        {
+          &#34;name&#34;: &#34;A&#34;,
+          &#34;delta_statistics&#34;: {
+            &#34;delta&#34;: 0.0,
+            &#34;confidence_interval&#34;: [
+              {
+                &#34;percentile&#34;: 2.5,
+                &#34;value&#34;: -6.445256794169719
+              },
+              {
+                &#34;percentile&#34;: 97.5,
+                &#34;value&#34;: 6.445256794169717
+              }
+            ],
+            &#34;treatment_sample_size&#34;: 6108,
+            &#34;control_sample_size&#34;: 6108,
+            &#34;treatment_mean&#34;: -4.572524000045541,
+            &#34;control_mean&#34;: -4.572524000045541
+          }
+        }
+      ]
+    }
   ]
 }
 </pre>
@@ -12545,7 +12553,7 @@ Control or baseline variant: A
 <div class="prompt input_prompt">In&nbsp;[10]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython2"><pre><span></span><span class="n">delta_freq</span> <span class="o">=</span> <span class="n">exp</span><span class="o">.</span><span class="n">delta</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;fixed_horizon&#39;</span><span class="p">,</span> <span class="n">assume_normal</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">percentiles</span><span class="o">=</span><span class="p">[</span><span class="mf">2.5</span><span class="p">,</span> <span class="mf">99.5</span><span class="p">])</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">delta_freq</span> <span class="o">=</span> <span class="n">exp</span><span class="o">.</span><span class="n">delta</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;fixed_horizon&#39;</span><span class="p">,</span> <span class="n">assume_normal</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">percentiles</span><span class="o">=</span><span class="p">[</span><span class="mf">2.5</span><span class="p">,</span> <span class="mf">99.5</span><span class="p">])</span>
 </pre></div>
 
 </div>
@@ -12558,7 +12566,7 @@ Control or baseline variant: A
 <div class="prompt input_prompt">In&nbsp;[11]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython2"><pre><span></span><span class="n">delta_g_s</span> <span class="o">=</span> <span class="n">exp</span><span class="o">.</span><span class="n">delta</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;group_sequential&#39;</span><span class="p">,</span> <span class="n">estimated_sample_size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">delta_g_s</span> <span class="o">=</span> <span class="n">exp</span><span class="o">.</span><span class="n">delta</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;group_sequential&#39;</span><span class="p">,</span> <span class="n">estimated_sample_size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12571,20 +12579,7 @@ Control or baseline variant: A
 <div class="prompt input_prompt">In&nbsp;[12]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython2"><pre><span></span><span class="n">delta_bayes_factor</span> <span class="o">=</span> <span class="n">exp</span><span class="o">.</span><span class="n">delta</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;bayes_factor&#39;</span><span class="p">,</span> <span class="n">distribution</span><span class="o">=</span><span class="s1">&#39;normal&#39;</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[13]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython2"><pre><span></span><span class="k">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">delta_bayes_factor</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">delta_bayes_factor</span> <span class="o">=</span> <span class="n">exp</span><span class="o">.</span><span class="n">delta</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;bayes_factor&#39;</span><span class="p">,</span> <span class="n">distribution</span><span class="o">=</span><span class="s1">&#39;normal&#39;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12595,64 +12590,95 @@ Control or baseline variant: A
 <div class="output">
 
 
-<div class="output_area"><div class="prompt"></div>
+<div class="output_area">
+<div class="prompt"></div>
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>INFO:pystan:COMPILING THE C++ CODE FOR MODEL anon_model_d87af3570eba8e4d47ba3c301c4f7a1d NOW.
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[13]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">delta_bayes_factor</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+<div class="prompt"></div>
+
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>{
+  &#34;warnings&#34;: [],
+  &#34;errors&#34;: [],
+  &#34;expan_version&#34;: &#34;0.6.1&#34;,
+  &#34;control_variant&#34;: &#34;A&#34;,
   &#34;kpis&#34;: [
     {
+      &#34;name&#34;: &#34;derived_kpi_one&#34;,
       &#34;variants&#34;: [
         {
+          &#34;name&#34;: &#34;B&#34;,
           &#34;delta_statistics&#34;: {
-            &#34;treatment_sample_size&#34;: 6108, 
-            &#34;control_sample_size&#34;: 6108, 
-            &#34;treatment_mean&#34;: -4.572524000045541, 
-            &#34;delta&#34;: 0.0, 
-            &#34;number_of_iterations&#34;: 25000, 
+            &#34;stop&#34;: true,
+            &#34;delta&#34;: 4.564575415240889,
             &#34;confidence_interval&#34;: [
               {
-                &#34;percentile&#34;: 2.5, 
-                &#34;value&#34;: -8.396765530428699
-              }, 
+                &#34;percentile&#34;: 2.5,
+                &#34;value&#34;: -2.8098960371617037
+              },
               {
-                &#34;percentile&#34;: 97.5, 
-                &#34;value&#34;: 3.5794735964894677
+                &#34;percentile&#34;: 97.5,
+                &#34;value&#34;: 8.477453471811664
               }
-            ], 
-            &#34;stop&#34;: true, 
-            &#34;control_mean&#34;: -4.572524000045541
-          }, 
-          &#34;name&#34;: &#34;A&#34;
-        }, 
+            ],
+            &#34;treatment_sample_size&#34;: 3892,
+            &#34;control_sample_size&#34;: 6108,
+            &#34;treatment_mean&#34;: -0.007948584804651233,
+            &#34;control_mean&#34;: -4.572524000045541,
+            &#34;number_of_iterations&#34;: 25000
+          }
+        },
         {
+          &#34;name&#34;: &#34;A&#34;,
           &#34;delta_statistics&#34;: {
-            &#34;treatment_sample_size&#34;: 3892, 
-            &#34;control_sample_size&#34;: 6108, 
-            &#34;treatment_mean&#34;: -0.007948584804651233, 
-            &#34;delta&#34;: 4.564575415240889, 
-            &#34;number_of_iterations&#34;: 25000, 
+            &#34;stop&#34;: true,
+            &#34;delta&#34;: 0.0,
             &#34;confidence_interval&#34;: [
               {
-                &#34;percentile&#34;: 2.5, 
-                &#34;value&#34;: -2.8506067127900847
-              }, 
+                &#34;percentile&#34;: 2.5,
+                &#34;value&#34;: -8.453673832823084
+              },
               {
-                &#34;percentile&#34;: 97.5, 
-                &#34;value&#34;: 8.497896742163277
+                &#34;percentile&#34;: 97.5,
+                &#34;value&#34;: 3.450690568961913
               }
-            ], 
-            &#34;stop&#34;: true, 
-            &#34;control_mean&#34;: -4.572524000045541
-          }, 
-          &#34;name&#34;: &#34;B&#34;
+            ],
+            &#34;treatment_sample_size&#34;: 6108,
+            &#34;control_sample_size&#34;: 6108,
+            &#34;treatment_mean&#34;: -4.572524000045541,
+            &#34;control_mean&#34;: -4.572524000045541,
+            &#34;number_of_iterations&#34;: 25000
+          }
         }
-      ], 
-      &#34;name&#34;: &#34;derived_kpi_one&#34;
+      ]
     }
-  ], 
-  &#34;control_variant&#34;: &#34;A&#34;, 
-  &#34;errors&#34;: [], 
-  &#34;expan_version&#34;: &#34;0.6.1&#34;, 
-  &#34;warnings&#34;: []
+  ]
 }
 </pre>
 </div>
@@ -12667,7 +12693,7 @@ Control or baseline variant: A
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Interpreting-the-output">Interpreting the output<a class="anchor-link" href="#Interpreting-the-output">&#182;</a></h3><table>
+<h1 id="Interpreting-the-output">Interpreting the output<a class="anchor-link" href="#Interpreting-the-output">&#182;</a></h1><table>
 <thead><tr>
 <th>Metric</th>
 <th>Description</th>
@@ -12717,7 +12743,7 @@ Control or baseline variant: A
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Using-Bootstrapping:">Using Bootstrapping:<a class="anchor-link" href="#Using-Bootstrapping:">&#182;</a></h2><p>We implement boostrapping for data which is not normally distributed.</p>
+<h1 id="Using-Bootstrapping:">Using Bootstrapping:<a class="anchor-link" href="#Using-Bootstrapping:">&#182;</a></h1><p>We implement boostrapping for data which is not normally distributed.</p>
 <p>We switch the flag 'assume_normal' to False for the <code>delta</code> function:</p>
 
 </div>
@@ -12728,8 +12754,8 @@ Control or baseline variant: A
 <div class="prompt input_prompt">In&nbsp;[14]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython2"><pre><span></span><span class="n">res_delta</span> <span class="o">=</span> <span class="n">exp</span><span class="o">.</span><span class="n">delta</span><span class="p">(</span><span class="n">assume_normal</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">res_delta</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">res_delta</span> <span class="o">=</span> <span class="n">exp</span><span class="o">.</span><span class="n">delta</span><span class="p">(</span><span class="n">assume_normal</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">res_delta</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
 </pre></div>
 
 </div>
@@ -12740,60 +12766,62 @@ Control or baseline variant: A
 <div class="output">
 
 
-<div class="output_area"><div class="prompt"></div>
+<div class="output_area">
+<div class="prompt"></div>
+
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>{
+  &#34;warnings&#34;: [],
+  &#34;errors&#34;: [],
+  &#34;expan_version&#34;: &#34;0.6.1&#34;,
+  &#34;control_variant&#34;: &#34;A&#34;,
   &#34;kpis&#34;: [
     {
+      &#34;name&#34;: &#34;derived_kpi_one&#34;,
       &#34;variants&#34;: [
         {
+          &#34;name&#34;: &#34;B&#34;,
           &#34;delta_statistics&#34;: {
-            &#34;treatment_mean&#34;: -4.572524000045541, 
-            &#34;control_sample_size&#34;: 6108, 
-            &#34;treatment_sample_size&#34;: 6108, 
-            &#34;delta&#34;: 0.0, 
+            &#34;delta&#34;: 4.564575415240889,
             &#34;confidence_interval&#34;: [
               {
-                &#34;percentile&#34;: 2.5, 
-                &#34;value&#34;: -6.451719231491042
-              }, 
+                &#34;percentile&#34;: 2.5,
+                &#34;value&#34;: -0.0624543841054832
+              },
               {
-                &#34;percentile&#34;: 97.5, 
-                &#34;value&#34;: 6.412118814781721
+                &#34;percentile&#34;: 97.5,
+                &#34;value&#34;: 9.030153301148799
               }
-            ], 
+            ],
+            &#34;treatment_sample_size&#34;: 3892,
+            &#34;control_sample_size&#34;: 6108,
+            &#34;treatment_mean&#34;: -0.007948584804651233,
             &#34;control_mean&#34;: -4.572524000045541
-          }, 
-          &#34;name&#34;: &#34;A&#34;
-        }, 
+          }
+        },
         {
+          &#34;name&#34;: &#34;A&#34;,
           &#34;delta_statistics&#34;: {
-            &#34;treatment_mean&#34;: -0.007948584804651233, 
-            &#34;control_sample_size&#34;: 6108, 
-            &#34;treatment_sample_size&#34;: 3892, 
-            &#34;delta&#34;: 4.564575415240889, 
+            &#34;delta&#34;: 0.0,
             &#34;confidence_interval&#34;: [
               {
-                &#34;percentile&#34;: 2.5, 
-                &#34;value&#34;: 0.06194124312058608
-              }, 
+                &#34;percentile&#34;: 2.5,
+                &#34;value&#34;: -6.45971989656208
+              },
               {
-                &#34;percentile&#34;: 97.5, 
-                &#34;value&#34;: 9.032079819101977
+                &#34;percentile&#34;: 97.5,
+                &#34;value&#34;: 6.5289914623406125
               }
-            ], 
+            ],
+            &#34;treatment_sample_size&#34;: 6108,
+            &#34;control_sample_size&#34;: 6108,
+            &#34;treatment_mean&#34;: -4.572524000045541,
             &#34;control_mean&#34;: -4.572524000045541
-          }, 
-          &#34;name&#34;: &#34;B&#34;
+          }
         }
-      ], 
-      &#34;name&#34;: &#34;derived_kpi_one&#34;
+      ]
     }
-  ], 
-  &#34;control_variant&#34;: &#34;A&#34;, 
-  &#34;errors&#34;: [], 
-  &#34;expan_version&#34;: &#34;0.6.1&#34;, 
-  &#34;warnings&#34;: []
+  ]
 }
 </pre>
 </div>
@@ -12818,10 +12846,30 @@ Control or baseline variant: A
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="core.binning">core.binning<a class="anchor-link" href="#core.binning">&#182;</a></h2><p>Defines a Binning class that represents a particular binning of a data, such that the same binning can then be applied to unseen data.</p>
-<p>Numerical and Categorical Binnings are defined.</p>
-<p>Tries to handle skewed data.</p>
+<h1 id="Binning">Binning<a class="anchor-link" href="#Binning">&#182;</a></h1><p>You can use the Binning module to group data into subsets, i.e., assign each data into a corresponding <code>Bin</code> object. We will explain respectively in the next few sections.</p>
 
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Create-bin-object-directly">Create bin object directly<a class="anchor-link" href="#Create-bin-object-directly">&#182;</a></h2><p>If you already know the set of bins you want to put data into. You can initialize a <code>bin</code> object directly.</p>
+<p>The first argument is the id of the bin. This might not be useful for your application but serves as a technical identifier.
+The second argument is the type of the bin. This can either be "numerical" or "categorical". Depending on the type, you should pass coresponding representation object as the third argument.</p>
+<p>We will explain the representation in next section.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Numerical-representation">Numerical representation<a class="anchor-link" href="#Numerical-representation">&#182;</a></h2>
 </div>
 </div>
 </div>
@@ -12830,35 +12878,11 @@ Control or baseline variant: A
 <div class="prompt input_prompt">In&nbsp;[15]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython2"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">exp</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">exp</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">variant</span> <span class="o">==</span> <span class="s1">&#39;A&#39;</span><span class="p">]</span>
-<span class="n">b</span> <span class="o">=</span> <span class="n">exp</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">exp</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">variant</span> <span class="o">==</span> <span class="s1">&#39;B&#39;</span><span class="p">]</span>
-</pre></div>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">expan.core.binning</span> <span class="k">import</span> <span class="o">*</span>
 
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Now-we-create-the-binning">Now we create the binning<a class="anchor-link" href="#Now-we-create-the-binning">&#182;</a></h3><p>This simply determines the thresholds appropriate for creating the requested number of bins...</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[16]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython2"><pre><span></span><span class="kn">import</span> <span class="nn">expan.core.binning</span> <span class="kn">as</span> <span class="nn">binning</span>
-
-<span class="n">bins</span> <span class="o">=</span> <span class="n">binning</span><span class="o">.</span><span class="n">create_binning</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span><span class="s1">&#39;treatment_start_time&#39;</span><span class="p">])</span>
-
-<span class="k">print</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span>
+<span class="c1"># numerical bin</span>
+<span class="c1"># create a numerical bin from value 0 (inclusive) to 10 (exclusive).</span>
+<span class="n">Bin</span><span class="p">(</span><span class="s2">&quot;numerical&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12869,17 +12893,122 @@ Control or baseline variant: A
 <div class="output">
 
 
-<div class="output_area"><div class="prompt"></div>
+<div class="output_area">
+<div class="prompt output_prompt">Out[15]:</div>
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>
+bin: [0, 10)</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Categorical-representation">Categorical representation<a class="anchor-link" href="#Categorical-representation">&#182;</a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[16]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># categorical bin</span>
+<span class="c1"># create a categorical bin which contains categories of &quot;a&quot; and &quot;b&quot;.</span>
+<span class="n">Bin</span><span class="p">(</span><span class="s2">&quot;categorical&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">])</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+<div class="prompt output_prompt">Out[16]:</div>
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>
+bin: [&#39;a&#39;, &#39;b&#39;]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Create-bin-object-automatically">Create bin object automatically<a class="anchor-link" href="#Create-bin-object-automatically">&#182;</a></h2><p>Given a number of bins, you can also create a list of bins from data by using the method <code>create_bins(data, n_bins)</code>.</p>
+<p>It will create <code>n_bins</code> Bin ojbects, by which to separate the <code>data</code> as equally as possible. This method will also automatically detects numerical or categorical data, and creates corresponding bin representations.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[17]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data1</span> <span class="o">=</span> <span class="n">exp</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">exp</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">variant</span> <span class="o">==</span> <span class="s1">&#39;A&#39;</span><span class="p">]</span>
+<span class="n">data2</span> <span class="o">=</span> <span class="n">exp</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">exp</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">variant</span> <span class="o">==</span> <span class="s1">&#39;B&#39;</span><span class="p">]</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[18]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">n_bins</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">create_bins</span><span class="p">(</span><span class="n">data1</span><span class="o">.</span><span class="n">normal_same</span><span class="p">,</span> <span class="n">n_bins</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+<div class="prompt"></div>
+
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>NumericalBinning with 8 bins:
- 0: [0.0,1.0)
- 1: [1.0,2.0)
- 2: [2.0,3.0)
- 3: [3.0,4.0)
- 4: [4.0,5.0)
- 5: [5.0,6.0)
- 6: [6.0,8.0)
- 7: [8.0,9.0]
+<pre>[
+bin: [-3.83665554846, -1.25906491145), 
+bin: [-1.25906491145, -0.804751813719), 
+bin: [-0.804751813719, -0.489466995342), 
+bin: [-0.489466995342, -0.226662203724), 
+bin: [-0.226662203724, 0.0239463824493), 
+bin: [0.0239463824493, 0.276994331119), 
+bin: [0.276994331119, 0.551060124216), 
+bin: [0.551060124216, 0.868798338306), 
+bin: [0.868798338306, 1.30062540106), 
+bin: [1.30062540106, 4.47908425103]]
 </pre>
 </div>
 </div>
@@ -12893,282 +13022,9 @@ Control or baseline variant: A
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="We-can-apply-this-binning-to-the-same-data:">We can <em>apply</em> this binning to the same data:<a class="anchor-link" href="#We-can-apply-this-binning-to-the-same-data:">&#182;</a></h3>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[17]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython2"><pre><span></span><span class="n">a_bins</span> <span class="o">=</span> <span class="n">bins</span><span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">treatment_start_time</span><span class="p">)</span>
-
-<span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">a_bins</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt output_prompt">Out[17]:</div>
-
-<div class="output_html rendered_html output_subarea output_execute_result">
-<div>
-<style>
-    .dataframe thead tr:only-child th {
-        text-align: right;
-    }
-
-    .dataframe thead th {
-        text-align: left;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>0</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>[6.0,8.0)</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>[4.0,5.0)</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>[4.0,5.0)</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>[3.0,4.0)</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>[2.0,3.0)</td>
-    </tr>
-    <tr>
-      <th>5</th>
-      <td>[8.0,9.0]</td>
-    </tr>
-    <tr>
-      <th>6</th>
-      <td>[0.0,1.0)</td>
-    </tr>
-    <tr>
-      <th>7</th>
-      <td>[0.0,1.0)</td>
-    </tr>
-    <tr>
-      <th>8</th>
-      <td>[6.0,8.0)</td>
-    </tr>
-    <tr>
-      <th>9</th>
-      <td>[4.0,5.0)</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="And-we-can-apply-it-to-different-data:">And we can <em>apply</em> it to different data:<a class="anchor-link" href="#And-we-can-apply-it-to-different-data:">&#182;</a></h3>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[18]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython2"><pre><span></span><span class="n">b_bins</span> <span class="o">=</span> <span class="n">bins</span><span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">treatment_start_time</span><span class="p">)</span>
-
-<span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">b_bins</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt output_prompt">Out[18]:</div>
-
-<div class="output_html rendered_html output_subarea output_execute_result">
-<div>
-<style>
-    .dataframe thead tr:only-child th {
-        text-align: right;
-    }
-
-    .dataframe thead th {
-        text-align: left;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>0</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>[3.0,4.0)</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>[1.0,2.0)</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>[4.0,5.0)</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>[8.0,9.0]</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>[8.0,9.0]</td>
-    </tr>
-    <tr>
-      <th>5</th>
-      <td>[5.0,6.0)</td>
-    </tr>
-    <tr>
-      <th>6</th>
-      <td>[6.0,8.0)</td>
-    </tr>
-    <tr>
-      <th>7</th>
-      <td>[5.0,6.0)</td>
-    </tr>
-    <tr>
-      <th>8</th>
-      <td>[8.0,9.0]</td>
-    </tr>
-    <tr>
-      <th>9</th>
-      <td>[8.0,9.0]</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Note that there is a hidden 'catch-all' bin...</p>
-<p>This is implemented as the last entry in the arrays, making indexing very easy: an unknown bin is always -1.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[19]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython2"><pre><span></span><span class="n">bins</span><span class="o">.</span><span class="n">uppers</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt output_prompt">Out[19]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>array([ 1.,  2.,  3.,  4.,  5.,  6.,  8.,  9.])</pre>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[20]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython2"><pre><span></span><span class="n">bins</span><span class="o">.</span><span class="n">_uppers</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt output_prompt">Out[20]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>array([  1.,   2.,   3.,   4.,   5.,   6.,   8.,   9.,  nan])</pre>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Bin-labels-can-be-arbitrarily-formatted:">Bin labels can be arbitrarily formatted:<a class="anchor-link" href="#Bin-labels-can-be-arbitrarily-formatted:">&#182;</a></h3><p>Without running the binning algorithm on the data again.</p>
+<h2 id="Assign-data-to-bins">Assign data to bins<a class="anchor-link" href="#Assign-data-to-bins">&#182;</a></h2><p>We can use the method <code>apply(data):</code> of the <code>Bin</code> object to assign data to one of the given bins.</p>
+<p>This method will return a subset of input data which belongs to this bin.
+It will return <code>None</code> if there is no data matched for this bin.</p>
 
 </div>
 </div>
@@ -13178,7 +13034,9 @@ Control or baseline variant: A
 <div class="prompt input_prompt">In&nbsp;[21]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython2"><pre><span></span><span class="k">print</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">a_bin</span> <span class="o">=</span> <span class="n">Bin</span><span class="p">(</span><span class="s2">&quot;numerical&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;applying bin to data in variant A:&quot;</span><span class="p">)</span>
+<span class="n">a_bin</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">data1</span><span class="o">.</span><span class="n">normal_same</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -13189,19 +13047,85 @@ Control or baseline variant: A
 <div class="output">
 
 
-<div class="output_area"><div class="prompt"></div>
+<div class="output_area">
+<div class="prompt"></div>
+
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>NumericalBinning with 8 bins:
- 0: [0.0,1.0)
- 1: [1.0,2.0)
- 2: [2.0,3.0)
- 3: [3.0,4.0)
- 4: [4.0,5.0)
- 5: [5.0,6.0)
- 6: [6.0,8.0)
- 7: [8.0,9.0]
+<pre>applying bin to data in variant A:
 </pre>
 </div>
+</div>
+
+<div class="output_area">
+<div class="prompt output_prompt">Out[21]:</div>
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>4       1.112634
+6       0.085595
+10      0.335054
+13      0.542203
+15      0.002232
+19      0.467690
+21      1.171102
+23      1.289203
+27      0.141980
+28      0.313723
+31      1.345935
+37      2.418778
+41      0.288028
+44      0.411566
+46      1.120967
+47      0.805575
+48      0.975823
+49      0.008858
+54      1.352039
+57      2.159121
+58      0.091315
+61      1.637082
+63      0.735269
+66      1.030250
+71      0.644690
+77      0.723038
+78      0.085513
+83      1.889279
+84      0.238171
+89      0.580568
+          ...   
+9873    0.030269
+9875    0.863606
+9876    0.524865
+9880    0.008274
+9891    0.395712
+9900    1.168769
+9901    0.055230
+9903    0.192369
+9908    0.010693
+9909    0.354407
+9910    0.853060
+9914    0.492523
+9918    0.502002
+9924    1.096724
+9925    0.688108
+9934    0.367047
+9935    0.279812
+9936    0.445043
+9945    0.876760
+9948    0.261577
+9954    1.601119
+9955    1.797017
+9959    0.542985
+9969    0.206816
+9973    1.589447
+9980    0.130357
+9982    0.377618
+9985    0.193655
+9986    0.055740
+9987    0.664763
+Name: normal_same, dtype: float64</pre>
+</div>
+
 </div>
 
 </div>
@@ -13213,7 +13137,8 @@ Control or baseline variant: A
 <div class="prompt input_prompt">In&nbsp;[22]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython2"><pre><span></span><span class="k">print</span><span class="p">(</span><span class="n">bins</span><span class="o">.</span><span class="n">__str__</span><span class="p">(</span><span class="s1">&#39;{conditions}&#39;</span><span class="p">))</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;applying bin to data in variant B:&quot;</span><span class="p">)</span>
+<span class="n">a_bin</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">data2</span><span class="o">.</span><span class="n">normal_same</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -13224,89 +13149,85 @@ Control or baseline variant: A
 <div class="output">
 
 
-<div class="output_area"><div class="prompt"></div>
+<div class="output_area">
+<div class="prompt"></div>
+
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>NumericalBinning with 8 bins:
- 0: 0.0&lt;=x&lt;1.0
- 1: 1.0&lt;=x&lt;2.0
- 2: 2.0&lt;=x&lt;3.0
- 3: 3.0&lt;=x&lt;4.0
- 4: 4.0&lt;=x&lt;5.0
- 5: 5.0&lt;=x&lt;6.0
- 6: 6.0&lt;=x&lt;8.0
- 7: 8.0&lt;=x&lt;=9.0
+<pre>applying bin to data in variant B:
 </pre>
 </div>
 </div>
 
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[23]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython2"><pre><span></span><span class="k">print</span><span class="p">(</span><span class="n">bins</span><span class="o">.</span><span class="n">__str__</span><span class="p">(</span><span class="s1">&#39;{iter.uppercase}&#39;</span><span class="p">))</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
+<div class="output_area">
+<div class="prompt output_prompt">Out[22]:</div>
 
 
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>NumericalBinning with 8 bins:
- 0: A
- 1: B
- 2: C
- 3: D
- 4: E
- 5: F
- 6: G
- 7: H
-</pre>
-</div>
+
+<div class="output_text output_subarea output_execute_result">
+<pre>2       0.388819
+8       0.772848
+9       0.783160
+11      0.564789
+20      1.310606
+25      0.600733
+30      0.608267
+33      1.360168
+35      0.849585
+38      1.495458
+43      0.444854
+51      0.977872
+55      2.099408
+69      1.132805
+70      1.597397
+74      0.079915
+75      0.320930
+86      0.220631
+88      0.324758
+92      1.638961
+104     1.277857
+107     1.498012
+115     1.344854
+118     2.120994
+127     0.059905
+139     2.254038
+156     0.079048
+161     0.150602
+165     0.090310
+170     0.947512
+          ...   
+9862    0.725924
+9863    1.492610
+9864    0.908889
+9883    1.138699
+9885    0.167043
+9886    0.285282
+9887    0.322020
+9894    2.127297
+9897    1.896604
+9911    1.127925
+9913    0.499415
+9915    0.327819
+9927    0.729370
+9928    0.887623
+9937    0.278923
+9938    0.729843
+9940    0.201785
+9943    1.338250
+9957    0.544323
+9958    0.858663
+9971    0.290580
+9972    1.081581
+9977    0.460328
+9981    0.084888
+9983    0.443676
+9984    0.338594
+9989    1.544333
+9993    0.672613
+9996    0.792395
+9997    0.994518
+Name: normal_same, dtype: float64</pre>
 </div>
 
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[24]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython2"><pre><span></span><span class="k">print</span><span class="p">(</span><span class="n">bins</span><span class="o">.</span><span class="n">__str__</span><span class="p">(</span><span class="s1">&#39;{iter.uppercase}: From {lo:.2f} </span><span class="se">\t</span><span class="s1"> To {up:.2f}&#39;</span><span class="p">))</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>NumericalBinning with 8 bins:
- 0: A: From 0.00 	 To 1.00
- 1: B: From 1.00 	 To 2.00
- 2: C: From 2.00 	 To 3.00
- 3: D: From 3.00 	 To 4.00
- 4: E: From 4.00 	 To 5.00
- 5: F: From 5.00 	 To 6.00
- 6: G: From 6.00 	 To 8.00
- 7: H: From 8.00 	 To 9.00
-</pre>
-</div>
 </div>
 
 </div>
@@ -13318,22 +13239,11 @@ Control or baseline variant: A
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="core.statistics">core.statistics<a class="anchor-link" href="#core.statistics">&#182;</a></h2><p>Here the underlying statistical functions are implemented. These are used by the higher-level <code>experiment</code> module, and can indeed be used directly by passing in NumPy <code>Array</code>s.</p>
+<h1 id="Statistics">Statistics<a class="anchor-link" href="#Statistics">&#182;</a></h1><p>Here the underlying statistical functions are implemented. These are used by the higher-level <code>experiment</code> module, and can indeed be used directly by passing in NumPy <code>Array</code>s.</p>
 <p>The more interesting functions are:</p>
 <h3 id="bootstrap"><code>bootstrap</code><a class="anchor-link" href="#bootstrap">&#182;</a></h3><p>Bootstraps the Confidence Intervals for a particular function comparing two samples. NaNs are ignored (discarded before calculation).</p>
 <p>This function, as well as others such as <code>normal_sample_difference</code>, and <code>delta</code>, take as input a list of percentiles, and return the values corresponding to those percentiles. This implementation is very general, allowing us to use the same functions for one-sided as well as two-sided tests, as well as more exactly recreating an output distribution (e.g. if we want to graphically depict more than 95% confidence intervals).</p>
 <h3 id="delta"><code>delta</code><a class="anchor-link" href="#delta">&#182;</a></h3><p>Uses either bootstrap or standard normal assumptions to compute the difference between two arrays.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="core.utils">core.utils<a class="anchor-link" href="#core.utils">&#182;</a></h2><p>A <code>commons</code> module: contains supplied utility methods shared by other classes.</p>
-<p>Currently it supports methods for generating random data for performing an experiment.</p>
 
 </div>
 </div>
@@ -13351,4 +13261,8 @@ Control or baseline variant: A
     </div>
   </div>
 </body>
+
+ 
+
+
 </html>
