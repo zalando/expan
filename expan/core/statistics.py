@@ -465,7 +465,8 @@ def normal_difference(mean1, std1, n1, mean2, std2, n2, percentiles=[2.5, 97.5],
 
 
 def estimate_std(x, mu, pctile):
-    """Estimate the standard deviation from a given percentile, according to
+    """
+    Estimate the standard deviation from a given percentile, according to
     the z-score:
         z = (x - mu) / sigma
 
@@ -478,3 +479,42 @@ def estimate_std(x, mu, pctile):
         float: estimated standard deviation of the distribution
     """
     return (x - mu) / stats.norm.ppf(pctile / 100.0)
+
+
+def compute_statistical_power(x, y, alpha=0.05):
+    """
+    Compute the statistical power for the given alpha and treatment and control data.
+    Args:
+        x (array-like): sample of a treatment group
+        y (array-like): sample of a control group
+        alpha: Type I error (false positive rate)
+
+    Returns:
+        float: statistical power --- that is, the probability of a test to detect an effect, 
+            if the effect actually exists.
+    """
+    normal_var = stats.norm()
+    z_1_minus_alpha = normal_var.ppf(1 - alpha)
+
+    _x = np.array(x, dtype=float)
+    _x = _x[~np.isnan(_x)]
+    _y = np.array(y, dtype=float)
+    _y = _y[~np.isnan(_y)]
+
+    mean1 = np.mean(_x)
+    mean2 = np.mean(_y)
+    std1 = np.std(_x)
+    std2 = np.std(_y)
+    n1 = len(_x)
+    n2 = len(_y)
+
+    effect_size = mean1 - mean2
+    std = pooled_std(std1, n1, std2, n2)
+
+    tmp = (n1 * n2 * effect_size**2) / ((n1 + n2) * std**2)
+    z_beta = z_1_minus_alpha - np.sqrt(tmp)
+
+    beta = normal_var.cdf(z_beta)
+    power = 1- beta
+
+    return power
