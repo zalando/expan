@@ -98,7 +98,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
 
         self.getExperiment(['normal_same'])
 
-        # implicit do the conversion if there is one str
+        # implicit do the conversion if there is one string
         self.getExperiment('normal_same')
 
         # check of dictionary structure
@@ -123,12 +123,10 @@ class ExperimentClassTestCases(ExperimentTestCase):
                                [self.derived_kpi_9])
 
     def test_errors_warnings_expan_version(self):
-        ndecimals = 5
         res = self.getExperiment(['normal_same']).delta(method='fixed_horizon')
-        a = 'errors'        in res
-        a = 'warnings'      in res
-        a = 'expan_version' in res
-
+        self.assertTrue('errors' in res)
+        self.assertTrue('warnings' in res)
+        self.assertTrue('expan_version' in res)
 
     def test_fixed_horizon_delta(self):
         ndecimals = 5
@@ -148,10 +146,11 @@ class ExperimentClassTestCases(ExperimentTestCase):
         self.assertNumericalEqual(aStats['treatment_mean'],  0.025219, ndecimals)
         self.assertNumericalEqual(aStats['control_mean'],   -0.007833, ndecimals)
 
+        self.assertNumericalEqual(aStats['statistical_power'], 0.48697, ndecimals)
+
 
     def test_fixed_horizon_delta_derived_kpis(self):
-        self.getExperiment(self.numeric_column_names + [self.derived_kpi_1['name'],
-                                                      self.derived_kpi_2['name']],
+        self.getExperiment(self.numeric_column_names + [self.derived_kpi_1['name'], self.derived_kpi_2['name']],
                            [self.derived_kpi_1, self.derived_kpi_2]).delta()
 
 
@@ -171,6 +170,8 @@ class ExperimentClassTestCases(ExperimentTestCase):
 
         self.assertNumericalEqual(aStats['treatment_mean'],  0.025219, ndecimals)
         self.assertNumericalEqual(aStats['control_mean'],   -0.007833, ndecimals)
+
+        self.assertNumericalEqual(aStats['statistical_power'], 0.48697, ndecimals)
 
 
     def test_group_sequential_delta_derived_kpis(self):
@@ -201,6 +202,8 @@ class ExperimentClassTestCases(ExperimentTestCase):
         self.assertNumericalEqual(aStats['treatment_mean'],  0.025219, ndecimals)
         self.assertNumericalEqual(aStats['control_mean'],   -0.007833, ndecimals)
 
+        self.assertNumericalEqual(aStats['statistical_power'], 0.48697, ndecimals)
+
 
     # @unittest.skip("sometimes takes too much time")
     def test_bayes_factor_delta_derived_kpis(self):
@@ -230,6 +233,8 @@ class ExperimentClassTestCases(ExperimentTestCase):
 
         self.assertNumericalEqual(aStats['treatment_mean'],  0.025219, ndecimals)
         self.assertNumericalEqual(aStats['control_mean'],   -0.007833, ndecimals)
+
+        self.assertNumericalEqual(aStats['statistical_power'], 0.48697, ndecimals)
 
 
     # @unittest.skip("sometimes takes too much time")
