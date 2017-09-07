@@ -106,6 +106,7 @@ def delta(x, y, assume_normal=True, percentiles=[2.5, 97.5],
             'treatment_mean'        : float(np.nanmean(_x)),
             'control_mean'          : float(np.nanmean(_y))}
 
+
 def sample_size(x):
     """
     Calculates sample size of a sample x

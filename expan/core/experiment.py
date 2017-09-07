@@ -129,17 +129,22 @@ class Experiment(object):
             res = {}
             res['name']     = kpi
             res['variants'] = []
-            control       = self.get_kpi_by_name_and_variant(kpi, self.control_variant_name)
-            controlWeight = self._get_weights(kpi, self.control_variant_name)
+            control         = self.get_kpi_by_name_and_variant(kpi, self.control_variant_name)
+            control_weight  = self._get_weights(kpi, self.control_variant_name)
+            control_data    = control * control_weight
             for variant in self.variant_names:
-                treatment       = self.get_kpi_by_name_and_variant(kpi, variant)
-                treatmentWeight = self._get_weights(kpi, variant)
+                treatment        = self.get_kpi_by_name_and_variant(kpi, variant)
+                treatment_weight = self._get_weights(kpi, variant)
+                treatment_data   = treatment * treatment_weight
                 with warnings.catch_warnings(record=True) as w:
-                    ds = worker(x=treatment*treatmentWeight, y=control*controlWeight)
+                    statistics = worker(x=treatment_data, y=control_data)
+                    # add statistical power
+                    power = statx.compute_statistical_power(treatment_data, control_data)
+                    statistics['statistical_power'] = power
                 if len(w):
                     result['warnings'].append('kpi: ' + kpi + ', variant: '+ variant + ': ' + str(w[-1].message))
                 res['variants'].append({'name'             : variant,
-                                        'delta_statistics' : ds})
+                                        'delta_statistics' : statistics})
             kpis.append(res)
 
         result['kpis'] = kpis
