@@ -198,3 +198,15 @@ class Experiment(object):
             warnings.warn('More than 2% of entities have been filtered out, consider adjusting the percentile value.')
 
         self.data = self.data[flags == False]
+
+    def sga(self, dimension_to_bins):
+        """
+        Perform subgroup analysis.
+    
+        Args:
+            dimension_to_bins (dict): a dict of dimension name (key) to list of Bin objects (value). 
+                                      This dict defines on which column and how to split into subgroups.
+                                      
+        Returns:
+            Analysis results per subgroup. 
+        """
