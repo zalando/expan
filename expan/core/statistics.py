@@ -445,8 +445,6 @@ def normal_difference(mean1, std1, n1, mean2, std2, n2, percentiles=[2.5, 97.5],
     For further information vistit:
             http://sphweb.bumc.bu.edu/otlt/MPH-Modules/BS/BS704_Confidence_Intervals/BS704_Confidence_Intervals5.html
     """
-    # TODO: Figure out how to pass directly to normal_percentiles()
-
     # Compute combined parameters from individual parameters
     mean = mean1 - mean2
     std = pooled_std(std1, n1, std2, n2)
@@ -483,18 +481,17 @@ def estimate_std(x, mu, pctile):
 
 def compute_statistical_power(x, y, alpha=0.05):
     """
-    Compute the statistical power for the given alpha and treatment and control data.
+    Compute statistical power
     Args:
         x (array-like): sample of a treatment group
         y (array-like): sample of a control group
         alpha: Type I error (false positive rate)
 
     Returns:
-        float: statistical power --- that is, the probability of a test to detect an effect, 
+        float: statistical power --- the probability of a test to detect an effect, 
             if the effect actually exists.
     """
-    normal_var = stats.norm()
-    z_1_minus_alpha = normal_var.ppf(1 - alpha)
+    z_1_minus_alpha = stats.norm.ppf(1 - alpha)
 
     _x = np.array(x, dtype=float)
     _x = _x[~np.isnan(_x)]
@@ -508,13 +505,31 @@ def compute_statistical_power(x, y, alpha=0.05):
     n1 = len(_x)
     n2 = len(_y)
 
+    return _get_power(mean1, std1, n1, mean2, std2, n2, z_1_minus_alpha)
+
+
+def _get_power(mean1, std1, n1, mean2, std2, n2, z_1_minus_alpha):
+    """
+    Compute statistical power.
+    This is a helper function for compute_statistical_power(x, y, alpha=0.05)
+    Args:
+        mean1 (float): mean value of the treatment distribution
+        std1 (float): standard deviation of the treatment distribution
+        n1 (integer): number of samples of the treatment distribution
+        mean2 (float): mean value of the control distribution
+        std2 (float): standard deviation of the control distribution
+        n2 (integer): number of samples of the control distribution
+        z_1_minus_alpha (float): critical value for significance level alpha. That is, z-value for 1-alpha.
+    
+    Returns:
+        float: statistical power --- that is, the probability of a test to detect an effect, 
+            if the effect actually exists.
+    """
     effect_size = mean1 - mean2
     std = pooled_std(std1, n1, std2, n2)
-
     tmp = (n1 * n2 * effect_size**2) / ((n1 + n2) * std**2)
     z_beta = z_1_minus_alpha - np.sqrt(tmp)
-
-    beta = normal_var.cdf(z_beta)
-    power = 1- beta
+    beta = stats.norm.cdf(z_beta)
+    power = 1 - beta
 
     return power

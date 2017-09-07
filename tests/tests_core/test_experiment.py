@@ -190,7 +190,6 @@ class ExperimentClassTestCases(ExperimentTestCase):
         self.assertEqual(aStats['stop'],      True, ndecimals)
         self.assertEqual(aStats['number_of_iterations'], 2000, ndecimals)
 
-        #
         # this can result in different numerical values depending on Python version
         #
         # self.assertNumericalEqual(aStats['confidence_interval'][0]['value'], -0.007079081, ndecimals)
@@ -221,7 +220,6 @@ class ExperimentClassTestCases(ExperimentTestCase):
         self.assertEqual(aStats['stop'], True, ndecimals)
         self.assertEqual(aStats['number_of_iterations'], 2000, ndecimals)
 
-        #
         # this can result in different numerical values depending on Python version
         #
         # self.assertNumericalEqual(aStats['confidence_interval'][0]['value'], -0.007079081, ndecimals)
