@@ -446,7 +446,7 @@ class StatisticalPowerTestCases(StatisticsTestCase):
 
     def test_compute_statistical_power(self):
         # pre-computed value by hand via power analysis
-        # alpha=0.05, beta=0.2, sigma=1, delta=1, n1 = 12, n2 = 13
+        # alpha=0.05, beta=0.2, sigma=1, delta=1, n1=12, n2=13
         z_1_minus_alpha = stats.norm.ppf(0.95)
         power = statx._get_power(0, 1, 13, 1, 1, 12, z_1_minus_alpha)
         self.assertAlmostEqual(power, 0.8, 2)
