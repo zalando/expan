@@ -5,20 +5,12 @@ import warnings
 import numpy as np
 import pandas as pd
 
-import expan.core.binning as binmodule
 import expan.core.early_stopping as es
 import expan.core.statistics as statx
 
 from expan.core.version import __version__
 
 from expan.core.util import get_column_names_by_type
-# from expan.core.experimentdata import ExperimentData
-# from expan.core.results import Results, delta_to_dataframe_all_variants, feature_check_to_dataframe, \
-#     early_stopping_to_dataframe
-
-# from expan.core.jsonable import Jsonable
-
-# raise the same warning multiple times
 warnings.simplefilter('always', UserWarning)
 
 logger = logging.getLogger(__name__)
@@ -87,8 +79,8 @@ class Experiment(object):
             self.reference_kpis[name] = re.sub(kpi_name_pattern + '/', '', formula)
 
 
-    def get_kpi_by_name_and_variant(self, name, variant):
-        return self.data.reset_index().set_index('variant').loc[variant, name]
+    def get_kpi_by_name_and_variant(self, data, name, variant):
+        return data.reset_index().set_index('variant').loc[variant, name]
 
 
     def __str__(self):
@@ -99,23 +91,27 @@ class Experiment(object):
             len(variants), ', '.join([('*' + k + '*') if (k == self.control_variant_name) else k for k in variants]))
 
 
-    def _get_weights(self, kpi, variant):
+    def _get_weights(self, data, kpi, variant):
         if kpi not in self.reference_kpis:
             return 1.0
         reference_kpi  = self.reference_kpis[kpi]
-        x              = self.get_kpi_by_name_and_variant(reference_kpi, variant)
+        x              = self.get_kpi_by_name_and_variant(data, reference_kpi, variant)
         zeros_and_nans = sum(x == 0) + np.isnan(x).sum()
         non_zeros      = len(x) - zeros_and_nans
         return non_zeros/np.nansum(x) * x
 
 
     def delta(self, method='fixed_horizon', **worker_args):
+        return self._delta(method=method, data=self.data, **worker_args)
+
+
+    def _delta(self, method, data, **worker_args):
         worker_table = {
-                'fixed_horizon'    : statx.make_delta,
-                'group_sequential' : es.make_group_sequential,
-                'bayes_factor'     : es.make_bayes_factor,
-                'bayes_precision'  : es.make_bayes_precision,
-                }
+            'fixed_horizon'    : statx.make_delta,
+            'group_sequential' : es.make_group_sequential,
+            'bayes_factor'     : es.make_bayes_factor,
+            'bayes_precision'  : es.make_bayes_precision
+        }
 
         if not method in worker_table:
             raise NotImplementedError
@@ -130,15 +126,15 @@ class Experiment(object):
         kpis = []
 
         for kpi in self.report_kpi_names:
-            res = {}
-            res['name']     = kpi
-            res['variants'] = []
-            control         = self.get_kpi_by_name_and_variant(kpi, self.control_variant_name)
-            control_weight  = self._get_weights(kpi, self.control_variant_name)
+            res_kpi = {}
+            res_kpi['name']     = kpi
+            res_kpi['variants'] = []
+            control         = self.get_kpi_by_name_and_variant(data, kpi, self.control_variant_name)
+            control_weight  = self._get_weights(data, kpi, self.control_variant_name)
             control_data    = control * control_weight
             for variant in self.variant_names:
-                treatment        = self.get_kpi_by_name_and_variant(kpi, variant)
-                treatment_weight = self._get_weights(kpi, variant)
+                treatment        = self.get_kpi_by_name_and_variant(data, kpi, variant)
+                treatment_weight = self._get_weights(data, kpi, variant)
                 treatment_data   = treatment * treatment_weight
                 with warnings.catch_warnings(record=True) as w:
                     statistics = worker(x=treatment_data, y=control_data)
@@ -147,9 +143,8 @@ class Experiment(object):
                     statistics['statistical_power'] = power
                 if len(w):
                     result['warnings'].append('kpi: ' + kpi + ', variant: '+ variant + ': ' + str(w[-1].message))
-                res['variants'].append({'name'             : variant,
-                                        'delta_statistics' : statistics})
-            kpis.append(res)
+                res_kpi['variants'].append({'name': variant, 'delta_statistics' : statistics})
+            kpis.append(res_kpi)
 
         result['kpis'] = kpis
         return result
@@ -226,3 +221,16 @@ class Experiment(object):
             # check whether data contains this column
             if dimension not in self.data:
                 raise KeyError('No column %s provided in data.' % dimension)
+
+        subgroups = []
+        for dimension in dimension_to_bins:
+            for bin in dimension_to_bins[dimension]:
+                subgroup = {}
+                subgroup['dimension'] = dimension
+                subgroup['segment'] = str(bin.representation)
+                subgroup_data = bin.apply(self.data, dimension)
+                subgroup_res = self._delta(method='fixed_horizon', data=subgroup_data)
+                subgroup['result'] = subgroup_res
+                subgroups.append(subgroup)
+
+        return subgroups
