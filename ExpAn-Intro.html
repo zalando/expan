@@ -11913,7 +11913,7 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="prompt input_prompt">In&nbsp;[5]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span>
@@ -11929,22 +11929,6 @@ div#notebook {
 </pre></div>
 
 </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>ExpAn core init: v0.6.1
-</pre>
-</div>
-</div>
-
 </div>
 </div>
 
@@ -12169,7 +12153,7 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[4]:</div>
+<div class="prompt input_prompt">In&nbsp;[6]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">expan</span>
@@ -12206,7 +12190,7 @@ div#notebook {
 <div class="prompt"></div>
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Experiment &#34;random_data_generation&#34; with 1 derived kpis, 1 report kpis, 10000 entities and 2 variants: B, *A*
+<pre>Experiment &#34;random_data_generation&#34; with 1 derived kpis, 1 report kpis, 10000 entities and 2 variants: *A*, B
 </pre>
 </div>
 </div>
@@ -12303,7 +12287,7 @@ div#notebook {
 <div class="prompt"></div>
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Variants: {&#39;B&#39;, &#39;A&#39;}
+<pre>Variants: {&#39;A&#39;, &#39;B&#39;}
 Control or baseline variant: A
 </pre>
 </div>
@@ -12327,7 +12311,7 @@ Control or baseline variant: A
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Let's-start-with-a-single-DeltaKPI-of-orders:">Let's start with a single DeltaKPI of orders:<a class="anchor-link" href="#Let's-start-with-a-single-DeltaKPI-of-orders:">&#182;</a></h3>
+<h3 id="Let's-start-with-a-single-delta-analysis:">Let's start with a single delta analysis:<a class="anchor-link" href="#Let's-start-with-a-single-delta-analysis:">&#182;</a></h3>
 </div>
 </div>
 </div>
@@ -12373,32 +12357,12 @@ Control or baseline variant: A
     &#34;kpi: derived_kpi_one, variant: B: Sample variances differ too much to assume that population variances are equal.&#34;
   ],
   &#34;errors&#34;: [],
-  &#34;expan_version&#34;: &#34;0.6.1&#34;,
+  &#34;expan_version&#34;: &#34;0.6.2&#34;,
   &#34;control_variant&#34;: &#34;A&#34;,
   &#34;kpis&#34;: [
     {
       &#34;name&#34;: &#34;derived_kpi_one&#34;,
       &#34;variants&#34;: [
-        {
-          &#34;name&#34;: &#34;B&#34;,
-          &#34;delta_statistics&#34;: {
-            &#34;delta&#34;: 4.564575415240889,
-            &#34;confidence_interval&#34;: [
-              {
-                &#34;percentile&#34;: 2.5,
-                &#34;value&#34;: -1.1450816040987393
-              },
-              {
-                &#34;percentile&#34;: 97.5,
-                &#34;value&#34;: 10.274232434580517
-              }
-            ],
-            &#34;treatment_sample_size&#34;: 3892,
-            &#34;control_sample_size&#34;: 6108,
-            &#34;treatment_mean&#34;: -0.007948584804651233,
-            &#34;control_mean&#34;: -4.572524000045541
-          }
-        },
         {
           &#34;name&#34;: &#34;A&#34;,
           &#34;delta_statistics&#34;: {
@@ -12416,7 +12380,29 @@ Control or baseline variant: A
             &#34;treatment_sample_size&#34;: 6108,
             &#34;control_sample_size&#34;: 6108,
             &#34;treatment_mean&#34;: -4.572524000045541,
-            &#34;control_mean&#34;: -4.572524000045541
+            &#34;control_mean&#34;: -4.572524000045541,
+            &#34;statistical_power&#34;: 0.050000000000000044
+          }
+        },
+        {
+          &#34;name&#34;: &#34;B&#34;,
+          &#34;delta_statistics&#34;: {
+            &#34;delta&#34;: 4.564575415240889,
+            &#34;confidence_interval&#34;: [
+              {
+                &#34;percentile&#34;: 2.5,
+                &#34;value&#34;: -1.1450816040987393
+              },
+              {
+                &#34;percentile&#34;: 97.5,
+                &#34;value&#34;: 10.274232434580517
+              }
+            ],
+            &#34;treatment_sample_size&#34;: 3892,
+            &#34;control_sample_size&#34;: 6108,
+            &#34;treatment_mean&#34;: -0.007948584804651233,
+            &#34;control_mean&#34;: -4.572524000045541,
+            &#34;statistical_power&#34;: 0.46900387352149797
           }
         }
       ]
@@ -12436,7 +12422,7 @@ Control or baseline variant: A
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Currently <strong><code>deltaKPI</code></strong> supports 4 methods to compute <code>delta</code>: <code>fixed_horizon</code> (default), <code>group_sequential</code>, <code>bayes_factor</code> and <code>bayes_precision</code>. All methods requires different additional parameters.</p>
+<p>Currently <strong><code>delta</code></strong> supports 4 methods to compute <code>delta</code>: <code>fixed_horizon</code> (default), <code>group_sequential</code>, <code>bayes_factor</code> and <code>bayes_precision</code>. All methods requires different additional parameters.</p>
 <p><strong><code>fixed_horizon</code></strong> is a default method which has default settings/parameters:</p>
 <table>
 <thead><tr>
@@ -12586,22 +12572,6 @@ Control or baseline variant: A
 </div>
 </div>
 
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre>INFO:pystan:COMPILING THE C++ CODE FOR MODEL anon_model_d87af3570eba8e4d47ba3c301c4f7a1d NOW.
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
@@ -12624,36 +12594,16 @@ Control or baseline variant: A
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>{
-  &#34;warnings&#34;: [],
+  &#34;warnings&#34;: [
+    &#34;kpi: derived_kpi_one, variant: B: Sample variances differ too much to assume that population variances are equal.&#34;
+  ],
   &#34;errors&#34;: [],
-  &#34;expan_version&#34;: &#34;0.6.1&#34;,
+  &#34;expan_version&#34;: &#34;0.6.2&#34;,
   &#34;control_variant&#34;: &#34;A&#34;,
   &#34;kpis&#34;: [
     {
       &#34;name&#34;: &#34;derived_kpi_one&#34;,
       &#34;variants&#34;: [
-        {
-          &#34;name&#34;: &#34;B&#34;,
-          &#34;delta_statistics&#34;: {
-            &#34;stop&#34;: true,
-            &#34;delta&#34;: 4.564575415240889,
-            &#34;confidence_interval&#34;: [
-              {
-                &#34;percentile&#34;: 2.5,
-                &#34;value&#34;: -2.8098960371617037
-              },
-              {
-                &#34;percentile&#34;: 97.5,
-                &#34;value&#34;: 8.477453471811664
-              }
-            ],
-            &#34;treatment_sample_size&#34;: 3892,
-            &#34;control_sample_size&#34;: 6108,
-            &#34;treatment_mean&#34;: -0.007948584804651233,
-            &#34;control_mean&#34;: -4.572524000045541,
-            &#34;number_of_iterations&#34;: 25000
-          }
-        },
         {
           &#34;name&#34;: &#34;A&#34;,
           &#34;delta_statistics&#34;: {
@@ -12662,18 +12612,42 @@ Control or baseline variant: A
             &#34;confidence_interval&#34;: [
               {
                 &#34;percentile&#34;: 2.5,
-                &#34;value&#34;: -8.453673832823084
+                &#34;value&#34;: -8.396765530428699
               },
               {
                 &#34;percentile&#34;: 97.5,
-                &#34;value&#34;: 3.450690568961913
+                &#34;value&#34;: 3.5794735964894677
               }
             ],
             &#34;treatment_sample_size&#34;: 6108,
             &#34;control_sample_size&#34;: 6108,
             &#34;treatment_mean&#34;: -4.572524000045541,
             &#34;control_mean&#34;: -4.572524000045541,
-            &#34;number_of_iterations&#34;: 25000
+            &#34;number_of_iterations&#34;: 25000,
+            &#34;statistical_power&#34;: 0.050000000000000044
+          }
+        },
+        {
+          &#34;name&#34;: &#34;B&#34;,
+          &#34;delta_statistics&#34;: {
+            &#34;stop&#34;: true,
+            &#34;delta&#34;: 4.564575415240889,
+            &#34;confidence_interval&#34;: [
+              {
+                &#34;percentile&#34;: 2.5,
+                &#34;value&#34;: -2.8506067127900847
+              },
+              {
+                &#34;percentile&#34;: 97.5,
+                &#34;value&#34;: 8.497896742163277
+              }
+            ],
+            &#34;treatment_sample_size&#34;: 3892,
+            &#34;control_sample_size&#34;: 6108,
+            &#34;treatment_mean&#34;: -0.007948584804651233,
+            &#34;control_mean&#34;: -4.572524000045541,
+            &#34;number_of_iterations&#34;: 25000,
+            &#34;statistical_power&#34;: 0.46900387352149797
           }
         }
       ]
@@ -12726,11 +12700,15 @@ Control or baseline variant: A
 </tr>
 <tr>
 <td><strong><code>number_of_iterations</code></strong></td>
-<td>number of iterations used for bayes sampling for <strong><code>bayes_factor</code></strong> and <strong><code>bayes_precision</code></strong> methods.</td>
+<td>number of iterations used for bayes sampling for <strong><code>bayes_factor</code></strong> and <strong><code>bayes_precision</code></strong> methods</td>
 </tr>
 <tr>
 <td><strong><code>stop</code></strong></td>
 <td>when <strong><code>True</code></strong> means the early stopping was done</td>
+</tr>
+<tr>
+<td><strong><code>statistical_power</code></strong></td>
+<td>statistical power --- that is, the probability of a test to detect an effect, if the effect actually exists</td>
 </tr>
 </tbody>
 </table>
@@ -12771,34 +12749,16 @@ Control or baseline variant: A
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>{
-  &#34;warnings&#34;: [],
+  &#34;warnings&#34;: [
+    &#34;kpi: derived_kpi_one, variant: B: Sample variances differ too much to assume that population variances are equal.&#34;
+  ],
   &#34;errors&#34;: [],
-  &#34;expan_version&#34;: &#34;0.6.1&#34;,
+  &#34;expan_version&#34;: &#34;0.6.2&#34;,
   &#34;control_variant&#34;: &#34;A&#34;,
   &#34;kpis&#34;: [
     {
       &#34;name&#34;: &#34;derived_kpi_one&#34;,
       &#34;variants&#34;: [
-        {
-          &#34;name&#34;: &#34;B&#34;,
-          &#34;delta_statistics&#34;: {
-            &#34;delta&#34;: 4.564575415240889,
-            &#34;confidence_interval&#34;: [
-              {
-                &#34;percentile&#34;: 2.5,
-                &#34;value&#34;: -0.0624543841054832
-              },
-              {
-                &#34;percentile&#34;: 97.5,
-                &#34;value&#34;: 9.030153301148799
-              }
-            ],
-            &#34;treatment_sample_size&#34;: 3892,
-            &#34;control_sample_size&#34;: 6108,
-            &#34;treatment_mean&#34;: -0.007948584804651233,
-            &#34;control_mean&#34;: -4.572524000045541
-          }
-        },
         {
           &#34;name&#34;: &#34;A&#34;,
           &#34;delta_statistics&#34;: {
@@ -12806,17 +12766,39 @@ Control or baseline variant: A
             &#34;confidence_interval&#34;: [
               {
                 &#34;percentile&#34;: 2.5,
-                &#34;value&#34;: -6.45971989656208
+                &#34;value&#34;: -6.451719231491042
               },
               {
                 &#34;percentile&#34;: 97.5,
-                &#34;value&#34;: 6.5289914623406125
+                &#34;value&#34;: 6.412118814781721
               }
             ],
             &#34;treatment_sample_size&#34;: 6108,
             &#34;control_sample_size&#34;: 6108,
             &#34;treatment_mean&#34;: -4.572524000045541,
-            &#34;control_mean&#34;: -4.572524000045541
+            &#34;control_mean&#34;: -4.572524000045541,
+            &#34;statistical_power&#34;: 0.050000000000000044
+          }
+        },
+        {
+          &#34;name&#34;: &#34;B&#34;,
+          &#34;delta_statistics&#34;: {
+            &#34;delta&#34;: 4.564575415240889,
+            &#34;confidence_interval&#34;: [
+              {
+                &#34;percentile&#34;: 2.5,
+                &#34;value&#34;: 0.06194124312058608
+              },
+              {
+                &#34;percentile&#34;: 97.5,
+                &#34;value&#34;: 9.032079819101977
+              }
+            ],
+            &#34;treatment_sample_size&#34;: 3892,
+            &#34;control_sample_size&#34;: 6108,
+            &#34;treatment_mean&#34;: -0.007948584804651233,
+            &#34;control_mean&#34;: -4.572524000045541,
+            &#34;statistical_power&#34;: 0.46900387352149797
           }
         }
       ]
@@ -12875,7 +12857,7 @@ The second argument is the type of the bin. This can either be "numerical" or "c
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[15]:</div>
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">expan.core.binning</span> <span class="k">import</span> <span class="o">*</span>
@@ -12894,7 +12876,16 @@ The second argument is the type of the bin. This can either be "numerical" or "c
 
 
 <div class="output_area">
-<div class="prompt output_prompt">Out[15]:</div>
+<div class="prompt"></div>
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>ExpAn core init: v0.6.2
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+<div class="prompt output_prompt">Out[2]:</div>
 
 
 
@@ -13226,6 +13217,108 @@ Name: normal_same, dtype: float64</pre>
 9996    0.792395
 9997    0.994518
 Name: normal_same, dtype: float64</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Subgroup-Analysis">Subgroup Analysis<a class="anchor-link" href="#Subgroup-Analysis">&#182;</a></h1><p>Subgroup analysis in ExaAn will select subgroup (which is a segment of data) based on the input argument, and then perform a regular delta analysis per subgroup as described before. 
+That is to say, we don't compare between subgroups, but compare treatment with control within each subgroup.</p>
+<p>The input argument is a <code>dict</code>, which maps feature name (key) to a list of <code>Bin</code> objects (value). This <code>dict</code> defines how and on which feature to perform the subgroup split. 
+The returned value of subgroup analysis will be the result of regular delta analysis per subgroup.</p>
+<p>An example is provided below.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[8]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">dimension_to_bins</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;treatment_start_time&quot;</span><span class="p">:</span> <span class="p">[</span>
+    <span class="n">Bin</span><span class="p">(</span><span class="s2">&quot;numerical&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span> 
+    <span class="n">Bin</span><span class="p">(</span><span class="s2">&quot;numerical&quot;</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">)]</span>
+<span class="p">}</span>
+<span class="n">exp</span><span class="o">.</span><span class="n">sga</span><span class="p">(</span><span class="n">dimension_to_bins</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+<div class="prompt output_prompt">Out[8]:</div>
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[{&#39;dimension&#39;: &#39;treatment_start_time&#39;,
+  &#39;result&#39;: {&#39;control_variant&#39;: &#39;A&#39;,
+   &#39;errors&#39;: [],
+   &#39;expan_version&#39;: &#39;0.6.2&#39;,
+   &#39;kpis&#39;: [{&#39;name&#39;: &#39;derived_kpi_one&#39;,
+     &#39;variants&#39;: [{&#39;delta_statistics&#39;: {&#39;confidence_interval&#39;: [{&#39;percentile&#39;: 2.5,
+          &#39;value&#39;: -1.5569210692070499},
+         {&#39;percentile&#39;: 97.5, &#39;value&#39;: 2.1978673629800363}],
+        &#39;control_mean&#39;: -0.32639393302612346,
+        &#39;control_sample_size&#39;: 3076,
+        &#39;delta&#39;: 0.3204731468864935,
+        &#39;statistical_power&#39;: 0.095063282824786377,
+        &#39;treatment_mean&#39;: -0.005920786139629961,
+        &#39;treatment_sample_size&#39;: 1930},
+       &#39;name&#39;: &#39;B&#39;},
+      {&#39;delta_statistics&#39;: {&#39;confidence_interval&#39;: [{&#39;percentile&#39;: 2.5,
+          &#39;value&#39;: -2.1025221680926345},
+         {&#39;percentile&#39;: 97.5, &#39;value&#39;: 2.102522168092634}],
+        &#39;control_mean&#39;: -0.32639393302612346,
+        &#39;control_sample_size&#39;: 3076,
+        &#39;delta&#39;: 0.0,
+        &#39;statistical_power&#39;: 0.050000000000000044,
+        &#39;treatment_mean&#39;: -0.32639393302612346,
+        &#39;treatment_sample_size&#39;: 3076},
+       &#39;name&#39;: &#39;A&#39;}]}],
+   &#39;warnings&#39;: [&#39;kpi: derived_kpi_one, variant: B: Sample variances differ too much to assume that population variances are equal.&#39;]},
+  &#39;segment&#39;: &#39;[0, 5)&#39;},
+ {&#39;dimension&#39;: &#39;treatment_start_time&#39;,
+  &#39;result&#39;: {&#39;control_variant&#39;: &#39;A&#39;,
+   &#39;errors&#39;: [],
+   &#39;expan_version&#39;: &#39;0.6.2&#39;,
+   &#39;kpis&#39;: [{&#39;name&#39;: &#39;derived_kpi_one&#39;,
+     &#39;variants&#39;: [{&#39;delta_statistics&#39;: {&#39;confidence_interval&#39;: [{&#39;percentile&#39;: 2.5,
+          &#39;value&#39;: -6.9215226752839172},
+         {&#39;percentile&#39;: 97.5, &#39;value&#39;: 0.14205372043176823}],
+        &#39;control_mean&#39;: 3.379775978641749,
+        &#39;control_sample_size&#39;: 3032,
+        &#39;delta&#39;: -3.389734477426074,
+        &#39;statistical_power&#39;: 0.59356839479094403,
+        &#39;treatment_mean&#39;: -0.009958498784324924,
+        &#39;treatment_sample_size&#39;: 1962},
+       &#39;name&#39;: &#39;B&#39;},
+      {&#39;delta_statistics&#39;: {&#39;confidence_interval&#39;: [{&#39;percentile&#39;: 2.5,
+          &#39;value&#39;: -4.017338312084763},
+         {&#39;percentile&#39;: 97.5, &#39;value&#39;: 4.0173383120847621}],
+        &#39;control_mean&#39;: 3.379775978641749,
+        &#39;control_sample_size&#39;: 3032,
+        &#39;delta&#39;: 0.0,
+        &#39;statistical_power&#39;: 0.050000000000000044,
+        &#39;treatment_mean&#39;: 3.379775978641749,
+        &#39;treatment_sample_size&#39;: 3032},
+       &#39;name&#39;: &#39;A&#39;}]}],
+   &#39;warnings&#39;: [&#39;kpi: derived_kpi_one, variant: B: Sample variances differ too much to assume that population variances are equal.&#39;]},
+  &#39;segment&#39;: &#39;[5, 10)&#39;}]</pre>
 </div>
 
 </div>
