@@ -29,7 +29,6 @@ class ExperimentTestCase(unittest.TestCase):
         """
         Clean up after the test
         """
-        # TODO: find out if we have to remove data manually
         pass
 
 
@@ -78,19 +77,16 @@ class ExperimentClassTestCases(ExperimentTestCase):
         with self.assertRaises(ValueError):
             self.getExperiment(self.column_names + ['non_existing'])
 
-        self.getExperiment(self.column_names + [self.derived_kpi_1['name'],
-                                                self.derived_kpi_2['name']],
+        self.getExperiment(self.column_names + [self.derived_kpi_1['name'], self.derived_kpi_2['name']],
                           [self.derived_kpi_1, self.derived_kpi_2])
 
         with self.assertRaises(ValueError):
-            self.getExperiment(self.column_names + [self.derived_kpi_1['name'],
-                                                    self.derived_kpi_3['name']],
+            self.getExperiment(self.column_names + [self.derived_kpi_1['name'], self.derived_kpi_3['name']],
                                [self.derived_kpi_1, self.derived_kpi_3])
 
 
         with self.assertRaises(ValueError):
-            self.getExperiment(self.column_names + [self.derived_kpi_4['name'],
-                                                    self.derived_kpi_2['name']],
+            self.getExperiment(self.column_names + [self.derived_kpi_4['name'], self.derived_kpi_2['name']],
                                [self.derived_kpi_4, self.derived_kpi_2])
 
         with self.assertRaises(TypeError):
@@ -122,11 +118,13 @@ class ExperimentClassTestCases(ExperimentTestCase):
             self.getExperiment(self.numeric_column_names + ['normal_same'],
                                [self.derived_kpi_9])
 
+
     def test_errors_warnings_expan_version(self):
         res = self.getExperiment(['normal_same']).delta(method='fixed_horizon')
         self.assertTrue('errors' in res)
         self.assertTrue('warnings' in res)
         self.assertTrue('expan_version' in res)
+
 
     def test_fixed_horizon_delta(self):
         ndecimals = 5
@@ -135,7 +133,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
         variants = find_list_of_dicts_element(res['kpis'], 'name', 'normal_same', 'variants')
         aStats   = find_list_of_dicts_element(variants, 'name', 'A', 'delta_statistics')
 
-        self.assertNumericalEqual(aStats['delta'],           0.033053, ndecimals)
+        self.assertNumericalEqual(aStats['delta'], 0.033053, ndecimals)
 
         self.assertNumericalEqual(aStats['confidence_interval'][0]['value'], -0.007135, ndecimals)
         self.assertNumericalEqual(aStats['confidence_interval'][1]['value'],  0.073240, ndecimals)
@@ -175,9 +173,9 @@ class ExperimentClassTestCases(ExperimentTestCase):
 
 
     def test_group_sequential_delta_derived_kpis(self):
-        self.getExperiment(self.numeric_column_names + [self.derived_kpi_1['name'],
-                                                      self.derived_kpi_2['name']],
+        self.getExperiment(self.numeric_column_names + [self.derived_kpi_1['name'], self.derived_kpi_2['name']],
                            [self.derived_kpi_1, self.derived_kpi_2]).delta('group_sequential')
+
 
     # @unittest.skip("sometimes takes too much time")
     def test_bayes_factor_delta(self):
@@ -191,10 +189,8 @@ class ExperimentClassTestCases(ExperimentTestCase):
         self.assertEqual(aStats['stop'],      True, ndecimals)
         self.assertEqual(aStats['number_of_iterations'], 2000, ndecimals)
 
-        # this can result in different numerical values depending on Python version
-        #
-        # self.assertNumericalEqual(aStats['confidence_interval'][0]['value'], -0.007079081, ndecimals)
-        # self.assertNumericalEqual(aStats['confidence_interval'][1]['value'],  0.072703576, ndecimals)
+        self.assertNumericalEqual(aStats['confidence_interval'][0]['value'], -0.00829, ndecimals)
+        self.assertNumericalEqual(aStats['confidence_interval'][1]['value'],  0.07127, ndecimals)
 
         self.assertEqual(aStats['treatment_sample_size'], 6108)
         self.assertEqual(aStats['control_sample_size'],   3892)
@@ -223,10 +219,8 @@ class ExperimentClassTestCases(ExperimentTestCase):
         self.assertEqual(aStats['stop'], True, ndecimals)
         self.assertEqual(aStats['number_of_iterations'], 2000, ndecimals)
 
-        # this can result in different numerical values depending on Python version
-        #
-        # self.assertNumericalEqual(aStats['confidence_interval'][0]['value'], -0.007079081, ndecimals)
-        # self.assertNumericalEqual(aStats['confidence_interval'][1]['value'],  0.072703576, ndecimals)
+        self.assertNumericalEqual(aStats['confidence_interval'][0]['value'], -0.00829, ndecimals)
+        self.assertNumericalEqual(aStats['confidence_interval'][1]['value'],  0.07127, ndecimals)
 
         self.assertEqual(aStats['treatment_sample_size'], 6108)
         self.assertEqual(aStats['control_sample_size'],   3892)
@@ -242,7 +236,6 @@ class ExperimentClassTestCases(ExperimentTestCase):
         exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
         res = exp.delta(method='bayes_precision', num_iters=2000)
 
-        # self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1]).delta()
 
     def test_quantile_filtering_multiple_columns(self):
         exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
@@ -255,6 +248,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
             ]
         )
         self.assertEqual(len(self.data) - len(exp.data), exp.metadata['filtered_entities_number'])
+
 
     def test_quantile_filtering_lower_threshold(self):
         exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
@@ -270,44 +264,31 @@ class ExperimentClassTestCases(ExperimentTestCase):
         )
         self.assertEqual(len(self.data) - len(exp.data), exp.metadata['filtered_entities_number'])
 
+
     def test_quantile_filtering_unsupported_kpi(self):
         exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
         with self.assertRaises(KeyError):
-            exp.filter(
-                kpis=[
-                    'revenue'
-                ]
-            )
+            exp.filter(kpis=['revenue'])
+
 
     def test_quantile_filtering_unsupported_percentile(self):
         exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
         with self.assertRaises(ValueError):
-            exp.filter(
-                kpis=[
-                    'normal_same'
-                ],
-                percentile=101.0
-            )
+            exp.filter(kpis=['normal_same'], percentile=101.0)
+
 
     def test_quantile_filtering_unsupported_threshold_kind(self):
         exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
         with self.assertRaises(ValueError):
-            exp.filter(
-                kpis=[
-                    'normal_same'
-                ],
-                threshold_type='uppper'
-            )
+            exp.filter(kpis=['normal_same'], threshold_type='uppper')
 
-    # def test_quantile_filtering_high_filtering_percentage(self):
-    #     exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
-    #     with self.assertWarns(UserWarning):
-    #         exp.filter(
-    #             kpis=[
-    #                 'normal_same'
-    #             ],
-    #             percentile=97.9
-    #         )
+
+    def test_quantile_filtering_high_filtering_percentage(self):
+        exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
+        with warnings.catch_warnings(record=True) as w:
+            exp.filter(kpis=['normal_same'], percentile=97.9)
+            self.assertEqual(len(w), 1)
+            self.assertTrue(issubclass(w[-1].category, UserWarning))
 
 
 if __name__ == '__main__':
