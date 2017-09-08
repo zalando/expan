@@ -86,8 +86,10 @@ class Experiment(object):
             self.data.loc[:, name] = eval(re.sub(kpi_name_pattern, r'self.data.\1.astype(float)', formula))
             self.reference_kpis[name] = re.sub(kpi_name_pattern + '/', '', formula)
 
+
     def get_kpi_by_name_and_variant(self, name, variant):
         return self.data.reset_index().set_index('variant').loc[variant, name]
+
 
     def __str__(self):
         variants = self.variant_names
@@ -95,6 +97,7 @@ class Experiment(object):
         return 'Experiment "{:s}" with {:d} derived kpis, {:d} report kpis, {:d} entities and {:d} variants: {}'.format(
             self.metadata['experiment'], len(self.derived_kpis), len(self.report_kpi_names), len(self.data),
             len(variants), ', '.join([('*' + k + '*') if (k == self.control_variant_name) else k for k in variants]))
+
 
     def _get_weights(self, kpi, variant):
         if kpi not in self.reference_kpis:
@@ -104,6 +107,7 @@ class Experiment(object):
         zeros_and_nans = sum(x == 0) + np.isnan(x).sum()
         non_zeros      = len(x) - zeros_and_nans
         return non_zeros/np.nansum(x) * x
+
 
     def delta(self, method='fixed_horizon', **worker_args):
         worker_table = {
@@ -150,6 +154,7 @@ class Experiment(object):
         result['kpis'] = kpis
         return result
 
+
     def _quantile_filtering(self, kpis, percentile, threshold_type):
         method_table = {'upper': lambda x: x > threshold, 'lower': lambda x: x <= threshold}
         flags = pd.Series(data=[False]*len(self.data))
@@ -157,6 +162,7 @@ class Experiment(object):
             threshold = np.percentile(self.data[column], percentile)
             flags = flags | self.data[column].apply(method_table[threshold_type])
         return flags
+
 
     def filter(self, kpis, percentile=99.0, threshold_type='upper'):
         """
@@ -169,7 +175,7 @@ class Experiment(object):
             threshold_type (string): type of threshold used ('lower' or 'upper')
 
         Returns:
-
+            No return value. Will filter out outliers in self.data in place.
         """
 
         # check if provided KPIs are present in the data
@@ -199,14 +205,24 @@ class Experiment(object):
 
         self.data = self.data[flags == False]
 
+
     def sga(self, dimension_to_bins):
         """
         Perform subgroup analysis.
     
         Args:
             dimension_to_bins (dict): a dict of dimension name (key) to list of Bin objects (value). 
-                                      This dict defines on which column and how to split into subgroups.
+                                      This dict defines how and on which column to perform the subgroup split.
                                       
         Returns:
             Analysis results per subgroup. 
         """
+        for dimension in dimension_to_bins:
+            # check type
+            if type(dimension) is not str:
+                raise TypeError("Key of the input dict needs to be string, indicating the name of dimension")
+            if type(dimension_to_bins[dimension]) is not list:
+                raise TypeError("Value of the input dict needs to be a list of Bin objects.")
+            # check whether data contains this column
+            if dimension not in self.data:
+                raise KeyError('No column %s provided in data.' % dimension)

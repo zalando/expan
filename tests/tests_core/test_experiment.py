@@ -3,6 +3,7 @@ import warnings
 import numpy as np
 import pandas as pd
 
+from expan.core.binning import Bin
 from expan.core.experiment import Experiment
 # from expan.core.results import Results
 from expan.core.util import generate_random_data, get_column_names_by_type, find_list_of_dicts_element
@@ -289,6 +290,33 @@ class ExperimentClassTestCases(ExperimentTestCase):
             exp.filter(kpis=['normal_same'], percentile=97.9)
             self.assertEqual(len(w), 1)
             self.assertTrue(issubclass(w[-1].category, UserWarning))
+
+
+    def test_sga_invalid_bin_list(self):
+        exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
+        dimension_to_bin = {"normal_same": Bin("numerical", 1, 10, True, True)}
+        with self.assertRaises(TypeError):
+            exp.sga(dimension_to_bin)
+
+
+    def test_sga_invalid_dimension_type(self):
+        exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
+        dimension_to_bin = {123: [Bin("numerical", 1, 10, True, True)]}
+        with self.assertRaises(TypeError):
+            exp.sga(dimension_to_bin)
+
+
+    def test_sga_invalid_dimension_name(self):
+        exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
+        dimension_to_bin = {"dimension_does_not_exist": [Bin("numerical", 1, 10, True, True)]}
+        with self.assertRaises(KeyError):
+            exp.sga(dimension_to_bin)
+
+
+    def test_sga_valid_input(self):
+        exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
+        dimension_to_bin = {"normal_same": [Bin("numerical", 1, 10, True, True)]}
+        exp.sga(dimension_to_bin)
 
 
 if __name__ == '__main__':
