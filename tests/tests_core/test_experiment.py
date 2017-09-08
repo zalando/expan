@@ -1,12 +1,14 @@
 import unittest
 import warnings
+
 import numpy as np
-import pandas as pd
 
 from expan.core.binning import Bin
 from expan.core.experiment import Experiment
 # from expan.core.results import Results
 from expan.core.util import generate_random_data, get_column_names_by_type, find_list_of_dicts_element
+
+
 # from tests.tests_core.test_results import mock_results_object
 
 class ExperimentTestCase(unittest.TestCase):

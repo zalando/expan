@@ -1,16 +1,15 @@
 import os
+import pickle
+import sys
+import tempfile
 from os.path import dirname, join, realpath
 
 import numpy as np
-import sys
 from pystan import StanModel
 from scipy.stats import gaussian_kde, norm, cauchy
-from expan.core.util import drop_nan
 
 import expan.core.statistics as statx
-
-import pickle
-import tempfile
+from expan.core.util import drop_nan
 
 __location__ = realpath(join(os.getcwd(), dirname(__file__)))
 

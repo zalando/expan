@@ -7,10 +7,9 @@ import pandas as pd
 
 import expan.core.early_stopping as es
 import expan.core.statistics as statx
-
+from expan.core.util import get_column_names_by_type
 from expan.core.version import __version__
 
-from expan.core.util import get_column_names_by_type
 warnings.simplefilter('always', UserWarning)
 
 logger = logging.getLogger(__name__)
