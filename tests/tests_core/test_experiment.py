@@ -315,10 +315,49 @@ class ExperimentClassTestCases(ExperimentTestCase):
             exp.sga(dimension_to_bin)
 
 
-    def test_sga_valid_input(self):
+    def test_sga_one_bin(self):
         exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
         dimension_to_bin = {"normal_same": [Bin("numerical", 1, 10, True, True)]}
-        exp.sga(dimension_to_bin)
+        sga_result = exp.sga(dimension_to_bin)
+
+        self.assertEqual(len(sga_result), 1)
+        subgroup_res = sga_result[0]
+        self.assertEqual(subgroup_res['dimension'], 'normal_same')
+        self.assertEqual(subgroup_res['segment'], '[1, 10]')
+        self.assertTrue("result" in subgroup_res)
+
+
+    def test_sga_multi_bins(self):
+        exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
+        dimension_to_bin = {"normal_same": [
+            Bin("numerical", 1, 2, True, False),
+            Bin("numerical", 2, 3, True, False)
+        ]}
+        sga_result = exp.sga(dimension_to_bin)
+
+        self.assertEqual(len(sga_result), 2)
+        dimension_name = find_list_of_dicts_element(sga_result, "segment", "[1, 2)", "dimension")
+        self.assertEqual(dimension_name, 'normal_same')
+
+
+    def test_sga_multi_dim_multi_bins(self):
+        exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
+        dimension_to_bin = {
+            "normal_same": [
+                Bin("numerical", 1, 2, True, False),
+                Bin("numerical", 2, 3, True, False)],
+            "feature": [
+                Bin("categorical", ["has"]),
+                Bin("categorical", ["non"])
+            ]
+        }
+        sga_result = exp.sga(dimension_to_bin)
+
+        self.assertEqual(len(sga_result), 4)
+        numerical_dimension_name = find_list_of_dicts_element(sga_result, "segment", "[1, 2)", "dimension")
+        self.assertEqual(numerical_dimension_name, 'normal_same')
+        numerical_dimension_name = find_list_of_dicts_element(sga_result, "segment", "['non']", "dimension")
+        self.assertEqual(numerical_dimension_name, 'feature')
 
 
 if __name__ == '__main__':
