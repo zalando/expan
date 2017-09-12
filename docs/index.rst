@@ -14,14 +14,8 @@ Contents:
    readme
    installation
    usage
+   api
+   history
+   authors
    contributing
    alternatives
-   authors
-   history
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
