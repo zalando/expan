@@ -39,20 +39,49 @@ imported and used from within other projects and from the command line.
 
 Major statistical functionalities include:
 
-- **feature check**
 - **delta**
 - **subgroup analysis**
-- **trend**
+- **trend analysis** (coming soon)
 
 
 Installation
 ============
+
+Stable release
+--------------
 
 To install ExpAn, run this command in your terminal:
 
 .. code-block:: console
 
     $ pip install expan
+
+From sources
+------------
+
+The sources for ExpAn can be downloaded from the `Github repo`_.
+
+You can either clone the public repository:
+
+.. code-block:: console
+
+    $ git clone git://github.com/zalando/expan
+
+Or download the `tarball`_:
+
+.. code-block:: console
+
+    $ curl  -OL https://github.com/zalando/expan/tarball/master
+
+Once you have a copy of the source, you can install it with:
+
+.. code-block:: console
+
+    $ python setup.py install
+
+
+.. _Github repo: https://github.com/zalando/expan
+.. _tarball: https://github.com/zalando/expan/tarball/master
 
 
 Usage
@@ -69,7 +98,8 @@ Some mock-up data:
     from expan.core.experiment import Experiment
     from expan.core.util import generate_random_data
 
-    exp = Experiment('B', *generate_random_data())
+    data, metadata = generate_random_data()
+    exp = Experiment(control_variant_name='B', data=data, metadata=metadata)
     exp.delta()
 
 

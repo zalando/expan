@@ -1,22 +1,6 @@
-=====
-Usage
-=====
-
-To use ExpAn in a project::
-
-    import expan
-
-Some mock-up data
------------------
-
-::
-
-    from expan.core.experiment import Experiment
-    from expan.core.util import generate_random_data
-
-    exp = Experiment('B', *generate_random_data())
-    exp.delta()
-
+==========
+Glossary
+==========
 
 Per-entity ratio vs. ratio of totals
 ------------------------------------
@@ -64,3 +48,12 @@ To have such functionality as a more generic approach in **ExpAn**, we can intro
 - A reference metric, on which the weighting factor is based, e.g. :math:`V_i`
 
 With this input it calculates :math:`\alpha` as described above and outputs the result of ``statistics.delta()``.
+
+
+Early stopping
+------------------------------------
+ToDo
+
+Multiple testing problem
+------------------------------------
+ToDo
