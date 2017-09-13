@@ -2,6 +2,26 @@
 Glossary
 ==========
 
+
+Assumptions used in analysis
+------------------------------------
+
+1. Sample-size estimation
+
+  * Treatment does not affect variance
+  * Variance in treatment and control is identical
+  * Mean of delta is normally distributed
+
+2. Welch t-test
+
+  * Mean of means is t-distributed (or normally distributed) 
+
+3. In general
+
+  * Sample represents underlying population
+  * Entities are independent
+
+
 Per-entity ratio vs. ratio of totals
 ------------------------------------
 

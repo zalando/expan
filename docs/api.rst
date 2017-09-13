@@ -3,4 +3,4 @@
 API
 ===================
 
-* :ref:`modindex`
+:ref:`by module <modindex>`
