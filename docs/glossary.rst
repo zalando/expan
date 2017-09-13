@@ -52,7 +52,14 @@ With this input it calculates :math:`\alpha` as described above and outputs the 
 
 Early stopping
 ------------------------------------
-ToDo
+
+Given samples x from treatment group, samples y from control group, we want to know whether there is a significant difference between the means :math:`\delta=\mu(y)−\mu(x)`.
+To save the cost of long-running experiments, we want to stop the test early if we are already certain that there is a statistically significant result.
+
+You can find links to more detailed documentations of 
+`concept of early stopping <https://github.com/shansfolder/AB-Test-Early-Stopping/blob/master/docs/EarlyStoppingConcept/EarlyStoppingConcept.pdf>`_ and
+`early stopping methods we investigated <https://github.com/shansfolder/AB-Test-Early-Stopping/blob/master/docs/EvaluateEarlyStopping/EvaluatingEarlyStopping.pdf>`_.
+
 
 Multiple testing problem
 ------------------------------------
