@@ -2,12 +2,11 @@ import unittest
 import warnings
 
 import numpy as np
+from scipy import stats
 
 import expan.core.statistics as statx
 from expan.core.util import find_list_of_dicts_element
 from .util import *
-
-data_dir = os.getcwd() + '/tests/tests_core/data'
 
 
 class StatisticsTestCase(unittest.TestCase):
@@ -21,6 +20,8 @@ class StatisticsTestCase(unittest.TestCase):
         seed so that randomized algorithms show deterministic behaviour.
         """
         np.random.seed(0)
+        data_dir = os.path.dirname(os.path.realpath(__file__)) + '/data'
+
         self.samples = get_norm_temp_data(data_dir)
         self.metrics = get_framingham_data(data_dir)
 
@@ -31,7 +32,6 @@ class StatisticsTestCase(unittest.TestCase):
         """
         Clean up after the test
         """
-        # TODO: find out if we have to remove data manually
         pass
 
 
@@ -62,7 +62,7 @@ class DeltaTestCases(StatisticsTestCase):
             percentiles=[2.5, 97.5],
             assume_normal=True)
         # Checking if mean has right value
-        self.assertAlmostEqual(res['delta'],          -0.28923076923075541)
+        self.assertAlmostEqual(res['delta'], -0.28923076923075541)
 
         value025 = find_list_of_dicts_element(res['confidence_interval'], 'percentile',  2.5, 'value')
         value975 = find_list_of_dicts_element(res['confidence_interval'], 'percentile', 97.5, 'value')
@@ -281,17 +281,6 @@ class BootstrapTestCases(StatisticsTestCase):
     """
       Test cases for the bootstrap() function in core.statistics.
       """
-
-    def setUp(self):
-        """
-        Do the same setup as before - separate so that changing things in the base
-        TestCase doesn't change the randomisation here.
-        """
-
-        np.random.seed(0)
-        self.samples = get_norm_temp_data(data_dir)
-        self.metrics = get_framingham_data(data_dir)
-
     def test__bootstrap__computation(self):
         """
         Result of bootstrap() equals expected result.
@@ -302,7 +291,7 @@ class BootstrapTestCases(StatisticsTestCase):
         # Checking if lower percentile of result2 is correct
         self.assertAlmostEqual(result1[0][2.5], 98.1220, 2)
         # Checking if upper percentile of result2 is correct
-        self.assertAlmostEqual(result1[0][97.5], 98.3765, 2)
+        self.assertAlmostEqual(result1[0][97.5], 98.3708, 2)
         # Checking if no bootstrap data was passed
         self.assertIsNone(result1[1])
 
@@ -324,7 +313,7 @@ class BootstrapTestCases(StatisticsTestCase):
         # Checking if lower percentile of result3 is correct
         self.assertAlmostEqual(result3[0][2.5], -0.53384615384615619)
         # Checking if upper percentile of result3 is correct
-        self.assertAlmostEqual(result3[0][97.5], -0.041538461538493367)
+        self.assertAlmostEqual(result3[0][97.5], -0.049192307692299965)
         # Checking if no bootstrap data was passed
         self.assertIsNone(result3[1])
 
@@ -448,6 +437,19 @@ class NormalSampleDifferenceTestCases(StatisticsTestCase):
         self.assertAlmostEqual(result1[2.5], -0.53770569567692295)
         # Checking if upper percentile of result1 is correct
         self.assertAlmostEqual(result1[97.5], -0.040755842784587965)
+
+
+class StatisticalPowerTestCases(StatisticsTestCase):
+    """
+      Test cases for compute_statistical_power() function in core.statistics.
+      """
+
+    def test_compute_statistical_power(self):
+        # pre-computed value by hand via power analysis
+        # alpha=0.05, beta=0.2, sigma=1, delta=1, n1=12, n2=13
+        z_1_minus_alpha = stats.norm.ppf(0.95)
+        power = statx._get_power(0, 1, 13, 1, 1, 12, z_1_minus_alpha)
+        self.assertAlmostEqual(power, 0.8, 2)
 
 
 if __name__ == '__main__':

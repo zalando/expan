@@ -6,9 +6,9 @@ import logging
 import pickle
 
 import pandas as pd
-
-from expan.core.experiment     import Experiment
 from expan.core.experimentdata import ExperimentData
+
+from expan.core.experiment import Experiment
 
 
 class UsageError(Exception):
