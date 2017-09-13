@@ -200,34 +200,34 @@ class Experiment(object):
         self.data = self.data[flags == False]
 
 
-    def sga(self, dimension_to_bins):
+    def sga(self, feature_name_to_bins):
         """
         Perform subgroup analysis.
     
         Args:
-            dimension_to_bins (dict): a dict of dimension name (key) to list of Bin objects (value). 
+            feature_name_to_bins (dict): a dict of feature name (key) to list of Bin objects (value). 
                                       This dict defines how and on which column to perform the subgroup split.
                                       
         Returns:
             Analysis results per subgroup. 
         """
-        for dimension in dimension_to_bins:
+        for feature in feature_name_to_bins:
             # check type
-            if type(dimension) is not str:
+            if type(feature) is not str:
                 raise TypeError("Key of the input dict needs to be string, indicating the name of dimension")
-            if type(dimension_to_bins[dimension]) is not list:
+            if type(feature_name_to_bins[feature]) is not list:
                 raise TypeError("Value of the input dict needs to be a list of Bin objects.")
             # check whether data contains this column
-            if dimension not in self.data:
-                raise KeyError('No column %s provided in data.' % dimension)
+            if feature not in self.data:
+                raise KeyError('No column %s provided in data.' % feature)
 
         subgroups = []
-        for dimension in dimension_to_bins:
-            for bin in dimension_to_bins[dimension]:
+        for feature in feature_name_to_bins:
+            for bin in feature_name_to_bins[feature]:
                 subgroup = {}
-                subgroup['dimension'] = dimension
+                subgroup['dimension'] = feature
                 subgroup['segment'] = str(bin.representation)
-                subgroup_data = bin.apply(self.data, dimension)
+                subgroup_data = bin.apply(self.data, feature)
                 subgroup_res = self._delta(method='fixed_horizon', data=subgroup_data)
                 subgroup['result'] = subgroup_res
                 subgroups.append(subgroup)

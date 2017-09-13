@@ -45,14 +45,14 @@ class Bin(object):
     def __ne__(self, other):
         return not self.__eq__(other)
 
-    def apply(self, data, dimension):
+    def apply(self, data, feature):
         """
         Apply the bin to data.
         :param data: pandas data frame
-        :param dimension: dimension of the data for this bin
-        :return: subset of input data which belongs to this bin
+        :param feature: feature name on which this bin is defined
+        :return: subset of input dataframe which belongs to this bin
         """
-        return self.representation.apply_to_data(data, dimension)
+        return self.representation.apply_to_data(data, feature)
 
 
 
@@ -96,27 +96,27 @@ class NumericalRepresentation(object):
     def __ne__(self, other):
         return not self.__eq__(other)
 
-    def apply_to_data(self, data, dimension):
+    def apply_to_data(self, data, feature):
         """
         Apply the bin to data.
         :param data: pandas data frame
-        :param dimension: dimension of the data for this bin
-        :return: subset of input data which belongs to this bin
+        :param feature: feature name on which this bin is defined
+        :return: subset of input dataframe which belongs to this bin
         """
-        data_subgroup_dimension = data[dimension]
+        data_feature_column = data[feature]
 
         # if either bound is nan, only nans exist in the bin.
         if np.isnan(self.lower) or np.isnan(self.upper):
-            return data[np.isnan(data_subgroup_dimension)]
+            return data[np.isnan(data_feature_column)]
 
         if self.lower_closed:
-            filter_lower = (data_subgroup_dimension >= self.lower)
+            filter_lower = (data_feature_column >= self.lower)
         else:
-            filter_lower = (data_subgroup_dimension > self.lower)
+            filter_lower = (data_feature_column > self.lower)
         if self.upper_closed:
-            filter_upper = (data_subgroup_dimension <= self.upper)
+            filter_upper = (data_feature_column <= self.upper)
         else:
-            filter_upper = (data_subgroup_dimension < self.upper)
+            filter_upper = (data_feature_column < self.upper)
 
         return data[filter_lower & filter_upper]
 
@@ -145,18 +145,18 @@ class CategoricalRepresentation(object):
     def __ne__(self, other):
         return not self.__eq__(other)
 
-    def apply_to_data(self, data, dimension):
+    def apply_to_data(self, data, feature):
         """
         Apply the bin to data.
         :param data: pandas data frame
-        :param dimension: dimension of the data for this bin
-        :return: subset of input data which belongs to this bin
+        :param feature: feature name on which this bin is defined
+        :return: subset of input dataframe which belongs to this bin
         """
-        data_subgroup_dimension = data[dimension]
+        data_feature_column = data[feature]
         if len(self.categories) == 1:
-            return data[data_subgroup_dimension == self.categories[0]]
+            return data[data_feature_column == self.categories[0]]
         else:
-            return data[data_subgroup_dimension.isin(self.categories)]
+            return data[data_feature_column.isin(self.categories)]
 
 
 
