@@ -111,13 +111,6 @@ The latest stable version is 0.6.2.
 
 `ExpAn main documentation <http://expan.readthedocs.io/>`__
 
-`ExpAn Introduction Notebook <https://github.com/zalando/expan/blob/dev/ExpAn-Intro.ipynb>`__ - a full jupyter (iPython) notebook. You can view it as slides with `jupyter <http://jupyter.org>`__:
-
-`ExpAn Introduction HTML <https://github.com/zalando/expan/blob/dev/ExpAn-Intro.html>`__ - static html doc generated from the above jupyter notebook
-::
-
-    sh serve_intro_slides
-
 
 License
 =======
