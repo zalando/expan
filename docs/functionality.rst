@@ -18,8 +18,8 @@ It supports **group sequential**, **Bayes factor** and **Bayes precision**.
 ``core.binning`` implements categorical and numerical **binning algorithms**.
 It supports binning implementations which can be applied to unseed data as well.
 
-``core.utils`` contains supplied utility methods. 
-for example, **generate random data** and **drop nan values**.
+``core.utils`` contains supplied utility functions. 
+for example, **generate random data** and **drop nan values**, among many other functions.
 
 ``core.version`` constructs versioning of the package.
 
