@@ -1,4 +1,6 @@
 #!/usr/bin/python
+'''
+# TODO: outdated
 
 import argparse
 import ast
@@ -133,3 +135,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+'''

@@ -9,19 +9,13 @@ Welcome to ExpAn's documentation!
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    readme
-   installation
-   usage
-   contributing
-   alternatives
-   authors
+   functionality
+   tutorial
+   api
+   glossary
    history
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   alternatives
+   contributing
