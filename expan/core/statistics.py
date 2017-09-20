@@ -92,8 +92,8 @@ def delta(x, y, assume_normal=True, percentiles=[2.5, 97.5],
         # Computing the confidence intervals
         if assume_normal:
             if num_tests:
-                percentiles = [x/num_tests if x < 50.0
-                               else 100-(100-x)/num_tests if x > 50.0 else x for x in percentiles]
+                percentiles = [float(p)/num_tests if p < 50.0
+                               else 100-(100-float(p))/num_tests if p > 50.0 else p for p in percentiles]
             c_i = normal_sample_difference(x=_x, y=_y, percentiles=percentiles, relative=relative)
         else:
             c_i, _ = bootstrap(x=_x, y=_y, percentiles=percentiles, nruns=nruns,
