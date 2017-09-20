@@ -11,7 +11,7 @@ def _delta_mean(x, y):
 
 
 def make_delta(assume_normal=True, percentiles=[2.5, 97.5],
-               min_observations=20, nruns=10000, relative=False, num_tests=0):
+               min_observations=20, nruns=10000, relative=False, num_tests=1):
     """ a closure to the below delta function """
 
     def f(x, y, x_weights=1, y_weights=1):
@@ -22,7 +22,7 @@ def make_delta(assume_normal=True, percentiles=[2.5, 97.5],
 
 
 def delta(x, y, assume_normal=True, percentiles=[2.5, 97.5],
-          min_observations=20, nruns=10000, relative=False, x_weights=1, y_weights=1, num_tests=0):
+          min_observations=20, nruns=10000, relative=False, x_weights=1, y_weights=1, num_tests=1):
     """
     Calculates the difference of means between the samples (x-y) in a
     statistical sense, i.e. with confidence intervals.
@@ -91,9 +91,8 @@ def delta(x, y, assume_normal=True, percentiles=[2.5, 97.5],
         mu = _delta_mean(_x, _y)
         # Computing the confidence intervals
         if assume_normal:
-            if num_tests:
-                percentiles = [float(p)/num_tests if p < 50.0
-                               else 100-(100-float(p))/num_tests if p > 50.0 else p for p in percentiles]
+            percentiles = [float(p)/num_tests if p < 50.0
+                           else 100-(100-float(p))/num_tests if p > 50.0 else p for p in percentiles]
             c_i = normal_sample_difference(x=_x, y=_y, percentiles=percentiles, relative=relative)
         else:
             c_i, _ = bootstrap(x=_x, y=_y, percentiles=percentiles, nruns=nruns,
