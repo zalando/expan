@@ -4,24 +4,25 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
+
 def _delta_mean(x, y):
     """Implemented as function to allow calling from bootstrap. """
     return np.nanmean(x) - np.nanmean(y)
 
 
 def make_delta(assume_normal=True, percentiles=[2.5, 97.5],
-               min_observations=20, nruns=10000, relative=False):
+               min_observations=20, nruns=10000, relative=False, num_tests=0):
     """ a closure to the below delta function """
 
     def f(x, y, x_weights=1, y_weights=1):
         return delta(x, y, assume_normal, percentiles, min_observations,
-                     nruns, relative, x_weights, y_weights)
+                     nruns, relative, x_weights, y_weights, num_tests)
 
     return f
 
 
 def delta(x, y, assume_normal=True, percentiles=[2.5, 97.5],
-          min_observations=20, nruns=10000, relative=False, x_weights=1, y_weights=1):
+          min_observations=20, nruns=10000, relative=False, x_weights=1, y_weights=1, num_tests=0):
     """
     Calculates the difference of means between the samples (x-y) in a
     statistical sense, i.e. with confidence intervals.
@@ -56,6 +57,7 @@ def delta(x, y, assume_normal=True, percentiles=[2.5, 97.5],
             the weighted mean and confidence intervals, which is equivalent
             to the overall metric. This weighted approach is only relevant
             for ratios.
+        num_tests: number of tests or reported kpis
 
     Returns:
         DeltaStatistics object
@@ -89,8 +91,10 @@ def delta(x, y, assume_normal=True, percentiles=[2.5, 97.5],
         mu = _delta_mean(_x, _y)
         # Computing the confidence intervals
         if assume_normal:
-            c_i = normal_sample_difference(x=_x, y=_y, percentiles=percentiles,
-                                           relative=relative)
+            if num_tests:
+                percentiles = [x/num_tests if x < 50.0
+                               else 100-(100-x)/num_tests if x > 50.0 else x for x in percentiles]
+            c_i = normal_sample_difference(x=_x, y=_y, percentiles=percentiles, relative=relative)
         else:
             c_i, _ = bootstrap(x=_x, y=_y, percentiles=percentiles, nruns=nruns,
                                relative=relative)
