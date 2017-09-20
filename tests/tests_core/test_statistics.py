@@ -76,6 +76,38 @@ class DeltaTestCases(StatisticsTestCase):
         # Checking if sample size 2 is correct
         self.assertEqual(res['control_sample_size'], 65)
 
+    def test__delta__2percentiles_25_tests(self):
+        """
+        Percentiles of delta() for sga are corrected for 25 tests
+        """
+        res = statx.delta(
+            self.samples.temperature[self.samples.gender == 1],
+            self.samples.temperature[self.samples.gender == 2],
+            percentiles=[2.5, 97.5],
+            assume_normal=True, num_tests=25)
+
+        value025 = find_list_of_dicts_element(res['confidence_interval'], 'percentile', 0.1, 'value')
+        value975 = find_list_of_dicts_element(res['confidence_interval'], 'percentile', 99.9, 'value')
+
+        self.assertAlmostEqual(value025, -0.68544085117601006)
+        self.assertAlmostEqual(value975, 0.1069793127145035)
+
+    def test__delta__2percentiles_no_tests(self):
+        """
+        Percentiles of delta() for sga are corrected for no tests (1 as a default)
+        """
+        res = statx.delta(
+            self.samples.temperature[self.samples.gender == 1],
+            self.samples.temperature[self.samples.gender == 2],
+            percentiles=[2.5, 97.5],
+            assume_normal=True, num_tests=1)
+
+        value025 = find_list_of_dicts_element(res['confidence_interval'], 'percentile', 2.5, 'value')
+        value975 = find_list_of_dicts_element(res['confidence_interval'], 'percentile', 97.5, 'value')
+
+        self.assertAlmostEqual(value025, -0.53770569567692295)
+        self.assertAlmostEqual(value975, -0.040755842784587965)
+
     def test__delta__nan_handling(self):
         """
         Test correct handling of nans. (ignored)
@@ -84,7 +116,7 @@ class DeltaTestCases(StatisticsTestCase):
         self.assertEqual(res['treatment_sample_size'], 1000)
         self.assertEqual(res['control_sample_size'], 1000)
 
-        r1 = self.rand_s1.copy();
+        r1 = self.rand_s1.copy()
         r1[90:] = np.nan
         res = statx.delta(r1, self.rand_s2)
 
