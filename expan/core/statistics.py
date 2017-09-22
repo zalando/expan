@@ -90,9 +90,9 @@ def delta(x, y, assume_normal=True, percentiles=[2.5, 97.5],
         # Computing the mean
         mu = _delta_mean(_x, _y)
         # Computing the confidence intervals
+        percentiles = [float(p) / num_tests if p < 50.0
+                       else 100 - (100 - float(p)) / num_tests if p > 50.0 else p for p in percentiles]
         if assume_normal:
-            percentiles = [float(p)/num_tests if p < 50.0
-                           else 100-(100-float(p))/num_tests if p > 50.0 else p for p in percentiles]
             c_i = normal_sample_difference(x=_x, y=_y, percentiles=percentiles, relative=relative)
         else:
             c_i, _ = bootstrap(x=_x, y=_y, percentiles=percentiles, nruns=nruns,
@@ -266,7 +266,7 @@ def bootstrap(x, y, func=_delta_mean, nruns=10000, percentiles=[2.5, 97.5],
         # Initializing bootstraps array and random sampling for each run
         bootstraps = np.ones(nruns) * np.nan
         for run in range(nruns):
-            # Randomly chose values from _x and _y with replacement
+            # Randomly choose values from _x and _y with replacement
             xp = _x[np.random.randint(0, len(_x), size=(len(_x),))]
             yp = _y[np.random.randint(0, len(_y), size=(len(_y),))]
             # Application of the given function to the bootstraps
