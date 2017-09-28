@@ -24,10 +24,10 @@ class Experiment(object):
     """
     def __init__(self, control_variant_name, data, metadata, report_kpi_names=None, derived_kpis=None):
         report_kpi_names = report_kpi_names or []
-        derived_kpis  = derived_kpis or []
+        derived_kpis = derived_kpis or []
 
         experiment_column_names = set(['entity', 'variant'])
-        numerical_column_names  = set(get_column_names_by_type(data, np.number))
+        numerical_column_names = set(get_column_names_by_type(data, np.number))
 
         if type(report_kpi_names) is str:
             report_kpi_names = [report_kpi_names]
@@ -77,10 +77,8 @@ class Experiment(object):
             self.data.loc[:, name] = eval(re.sub(kpi_name_pattern, r'self.data.\1.astype(float)', formula))
             self.reference_kpis[name] = re.sub(kpi_name_pattern + '/', '', formula)
 
-
     def get_kpi_by_name_and_variant(self, data, name, variant):
         return data.reset_index().set_index('variant').loc[variant, name]
-
 
     def __str__(self):
         variants = self.variant_names
@@ -88,7 +86,6 @@ class Experiment(object):
         return 'Experiment "{:s}" with {:d} derived kpis, {:d} report kpis, {:d} entities and {:d} variants: {}'.format(
             self.metadata['experiment'], len(self.derived_kpis), len(self.report_kpi_names), len(self.data),
             len(variants), ', '.join([('*' + k + '*') if (k == self.control_variant_name) else k for k in variants]))
-
 
     def _get_weights(self, data, kpi, variant):
         if kpi not in self.reference_kpis:
@@ -99,10 +96,8 @@ class Experiment(object):
         non_zeros      = len(x) - zeros_and_nans
         return non_zeros/np.nansum(x) * x
 
-
     def delta(self, method='fixed_horizon', **worker_args):
         return self._delta(method=method, data=self.data, **worker_args)
-
 
     def _delta(self, method, data, **worker_args):
         worker_table = {
@@ -117,17 +112,15 @@ class Experiment(object):
 
         worker = worker_table[method](**worker_args)
 
-        result = {}
-        result['warnings']        = []
-        result['errors']          = []
-        result['expan_version']   = __version__
-        result['control_variant'] = self.control_variant_name
+        result = {'warnings': [],
+                  'errors': [],
+                  'expan_version': __version__,
+                  'control_variant': self.control_variant_name}
         kpis = []
 
         for kpi in self.report_kpi_names:
-            res_kpi = {}
-            res_kpi['name']     = kpi
-            res_kpi['variants'] = []
+            res_kpi = {'name': kpi,
+                       'variants': []}
             control         = self.get_kpi_by_name_and_variant(data, kpi, self.control_variant_name)
             control_weight  = self._get_weights(data, kpi, self.control_variant_name)
             control_data    = control * control_weight
@@ -141,13 +134,12 @@ class Experiment(object):
                     power = statx.compute_statistical_power(treatment_data, control_data)
                     statistics['statistical_power'] = power
                 if len(w):
-                    result['warnings'].append('kpi: ' + kpi + ', variant: '+ variant + ': ' + str(w[-1].message))
-                res_kpi['variants'].append({'name': variant, 'delta_statistics' : statistics})
+                    result['warnings'].append('kpi: {}, variant: {}: {}'.format(kpi, variant, w[-1].message))
+                res_kpi['variants'].append({'name': variant, 'delta_statistics': statistics})
             kpis.append(res_kpi)
 
         result['kpis'] = kpis
         return result
-
 
     def _quantile_filtering(self, kpis, percentile, threshold_type):
         method_table = {'upper': lambda x: x > threshold, 'lower': lambda x: x <= threshold}
@@ -156,7 +148,6 @@ class Experiment(object):
             threshold = np.percentile(self.data[column], percentile)
             flags = flags | self.data[column].apply(method_table[threshold_type])
         return flags
-
 
     def filter(self, kpis, percentile=99.0, threshold_type='upper'):
         """
@@ -199,7 +190,6 @@ class Experiment(object):
 
         self.data = self.data[flags == False]
 
-
     def sga(self, feature_name_to_bins):
         """
         Perform subgroup analysis.
@@ -224,11 +214,11 @@ class Experiment(object):
         subgroups = []
         for feature in feature_name_to_bins:
             for bin in feature_name_to_bins[feature]:
-                subgroup = {}
-                subgroup['dimension'] = feature
-                subgroup['segment'] = str(bin.representation)
+                subgroup = {'dimension': feature,
+                            'segment': str(bin.representation)}
                 subgroup_data = bin.apply(self.data, feature)
-                subgroup_res = self._delta(method='fixed_horizon', data=subgroup_data)
+                subgroup_res = self._delta(method='fixed_horizon', data=subgroup_data,
+                                           num_tests=len(self.report_kpi_names))
                 subgroup['result'] = subgroup_res
                 subgroups.append(subgroup)
 

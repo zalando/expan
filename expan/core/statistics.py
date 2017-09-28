@@ -4,24 +4,25 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
+
 def _delta_mean(x, y):
     """Implemented as function to allow calling from bootstrap. """
     return np.nanmean(x) - np.nanmean(y)
 
 
 def make_delta(assume_normal=True, percentiles=[2.5, 97.5],
-               min_observations=20, nruns=10000, relative=False):
+               min_observations=20, nruns=10000, relative=False, num_tests=1):
     """ a closure to the below delta function """
 
     def f(x, y, x_weights=1, y_weights=1):
         return delta(x, y, assume_normal, percentiles, min_observations,
-                     nruns, relative, x_weights, y_weights)
+                     nruns, relative, x_weights, y_weights, num_tests)
 
     return f
 
 
 def delta(x, y, assume_normal=True, percentiles=[2.5, 97.5],
-          min_observations=20, nruns=10000, relative=False, x_weights=1, y_weights=1):
+          min_observations=20, nruns=10000, relative=False, x_weights=1, y_weights=1, num_tests=1):
     """
     Calculates the difference of means between the samples (x-y) in a
     statistical sense, i.e. with confidence intervals.
@@ -56,6 +57,7 @@ def delta(x, y, assume_normal=True, percentiles=[2.5, 97.5],
             the weighted mean and confidence intervals, which is equivalent
             to the overall metric. This weighted approach is only relevant
             for ratios.
+        num_tests: number of tests or reported kpis
 
     Returns:
         DeltaStatistics object
@@ -88,9 +90,10 @@ def delta(x, y, assume_normal=True, percentiles=[2.5, 97.5],
         # Computing the mean
         mu = _delta_mean(_x, _y)
         # Computing the confidence intervals
+        percentiles = [float(p) / num_tests if p < 50.0
+                       else 100 - (100 - float(p)) / num_tests if p > 50.0 else p for p in percentiles]
         if assume_normal:
-            c_i = normal_sample_difference(x=_x, y=_y, percentiles=percentiles,
-                                           relative=relative)
+            c_i = normal_sample_difference(x=_x, y=_y, percentiles=percentiles, relative=relative)
         else:
             c_i, _ = bootstrap(x=_x, y=_y, percentiles=percentiles, nruns=nruns,
                                relative=relative)
@@ -263,7 +266,7 @@ def bootstrap(x, y, func=_delta_mean, nruns=10000, percentiles=[2.5, 97.5],
         # Initializing bootstraps array and random sampling for each run
         bootstraps = np.ones(nruns) * np.nan
         for run in range(nruns):
-            # Randomly chose values from _x and _y with replacement
+            # Randomly choose values from _x and _y with replacement
             xp = _x[np.random.randint(0, len(_x), size=(len(_x),))]
             yp = _y[np.random.randint(0, len(_y), size=(len(_y),))]
             # Application of the given function to the bootstraps
