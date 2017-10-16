@@ -67,12 +67,6 @@ def group_sequential(x,
     _x = np.array(x, dtype=float)
     _y = np.array(y, dtype=float)
 
-    # if scalar, assume equal spacing between the intervals
-    # if not isinstance(information_fraction, list):
-    #	fraction = np.linspace(0,1,information_fraction+1)[1:]
-    # else:
-    #	fraction = information_fraction
-
     n_x = statx.sample_size(_x)
     n_y = statx.sample_size(_y)
 
