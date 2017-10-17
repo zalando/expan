@@ -72,6 +72,19 @@ class GroupSequentialTestCases(EarlyStoppingTestCase):
         self.assertAlmostEqual         (res['control_mean'],           0.11361694031616358)
 
 
+    def test_group_sequential_actual_size_larger_than_estimated(self):
+        """
+        Check the group sequential function with wrong input,
+        such that the actual data size is already larger than estimated sample size.
+        """
+        res = es.group_sequential(self.rand_s1, self.rand_s2, estimated_sample_size=100)
+
+        value025 = find_list_of_dicts_element(res['confidence_interval'], 'percentile',  2.5, 'value')
+        value975 = find_list_of_dicts_element(res['confidence_interval'], 'percentile', 97.5, 'value')
+        np.testing.assert_almost_equal (value025,                     -0.24461812530841959, decimal=5)
+        np.testing.assert_almost_equal (value975,                     -0.07312917030429833, decimal=5)
+
+
 class BayesFactorTestCases(EarlyStoppingTestCase):
     """
       Test cases for the bayes_factor function in core.early_stopping.
