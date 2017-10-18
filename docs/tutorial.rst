@@ -11,7 +11,7 @@ First, let's generate some random data.
 	from expan.core.util import generate_random_data
 	data, metadata = generate_random_data()
 
-``data`` is a pandas DataFrame. 
+``data`` is a pandas DataFrame.
 It must contain a column **entity**, a column **variant**, then one column per kpis you defined.
 You can check the example structure of ``data`` aby looking at:
 
@@ -36,18 +36,18 @@ To use ExpAn for analysis, you first need to construct an ``Experiment`` object.
 .. code-block:: python
 
 	from expan.core.experiment import Experiment
-	exp = Experiment(control_variant_name='A', 
-	                 data=data, 
-	                 metadata=metadata, 
+	exp = Experiment(control_variant_name='A',
+	                 data=data,
+	                 metadata=metadata,
 	                 report_kpi_names=['derived_kpi_one'],
 	                 derived_kpis=[{'name':'derived_kpi_one','formula':'normal_same/normal_shifted'}])
 
 This ``Experiment`` object has the following parameters:
-	
+
 	* ``control_variant_name``: Indicates which of the variants is to be considered as a baseline (a.k.a. control).
 	* ``data``: A data you want to run experiment for. An example of the data structure. Described above.
 	* ``metadata``: Specifies an experiment name as the mandatory and data source as the optional fields. Described above.
-	* ``report_kpi_names``: A list of strings specifying desired kpis to analyse (empty list by default). 
+	* ``report_kpi_names``: A list of strings specifying desired kpis to analyse (empty list by default).
 	* ``derived_kpis``: Each derived kpi is defined as a dictionary structured by *{'name': <name_of_the_kpi>, 'formula': <formula_to_compute_kpi>}*. Then **derived_kpis** is a list of such dictionaries if more than one derived_kpi is wanted (empty dict by default). *<name_of_the_kpi>* is name of the kpi. *<formula_to_compute_kpi>* is the formula to calculate the desired kpi. You can find the example described above.
 
 **NOTE 1**. You should be careful specifying the correct structure to the derived_kpis dictionary including keys *'name'* and *'formula'*. Otherwise, construction of ``Experiment`` object will raise an exception.
@@ -87,8 +87,8 @@ If you would like to change any of the default values, just pass them as paramet
 	exp.delta(method='fixed_horizon', assume_normal=True, percentiles=[2.5, 99.5])
 	exp.delta(method='group_sequential', estimated_sample_size=1000)
 	exp.delta(method='bayes_factor', distribution='normal')
-	
-Here is the list of each of the addtional parameters. 
+
+Here is the list of each of the addtional parameters.
 You may also find the description in our :ref:`API <modindex>` page.
 
 *fixed_horizon* is the default method:
@@ -100,9 +100,9 @@ You may also find the description in our :ref:`API <modindex>` page.
 	* ``relative=False``: If relative==True, then the values will be returned as distances below and above the mean, respectively, rather than the absolute values.
 
 *group_sequential* is a frequentist approach for early stopping:
-	
+
 	* ``spending_function='obrien_fleming'``: Currently we support only Obrient-Fleming alpha spending function for the frequentist early stopping decision.
-	* ``estimated_sample_size=None``: Sample size to be achieved towards the end of experiment.
+	* ``estimated_sample_size=None``: Sample size to be achieved towards the end of experiment. In other words, the actual size of data should be always smaller than estimated_sample_size.
 	* ``alpha=0.05``: Type-I error rate.
 	* ``cap=8``: Upper bound of the adapted z-score.
 
@@ -188,7 +188,7 @@ The output of the ``delta`` method has the following structure:
 	}
 
 The corresponding fields are:
-	
+
 	* ``treatment_mean``: the mean of the treatment group.
 	* ``control_mean``: the mean of the control group.
 	* ``control_sample_size``: the sample size for the control group.
@@ -242,7 +242,7 @@ will output:
 
 Create bin object automatically
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Given a number of bins, you can also create a list of bins from data by using the method ``create_bins(data, n_bins)``. 
+Given a number of bins, you can also create a list of bins from data by using the method ``create_bins(data, n_bins)``.
 
 It will create n_bins ``Bin`` ojbects, which separates ``data`` as equally as possible. This method will also automatically detects numerical or categorical data, and creates corresponding bin representations.
 
@@ -262,22 +262,22 @@ will output:
 .. code-block:: python
 
 	[
-	  bin: [-3.83665554846, -1.25906491145), 
-	  bin: [-1.25906491145, -0.804751813719), 
-	  bin: [-0.804751813719, -0.489466995342), 
-	  bin: [-0.489466995342, -0.226662203724), 
-	  bin: [-0.226662203724, 0.0239463824493), 
-	  bin: [0.0239463824493, 0.276994331119), 
-	  bin: [0.276994331119, 0.551060124216), 
-	  bin: [0.551060124216, 0.868798338306), 
-	  bin: [0.868798338306, 1.30062540106), 
+	  bin: [-3.83665554846, -1.25906491145),
+	  bin: [-1.25906491145, -0.804751813719),
+	  bin: [-0.804751813719, -0.489466995342),
+	  bin: [-0.489466995342, -0.226662203724),
+	  bin: [-0.226662203724, 0.0239463824493),
+	  bin: [0.0239463824493, 0.276994331119),
+	  bin: [0.276994331119, 0.551060124216),
+	  bin: [0.551060124216, 0.868798338306),
+	  bin: [0.868798338306, 1.30062540106),
 	  bin: [1.30062540106, 4.47908425103]
 	]
 
 Assign data to bins
 ~~~~~~~~~~~~~~~~~~~~~
 We can use the method ``apply(data)`` of the ``Bin`` object to assign data to one of the given bins.
-This method will return a subset of input data which belongs to this bin. 
+This method will return a subset of input data which belongs to this bin.
 It will return ``None`` if there is no data matched.
 
 .. code-block:: python
@@ -319,7 +319,7 @@ Applying bin to data in variant A will result in:
 	83      1.889279
 	84      0.238171
 	89      0.580568
-	          ...   
+	          ...
 	9873    0.030269
 	9875    0.863606
 	9876    0.524865
@@ -391,7 +391,7 @@ Similarly, applying bin to data in variant B will result in different result:
 	161     0.150602
 	165     0.090310
 	170     0.947512
-	          ...   
+	          ...
 	9862    0.725924
 	9863    1.492610
 	9864    0.908889
@@ -425,14 +425,14 @@ Similarly, applying bin to data in variant B will result in different result:
 	Name: normal_same, dtype: float64
 
 
-	
+
 Subgroup analysis
 -------------------
-Subgroup analysis in ExaAn will select subgroup (which is a segment of data) based on the input argument, and then perform a regular delta analysis per subgroup as described before. 
+Subgroup analysis in ExaAn will select subgroup (which is a segment of data) based on the input argument, and then perform a regular delta analysis per subgroup as described before.
 That is to say, we don't compare between subgroups, but compare treatment with control within each subgroup.
 
-The input argument is a python dict, which maps feature name (key) to a list of ``Bin`` objects (value). 
-This dict defines how and on which feature to perform the subgroup split. 
+The input argument is a python dict, which maps feature name (key) to a list of ``Bin`` objects (value).
+This dict defines how and on which feature to perform the subgroup split.
 The returned value of subgroup analysis will be the result of regular delta analysis per subgroup.
 
 An example is provided below.
@@ -440,7 +440,7 @@ An example is provided below.
 .. code-block:: python
 
 	dimension_to_bins = {"treatment_start_time": [
-	    Bin("numerical", 0, 5, True, False), 
+	    Bin("numerical", 0, 5, True, False),
 	    Bin("numerical", 5, 10, True, False)]
 	}
 	exp.sga(dimension_to_bins)
@@ -472,7 +472,7 @@ And the result of subgroup analysis is:
 	                'treatment_mean': -0.005920786139629961,
 	                'treatment_sample_size': 1930,
 	              	'confidence_interval': [
-	              	  {'percentile': 2.5, 'value': -1.5569210692070499}, 
+	              	  {'percentile': 2.5, 'value': -1.5569210692070499},
 	                  {'percentile': 97.5, 'value': 2.1978673629800363}
 	              	]
 	              }
@@ -553,5 +553,5 @@ As you can see, the hierarchy of the result of subgroup analysis is the followin
 	    -variants
 
 
-That's it! Try it out for yourself: `<github.com/zalando/expan>`_ 
+That's it! Try it out for yourself: `<github.com/zalando/expan>`_
 
