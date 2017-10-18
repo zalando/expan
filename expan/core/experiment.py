@@ -7,7 +7,7 @@ import pandas as pd
 
 import expan.core.early_stopping as es
 import expan.core.statistics as statx
-from expan.core.util import get_column_names_by_type
+from expan.core.util import get_column_names_by_type, subset_data_by_date
 from expan.core.version import __version__
 
 warnings.simplefilter('always', UserWarning)
@@ -190,21 +190,23 @@ class Experiment(object):
 
         self.data = self.data[flags == False]
 
-    def sga(self, feature_name_to_bins):
+    def sga(self, feature_name_to_bins, time_interval=None):
         """
-        Perform subgroup analysis.
-    
+        Perform subgroup analysis. If start and end dates are specified, the time-based sga is performed alongside.
+
         Args:
             feature_name_to_bins (dict): a dict of feature name (key) to list of Bin objects (value). 
                                       This dict defines how and on which column to perform the subgroup split.
-                                      
+            time_interval: lower and upper bound of the time interval for the date of treatment.
+
         Returns:
             Analysis results per subgroup. 
         """
+
         for feature in feature_name_to_bins:
             # check type
             if type(feature) is not str:
-                raise TypeError("Key of the input dict needs to be string, indicating the name of dimension")
+                raise TypeError("Key of the input dict needs to be string, indicating the name of dimension.")
             if type(feature_name_to_bins[feature]) is not list:
                 raise TypeError("Value of the input dict needs to be a list of Bin objects.")
             # check whether data contains this column
@@ -212,14 +214,27 @@ class Experiment(object):
                 raise KeyError('No column %s provided in data.' % feature)
 
         subgroups = []
-        for feature in feature_name_to_bins:
-            for bin in feature_name_to_bins[feature]:
-                subgroup = {'dimension': feature,
-                            'segment': str(bin.representation)}
-                subgroup_data = bin.apply(self.data, feature)
-                subgroup_res = self._delta(method='fixed_horizon', data=subgroup_data,
-                                           num_tests=len(self.report_kpi_names))
-                subgroup['result'] = subgroup_res
-                subgroups.append(subgroup)
+        if feature_name_to_bins:
+            for feature in feature_name_to_bins:
+                for bin in feature_name_to_bins[feature]:
+                    subgroup = {'dimension': feature,
+                                'segment': str(bin.representation)}
+                    subgroup_data = bin.apply(self.data, feature)
+                    subgroup_res = self._delta(method='fixed_horizon', data=subgroup_data,
+                                               num_tests=len(self.report_kpi_names))
+                    subgroup['result'] = subgroup_res
+                    subgroups.append(subgroup)
 
+        if time_interval:
+            # Checks if the date is available and subsets the data.
+            if 'date' in self.data:
+                self.data = subset_data_by_date(self.data, time_interval)
+            else:
+                raise KeyError("No date column is provided in data for time-based SGA!")
+
+        if time_interval:
+            subgroups.append({'dimension': 'date',
+                              'segment': time_interval,
+                              'result': self._delta(method='fixed_horizon', data=self.data,
+                                                    num_tests=len(self.report_kpi_names))})
         return subgroups

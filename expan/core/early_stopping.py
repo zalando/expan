@@ -37,6 +37,7 @@ def make_group_sequential(spending_function='obrien_fleming', estimated_sample_s
                                 alpha, cap)
     return f
 
+
 def group_sequential(x,
                      y,
                      spending_function='obrien_fleming',
@@ -174,6 +175,7 @@ def get_or_compile_stan_model(model_file, distribution):
 cache_sampling_results = False
 sampling_results = {} # memoized sampling results
 
+
 def _bayes_sampling(x, y, distribution='normal', num_iters=25000, inference="sampling"):
     """
     Helper function.
@@ -307,6 +309,7 @@ def make_bayes_precision(distribution='normal', posterior_width=0.08, num_iters=
     def f(x, y):
         return bayes_precision(x, y, distribution, posterior_width, num_iters)
     return f
+
 
 def bayes_precision(x, y, distribution='normal', posterior_width=0.08, num_iters=25000):
     """

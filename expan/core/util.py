@@ -2,6 +2,7 @@ from warnings import warn
 
 import numpy as np
 import pandas as pd
+from datetime import datetime, timedelta
 
 
 def find_list_of_dicts_element(items, key1, value, key2):
@@ -125,6 +126,17 @@ def generate_random_data():
     test_data_frame.loc[test_data_frame['variant'] == 'B','normal_unequal_variance'] \
         = np.random.normal(scale=10, size=size_unequalvar_B)
 
+    # Add date column
+    d1 = datetime.strptime('2015-01-01', '%Y-%m-%d')
+    d2 = datetime.strptime('2016-03-01', '%Y-%m-%d')
+    date_col = []
+
+    delta = d2 - d1
+    for i in range(delta.days * 24 + 1):
+        date_col.append((d1 + timedelta(hours=i)).strftime('%Y%m%d'))
+
+    test_data_frame['date'] = date_col[:size]
+
     metadata = {
         'primary_KPI': 'normal_shifted',
         'source': 'simulated',
@@ -156,3 +168,53 @@ def generate_random_data_n_variants(n_variants=3):
     }
 
     return test_data_frame, metadata
+
+
+def bg_date_to_datetime(date_str):
+    """
+    Converts from BigQuery date string to datetime
+    Args:
+        date_str: date in type String
+    Returns:
+        datetime formatted date
+    """
+    return datetime.strptime(date_str, '%Y%m%d')
+
+
+def from_string_to_date(date_str):
+    """
+    Converts from the user-input string to datetime
+    Args:
+        date_str: date in type String
+    Returns:
+        datetime formatted date
+    """
+    return datetime.strptime(date_str, '%d.%m.%Y')
+
+
+def subset_data_by_date(data, time_interval):
+    """
+    Subsets data by start date and end date or separately for start and end if one of them is specified.
+    Args: 
+        data: data for the experiment
+        time_interval: lower and upper bound of the time interval.
+    Returns: 
+        subset of data
+    """
+
+    if len(time_interval) > 2:
+        raise ValueError("Time interval should have two parameters: the start date and the end date!")
+
+    if 'start' in time_interval and 'end' in time_interval:
+        if time_interval['start'] > time_interval['end']:
+            raise ValueError("Start date should be smaller than the end date!")
+
+        return data[data['date'].apply(
+            lambda x: from_string_to_date(
+                time_interval['start']) <= bg_date_to_datetime(x) <= from_string_to_date(time_interval['end']))]
+    elif 'end' in time_interval:
+        return data[data['date'].apply(lambda x: bg_date_to_datetime(x) <= from_string_to_date(time_interval['end']))]
+    elif 'start' in time_interval:
+        return data[data['date'].apply(lambda x: bg_date_to_datetime(x) >= from_string_to_date(time_interval['start']))]
+
+    return data

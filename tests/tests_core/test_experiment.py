@@ -8,8 +8,8 @@ from expan.core.experiment import Experiment
 # from expan.core.results import Results
 from expan.core.util import generate_random_data, get_column_names_by_type, find_list_of_dicts_element
 
-
 # from tests.tests_core.test_results import mock_results_object
+
 
 class ExperimentTestCase(unittest.TestCase):
     """
@@ -359,6 +359,60 @@ class ExperimentClassTestCases(ExperimentTestCase):
         numerical_dimension_name = find_list_of_dicts_element(sga_result, "segment", "['non']", "dimension")
         self.assertEqual(numerical_dimension_name, 'feature')
 
+    def test_sga_time_based_no_bins(self):
+        exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
+        dimension_to_bin = {}
+        sga_result = exp.sga(dimension_to_bin)
+
+        self.assertEqual(len(sga_result), 0)
+
+    def test_sga_time_based_partitioning(self):
+        exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
+
+        time_interval = {'start': '01.01.2015', 'end': '01.03.2016'}
+
+        dimension_to_bin = {
+            "normal_same": [
+                Bin("numerical", 1, 2, True, False),
+                Bin("numerical", 2, 3, True, False)],
+            "feature": [
+                Bin("categorical", ["has"]),
+                Bin("categorical", ["non"])
+            ]
+        }
+        sga_result = exp.sga(dimension_to_bin, time_interval=time_interval)
+        self.assertEqual(len(sga_result), 5)
+        numerical_dimension_name = find_list_of_dicts_element(sga_result, "segment", "[1, 2)", "dimension")
+        self.assertEqual(numerical_dimension_name, 'normal_same')
+        numerical_dimension_name = find_list_of_dicts_element(sga_result, "segment", "['non']", "dimension")
+        self.assertEqual(numerical_dimension_name, 'feature')
+
+    def test_sga_time_based_partitioning_no_bins(self):
+        exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
+
+        time_interval = {'start': '01.01.2015', 'end': '01.03.2016'}
+
+        dimension_to_bin = {}
+        sga_result = exp.sga(dimension_to_bin, time_interval=time_interval)
+        self.assertEqual(len(sga_result), 1)
+
+    def test_sga_start_date(self):
+        exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
+
+        time_interval = {'start': '01.01.2015'}
+
+        dimension_to_bin = {}
+        sga_result = exp.sga(dimension_to_bin, time_interval=time_interval)
+        self.assertEqual(len(sga_result), 1)
+
+    def test_sga_end_date(self):
+        exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
+
+        time_interval = {'end': '01.05.2015'}
+
+        dimension_to_bin = {}
+        sga_result = exp.sga(dimension_to_bin, time_interval=time_interval)
+        self.assertEqual(len(sga_result), 1)
 
 if __name__ == '__main__':
     unittest.main()
