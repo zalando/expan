@@ -369,7 +369,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
     def test_sga_time_based_partitioning(self):
         exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
 
-        time_interval = {'start': '01.01.2015', 'end': '01.03.2016'}
+        time_interval = {'start': '20150101', 'end': '20160103'}
 
         dimension_to_bin = {
             "normal_same": [
@@ -390,7 +390,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
     def test_sga_time_based_partitioning_no_bins(self):
         exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
 
-        time_interval = {'start': '01.01.2015', 'end': '01.03.2016'}
+        time_interval = {'start': '20150101', 'end': '20160103'}
 
         dimension_to_bin = {}
         sga_result = exp.sga(dimension_to_bin, time_interval=time_interval)
@@ -399,7 +399,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
     def test_sga_start_date(self):
         exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
 
-        time_interval = {'start': '01.01.2015'}
+        time_interval = {'start': '20150101'}
 
         dimension_to_bin = {}
         sga_result = exp.sga(dimension_to_bin, time_interval=time_interval)
@@ -408,7 +408,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
     def test_sga_end_date(self):
         exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
 
-        time_interval = {'end': '01.05.2015'}
+        time_interval = {'start': ''}
 
         dimension_to_bin = {}
         sga_result = exp.sga(dimension_to_bin, time_interval=time_interval)

@@ -7,7 +7,7 @@ import pandas as pd
 
 import expan.core.early_stopping as es
 import expan.core.statistics as statx
-from expan.core.util import get_column_names_by_type, subset_data_by_date
+from expan.core.util import get_column_names_by_type
 from expan.core.version import __version__
 
 warnings.simplefilter('always', UserWarning)
@@ -226,15 +226,15 @@ class Experiment(object):
                     subgroups.append(subgroup)
 
         if time_interval:
-            # Checks if the date is available and subsets the data.
+            start = time_interval.get('start', '19000101')  # minimal date
+            end = time_interval.get('end', '22000101')  # maximal date
             if 'date' in self.data:
-                self.data = subset_data_by_date(self.data, time_interval)
+                subgroup_data = self.data[(start <= self.data.date) & (self.data.date <= end)]
             else:
                 raise KeyError("No date column is provided in data for time-based SGA!")
 
-        if time_interval:
             subgroups.append({'dimension': 'date',
                               'segment': time_interval,
-                              'result': self._delta(method='fixed_horizon', data=self.data,
+                              'result': self._delta(method='fixed_horizon', data=subgroup_data,
                                                     num_tests=len(self.report_kpi_names))})
         return subgroups
