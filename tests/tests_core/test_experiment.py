@@ -404,15 +404,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
         dimension_to_bin = {}
         sga_result = exp.sga(dimension_to_bin, time_interval=time_interval)
         self.assertEqual(len(sga_result), 1)
-
-    def test_sga_end_date(self):
-        exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
-
-        time_interval = {'start': ''}
-
-        dimension_to_bin = {}
-        sga_result = exp.sga(dimension_to_bin, time_interval=time_interval)
-        self.assertEqual(len(sga_result), 1)
+        self.assertEqual(sga_result[0]['segment'], time_interval)
 
 if __name__ == '__main__':
     unittest.main()
