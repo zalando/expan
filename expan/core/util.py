@@ -133,7 +133,7 @@ def generate_random_data():
 
     delta = d2 - d1
     for i in range(delta.days * 24 + 1):
-        date_col.append((d1 + timedelta(hours=i)).strftime('%Y%m%d'))
+        date_col.append((d1 + timedelta(hours=i)).strftime('%Y-%m-%d'))
 
     test_data_frame['date'] = date_col[:size]
 
