@@ -219,6 +219,8 @@ class Experiment(object):
                 subgroup = {'dimension': feature,
                             'segment': str(bin.representation)}
                 subgroup_data = bin.apply(self.data, feature)
+                if subgroup_data is None or len(subgroup_data) == 0:
+                    continue
                 subgroup_res = self._delta(method='fixed_horizon', data=subgroup_data,
                                            num_tests=len(self.report_kpi_names))
                 subgroup['result'] = subgroup_res
@@ -232,8 +234,9 @@ class Experiment(object):
             else:
                 raise KeyError("No date column is provided in data for time-based SGA!")
 
-            subgroups.append({'dimension': 'date',
-                              'segment': time_interval,
-                              'result': self._delta(method='fixed_horizon', data=subgroup_data,
-                                                    num_tests=len(self.report_kpi_names))})
+            if subgroup_data is not None:
+                subgroups.append({'dimension': 'date',
+                                  'segment': time_interval,
+                                  'result': self._delta(method='fixed_horizon', data=subgroup_data,
+                                                        num_tests=len(self.report_kpi_names))})
         return subgroups
