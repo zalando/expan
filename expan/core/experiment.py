@@ -100,6 +100,10 @@ class Experiment(object):
         return self._delta(method=method, data=self.data, **worker_args)
 
     def _delta(self, method, data, **worker_args):
+        # entity should be unique
+        if data.entity.duplicated().any():
+            raise ValueError('Entities in data should be unique')
+
         worker_table = {
             'fixed_horizon'    : statx.make_delta,
             'group_sequential' : es.make_group_sequential,
@@ -217,6 +221,10 @@ class Experiment(object):
                 subgroup = {'dimension': feature,
                             'segment': str(bin.representation)}
                 subgroup_data = bin.apply(self.data, feature)
+
+                if subgroup_data is None:
+                    continue
+
                 subgroup_res = self._delta(method='fixed_horizon', data=subgroup_data,
                                            num_tests=len(self.report_kpi_names))
                 subgroup['result'] = subgroup_res

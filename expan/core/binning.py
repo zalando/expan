@@ -132,12 +132,14 @@ class CategoricalRepresentation(object):
         Constructor for representation of a categorical bin.
         :param categories: list of categorical values that belong to this bin
         '''
-        if type(categories) is not list:
-            raise ValueError("args for categorical bin is a list of categorical values.")
+        if type(categories) is list:
+            categories = set(categories)
+        if type(categories) is not set:
+            raise ValueError("categorical bin should be represented by a set of categorical values.")
         self.categories = categories
 
     def __repr__(self):
-        return str(self.categories)
+        return str(list(self.categories))
 
     def __eq__(self, other):
         return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
@@ -153,10 +155,7 @@ class CategoricalRepresentation(object):
         :return: subset of input dataframe which belongs to this bin
         """
         data_feature_column = data[feature]
-        if len(self.categories) == 1:
-            return data[data_feature_column == self.categories[0]]
-        else:
-            return data[data_feature_column.isin(self.categories)]
+        return data[data_feature_column.isin(self.categories)]
 
 
 
