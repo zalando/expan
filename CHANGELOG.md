@@ -2,7 +2,14 @@
 
 ## [Unreleased](https://github.com/zalando/expan/tree/HEAD)
 
-[Full Changelog](https://github.com/zalando/expan/compare/v0.6.2...HEAD)
+[Full Changelog](https://github.com/zalando/expan/compare/v0.6.3...HEAD)
+
+**Merged pull requests:**
+
+- bump version to v0.6.3 [\#166](https://github.com/zalando/expan/pull/166) ([mkolarek](https://github.com/mkolarek))
+
+## [v0.6.3](https://github.com/zalando/expan/tree/v0.6.3) (2017-10-24)
+[Full Changelog](https://github.com/zalando/expan/compare/v0.6.2...v0.6.3)
 
 **Merged pull requests:**
 
