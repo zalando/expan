@@ -5,7 +5,33 @@ Change Log
 -----------------------------------------------------------
 
 `Full
-Changelog <https://github.com/zalando/expan/compare/v0.6.1...HEAD>`__
+Changelog <https://github.com/zalando/expan/compare/v0.6.2...HEAD>`__
+
+**Merged pull requests:**
+
+-  OCTO-2214 Bugfix: Capping information fraction
+   `#163 <https://github.com/zalando/expan/pull/163>`__
+   (`shansfolder <https://github.com/shansfolder>`__)
+-  OCTO-2088: Implement multiple testing correction in ExpAn
+   `#161 <https://github.com/zalando/expan/pull/161>`__
+   (`daryadedik <https://github.com/daryadedik>`__)
+-  OCTO-1044 Improve readthedoc
+   `#160 <https://github.com/zalando/expan/pull/160>`__
+   (`shansfolder <https://github.com/shansfolder>`__)
+-  OCTO-1933 Subgroup analysis
+   `#159 <https://github.com/zalando/expan/pull/159>`__
+   (`shansfolder <https://github.com/shansfolder>`__)
+-  release 0.6.2 `#156 <https://github.com/zalando/expan/pull/156>`__
+   (`mkolarek <https://github.com/mkolarek>`__)
+-  OCTO-1920, OCTO-1968, OCTO-1969 Refactor binning
+   `#155 <https://github.com/zalando/expan/pull/155>`__
+   (`shansfolder <https://github.com/shansfolder>`__)
+
+`v0.6.2 <https://github.com/zalando/expan/tree/v0.6.2>`__ (2017-08-29)
+----------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/zalando/expan/compare/v0.6.1...v0.6.2>`__
 
 **Fixed bugs:**
 
