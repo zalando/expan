@@ -9,6 +9,11 @@ Changelog <https://github.com/zalando/expan/compare/v0.6.3...HEAD>`__
 
 **Merged pull requests:**
 
+-  updated version `#168 <https://github.com/zalando/expan/pull/168>`__
+   (`mkolarek <https://github.com/mkolarek>`__)
+-  Bump version: 0.6.3 → 0.6.4
+   `#167 <https://github.com/zalando/expan/pull/167>`__
+   (`mkolarek <https://github.com/mkolarek>`__)
 -  bump version to v0.6.3
    `#166 <https://github.com/zalando/expan/pull/166>`__
    (`mkolarek <https://github.com/mkolarek>`__)
