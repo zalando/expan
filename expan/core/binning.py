@@ -45,7 +45,7 @@ class Bin(object):
     def __ne__(self, other):
         return not self.__eq__(other)
 
-    def apply(self, data, feature):
+    def __call__(self, data, feature):
         """
         Apply the bin to data.
         :param data: pandas data frame

@@ -216,7 +216,7 @@ class Experiment(object):
             for bin in feature_name_to_bins[feature]:
                 subgroup = {'dimension': feature,
                             'segment': str(bin.representation)}
-                subgroup_data = bin.apply(self.data, feature)
+                subgroup_data = bin(self.data, feature)
                 subgroup_res = self._delta(method='fixed_horizon', data=subgroup_data,
                                            num_tests=len(self.report_kpi_names))
                 subgroup['result'] = subgroup_res
