@@ -4,24 +4,25 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
+
 def _delta_mean(x, y):
     """Implemented as function to allow calling from bootstrap. """
     return np.nanmean(x) - np.nanmean(y)
 
 
 def make_delta(assume_normal=True, percentiles=[2.5, 97.5],
-               min_observations=20, nruns=10000, relative=False):
+               min_observations=20, nruns=10000, relative=False, num_tests=1):
     """ a closure to the below delta function """
 
     def f(x, y, x_weights=1, y_weights=1):
         return delta(x, y, assume_normal, percentiles, min_observations,
-                     nruns, relative, x_weights, y_weights)
+                     nruns, relative, x_weights, y_weights, num_tests)
 
     return f
 
 
 def delta(x, y, assume_normal=True, percentiles=[2.5, 97.5],
-          min_observations=20, nruns=10000, relative=False, x_weights=1, y_weights=1):
+          min_observations=20, nruns=10000, relative=False, x_weights=1, y_weights=1, num_tests=1):
     """
     Calculates the difference of means between the samples (x-y) in a
     statistical sense, i.e. with confidence intervals.
@@ -56,6 +57,7 @@ def delta(x, y, assume_normal=True, percentiles=[2.5, 97.5],
             the weighted mean and confidence intervals, which is equivalent
             to the overall metric. This weighted approach is only relevant
             for ratios.
+        num_tests: number of tests or reported kpis
 
     Returns:
         DeltaStatistics object
@@ -88,9 +90,10 @@ def delta(x, y, assume_normal=True, percentiles=[2.5, 97.5],
         # Computing the mean
         mu = _delta_mean(_x, _y)
         # Computing the confidence intervals
+        percentiles = [float(p) / num_tests if p < 50.0
+                       else 100 - (100 - float(p)) / num_tests if p > 50.0 else p for p in percentiles]
         if assume_normal:
-            c_i = normal_sample_difference(x=_x, y=_y, percentiles=percentiles,
-                                           relative=relative)
+            c_i = normal_sample_difference(x=_x, y=_y, percentiles=percentiles, relative=relative)
         else:
             c_i, _ = bootstrap(x=_x, y=_y, percentiles=percentiles, nruns=nruns,
                                relative=relative)
@@ -105,6 +108,7 @@ def delta(x, y, assume_normal=True, percentiles=[2.5, 97.5],
             'control_sample_size'   : int(ss_y),
             'treatment_mean'        : float(np.nanmean(_x)),
             'control_mean'          : float(np.nanmean(_y))}
+
 
 def sample_size(x):
     """
@@ -262,7 +266,7 @@ def bootstrap(x, y, func=_delta_mean, nruns=10000, percentiles=[2.5, 97.5],
         # Initializing bootstraps array and random sampling for each run
         bootstraps = np.ones(nruns) * np.nan
         for run in range(nruns):
-            # Randomly chose values from _x and _y with replacement
+            # Randomly choose values from _x and _y with replacement
             xp = _x[np.random.randint(0, len(_x), size=(len(_x),))]
             yp = _y[np.random.randint(0, len(_y), size=(len(_y),))]
             # Application of the given function to the bootstraps
@@ -445,8 +449,6 @@ def normal_difference(mean1, std1, n1, mean2, std2, n2, percentiles=[2.5, 97.5],
     For further information vistit:
             http://sphweb.bumc.bu.edu/otlt/MPH-Modules/BS/BS704_Confidence_Intervals/BS704_Confidence_Intervals5.html
     """
-    # TODO: Figure out how to pass directly to normal_percentiles()
-
     # Compute combined parameters from individual parameters
     mean = mean1 - mean2
     std = pooled_std(std1, n1, std2, n2)
@@ -465,7 +467,8 @@ def normal_difference(mean1, std1, n1, mean2, std2, n2, percentiles=[2.5, 97.5],
 
 
 def estimate_std(x, mu, pctile):
-    """Estimate the standard deviation from a given percentile, according to
+    """
+    Estimate the standard deviation from a given percentile, according to
     the z-score:
         z = (x - mu) / sigma
 
@@ -478,3 +481,59 @@ def estimate_std(x, mu, pctile):
         float: estimated standard deviation of the distribution
     """
     return (x - mu) / stats.norm.ppf(pctile / 100.0)
+
+
+def compute_statistical_power(x, y, alpha=0.05):
+    """
+    Compute statistical power
+    Args:
+        x (array-like): sample of a treatment group
+        y (array-like): sample of a control group
+        alpha: Type I error (false positive rate)
+
+    Returns:
+        float: statistical power --- the probability of a test to detect an effect, 
+            if the effect actually exists.
+    """
+    z_1_minus_alpha = stats.norm.ppf(1 - alpha)
+
+    _x = np.array(x, dtype=float)
+    _x = _x[~np.isnan(_x)]
+    _y = np.array(y, dtype=float)
+    _y = _y[~np.isnan(_y)]
+
+    mean1 = np.mean(_x)
+    mean2 = np.mean(_y)
+    std1 = np.std(_x)
+    std2 = np.std(_y)
+    n1 = len(_x)
+    n2 = len(_y)
+
+    return _get_power(mean1, std1, n1, mean2, std2, n2, z_1_minus_alpha)
+
+
+def _get_power(mean1, std1, n1, mean2, std2, n2, z_1_minus_alpha):
+    """
+    Compute statistical power.
+    This is a helper function for compute_statistical_power(x, y, alpha=0.05)
+    Args:
+        mean1 (float): mean value of the treatment distribution
+        std1 (float): standard deviation of the treatment distribution
+        n1 (integer): number of samples of the treatment distribution
+        mean2 (float): mean value of the control distribution
+        std2 (float): standard deviation of the control distribution
+        n2 (integer): number of samples of the control distribution
+        z_1_minus_alpha (float): critical value for significance level alpha. That is, z-value for 1-alpha.
+    
+    Returns:
+        float: statistical power --- that is, the probability of a test to detect an effect, 
+            if the effect actually exists.
+    """
+    effect_size = mean1 - mean2
+    std = pooled_std(std1, n1, std2, n2)
+    tmp = (n1 * n2 * effect_size**2) / ((n1 + n2) * std**2)
+    z_beta = z_1_minus_alpha - np.sqrt(tmp)
+    beta = stats.norm.cdf(z_beta)
+    power = 1 - beta
+
+    return power

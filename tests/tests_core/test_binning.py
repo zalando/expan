@@ -1,487 +1,281 @@
+import sys
 import unittest
-import warnings
 
-# The simplefilter(always) stupidly does not clear the existing registry for the
-# warnings, meaning that if any particular warning has already been masked by
-# the 'once' filter, it will continue to be masked
-# see https://docs.python.org/2/library/warnings.html#testing-warnings
-warnings.simplefilter('always')
+import pandas as pd
 
 from expan.core.binning import *
 
+#---------- test util function ------------#
+def toBinRepresentation(bins):
+    """
+    Get the bin representations of the given bins
+    :param bins: a list of Bin objects.
+    :return: a lista list of NumericalRepresenation or CategoricalRepresenation objects
+    """
+    reprs = []
+    for bin in bins:
+        reprs.append(bin.representation)
+    return reprs
 
-class UtilTestCase(unittest.TestCase):
+
+#---------- test classes ------------#
+class BinningTestCase(unittest.TestCase):
     """
     Defines the setUp() and tearDown() functions for the statistics test cases.
     """
-
     def setUp(self):
-        """
-        Load the needed datasets for all UtilTestCases and set the random
-        seed so that randomized algorithms show deterministic behaviour.
-        """
-        np.random.seed(0)
+        np.random.seed(41)
+        self.maxDiff = None
 
     def tearDown(self):
-        """
-        Clean up after the test
-        """
-        # TODO: find out if we have to remove data manually
         pass
 
+    def assertCollectionEqual(self, source, expected):
+        is_python3 = sys.version_info[0] == 3
+        if is_python3:
+            return self.assertCountEqual(source, expected)
+        else:
+            return self.assertItemsEqual(source, expected)
 
-class BinningTestCase(UtilTestCase):
-    """
-    Test cases for the binning function in core.
-    """
 
+
+#---------- Numerical binning tests ------------#
+class CreateNumericalBinsTestCase(BinningTestCase):
+    """
+    Test cases for creating numerical bins.
+    """
     def test_invalid_input(self):
-        """
-        Check if errors are raised for invalid input (empty data and n_bins=0)
-        """
-
-        # Check if error is raised for empty input
         with self.assertRaises(ValueError):
-            create_binning(None, 10)
-
+            create_bins(None, 10)
         with self.assertRaises(ValueError):
-            create_binning(list(range(100)), 0)
+            create_bins(list(range(100)), 0)
 
-    def test_creation_range_100__nbins_1(self):
-        """
-        Check if n_bins = 1 functions properly.
-        """
-        # Create data
-        x = list(range(100))
-        # Calculate binning
-        bins = create_binning(x, 1)
-        r = bins.label(x, '{simplei}')
-        # Comparison
-        self.assertEqual(r[0], '0_99')
+    def test_create_regular(self):
+        data = np.arange(1000)
+        nbins = 10
+        bins = create_bins(data, nbins)
+        self.assertEqual(len(bins), nbins)
+        bins_repr_source = toBinRepresentation(bins)
+        bins_repr_expected = [
+            NumericalRepresentation(0, 100, True, False),
+            NumericalRepresentation(100, 200, True, False),
+            NumericalRepresentation(200, 300, True, False),
+            NumericalRepresentation(300, 400, True, False),
+            NumericalRepresentation(400, 500, True, False),
+            NumericalRepresentation(500, 600, True, False),
+            NumericalRepresentation(600, 700, True, False),
+            NumericalRepresentation(700, 800, True, False),
+            NumericalRepresentation(800, 900, True, False),
+            NumericalRepresentation(900, 999, True, True)
+        ]
+        self.assertCollectionEqual(bins_repr_source, bins_repr_expected)
 
-    def test_creation_range_100__nbins_2(self):
-        """
-        Check if n_bins = 2 functions properly.
-        """
-        # Create data
-        x = list(range(100))
-        # Calculate binning
-        bins = create_binning(x, 2)
-        r = bins.label(x, '{simplei}')
-        # Expected result
-        self.assertEqual(r[0], '0_50')
-        self.assertEqual(r[-1], '50_99')
-
-    def test_creation_range_100__n_bins_5(self):
-        """
-        Check if n_bins = 5 functions properly.
-        """
-        # Create data
-        x = list(range(100))
-        # Calculate binning
-        bins = create_binning(x, 5)
-        r = bins.label(x, '{simplei}')
-        # Comparison
-        self.assertEqual(r[0], '0_20')
-        self.assertEqual(r[20], '20_40')
-        self.assertEqual(r[40], '40_60')
-        self.assertEqual(r[60], '60_80')
-        self.assertEqual(r[80], '80_99')
-        self.assertEqual(r[99], '80_99')
-
-    def test_creation_range_100__n_bins_8(self):
-        """
-        Check if n_bins = 8 functions properly.
-        here we test the output of bins.lables() instead of bins.label(), which has a different structure.
-        """
-        # Create data
-        x = list(range(100))
-        # Calculate binning
-        bins = create_binning(x, 8)
-        bins.label(x, '{simplei}')
-        r = list(bins.labels('{simplei}'))
-        r.sort()
-        # Expected result
-        e = ['88_99', '0_13', '63_76', '39_51', '51_63', '76_88', '26_39', '13_26']
-        e.sort()
-        # Comparison
-        self.assertEqual(r, e)
-
-    def test_creation_range_100__n_bins_10(self):
-        """
-        Check if n_bins = 10 functions properly.
-        """
-        # Create data
-        x = list(range(100))
-        # Calculate binning
-        bins = create_binning(x, 10)
-        r = bins.label(x, '{simplei}')
-        # Expected result
-        self.assertEqual(r[0], '0_10')
-        self.assertEqual(r[10], '10_20')
-        self.assertEqual(r[-1], '90_99')
-
-    def test_creation_range_100__n_bins_20(self):
-        """
-        Check if n_bins = 20 functions properly.
-        """
-        # Create data
-        x = list(range(100))
-        # Calculate binning
-        bins = create_binning(x, 20)
-        r = bins.label(x, '{simplei}')
-        # Expected result
-        self.assertEqual(r[0], '0_5')
-        self.assertEqual(r[6], '5_10')
-        self.assertEqual(r[-1], '95_99')
-
-    def test_creation_more_bins_than_data(self):
-        """
-        Check warnings and result if data has insufficient values for bins
-        """
-        # Create data
-        x = [0] * 100 + [1] * 10
-        # Calculate binning
-        with warnings.catch_warnings(record=True) as w:
-            bins = create_binning(x, 3)
-
-            self.assertEqual(len(w), 1)
-            self.assertTrue(issubclass(w[-1].category, UserWarning))
-            self.assertTrue('distinct values' in str(w[-1].message))
-
-        r = list(bins.labels('{standard}'))
-        r.sort()
-        # Expected result
-        e = ['[0.0,0.0]', '[1.0,1.0]']
-        e.sort()
-        # Comparison
-        self.assertEqual(r, e)
-
-    def test_creation_single_bin(self):
-        """
-        Check result if data has single value and request single bin
-        """
-        # Create data
-        x = [0] * 100
-        # Calculate binning
-        bins = create_binning(x, 1)
-        r = list(bins.labels())
-        r.sort()
-        # Expected result
-        e = ['[0.0,0.0]']
-        e.sort()
-        # Comparison
-        self.assertEqual(r, e)
-
-    def test_creation_very_skewed_data(self):
-        # Create data
-        x = [0] * 10000 + list(range(300))
-        # Calculate binning
-        with warnings.catch_warnings(record=True) as w:
-            bins = create_binning(x=x, nbins=4)
-        r = bins.labels().tolist()
-        # Expected result
-        e = ['[0.0,0.0]', '[1.0,101.0)', '[101.0,200.0)', '[200.0,299.0]']
-        # Comparison
-        self.assertEqual(r, e)
+    def test_create_nan(self):
+        data = np.arange(1002.)
+        data[-2] = np.nan
+        data[-1] = np.nan
+        nbins = 11
+        bins = create_bins(data, nbins)
+        self.assertEqual(len(bins), nbins)
+        bins_repr_source = toBinRepresentation(bins)
+        bins_repr_expected = [
+            NumericalRepresentation(0, 100, True, False),
+            NumericalRepresentation(100, 200, True, False),
+            NumericalRepresentation(200, 300, True, False),
+            NumericalRepresentation(300, 400, True, False),
+            NumericalRepresentation(400, 500, True, False),
+            NumericalRepresentation(500, 600, True, False),
+            NumericalRepresentation(600, 700, True, False),
+            NumericalRepresentation(700, 800, True, False),
+            NumericalRepresentation(800, 900, True, False),
+            NumericalRepresentation(900, 999, True, True),
+            NumericalRepresentation(np.nan, np.nan, True, True)  # bin for nans
+        ]
+        self.assertCollectionEqual(bins_repr_source, bins_repr_expected)
 
     def test_creation_two_big_bins_noise_between(self):
-        # Create data
-        x = [0] * 10000 + list(range(300)) + [301] * 10000
-        # Calculate binning
+        data = [0] * 10000 + list(range(300)) + [301] * 10000
+        nbins = 10
         with warnings.catch_warnings(record=True) as w:
-            bins = create_binning(x=x, nbins=10)
+            bins = create_bins(data, nbins)
             self.assertEqual(len(w), 1)
             self.assertTrue(issubclass(w[-1].category, UserWarning))
             self.assertTrue('less bins than requested' in str(w[-1].message).lower())
-        r = bins.labels().tolist()
-        # Expected result
-        e = ['[0.0,0.0]', '[1.0,301.0)', '[301.0,301.0]']
-        # Comparison
-        self.assertEqual(r, e)
+        bins_repr_source = toBinRepresentation(bins)
+        bins_repr_expected = [
+            NumericalRepresentation(0, 0, True, True),
+            NumericalRepresentation(1, 301, True, False),
+            NumericalRepresentation(301, 301, True, True)
+        ]
+        self.assertCollectionEqual(bins_repr_source, bins_repr_expected)
 
+    def test_creation_very_skewed_data(self):
+        data = [0] * 10000 + list(range(300))
+        nbins = 4
+        bins = create_bins(data, nbins)
+        bins_repr_source = toBinRepresentation(bins)
+        bins_repr_expected = [
+            NumericalRepresentation(0, 0, True, True),
+            NumericalRepresentation(1, 101, True, False),
+            NumericalRepresentation(101, 200, True, False),
+            NumericalRepresentation(200, 299, True, True)
+        ]
+        self.assertCollectionEqual(bins_repr_source, bins_repr_expected)
 
-class NumericalBinningClassTestCase(UtilTestCase):
-    def test_manual_creation(self):
-        """
-        Test manual creation of numerical binning
-        """
-        bb = NumericalBinning()
-        bb.lowers = [0, 1, 2, 3]
-        bb.uppers = [1, 2, 3, 4]
-        bb.lo_closed = [True] * 4
-        bb.up_closed = [False] * 4
-        bb.up_closed[3] = True
+    def test_creation_single_bin(self):
+        data = [0] * 100
+        nbins = 1
+        bins = create_bins(data, nbins)
+        bins_repr_source = toBinRepresentation(bins)
+        bins_repr_expected = [NumericalRepresentation(0, 0, True, True)]
+        self.assertCollectionEqual(bins_repr_source, bins_repr_expected)
 
+    def test_creation_more_bins_than_data(self):
+        data = [0] * 100 + [1] * 10
+        nbins = 3
         with warnings.catch_warnings(record=True) as w:
-            # ignore the invalid value warnings from the nan
-            warnings.simplefilter('ignore', category=RuntimeWarning)
-            res = bb._apply([-1, 0, 1, 2, 3, 4, 5, np.nan, 1.99])
-
-        np.testing.assert_array_equal(res, [-1, 0, 1, 2, 3, 3, -1, -1, 1])
-
-    def test_manual_nan_bin(self):
-        """
-        Test handling of nan bin in numerical binning (manual creation)
-        """
-        bins = NumericalBinning()
-        bins.lowers = [0, 1, 2, np.nan]
-        bins.uppers = [1, 2, 3, np.nan]
-        bins.lo_closed = [True] * 4
-        bins.up_closed = [False] * 4
-
-        res = bins._apply([-1, 0, 1, 2, 3, np.nan, 1.99, 2.99999])
-        np.testing.assert_array_equal(res, [-1, 0, 1, 2, -1, 3, 1, 2])
-
-    def test_binning(self):
-        """
-        Test various functions of numerical binning
-        """
-        values = np.arange(1000)
-        nbins = 10
-
-        bins = create_binning(values, nbins)
-        self.assertTrue(isinstance(bins, NumericalBinning))
-        self.assertEqual(len(bins), nbins)
-
-        # Test using midpoint as label
-        # This allows the label to be passed back into the binning.label
-        # and will label identically
-        labels = bins.mid(values)
-        self.assertEqual(labels[0], 50.)
-        self.assertEqual(labels[99], 50.)
-        self.assertEqual(labels[100], 150.)
-
-        # Test using midpoint as a formatstr
-        labels = bins.label(values, '{mid:.2f}')
-        self.assertEqual(labels[0], '50.00')
-        self.assertEqual(labels[99], '50.00')
-
-        labels = bins.label(values, '{set_notation}')
-        self.assertEqual(labels[0], '[0.0,100.0)')
-        self.assertEqual(labels[-1], '[900.0,999.0]')
-
-        # Test a certain label format...
-        labels = bins.label(values, '({lo:.0f}{lo_cond}x{up_cond}{up:.0f})')
-        self.assertEqual(labels[0], '(0<=x<100)')
-        self.assertEqual(labels[-1], '(900<=x<=999)')
-
-        # Test a certain label format with the shortcuts...
-        labels = bins.label(values, '({conditions})')
-        self.assertEqual(labels[0], '(0.0<=x<100.0)')
-        self.assertEqual(labels[-1], '(900.0<=x<=999.0)')
-
-        # See if we can format the numbers how we like
-        labels = bins.label(values, '({lo:.2f}{lo_cond}x{up_cond}{up:.2f})')
-        self.assertEqual(labels[0], '(0.00<=x<100.00)')
-        self.assertEqual(labels[-1], '(900.00<=x<=999.00)')
-
-        # Test a certain label format...
-        labels = bins.label(values, '{iter.uppercase}{lo_bracket}{lo:.0f},{up:.0f}{up_bracket}')
-        self.assertEqual(len(bins), nbins)
-        self.assertEqual(labels[0], 'A[0,100)')
-        self.assertEqual(labels[99], 'A[0,100)')
-        self.assertEqual(labels[100], 'B[100,200)')
-        self.assertEqual(labels[-1], 'J[900,999]')
-
-    def test_unseen_data(self):
-        """
-        Test unseen data with numerical binning
-        """
-        seen = np.arange(1000.)
-        nbins = 10
-        unseen = np.arange(1100)
-
-        bins = create_binning(seen, nbins)
-        self.assertTrue(isinstance(bins, NumericalBinning))
-        self.assertEqual(len(bins), nbins)
-
-        labels = bins.mid(unseen)
-        self.assertEqual(labels[0], 50.)
-        self.assertEqual(labels[99], 50.)
-        self.assertEqual(labels[100], 150.)
-        self.assertEqual(labels[1000 - 1], 949.5)  # last bin is closed-closed
-
-        # Test that the unseen data is given NaN
-        np.testing.assert_equal(labels[1000], np.nan)  # tests equal
-
-        labels = bins.label(unseen, '({conditions})')
-        self.assertEqual(labels[0], '(0.0<=x<100.0)')
-        self.assertEqual(labels[-1], '(unseen)')
-        # This would be cool: (would require knowing that bins span space)
-        # self.assertEqual(labels[-1], '(x<0.0 or x>999.0)')
-
-        labels = bins.label(unseen)
-        self.assertEqual(labels[-1], '[unseen]')
-
-        labels = bins.label(unseen, '{iter.uppercase} ({conditions})')
-        self.assertEqual(labels[0], 'A (0.0<=x<100.0)')
-        self.assertEqual(labels[100], 'B (100.0<=x<200.0)')
-        self.assertEqual(labels[-1], '? (unseen)')
-
-        labels = bins.label(unseen, '{iter.uppercase}')
-        self.assertEqual(labels[0], 'A')
-        self.assertEqual(labels[100], 'B')
-        self.assertEqual(labels[-1], '?')
-
-    def test_numerical_nans(self):
-        """
-        Test handling of nan in numerical binning
-        """
-        values = np.arange(1002.)
-        values[-2] = np.nan
-        values[-1] = np.nan
-        nbins = 10
-
-        bins = create_binning(values, nbins)
-        self.assertTrue(isinstance(bins, NumericalBinning))
-
-        # we say that nan bins are e
-        self.assertEqual(len(bins), nbins + 1)
-
-        labels = bins.label(values)
-        self.assertEqual(labels[-2], '[nan,nan]')
-        self.assertEqual(labels[-1], '[nan,nan]')
-        self.assertEqual(labels[-3], '[900.0,999.0]')
-        self.assertEqual(labels[0], '[0.0,100.0)')
-
-        # Test using midpoint as label
-        # This allows the label to be passed back into the binning.label
-        # and will label identically
-        labels = bins.mid(values)
-        self.assertTrue(np.isnan(labels[-2]))
-        self.assertTrue(np.isnan(labels[-1]))
-        self.assertEqual(labels[-3], 949.5)
-        self.assertEqual(labels[0], 50.)
-        self.assertEqual(labels[99], 50.)
-        self.assertEqual(labels[100], 150.)
-
-        # test unseen
-        values[-3] = 1001.
-        labels = bins.label(values, format_str='{iter.integer} ({conditions})')
-        self.assertEqual(labels[-3], '? (unseen)')
-
-        # following assumes the nan bin will be the first bin...
-        # this may be an assumption we want to change.
-        self.assertEqual(labels[0], '1 (0.0<=x<100.0)')
-
-
-class CategoricalBinningClassTestCase(UtilTestCase):
-    def test_manual_creation(self):
-        """
-        Test manual creation of categorical binning
-        """
-        bb = CategoricalBinning()
-        bb.categories += [['a', 'b']]
-        bb.categories += [['c', 'd', 'e']]
-        bb.categories += [['f', 'g']]
-        bb.categories += [['h']]
-
-        res = bb._apply(['z', 'a', 'c', 'f', 'h', np.nan, 'x', 0, 'aa'])
-        np.testing.assert_array_equal(res, [-1, 0, 1, 2, 3, -1, -1, -1, -1])
-
-    def test_manual_nan_bin(self):
-        """
-        Test handling of nan bin in categorical binning (manual creation)
-        """
-        bins = CategoricalBinning()
-
-        bins.categories += [['a', 'b']]
-        bins.categories += [['c', 'd', 'e']]
-        bins.categories += [['f', 'g']]
-        bins.categories += [['h', np.nan]]
-        bins.categories += [['i', 'j']]
-
-        res = bins._apply(['z', 'a', 'c', 'f', 'h', np.nan, 'x', 0, 'aa', 'j'])
-        np.testing.assert_array_equal(res, [-1, 0, 1, 2, 3, 3, -1, -1, -1, 4])
-
-        bins = CategoricalBinning()
-        bins.categories += [['a', 'b']]
-        bins.categories += [[np.nan]]
-        res = bins._apply(['a', 'b', 'c', np.nan])
-        np.testing.assert_array_equal(res, [0, 0, -1, 1])
-
-        x = ['A'] * 50 + ['B'] * 10 + ['C'] * 20 + [np.nan] * 10
-        bins = create_binning(x=x, nbins=3)
-        r = bins.labels().tolist()
-        e = ['{A}', '{B}', '{C}', '{nan}']
-        self.assertEqual(r, e)
-
-    def test_creation_categorical_data_enough_bins(self):
-        """
-        Test binning of normal categorical data
-        """
-        # Create data
-        x = ['A'] * 50 + ['B'] * 10 + ['C'] * 20
-
-        # Calculate binning
-        with warnings.catch_warnings(record=True) as w:
-            bins = create_binning(x=x, nbins=10)
-
+            bins = create_bins(data, nbins)
             self.assertEqual(len(w), 1)
             self.assertTrue(issubclass(w[-1].category, UserWarning))
-            self.assertTrue(
-                'insufficient distinct values' in str(w[-1].message).lower())
+            self.assertTrue('unique values' in str(w[-1].message))
+        bins_repr_source = toBinRepresentation(bins)
+        bins_repr_expected = [
+            NumericalRepresentation(0, 0, True, True),
+            NumericalRepresentation(1, 1, True, True)
+        ]
+        self.assertCollectionEqual(bins_repr_source, bins_repr_expected)
 
-        self.assertTrue(isinstance(bins, CategoricalBinning))
+    def test_creation_range_100__n_bins_8(self):
+        data = list(range(100))
+        nbins = 8
+        bins = create_bins(data, nbins)
+        bins_repr_source = toBinRepresentation(bins)
+        bins_repr_expected = [
+            NumericalRepresentation(0, 13, True, False),
+            NumericalRepresentation(13, 26, True, False),
+            NumericalRepresentation(26, 39, True, False),
+            NumericalRepresentation(39, 51, True, False),
+            NumericalRepresentation(51, 63, True, False),
+            NumericalRepresentation(63, 76, True, False),
+            NumericalRepresentation(76, 88, True, False),
+            NumericalRepresentation(88, 99, True, True)
+        ]
+        self.assertCollectionEqual(bins_repr_source, bins_repr_expected)
+
+    def test_creation_range_100__n_bins_2(self):
+        data = list(range(100))
+        nbins = 2
+        bins = create_bins(data, nbins)
+        bins_repr_source = toBinRepresentation(bins)
+        bins_repr_expected = [
+            NumericalRepresentation(0, 50, True, False),
+            NumericalRepresentation(50, 99, True, True)
+        ]
+        self.assertCollectionEqual(bins_repr_source, bins_repr_expected)
+
+
+class ApplyNumericalBinsTestCase(BinningTestCase):
+    """
+    Test cases for applying bins to numerical data.
+    """
+    def test_assign_regular(self):
+        data = pd.DataFrame(np.tile(np.array([np.arange(1000)]).T, (1,3)), columns=list('ABC'))
+        dimension = 'A'
+
+        bin1 = Bin("numerical", 0, 10, True, False)
+        data_applied_bin1 = pd.DataFrame(np.tile(np.array([np.arange(10)]).T, (1, 3)), columns=list('ABC'))
+        np.testing.assert_array_equal(data_applied_bin1, bin1.apply(data, dimension))
+
+        bin2 = Bin("numerical", 40, 50, True, False)
+        data_applied_bin2 = pd.DataFrame(np.tile(np.array([np.arange(40, 50)]).T, (1, 3)), columns=list('ABC'))
+        np.testing.assert_array_equal(data_applied_bin2, bin2.apply(data, dimension))
+
+        bin3 = Bin("numerical", 300, 500, False, True)
+        data_applied_bin3 = pd.DataFrame(np.tile(np.array([np.arange(301, 501)]).T, (1, 3)), columns=list('ABC'))
+        np.testing.assert_array_equal(data_applied_bin3, bin3.apply(data, dimension))
+
+        bin4 = Bin("numerical", 900, 999, True, True)
+        data_applied_bin4 = pd.DataFrame(np.tile(np.array([np.arange(900, 1000)]).T, (1, 3)), columns=list('ABC'))
+        np.testing.assert_array_equal(data_applied_bin4, bin4.apply(data, dimension))
+
+    def test_assign_unseen_data(self):
+        data = pd.DataFrame(np.tile(np.array([np.arange(1000)]).T, (1,3)), columns=list('ABC'))
+        dimension = 'A'
+
+        bin = Bin("numerical", 1000, 2000, False, False)
+        np.testing.assert_array_equal(None, bin.apply(data, dimension))
+
+    def test_assign_nan(self):
+        data_one_dim = np.arange(1002.)
+        data_one_dim[-2] = np.nan
+        data_one_dim[-1] = np.nan
+        data = pd.DataFrame(np.tile(np.array([data_one_dim]).T, (1,3)), columns=list('ABC'))
+        dimension = 'A'
+
+        bin_regular = Bin("numerical", 0, 10, True, False)
+        data_applied_bin_regular = pd.DataFrame(np.tile(np.array([np.arange(10)]).T, (1, 3)), columns=list('ABC'))
+        np.testing.assert_array_equal(data_applied_bin_regular, bin_regular.apply(data, dimension))
+
+        bin_nan = Bin("numerical", np.nan, np.nan, True, True)
+        data_applied_bin_nan = pd.DataFrame( np.full((2,3), np.nan), columns=list('ABC'))
+        np.testing.assert_array_equal(data_applied_bin_nan, bin_nan.apply(data, dimension))
+
+
+#---------- Categorical binning tests ------------#
+class CreateCategoricalBinsTestCase(BinningTestCase):
+    """
+    Test cases for creating categorical bins.
+    """
+    def test_categorical_binning_1(self):
+        data = ['a'] * 10 + ['b'] * 10
+        bins = create_bins(data, 2)
+        bins_repr_source = toBinRepresentation(bins)
+        bins_repr_expected = [
+            CategoricalRepresentation(["a"]),
+            CategoricalRepresentation(["b"])
+        ]
+        self.assertCollectionEqual(bins_repr_source, bins_repr_expected)
+
+    def test_categorical_binning_2(self):
+        data = ['a'] * 10 + ['b'] * 5 + ['c'] * 5
+        bins = create_bins(data, 2)
+        bins_repr_source = toBinRepresentation(bins)
+        bins_repr_expected = [
+            CategoricalRepresentation(["a"]),
+            CategoricalRepresentation(["c", "b"])
+        ]
+        self.assertCollectionEqual(bins_repr_source, bins_repr_expected)
+
+    def test_categorical_binning_too_little_data(self):
+        data = ['a'] * 10 + ['b'] * 5 + ['c'] * 5
+        bins = create_bins(data, 4)
         self.assertEqual(len(bins), 3)
 
-        # Test the labels of the bins themselves.
-        r = bins.label(x)
-        self.assertEqual(r[0], '{A}')
-        self.assertEqual(r[50], '{B}')
-        self.assertEqual(r[60], '{C}')
-        self.assertEqual(r[-1], '{C}')
 
-    def test_creation_categorical_data_less_bins(self):
-        """
-        Test binning of normal categorical data
-        """
-        x = ['A'] * 50 + ['B'] * 10 + ['C'] * 20
+class ApplyCategoricalBinsTestCase(BinningTestCase):
+    """
+    Test cases for applying bins to categorical data.
+    """
+    def test_assign_regular(self):
+        data = pd.DataFrame(["a", "b", "c", "a", "b"], columns=list("a"))
 
-        bins = create_binning(x=x, nbins=2)
-        self.assertEqual(len(bins), 2)
+        bin_a = Bin("categorical", ["a"])
+        np.testing.assert_array_equal(np.array([["a", "a"]]).T, bin_a.apply(data, "a"))
 
-        r = bins.label(x)
-        self.assertEqual(r[0], '{A}')
-        self.assertEqual(r[50], '{B,C}')
-        self.assertEqual(r[60], '{B,C}')
-        self.assertEqual(r[-1], '{B,C}')
+        bin_b = Bin("categorical", ["b"])
+        np.testing.assert_array_equal(np.array([["b", "b"]]).T, bin_b.apply(data, "a"))
 
-    def test_categorical_with_unseen_data(self):
-        """
-        Test categorical binning with unseen data
-        """
-        x = ['A'] * 50 + ['B'] * 10 + ['C'] * 20
-        y = ['A'] * 10 + ['B'] * 10 + ['C'] * 10 + ['D'] * 10 + ['A,B'] * 10 + ['AB'] * 10
+        bin_c = Bin("categorical", ["c"])
+        np.testing.assert_array_equal(np.array([["c"]]), bin_c.apply(data, "a"))
 
-        bins = create_binning(x=x, nbins=3)
-        self.assertEqual(len(bins), 3)
+    def test_assign_unseen(self):
+        data = pd.DataFrame(["a", "b", "c"], columns=list("a"))
 
-        r = bins.label(y)
-        self.assertEqual(r[0], '{A}')
-        self.assertEqual(r[10], '{B}')
-        self.assertEqual(r[20], '{C}')
-        # now unseen:
-        self.assertEqual(r[30], '{unseen}')
-        for rr in r[31:]:
-            self.assertEqual(rr, '{unseen}')
+        bin = Bin("categorical", ["d"])
+        np.testing.assert_array_equal(None, bin.apply(data, "a"))
 
-        r = bins.label(y, '{iter.integer}: {standard}')
-        self.assertEqual(r[0], '0: {A}')
-        self.assertEqual(r[-1], '?: {unseen}')
+    def test_assign_multiple(self):
+        data = pd.DataFrame(["a", "b", "c", "a", "b"], columns=list("a"))
 
-    def test_categorical_order(self):
-        """
-        Test that categorical bins requiring no merging are created in alphabetical order
-        """
-        x = ['C'] * 50 + ['B'] * 10 + ['A'] * 20
-        bins = create_binning(x=x, nbins=3)
-        r = bins.label(x, '{iter.integer}: {standard}')
-        self.assertEqual(r[0], '2: {C}')
-        self.assertEqual(r[50], '1: {B}')
-        self.assertEqual(r[60], '0: {A}')
-
-
-if __name__ == "__main__":
-    unittest.main()
+        bin = Bin("categorical", ["a", "b"])
+        np.testing.assert_array_equal(np.array([["a", "b", "a", "b"]]).T, bin.apply(data, "a"))

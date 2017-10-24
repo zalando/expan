@@ -5,20 +5,11 @@ import warnings
 import numpy as np
 import pandas as pd
 
-import expan.core.binning as binmodule
 import expan.core.early_stopping as es
 import expan.core.statistics as statx
-
+from expan.core.util import get_column_names_by_type
 from expan.core.version import __version__
 
-from expan.core.util import get_column_names_by_type
-# from expan.core.experimentdata import ExperimentData
-# from expan.core.results import Results, delta_to_dataframe_all_variants, feature_check_to_dataframe, \
-#     early_stopping_to_dataframe
-
-# from expan.core.jsonable import Jsonable
-
-# raise the same warning multiple times
 warnings.simplefilter('always', UserWarning)
 
 logger = logging.getLogger(__name__)
@@ -33,10 +24,10 @@ class Experiment(object):
     """
     def __init__(self, control_variant_name, data, metadata, report_kpi_names=None, derived_kpis=None):
         report_kpi_names = report_kpi_names or []
-        derived_kpis  = derived_kpis or []
+        derived_kpis = derived_kpis or []
 
         experiment_column_names = set(['entity', 'variant'])
-        numerical_column_names  = set(get_column_names_by_type(data, np.number))
+        numerical_column_names = set(get_column_names_by_type(data, np.number))
 
         if type(report_kpi_names) is str:
             report_kpi_names = [report_kpi_names]
@@ -86,8 +77,8 @@ class Experiment(object):
             self.data.loc[:, name] = eval(re.sub(kpi_name_pattern, r'self.data.\1.astype(float)', formula))
             self.reference_kpis[name] = re.sub(kpi_name_pattern + '/', '', formula)
 
-    def get_kpi_by_name_and_variant(self, name, variant):
-        return self.data.reset_index().set_index('variant').loc[variant, name]
+    def get_kpi_by_name_and_variant(self, data, name, variant):
+        return data.reset_index().set_index('variant').loc[variant, name]
 
     def __str__(self):
         variants = self.variant_names
@@ -96,51 +87,56 @@ class Experiment(object):
             self.metadata['experiment'], len(self.derived_kpis), len(self.report_kpi_names), len(self.data),
             len(variants), ', '.join([('*' + k + '*') if (k == self.control_variant_name) else k for k in variants]))
 
-    def _get_weights(self, kpi, variant):
+    def _get_weights(self, data, kpi, variant):
         if kpi not in self.reference_kpis:
             return 1.0
         reference_kpi  = self.reference_kpis[kpi]
-        x              = self.get_kpi_by_name_and_variant(reference_kpi, variant)
+        x              = self.get_kpi_by_name_and_variant(data, reference_kpi, variant)
         zeros_and_nans = sum(x == 0) + np.isnan(x).sum()
         non_zeros      = len(x) - zeros_and_nans
         return non_zeros/np.nansum(x) * x
 
     def delta(self, method='fixed_horizon', **worker_args):
+        return self._delta(method=method, data=self.data, **worker_args)
+
+    def _delta(self, method, data, **worker_args):
         worker_table = {
-                'fixed_horizon'    : statx.make_delta,
-                'group_sequential' : es.make_group_sequential,
-                'bayes_factor'     : es.make_bayes_factor,
-                'bayes_precision'  : es.make_bayes_precision,
-                }
+            'fixed_horizon'    : statx.make_delta,
+            'group_sequential' : es.make_group_sequential,
+            'bayes_factor'     : es.make_bayes_factor,
+            'bayes_precision'  : es.make_bayes_precision
+        }
 
         if not method in worker_table:
             raise NotImplementedError
 
         worker = worker_table[method](**worker_args)
 
-        result = {}
-        result['warnings']        = []
-        result['errors']          = []
-        result['expan_version']   = __version__
-        result['control_variant'] = self.control_variant_name
+        result = {'warnings': [],
+                  'errors': [],
+                  'expan_version': __version__,
+                  'control_variant': self.control_variant_name}
         kpis = []
 
         for kpi in self.report_kpi_names:
-            res = {}
-            res['name']     = kpi
-            res['variants'] = []
-            control       = self.get_kpi_by_name_and_variant(kpi, self.control_variant_name)
-            controlWeight = self._get_weights(kpi, self.control_variant_name)
+            res_kpi = {'name': kpi,
+                       'variants': []}
+            control         = self.get_kpi_by_name_and_variant(data, kpi, self.control_variant_name)
+            control_weight  = self._get_weights(data, kpi, self.control_variant_name)
+            control_data    = control * control_weight
             for variant in self.variant_names:
-                treatment       = self.get_kpi_by_name_and_variant(kpi, variant)
-                treatmentWeight = self._get_weights(kpi, variant)
+                treatment        = self.get_kpi_by_name_and_variant(data, kpi, variant)
+                treatment_weight = self._get_weights(data, kpi, variant)
+                treatment_data   = treatment * treatment_weight
                 with warnings.catch_warnings(record=True) as w:
-                    ds = worker(x=treatment*treatmentWeight, y=control*controlWeight)
+                    statistics = worker(x=treatment_data, y=control_data)
+                    # add statistical power
+                    power = statx.compute_statistical_power(treatment_data, control_data)
+                    statistics['statistical_power'] = power
                 if len(w):
-                    result['warnings'].append('kpi: ' + kpi + ', variant: '+ variant + ': ' + str(w[-1].message))
-                res['variants'].append({'name'             : variant,
-                                        'delta_statistics' : ds})
-            kpis.append(res)
+                    result['warnings'].append('kpi: {}, variant: {}: {}'.format(kpi, variant, w[-1].message))
+                res_kpi['variants'].append({'name': variant, 'delta_statistics': statistics})
+            kpis.append(res_kpi)
 
         result['kpis'] = kpis
         return result
@@ -164,7 +160,7 @@ class Experiment(object):
             threshold_type (string): type of threshold used ('lower' or 'upper')
 
         Returns:
-
+            No return value. Will filter out outliers in self.data in place.
         """
 
         # check if provided KPIs are present in the data
@@ -193,3 +189,37 @@ class Experiment(object):
             warnings.warn('More than 2% of entities have been filtered out, consider adjusting the percentile value.')
 
         self.data = self.data[flags == False]
+
+    def sga(self, feature_name_to_bins):
+        """
+        Perform subgroup analysis.
+    
+        Args:
+            feature_name_to_bins (dict): a dict of feature name (key) to list of Bin objects (value). 
+                                      This dict defines how and on which column to perform the subgroup split.
+                                      
+        Returns:
+            Analysis results per subgroup. 
+        """
+        for feature in feature_name_to_bins:
+            # check type
+            if type(feature) is not str:
+                raise TypeError("Key of the input dict needs to be string, indicating the name of dimension")
+            if type(feature_name_to_bins[feature]) is not list:
+                raise TypeError("Value of the input dict needs to be a list of Bin objects.")
+            # check whether data contains this column
+            if feature not in self.data:
+                raise KeyError('No column %s provided in data.' % feature)
+
+        subgroups = []
+        for feature in feature_name_to_bins:
+            for bin in feature_name_to_bins[feature]:
+                subgroup = {'dimension': feature,
+                            'segment': str(bin.representation)}
+                subgroup_data = bin.apply(self.data, feature)
+                subgroup_res = self._delta(method='fixed_horizon', data=subgroup_data,
+                                           num_tests=len(self.report_kpi_names))
+                subgroup['result'] = subgroup_res
+                subgroups.append(subgroup)
+
+        return subgroups

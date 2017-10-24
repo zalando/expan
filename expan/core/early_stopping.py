@@ -1,16 +1,15 @@
 import os
+import pickle
+import sys
+import tempfile
 from os.path import dirname, join, realpath
 
 import numpy as np
-import sys
 from pystan import StanModel
 from scipy.stats import gaussian_kde, norm, cauchy
-from expan.core.util import drop_nan
 
 import expan.core.statistics as statx
-
-import pickle
-import tempfile
+from expan.core.util import drop_nan
 
 __location__ = realpath(join(os.getcwd(), dirname(__file__)))
 
@@ -68,19 +67,13 @@ def group_sequential(x,
     _x = np.array(x, dtype=float)
     _y = np.array(y, dtype=float)
 
-    # if scalar, assume equal spacing between the intervals
-    # if not isinstance(information_fraction, list):
-    #	fraction = np.linspace(0,1,information_fraction+1)[1:]
-    # else:
-    #	fraction = information_fraction
-
     n_x = statx.sample_size(_x)
     n_y = statx.sample_size(_y)
 
     if not estimated_sample_size:
         information_fraction = 1.0
     else:
-        information_fraction = max(1.0, min(n_x, n_y) / estimated_sample_size)
+        information_fraction = min(1.0, min(n_x, n_y) / estimated_sample_size)
 
     # alpha spending function
     if spending_function in ('obrien_fleming'):

@@ -5,9 +5,8 @@ import logging
 from os import listdir
 from os.path import isfile, join
 
-import simplejson as json
-
 import pandas as pd
+import simplejson as json
 
 from expan.core.experiment import Experiment
 

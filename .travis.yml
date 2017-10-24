@@ -19,7 +19,7 @@ env:
 install:
 #- pip install --upgrade pip setuptools tox coveralls
 - pip install tox coveralls
-- pip install -r requirements.txt
+- pip install -r requirements_tox_test.txt
 language: python
 python:
 #- pypy
