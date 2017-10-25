@@ -220,7 +220,7 @@ class Experiment(object):
             for bin in feature_name_to_bins[feature]:
                 subgroup = {'dimension': feature,
                             'segment': str(bin.representation)}
-                subgroup_data = bin.apply(self.data, feature)
+                subgroup_data = bin(self.data, feature)
 
                 if subgroup_data is None:
                     continue
