@@ -198,11 +198,9 @@ class Experiment(object):
     def sga(self, feature_name_to_bins):
         """
         Perform subgroup analysis.
-
         Args:
             feature_name_to_bins (dict): a dict of feature name (key) to list of Bin objects (value). 
                                       This dict defines how and on which column to perform the subgroup split.
-
         Returns:
             Analysis results per subgroup. 
         """
