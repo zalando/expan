@@ -128,14 +128,15 @@ class CategoricalRepresentation(object):
     __hash__ = None
 
     def __init__(self, categories):
-        '''
+        """
         Constructor for representation of a categorical bin.
         :param categories: list of categorical values that belong to this bin
-        '''
-        if type(categories) is list:
+        """
+        try:
             categories = set(categories)
-        if type(categories) is not set:
-            raise ValueError("categorical bin should be represented by a set of categorical values.")
+        except:
+            raise ValueError("categorical bin should be represented by an iterable object of categories.")
+
         self.categories = categories
 
     def __repr__(self):
