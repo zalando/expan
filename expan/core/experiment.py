@@ -9,6 +9,7 @@ import expan.core.early_stopping as es
 import expan.core.statistics as statx
 from expan.core.util import get_column_names_by_type
 from expan.core.version import __version__
+from expan.core.binning import create_bins
 
 warnings.simplefilter('always', UserWarning)
 
@@ -190,14 +191,13 @@ class Experiment(object):
 
         self.data = self.data[flags == False]
 
-    def sga(self, feature_name_to_bins, time_interval=None):
+    def sga(self, feature_name_to_bins):
         """
-        Perform subgroup analysis. If start and end dates are specified, the time-based sga is performed alongside.
+        Perform subgroup analysis.
 
         Args:
             feature_name_to_bins (dict): a dict of feature name (key) to list of Bin objects (value). 
                                       This dict defines how and on which column to perform the subgroup split.
-            time_interval: lower and upper bound of the time interval for the date of treatment.
 
         Returns:
             Analysis results per subgroup. 
@@ -224,16 +224,30 @@ class Experiment(object):
                 subgroup['result'] = subgroup_res
                 subgroups.append(subgroup)
 
-        if time_interval:
-            start = time_interval.get('start', '19000101')  # minimal date
-            end = time_interval.get('end', '22000101')  # maximal date
-            if 'date' in self.data:
-                subgroup_data = self.data[(start <= self.data.date) & (self.data.date <= end)]
-            else:
-                raise KeyError("No date column is provided in data for time-based SGA!")
+        return subgroups
 
-            subgroups.append({'dimension': 'date',
-                              'segment': time_interval,
-                              'result': self._delta(method='fixed_horizon', data=subgroup_data,
-                                                    num_tests=len(self.report_kpi_names))})
+    def sga_date(self):
+        """
+        Perform subgroup analysis on date partitioning each day from start day till end date. Produces non-cumulative
+        delta and CIs for each subgroup.
+        Returns:
+            Analysis results per date
+        """
+
+        if 'date' not in self.data:
+            raise KeyError('No column date provided in data.')
+
+        num_bins = len(set(self.data['date']))
+        bins = create_bins(self.data['date'], num_bins)
+
+        subgroups = []
+        for bin in bins:
+            subgroup = {'dimension': 'date',
+                        'segment': str(bin.representation)}
+            subgroup_data = bin.apply(self.data, 'date')
+            subgroup_res = self._delta(method='fixed_horizon', data=subgroup_data,
+                                       num_tests=len(self.report_kpi_names))
+            subgroup['result'] = subgroup_res
+            subgroups.append(subgroup)
+
         return subgroups

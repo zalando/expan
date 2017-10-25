@@ -251,13 +251,13 @@ class CreateCategoricalBinsTestCase(BinningTestCase):
         bins = create_bins(data, 4)
         self.assertEqual(len(bins), 3)
 
-    def test_categorical_binning_date_1(self):
+    def test_binning_date_1(self):
         data = ['2017-05-01'] * 10 + ['2017-06-01'] * 5 + ['2017-07-01'] * 5
 
         bins = create_bins(data, 4)
         self.assertEqual(len(bins), 3)
 
-    def test_categorical_binning_date_2(self):
+    def test_binning_date_2(self):
         data = ['2017-05-01'] * 10 + ['2017-06-01'] * 5 + ['2017-07-01'] * 5
 
         bins = create_bins(data, 2)
