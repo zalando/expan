@@ -356,8 +356,8 @@ class ExperimentClassTestCases(ExperimentTestCase):
         self.assertEqual(len(sga_result), 4)
         numerical_dimension_name = find_list_of_dicts_element(sga_result, "segment", "[1, 2)", "dimension")
         self.assertEqual(numerical_dimension_name, 'normal_same')
-        numerical_dimension_name = find_list_of_dicts_element(sga_result, "segment", "['non']", "dimension")
-        self.assertEqual(numerical_dimension_name, 'feature')
+        categorical_dimension_name = find_list_of_dicts_element(sga_result, "segment", "['non']", "dimension")
+        self.assertEqual(categorical_dimension_name, 'feature')
 
     def test_sga_date(self):
         exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
