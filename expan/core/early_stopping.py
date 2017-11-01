@@ -245,13 +245,13 @@ def _bayes_sampling(x, y, distribution='normal', num_iters=25000, inference="sam
     return traces, n_x, n_y, mu_x, mu_y
 
 
-def make_bayes_factor(distribution='normal', num_iters=25000):
+def make_bayes_factor(distribution='normal', num_iters=25000, inference='sampling'):
     def f(x, y):
-        return bayes_factor(x, y, distribution, num_iters)
+        return bayes_factor(x, y, distribution, num_iters, inference)
     return f
 
 
-def bayes_factor(x, y, distribution='normal', num_iters=25000):
+def bayes_factor(x, y, distribution='normal', num_iters=25000, inference='sampling'):
     """
     Args:
         x (array_like): sample of a treatment group
@@ -259,11 +259,13 @@ def bayes_factor(x, y, distribution='normal', num_iters=25000):
         distribution: name of the KPI distribution model, which assumes a
             Stan model file with the same name exists
         num_iters: number of iterations of bayes sampling
+        inference: sampling or variational inference method for approximation the posterior
 
     Returns:
         dictionary with statistics
     """
-    traces, n_x, n_y, mu_x, mu_y = _bayes_sampling(x, y, distribution=distribution, num_iters=num_iters)
+    traces, n_x, n_y, mu_x, mu_y = _bayes_sampling(x, y, distribution=distribution, num_iters=num_iters,
+                                                   inference=inference)
     trace_normalized_effect_size = get_trace_normalized_effect_size(distribution, traces)
     trace_absolute_effect_size = traces['delta']
 
@@ -299,13 +301,13 @@ def get_trace_normalized_effect_size(distribution, traces):
         raise ValueError("model " + distribution + " is not implemented.")
 
 
-def make_bayes_precision(distribution='normal', posterior_width=0.08, num_iters=25000):
+def make_bayes_precision(distribution='normal', posterior_width=0.08, num_iters=25000, inference='sampling'):
     def f(x, y):
-        return bayes_precision(x, y, distribution, posterior_width, num_iters)
+        return bayes_precision(x, y, distribution, posterior_width, num_iters, inference)
     return f
 
 
-def bayes_precision(x, y, distribution='normal', posterior_width=0.08, num_iters=25000):
+def bayes_precision(x, y, distribution='normal', posterior_width=0.08, num_iters=25000, inference='sampling'):
     """
     Args:
         x (array_like): sample of a treatment group
@@ -315,11 +317,13 @@ def bayes_precision(x, y, distribution='normal', posterior_width=0.08, num_iters
         posterior_width: the stopping criterion, threshold of the posterior 
             width
         num_iters: number of iterations of bayes sampling
+        inference: sampling or variational inference method for approximation the posterior
 
     Returns:
         dictionary with statistics
     """
-    traces, n_x, n_y, mu_x, mu_y = _bayes_sampling(x, y, distribution=distribution, num_iters=num_iters)
+    traces, n_x, n_y, mu_x, mu_y = _bayes_sampling(x, y, distribution=distribution, num_iters=num_iters,
+                                                   inference=inference)
     trace_normalized_effect_size = get_trace_normalized_effect_size(distribution, traces)
     trace_absolute_effect_size = traces['delta']
 
