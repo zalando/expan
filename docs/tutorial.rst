@@ -110,13 +110,14 @@ You may also find the description in our :ref:`API <modindex>` page.
 
 	* ``distribution='normal'``: The name of the KPI distribution model, which assumes a Stan model file with the same name exists. Currently we support *normal* and *poisson* models.
 	* ``num_iters=25000``: Number of iterations of bayes sampling.
+    * ``inference=sampling``: 'sampling' for MCMC sampling method or 'variational' for variational inference method to approximate the posterior distribution.
 
 *bayes_precision* is another Bayesian approach similar as *bayes_factor*:
 
 	* ``distribution='normal'``: The name of the KPI distribution model, which assumes a Stan model file with the same name exists. Currently we support *normal* and *poisson* models.
 	* ``num_iters=25000``: Number of iterations of bayes sampling.
 	* ``posterior_width=0.08``: The stopping criterion, threshold of the posterior width.
-
+    * ``inference=sampling``: 'sampling' for MCMC sampling method or 'variational' for variational inference method to approximate the posterior distribution.
 
 
 Interpreting result

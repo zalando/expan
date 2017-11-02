@@ -8,8 +8,8 @@ from expan.core.experiment import Experiment
 # from expan.core.results import Results
 from expan.core.util import generate_random_data, get_column_names_by_type, find_list_of_dicts_element
 
-
 # from tests.tests_core.test_results import mock_results_object
+
 
 class ExperimentTestCase(unittest.TestCase):
     """
@@ -358,6 +358,14 @@ class ExperimentClassTestCases(ExperimentTestCase):
         self.assertEqual(numerical_dimension_name, 'normal_same')
         categorical_dimension_name = find_list_of_dicts_element(sga_result, "segment", "['non']", "dimension")
         self.assertEqual(categorical_dimension_name, 'feature')
+
+    def test_sga_date(self):
+        exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
+
+        sga_result = exp.sga_date()
+        self.assertEqual(len(sga_result), 417)
+        numerical_dimension_name = find_list_of_dicts_element(sga_result, "segment", "['2016-01-21']", "dimension")
+        self.assertEqual(numerical_dimension_name, 'date')
 
 
 if __name__ == '__main__':

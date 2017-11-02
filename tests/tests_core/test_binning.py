@@ -251,6 +251,26 @@ class CreateCategoricalBinsTestCase(BinningTestCase):
         bins = create_bins(data, 4)
         self.assertEqual(len(bins), 3)
 
+    def test_binning_date_1(self):
+        data = ['2017-05-01'] * 10 + ['2017-06-01'] * 5 + ['2017-07-01'] * 5
+
+        bins = create_bins(data, 4)
+        self.assertEqual(len(bins), 3)
+
+    def test_binning_date_2(self):
+        data = ['2017-05-01'] * 10 + ['2017-06-01'] * 5 + ['2017-07-01'] * 5
+
+        bins = create_bins(data, 2)
+        self.assertEqual(len(bins), 2)
+
+        bins_repr_source = toBinRepresentation(bins)
+
+        bins_repr_expected = [
+            CategoricalRepresentation(["2017-05-01"]),
+            CategoricalRepresentation(["2017-07-01", "2017-06-01"])
+        ]
+        self.assertCollectionEqual(bins_repr_source, bins_repr_expected)
+
 
 class ApplyCategoricalBinsTestCase(BinningTestCase):
     """

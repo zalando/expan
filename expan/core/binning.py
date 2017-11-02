@@ -17,14 +17,14 @@ class Bin(object):
     __hash__ = None
 
     def __init__(self, bin_type, *repr_args):
-        '''
+        """
         Constructor for a bin object.
         :param id: identifier (e.g. bin number) of the bin
         :param bin_type: "numerical" or "categorical"
         :param repr_args: arguments to represent this bin. 
                           args for numerical bin includes lower, upper, lower_closed, upper_closed
                           args for categorical bin includes a list of categories for this bin.
-        '''
+        """
         if bin_type == "numerical" and len(repr_args) != 4:
             raise ValueError("args for numerical bin are lower, upper, lower_closed, upper_closed.")
         if bin_type == "categorical" and len(repr_args) != 1 and type(repr_args[0]) is not list:
@@ -55,7 +55,6 @@ class Bin(object):
         return self.representation.apply_to_data(data, feature)
 
 
-
 class NumericalRepresentation(object):
     # this is a necessary hack for the buggy implementation of assertItemsEqual in python2
     # see https://stackoverflow.com/a/29690198
@@ -63,13 +62,13 @@ class NumericalRepresentation(object):
     __hash__ = None
 
     def __init__(self, lower, upper, lower_closed, upper_closed):
-        '''
+        """
         Constructor for representation of a numerical bin.
         :param upper: upper bound of the bin (exclusive)
         :param lower: lower bound of the bin (inclusive)
         :param lower_closed: boolean indicator whether lower bound is closed
         :param upper_closed: boolean indicator whether upper bound is closed
-        '''
+        """
         self.lower = lower
         self.upper = upper
         self.lower_closed = lower_closed
@@ -162,12 +161,12 @@ class CategoricalRepresentation(object):
 
 #------- public methods -------#
 def create_bins(data, n_bins):
-    '''
+    """
     Create bins from the data value
     :param data: a list or a 1-dim array of data to determine the bins
     :param n_bins: number of bins to create
     :return: a list of Bin object
-    '''
+    """
     if data is None or len(data) <= 0:
         raise ValueError('Empty input array!')
 
@@ -197,7 +196,6 @@ def create_bins(data, n_bins):
     return bins
 
 
-
 #------- private methods for numerical binnings-------#
 
 def _create_numerical_bins(data_as_array, n_bins):
@@ -205,12 +203,12 @@ def _create_numerical_bins(data_as_array, n_bins):
 
 
 def _create_next_numerical_bin(x, n_bins, result):
-    '''
+    """
     Create bins for numerical data
     :param x: array of data
     :param n_bins: number of bins
     :return: a list of bins object
-    '''
+    """
     # no more data
     if len(x) == 0:
         return result
@@ -236,11 +234,11 @@ def _create_next_numerical_bin(x, n_bins, result):
 
 
 def _first_interval(x, n_bins):
-    '''
+    """
     Gets the first interval based on the percentiles, 
     either a closed interval containing the same value multiple times
     or a closed-open interval with a different lower and upper bound.
-    '''
+    """
     # calculate the percentiles
     percentiles = np.linspace(0., 100., n_bins + 1)
     bounds = np.percentile(x, q=percentiles, interpolation='higher')
