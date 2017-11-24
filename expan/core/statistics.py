@@ -134,6 +134,37 @@ def sample_size(x):
     return len(x) - x_nan
 
 
+def estimate_sample_size(x, mde, n, r, alpha=0.05, beta=0.2):
+    """
+    Estimates sample size based on sample mean and variance given MDE (Minimum Detectable effect), number of variants and variant split ratio
+
+    Args:
+        x (pd.Series or pd.DataFrame): sample to base estimation on
+        mde (float): minimum detectable effect
+        n (int): number of variants
+        r (float): variant split ratio
+        alpha (float): significance level
+        beta (float): type II error
+
+    Returns:
+        float or pd.Series: estimated sample size
+
+    """
+    if not isinstance(x, pd.Series) and not isinstance(x, pd.DataFrame):
+        raise TypeError("Sample x needs to be either Series or DataFrame.")
+
+    if not isinstance(n, int):
+        raise TypeError("Number of variants needs to be an integer.")
+
+    if n <= 0:
+        raise ValueError("Number of variants needs to be higher than 0.")
+
+    if r <= 0:
+        raise ValueError("Variant split ratio needs to be higher than 0.")
+
+    return n * ((stats.norm.ppf(1 - alpha) - stats.norm.ppf(beta)) ** 2 * (x.var() / (x.mean() ** 2)) * (1 + (1 / float(r)))) / (mde ** 2)
+
+
 def chi_square(x, y, min_counts=5):
     """
     Performs the chi-square homogeneity test on categorical arrays x and y
@@ -492,7 +523,7 @@ def compute_statistical_power(x, y, alpha=0.05):
         alpha: Type I error (false positive rate)
 
     Returns:
-        float: statistical power --- the probability of a test to detect an effect, 
+        float: statistical power --- the probability of a test to detect an effect,
             if the effect actually exists.
     """
     z_1_minus_alpha = stats.norm.ppf(1 - alpha)
@@ -524,9 +555,9 @@ def _get_power(mean1, std1, n1, mean2, std2, n2, z_1_minus_alpha):
         std2 (float): standard deviation of the control distribution
         n2 (integer): number of samples of the control distribution
         z_1_minus_alpha (float): critical value for significance level alpha. That is, z-value for 1-alpha.
-    
+
     Returns:
-        float: statistical power --- that is, the probability of a test to detect an effect, 
+        float: statistical power --- that is, the probability of a test to detect an effect,
             if the effect actually exists.
     """
     effect_size = mean1 - mean2
