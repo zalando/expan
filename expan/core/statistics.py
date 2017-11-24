@@ -162,7 +162,7 @@ def estimate_sample_size(x, mde, n, r, alpha=0.05, beta=0.2):
     if r <= 0:
         raise ValueError("Variant split ratio needs to be higher than 0.")
 
-    return n * ((stats.norm.ppf(1 - alpha) - stats.norm.ppf(beta)) ** 2 * (x.var() / (x.mean() ** 2)) * (1 + (1 / float(r)))) / (mde ** 2)
+    return n * ((stats.norm.ppf(1 - alpha / 2.) - stats.norm.ppf(beta)) ** 2 * (x.var() / (x.mean() ** 2)) * (1 + (1 / float(r)))) / (mde ** 2)
 
 
 def chi_square(x, y, min_counts=5):

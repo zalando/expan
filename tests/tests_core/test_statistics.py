@@ -310,15 +310,15 @@ class EstimateSampleSizeTestCases(StatisticsTestCase):
 
         res = statx.estimate_sample_size(x=x, mde=0.01, r=1.0, n=2)
 
-        self.assertEqual(int(res['sample_1']), 155496)
-        self.assertEqual(int(res['sample_2']), 111956)
+        self.assertEqual(int(res['sample_1']), 197405)
+        self.assertEqual(int(res['sample_2']), 142130)
 
     def test__estimate_sample_size__series(self):
         """
         Result of estimate_sample_size() is estimated sample size.
         """
         x = pd.Series([1, 7, 8, 9, 3, 4, 2, 0])
-        self.assertEqual(int(statx.estimate_sample_size(x=x, mde=0.01, r=1.0, n=2)), 155496)
+        self.assertEqual(int(statx.estimate_sample_size(x=x, mde=0.01, r=1.0, n=2)), 197405)
 
     def test__estimate_sample_size__x_type_error(self):
         """
