@@ -495,7 +495,7 @@ def compute_statistical_power(x, y, alpha=0.05):
         float: statistical power --- the probability of a test to detect an effect, 
             if the effect actually exists.
     """
-    z_1_minus_alpha = stats.norm.ppf(1 - alpha)
+    z_1_minus_alpha = stats.norm.ppf(1 - alpha/2.)
 
     _x = np.array(x, dtype=float)
     _x = _x[~np.isnan(_x)]

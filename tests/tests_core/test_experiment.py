@@ -147,7 +147,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
         self.assertNumericalEqual(aStats['treatment_mean'],  0.025219, ndecimals)
         self.assertNumericalEqual(aStats['control_mean'],   -0.007833, ndecimals)
 
-        self.assertNumericalEqual(aStats['statistical_power'], 0.48697, ndecimals)
+        self.assertNumericalEqual(aStats['statistical_power'], 0.36401, ndecimals)
 
 
     def test_fixed_horizon_delta_derived_kpis(self):
@@ -172,7 +172,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
         self.assertNumericalEqual(aStats['treatment_mean'],  0.025219, ndecimals)
         self.assertNumericalEqual(aStats['control_mean'],   -0.007833, ndecimals)
 
-        self.assertNumericalEqual(aStats['statistical_power'], 0.48697, ndecimals)
+        self.assertNumericalEqual(aStats['statistical_power'], 0.36401, ndecimals)
 
 
     def test_group_sequential_delta_derived_kpis(self):
@@ -201,7 +201,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
         self.assertNumericalEqual(aStats['treatment_mean'],  0.025219, ndecimals)
         self.assertNumericalEqual(aStats['control_mean'],   -0.007833, ndecimals)
 
-        self.assertNumericalEqual(aStats['statistical_power'], 0.48697, ndecimals)
+        self.assertNumericalEqual(aStats['statistical_power'], 0.36401, ndecimals)
 
 
     # @unittest.skip("sometimes takes too much time")
@@ -231,7 +231,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
         self.assertNumericalEqual(aStats['treatment_mean'],  0.025219, ndecimals)
         self.assertNumericalEqual(aStats['control_mean'],   -0.007833, ndecimals)
 
-        self.assertNumericalEqual(aStats['statistical_power'], 0.48697, ndecimals)
+        self.assertNumericalEqual(aStats['statistical_power'], 0.36401, ndecimals)
 
 
     # @unittest.skip("sometimes takes too much time")
