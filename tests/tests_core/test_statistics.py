@@ -297,10 +297,9 @@ class EstimateSampleSizeTestCases(StatisticsTestCase):
     Test cases for the estimate_sample_size() function in core.statistics.
     """
 
-    def test__estimate_sample_size__1(self):
+    def test__estimate_sample_size__dataframe(self):
         """
         Result of estimate_sample_size() is a series of estimated sample sizes.
-
         """
         x = pd.DataFrame(
             {
@@ -314,42 +313,37 @@ class EstimateSampleSizeTestCases(StatisticsTestCase):
         self.assertEqual(int(res['sample_1']), 155496)
         self.assertEqual(int(res['sample_2']), 111956)
 
-    def test__estimate_sample_size__2(self):
+    def test__estimate_sample_size__series(self):
         """
         Result of estimate_sample_size() is estimated sample size.
-
         """
         x = pd.Series([1, 7, 8, 9, 3, 4, 2, 0])
         self.assertEqual(int(statx.estimate_sample_size(x=x, mde=0.01, r=1.0, n=2)), 155496)
 
-    def test__estimate_sample_size__3(self):
+    def test__estimate_sample_size__x_type_error(self):
         """
         Method estimate_sample_size raises TypeError since x is a list.
-
         """
         x = [1, 7, 8, 9, 3, 4, 2, 0]
         self.assertRaises(TypeError, statx.estimate_sample_size, x=x, mde=0.01, r=1.0, n=2)
 
-    def test__estimate_sample_size__4(self):
+    def test__estimate_sample_size__n_type_error(self):
         """
         Method estimate_sample_size raises TypeError since n is a float.
-
         """
         x = pd.Series([1, 7, 8, 9, 3, 4, 2, 0])
         self.assertRaises(TypeError, statx.estimate_sample_size, x=x, mde=0.01, r=1.0, n=1.5)
 
-    def test__estimate_sample_size__5(self):
+    def test__estimate_sample_size__n_value_error(self):
         """
         Method estimate_sample_size raises ValueError since n is 0.
-
         """
         x = pd.Series([1, 7, 8, 9, 3, 4, 2, 0])
         self.assertRaises(ValueError, statx.estimate_sample_size, x=x, mde=0.01, r=1.0, n=0)
 
-    def test__estimate_sample_size__6(self):
+    def test__estimate_sample_size__r_value_error(self):
         """
         Method estimate_sample_size raises ValueError since r is 0.
-
         """
         x = pd.Series([1, 7, 8, 9, 3, 4, 2, 0])
         self.assertRaises(ValueError, statx.estimate_sample_size, x=x, mde=0.01, r=0.0, n=2)
