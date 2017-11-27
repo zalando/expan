@@ -184,26 +184,26 @@ class ApplyNumericalBinsTestCase(BinningTestCase):
 
         bin1 = Bin("numerical", 0, 10, True, False)
         data_applied_bin1 = pd.DataFrame(np.tile(np.array([np.arange(10)]).T, (1, 3)), columns=list('ABC'))
-        np.testing.assert_array_equal(data_applied_bin1, bin1.apply(data, dimension))
+        np.testing.assert_array_equal(data_applied_bin1, bin1(data, dimension))
 
         bin2 = Bin("numerical", 40, 50, True, False)
         data_applied_bin2 = pd.DataFrame(np.tile(np.array([np.arange(40, 50)]).T, (1, 3)), columns=list('ABC'))
-        np.testing.assert_array_equal(data_applied_bin2, bin2.apply(data, dimension))
+        np.testing.assert_array_equal(data_applied_bin2, bin2(data, dimension))
 
         bin3 = Bin("numerical", 300, 500, False, True)
         data_applied_bin3 = pd.DataFrame(np.tile(np.array([np.arange(301, 501)]).T, (1, 3)), columns=list('ABC'))
-        np.testing.assert_array_equal(data_applied_bin3, bin3.apply(data, dimension))
+        np.testing.assert_array_equal(data_applied_bin3, bin3(data, dimension))
 
         bin4 = Bin("numerical", 900, 999, True, True)
         data_applied_bin4 = pd.DataFrame(np.tile(np.array([np.arange(900, 1000)]).T, (1, 3)), columns=list('ABC'))
-        np.testing.assert_array_equal(data_applied_bin4, bin4.apply(data, dimension))
+        np.testing.assert_array_equal(data_applied_bin4, bin4(data, dimension))
 
     def test_assign_unseen_data(self):
         data = pd.DataFrame(np.tile(np.array([np.arange(1000)]).T, (1,3)), columns=list('ABC'))
         dimension = 'A'
 
         bin = Bin("numerical", 1000, 2000, False, False)
-        np.testing.assert_array_equal(None, bin.apply(data, dimension))
+        np.testing.assert_array_equal(None, bin(data, dimension))
 
     def test_assign_nan(self):
         data_one_dim = np.arange(1002.)
@@ -214,11 +214,11 @@ class ApplyNumericalBinsTestCase(BinningTestCase):
 
         bin_regular = Bin("numerical", 0, 10, True, False)
         data_applied_bin_regular = pd.DataFrame(np.tile(np.array([np.arange(10)]).T, (1, 3)), columns=list('ABC'))
-        np.testing.assert_array_equal(data_applied_bin_regular, bin_regular.apply(data, dimension))
+        np.testing.assert_array_equal(data_applied_bin_regular, bin_regular(data, dimension))
 
         bin_nan = Bin("numerical", np.nan, np.nan, True, True)
         data_applied_bin_nan = pd.DataFrame( np.full((2,3), np.nan), columns=list('ABC'))
-        np.testing.assert_array_equal(data_applied_bin_nan, bin_nan.apply(data, dimension))
+        np.testing.assert_array_equal(data_applied_bin_nan, bin_nan(data, dimension))
 
 
 #---------- Categorical binning tests ------------#
@@ -251,6 +251,26 @@ class CreateCategoricalBinsTestCase(BinningTestCase):
         bins = create_bins(data, 4)
         self.assertEqual(len(bins), 3)
 
+    def test_binning_date_1(self):
+        data = ['2017-05-01'] * 10 + ['2017-06-01'] * 5 + ['2017-07-01'] * 5
+
+        bins = create_bins(data, 4)
+        self.assertEqual(len(bins), 3)
+
+    def test_binning_date_2(self):
+        data = ['2017-05-01'] * 10 + ['2017-06-01'] * 5 + ['2017-07-01'] * 5
+
+        bins = create_bins(data, 2)
+        self.assertEqual(len(bins), 2)
+
+        bins_repr_source = toBinRepresentation(bins)
+
+        bins_repr_expected = [
+            CategoricalRepresentation(["2017-05-01"]),
+            CategoricalRepresentation(["2017-07-01", "2017-06-01"])
+        ]
+        self.assertCollectionEqual(bins_repr_source, bins_repr_expected)
+
 
 class ApplyCategoricalBinsTestCase(BinningTestCase):
     """
@@ -260,22 +280,22 @@ class ApplyCategoricalBinsTestCase(BinningTestCase):
         data = pd.DataFrame(["a", "b", "c", "a", "b"], columns=list("a"))
 
         bin_a = Bin("categorical", ["a"])
-        np.testing.assert_array_equal(np.array([["a", "a"]]).T, bin_a.apply(data, "a"))
+        np.testing.assert_array_equal(np.array([["a", "a"]]).T, bin_a(data, "a"))
 
         bin_b = Bin("categorical", ["b"])
-        np.testing.assert_array_equal(np.array([["b", "b"]]).T, bin_b.apply(data, "a"))
+        np.testing.assert_array_equal(np.array([["b", "b"]]).T, bin_b(data, "a"))
 
         bin_c = Bin("categorical", ["c"])
-        np.testing.assert_array_equal(np.array([["c"]]), bin_c.apply(data, "a"))
+        np.testing.assert_array_equal(np.array([["c"]]), bin_c(data, "a"))
 
     def test_assign_unseen(self):
         data = pd.DataFrame(["a", "b", "c"], columns=list("a"))
 
         bin = Bin("categorical", ["d"])
-        np.testing.assert_array_equal(None, bin.apply(data, "a"))
+        np.testing.assert_array_equal(None, bin(data, "a"))
 
     def test_assign_multiple(self):
         data = pd.DataFrame(["a", "b", "c", "a", "b"], columns=list("a"))
 
         bin = Bin("categorical", ["a", "b"])
-        np.testing.assert_array_equal(np.array([["a", "b", "a", "b"]]).T, bin.apply(data, "a"))
+        np.testing.assert_array_equal(np.array([["a", "b", "a", "b"]]).T, bin(data, "a"))

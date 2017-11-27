@@ -103,26 +103,32 @@ A **build** and **test** is triggered when a commit is pushed to either
 - **master**
 - or a **pull request branch to dev or master**.
 
+If you wish to skip triggering a CI task (for example when you change documentation), please include ``[ci skip]`` in your commit message.
+
+Deploying to PyPI
+=================
+
 If you want to **deploy to PyPI**, then follow these steps:
 
 - assuming you have a dev branch that is up to date, create a pull request from dev to master (a travis job will be started for the pull request)
 - once the pull request is approved, merge it (another travis job will be started because a push to master happened)
 - checkout master
+- create a new tag
+- rerun documentation generation
 - push **tags** to **master** (a third travis job will be started, but this time it will also push to PyPI because tags were pushed)
-
-If you wish to skip triggering a CI task (for example when you change documentation), please include ``[ci skip]`` in your commit message.
 
 The flow would then look like follows:
 
 1. :code:`git fetch`
-2. :code:`git checkout dev`
+2. :code:`git checkout master`
 3. :code:`git pull`
 4. :code:`bumpversion (patch|minor)`
 5. :code:`make docs`
-6. :code:`git push --tags`
-7. :code:`git push`
-8. create pull request from dev to master
-9. merge pull request
+6. :code:`git add CHANGELOG.*`
+7. :code:`git commit -m "updated changelog"`
+8. :code:`git push --followTags`
+
+You can then check if the triggered Travis CI job is tagged (the name should be eg. 'v1.2.3' instead of 'master').
 
 
 TODOs
