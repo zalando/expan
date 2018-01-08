@@ -1,5 +1,23 @@
 # Change Log
 
+## [Unreleased](https://github.com/zalando/expan/tree/HEAD)
+
+[Full Changelog](https://github.com/zalando/expan/compare/v0.6.5...HEAD)
+
+**Closed issues:**
+
+- Infinitely large confidence intervals produced by group\_sequential\_delta\(\) [\#172](https://github.com/zalando/expan/issues/172)
+
+**Merged pull requests:**
+
+- Merging dev to master for new release [\#175](https://github.com/zalando/expan/pull/175) ([mkolarek](https://github.com/mkolarek))
+- AXO-35 implemented estimate\_sample\_size\(\) for estimating sample size … [\#174](https://github.com/zalando/expan/pull/174) ([mkolarek](https://github.com/mkolarek))
+- Fix two-sided alpha value in power analysis [\#173](https://github.com/zalando/expan/pull/173) ([shansfolder](https://github.com/shansfolder))
+- Docs/update contrib doc [\#171](https://github.com/zalando/expan/pull/171) ([mkolarek](https://github.com/mkolarek))
+- Add some parameter checks [\#170](https://github.com/zalando/expan/pull/170) ([shansfolder](https://github.com/shansfolder))
+- Make applying bins to data frames more agreeable [\#169](https://github.com/zalando/expan/pull/169) ([gbordyugov](https://github.com/gbordyugov))
+- OCTO-2181: Implement over time analysis. Time-based SGA [\#164](https://github.com/zalando/expan/pull/164) ([daryadedik](https://github.com/daryadedik))
+
 ## [v0.6.5](https://github.com/zalando/expan/tree/v0.6.5) (2017-10-24)
 [Full Changelog](https://github.com/zalando/expan/compare/v0.6.3...v0.6.5)
 
