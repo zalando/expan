@@ -83,7 +83,7 @@ You can find links to our detailed documentations for
 
 Subgroup analysis
 ------------------------------------
-Subgroup analysis in ExaAn will select subgroup (which is a segment of data) based on the input argument, and then perform a regular delta analysis per subgroup as described before.
+Subgroup analysis in ExpAn will select subgroup (which is a segment of data) based on the input argument, and then perform a regular delta analysis per subgroup as described before.
 
 That is to say, we don't compare between subgroups, but compare treatment with control within each subgroup.
 

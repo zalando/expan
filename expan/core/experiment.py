@@ -204,7 +204,7 @@ class Experiment(object):
         Args:
             feature_name_to_bins (dict): a dict of feature name (key) to list of Bin objects (value). 
                                       This dict defines how and on which column to perform the subgroup split.
-            multi_test_correction (boolean): True or False whether the correction for multiple testing is needed.
+            multi_test_correction (boolean): flag of whether the correction for multiple testing is needed.
         Returns:
             Analysis results per subgroup. 
         """
@@ -241,7 +241,7 @@ class Experiment(object):
         Perform subgroup analysis on date partitioning each day from start day till end date. Produces non-cumulative
         delta and CIs for each subgroup.
         Args:
-            multi_test_correction (boolean): True or False whether the correction for multiple testing is needed.
+            multi_test_correction (boolean): flag of whether the correction for multiple testing is needed.
         Returns:
             Analysis results per date
         """

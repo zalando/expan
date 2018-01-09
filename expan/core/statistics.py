@@ -58,8 +58,8 @@ def delta(x, y, assume_normal=True, percentiles=[2.5, 97.5],
             the weighted mean and confidence intervals, which is equivalent
             to the overall metric. This weighted approach is only relevant
             for ratios.
-        multi_test_correction (boolean): correct the confidence intervals (multiple correction problem)
-        num_tests: number of tests or reported kpis.
+        multi_test_correction (boolean): flag of whether the correction for multiple testing is needed.
+        num_tests (integer): number of tests or reported kpis used for multiple correction.
 
     Returns:
         DeltaStatistics object
@@ -430,8 +430,8 @@ def normal_sample_difference(x, y, percentiles=[2.5, 97.5], relative=False, mult
             absolute values. In this case, the interval is mean-ret_val[0] to
             mean+ret_val[1]. This is more useful in many situations because it
             corresponds with the sem() and std() functions.
-        multi_test_correction (boolean): True or False whether the correction for multiple testing is needed.
-        num_tests: number of tests or reported kpis used for multiple correction (default: 1, no correction is done)
+        multi_test_correction (boolean): flag of whether the correction for multiple testing is needed.
+        num_tests (integer): number of tests or reported kpis used for multiple correction.
 
     Returns:
         dict: percentiles and corresponding values
@@ -477,8 +477,8 @@ def normal_difference(mean1, std1, n1, mean2, std2, n2, percentiles=[2.5, 97.5],
             absolute values. In	this case, the interval is mean-ret_val[0] to
             mean+ret_val[1]. This is more useful in many situations because it
             corresponds with the sem() and std() functions.
-        multi_test_correction (boolean): True or False whether the correction for multiple testing is needed.
-        num_tests: number of tests or reported kpis used for multiple correction (default: 1, no correction is done)
+        multi_test_correction (boolean): flag of whether the correction for multiple testing is needed.
+        num_tests (integer): number of tests or reported kpis used for multiple correction.
 
     Returns:
         dict: percentiles and corresponding values

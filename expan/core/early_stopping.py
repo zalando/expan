@@ -59,8 +59,8 @@ def group_sequential(x,
             the end of experiment
         alpha: type-I error rate
         cap: upper bound of the adapted z-score
-        multi_test_correction: multiple correction flag
-        num_tests: number of tests or reported kpis used for multiple correction (default: 1, no correction is done)
+        multi_test_correction (boolean): flag of whether the correction for multiple testing is needed
+        num_tests (integer): number of tests or reported kpis used for multiple correction
         
     Returns:
         EarlyStoppingStatistics object
