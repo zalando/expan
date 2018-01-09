@@ -11,18 +11,19 @@ def _delta_mean(x, y):
 
 
 def make_delta(assume_normal=True, percentiles=[2.5, 97.5],
-               min_observations=20, nruns=10000, relative=False, num_tests=1):
+               min_observations=20, nruns=10000, relative=False, multi_test_correction=False, num_tests=1):
     """ a closure to the below delta function """
 
     def f(x, y, x_weights=1, y_weights=1):
         return delta(x, y, assume_normal, percentiles, min_observations,
-                     nruns, relative, x_weights, y_weights, num_tests)
+                     nruns, relative, x_weights, y_weights, multi_test_correction, num_tests)
 
     return f
 
 
 def delta(x, y, assume_normal=True, percentiles=[2.5, 97.5],
-          min_observations=20, nruns=10000, relative=False, x_weights=1, y_weights=1, num_tests=1):
+          min_observations=20, nruns=10000, relative=False, x_weights=1, y_weights=1,
+          multi_test_correction=False, num_tests=1):
     """
     Calculates the difference of means between the samples (x-y) in a
     statistical sense, i.e. with confidence intervals.
@@ -57,7 +58,8 @@ def delta(x, y, assume_normal=True, percentiles=[2.5, 97.5],
             the weighted mean and confidence intervals, which is equivalent
             to the overall metric. This weighted approach is only relevant
             for ratios.
-        num_tests: number of tests or reported kpis
+        multi_test_correction (boolean): correct the confidence intervals (multiple correction problem)
+        num_tests: number of tests or reported kpis.
 
     Returns:
         DeltaStatistics object
@@ -90,10 +92,9 @@ def delta(x, y, assume_normal=True, percentiles=[2.5, 97.5],
         # Computing the mean
         mu = _delta_mean(_x, _y)
         # Computing the confidence intervals
-        percentiles = [float(p) / num_tests if p < 50.0
-                       else 100 - (100 - float(p)) / num_tests if p > 50.0 else p for p in percentiles]
         if assume_normal:
-            c_i = normal_sample_difference(x=_x, y=_y, percentiles=percentiles, relative=relative)
+            c_i = normal_sample_difference(x=_x, y=_y, percentiles=percentiles, relative=relative,
+                                           multi_test_correction=multi_test_correction, num_tests=num_tests)
         else:
             c_i, _ = bootstrap(x=_x, y=_y, percentiles=percentiles, nruns=nruns,
                                relative=relative)
@@ -412,7 +413,7 @@ def normal_sample_percentiles(values, percentiles=[2.5, 97.5], relative=False):
                               relative=relative)
 
 
-def normal_sample_difference(x, y, percentiles=[2.5, 97.5], relative=False):
+def normal_sample_difference(x, y, percentiles=[2.5, 97.5], relative=False, multi_test_correction=False, num_tests=1):
     """
     Calculates the difference distribution of two normal distributions given
     by their samples.
@@ -429,6 +430,8 @@ def normal_sample_difference(x, y, percentiles=[2.5, 97.5], relative=False):
             absolute values. In this case, the interval is mean-ret_val[0] to
             mean+ret_val[1]. This is more useful in many situations because it
             corresponds with the sem() and std() functions.
+        multi_test_correction (boolean): True or False whether the correction for multiple testing is needed.
+        num_tests: number of tests or reported kpis used for multiple correction (default: 1, no correction is done)
 
     Returns:
         dict: percentiles and corresponding values
@@ -449,11 +452,12 @@ def normal_sample_difference(x, y, percentiles=[2.5, 97.5], relative=False):
 
     # Push calculation to normal difference function
     return normal_difference(mean1=mean1, std1=std1, n1=n1, mean2=mean2,
-                             std2=std2, n2=n2, percentiles=percentiles, relative=relative)
+                             std2=std2, n2=n2, percentiles=percentiles, relative=relative,
+                             multi_test_correction=multi_test_correction, num_tests=num_tests)
 
 
 def normal_difference(mean1, std1, n1, mean2, std2, n2, percentiles=[2.5, 97.5],
-                      relative=False):
+                      relative=False, multi_test_correction=False, num_tests=1):
     """
     Calculates the difference distribution of two normal distributions.
 
@@ -473,6 +477,8 @@ def normal_difference(mean1, std1, n1, mean2, std2, n2, percentiles=[2.5, 97.5],
             absolute values. In	this case, the interval is mean-ret_val[0] to
             mean+ret_val[1]. This is more useful in many situations because it
             corresponds with the sem() and std() functions.
+        multi_test_correction (boolean): True or False whether the correction for multiple testing is needed.
+        num_tests: number of tests or reported kpis used for multiple correction (default: 1, no correction is done)
 
     Returns:
         dict: percentiles and corresponding values
@@ -487,6 +493,11 @@ def normal_difference(mean1, std1, n1, mean2, std2, n2, percentiles=[2.5, 97.5],
     st_error = std * np.sqrt(1. / n1 + 1. / n2)
     # Computing degrees of freedom
     d_free = n1 + n2 - 2
+
+    # Adjusting percentiles, Bonferroni correction.
+    if multi_test_correction:
+        percentiles = [float(p) / num_tests if p < 50.0
+                       else 100 - (100 - float(p)) / num_tests if p > 50.0 else p for p in percentiles]
 
     # Mapping percentiles via standard error
     if relative:

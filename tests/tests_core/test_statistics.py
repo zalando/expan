@@ -84,7 +84,9 @@ class DeltaTestCases(StatisticsTestCase):
             self.samples.temperature[self.samples.gender == 1],
             self.samples.temperature[self.samples.gender == 2],
             percentiles=[2.5, 97.5],
-            assume_normal=True, num_tests=25)
+            assume_normal=True,
+            multi_test_correction=True,
+            num_tests=25)
 
         value025 = find_list_of_dicts_element(res['confidence_interval'], 'percentile', 0.1, 'value')
         value975 = find_list_of_dicts_element(res['confidence_interval'], 'percentile', 99.9, 'value')
@@ -100,7 +102,8 @@ class DeltaTestCases(StatisticsTestCase):
             self.samples.temperature[self.samples.gender == 1],
             self.samples.temperature[self.samples.gender == 2],
             percentiles=[2.5, 97.5],
-            assume_normal=True, num_tests=1)
+            multi_test_correction=True,
+            num_tests=1)
 
         value025 = find_list_of_dicts_element(res['confidence_interval'], 'percentile', 2.5, 'value')
         value975 = find_list_of_dicts_element(res['confidence_interval'], 'percentile', 97.5, 'value')
