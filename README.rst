@@ -107,7 +107,7 @@ Some mock-up data:
 Documentation
 =============
 
-The latest stable version is 0.6.6.
+The latest stable version is 0.6.7.
 
 `ExpAn main documentation <http://expan.readthedocs.io/>`__
 
