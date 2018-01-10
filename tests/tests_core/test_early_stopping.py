@@ -71,6 +71,22 @@ class GroupSequentialTestCases(EarlyStoppingTestCase):
         self.assertAlmostEqual         (res['treatment_mean'],        -0.045256707490195384)
         self.assertAlmostEqual         (res['control_mean'],           0.11361694031616358)
 
+    def test_group_sequential_multi_test_correction(self):
+        """
+        Test group sequential with multiple correction
+        """
+        res = es.group_sequential(self.rand_s1, self.rand_s2, multi_test_correction=True, num_tests=25)
+
+        self.assertEqual(res['stop'], True)
+        self.assertAlmostEqual(res['delta'], -0.15887364780635896)
+        value025 = find_list_of_dicts_element(res['confidence_interval'], 'percentile', 0.1, 'value')
+        value975 = find_list_of_dicts_element(res['confidence_interval'], 'percentile', 99.9, 'value')
+        np.testing.assert_almost_equal(value025, -0.29416175390519078, decimal=5)
+        np.testing.assert_almost_equal(value975, -0.023585541707525692, decimal=5)
+        self.assertEqual(res['treatment_sample_size'], 1000)
+        self.assertEqual(res['control_sample_size'], 1000)
+        self.assertAlmostEqual(res['treatment_mean'], -0.045256707490195384)
+        self.assertAlmostEqual(res['control_mean'], 0.11361694031616358)
 
     def test_group_sequential_actual_size_larger_than_estimated(self):
         """

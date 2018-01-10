@@ -31,10 +31,11 @@ def obrien_fleming(information_fraction, alpha=0.05):
     return (1 - norm.cdf(norm.ppf(1 - alpha / 2) / np.sqrt(information_fraction))) * 2
 
 
-def make_group_sequential(spending_function='obrien_fleming', estimated_sample_size=None, alpha=0.05, cap=8):
+def make_group_sequential(spending_function='obrien_fleming', estimated_sample_size=None, alpha=0.05, cap=8,
+                          multi_test_correction=False, num_tests=1):
     def f(x, y):
         return group_sequential(x, y, spending_function, estimated_sample_size,
-                                alpha, cap)
+                                alpha, cap, multi_test_correction, num_tests)
     return f
 
 
@@ -43,7 +44,9 @@ def group_sequential(x,
                      spending_function='obrien_fleming',
                      estimated_sample_size=None,
                      alpha=0.05,
-                     cap=8):
+                     cap=8,
+                     multi_test_correction=False,
+                     num_tests=1):
     """
     Group sequential method to determine whether to stop early or not.
 
@@ -56,7 +59,9 @@ def group_sequential(x,
             the end of experiment
         alpha: type-I error rate
         cap: upper bound of the adapted z-score
-
+        multi_test_correction (boolean): flag of whether the correction for multiple testing is needed
+        num_tests (integer): number of tests or reported kpis used for multiple correction
+        
     Returns:
         EarlyStoppingStatistics object
     """
@@ -74,7 +79,7 @@ def group_sequential(x,
     if not estimated_sample_size:
         information_fraction = 1.0
     else:
-        information_fraction = min(1.0, min(n_x, n_y) / estimated_sample_size)
+        information_fraction = min(1.0, (n_x + n_y) / estimated_sample_size)
 
     # alpha spending function
     if spending_function in ('obrien_fleming'):
@@ -101,7 +106,8 @@ def group_sequential(x,
         stop = False
 
     interval = statx.normal_difference(mu_x, sigma_x, n_x, mu_y, sigma_y, n_y,
-                                       [alpha_new * 100 / 2, 100 - alpha_new * 100 / 2])
+                                       [alpha_new * 100 / 2, 100 - alpha_new * 100 / 2],
+                                       multi_test_correction=multi_test_correction, num_tests=num_tests)
 
     # return stop, mu_x - mu_y, interval, n_x, n_y, mu_x, mu_y
     interval = [{'percentile': p, 'value': v} for (p, v) in interval.items()]

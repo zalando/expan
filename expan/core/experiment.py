@@ -115,6 +115,9 @@ class Experiment(object):
         if not method in worker_table:
             raise NotImplementedError
 
+        if 'multi_test_correction' in worker_args:
+            worker_args['num_tests'] = len(self.report_kpi_names)
+
         worker = worker_table[method](**worker_args)
 
         result = {'warnings': [],
@@ -195,12 +198,13 @@ class Experiment(object):
 
         self.data = self.data[flags == False]
 
-    def sga(self, feature_name_to_bins):
+    def sga(self, feature_name_to_bins, multi_test_correction=False):
         """
         Perform subgroup analysis.
         Args:
             feature_name_to_bins (dict): a dict of feature name (key) to list of Bin objects (value). 
                                       This dict defines how and on which column to perform the subgroup split.
+            multi_test_correction (boolean): flag of whether the correction for multiple testing is needed.
         Returns:
             Analysis results per subgroup. 
         """
@@ -226,16 +230,18 @@ class Experiment(object):
                     continue
 
                 subgroup_res = self._delta(method='fixed_horizon', data=subgroup_data,
-                                           num_tests=len(self.report_kpi_names))
+                                           multi_test_correction=multi_test_correction)
                 subgroup['result'] = subgroup_res
                 subgroups.append(subgroup)
 
         return subgroups
 
-    def sga_date(self):
+    def sga_date(self, multi_test_correction=False):
         """
         Perform subgroup analysis on date partitioning each day from start day till end date. Produces non-cumulative
         delta and CIs for each subgroup.
+        Args:
+            multi_test_correction (boolean): flag of whether the correction for multiple testing is needed.
         Returns:
             Analysis results per date
         """
@@ -252,7 +258,7 @@ class Experiment(object):
                         'segment': str(bin.representation)}
             subgroup_data = bin(self.data, 'date')
             subgroup_res = self._delta(method='fixed_horizon', data=subgroup_data,
-                                       num_tests=len(self.report_kpi_names))
+                                       multi_test_correction=multi_test_correction)
             subgroup['result'] = subgroup_res
             subgroups.append(subgroup)
 

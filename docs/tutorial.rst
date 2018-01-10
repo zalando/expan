@@ -98,6 +98,7 @@ You may also find the description in our :ref:`API <modindex>` page.
 	* ``min_observations=20``: Minimum number of observations needed.
 	* ``nruns=10000``: Only used if assume normal is false.
 	* ``relative=False``: If relative==True, then the values will be returned as distances below and above the mean, respectively, rather than the absolute values.
+	* ``multi_test_correction=False``: Initiate multiple correction (Bonferroni correction is supported).
 
 *group_sequential* is a frequentist approach for early stopping:
 
@@ -105,19 +106,20 @@ You may also find the description in our :ref:`API <modindex>` page.
 	* ``estimated_sample_size=None``: Sample size to be achieved towards the end of experiment. In other words, the actual size of data should be always smaller than estimated_sample_size.
 	* ``alpha=0.05``: Type-I error rate.
 	* ``cap=8``: Upper bound of the adapted z-score.
+	* ``multi_test_correction=False``: Initiate multiple correction (Bonferroni correction is supported).
 
 *bayes_factor* is a Bayesian approach for delta analysis and early stopping:
 
 	* ``distribution='normal'``: The name of the KPI distribution model, which assumes a Stan model file with the same name exists. Currently we support *normal* and *poisson* models.
 	* ``num_iters=25000``: Number of iterations of bayes sampling.
-    * ``inference=sampling``: 'sampling' for MCMC sampling method or 'variational' for variational inference method to approximate the posterior distribution.
+	* ``inference=sampling``: 'sampling' for MCMC sampling method or 'variational' for variational inference method to approximate the posterior distribution.
 
 *bayes_precision* is another Bayesian approach similar as *bayes_factor*:
 
 	* ``distribution='normal'``: The name of the KPI distribution model, which assumes a Stan model file with the same name exists. Currently we support *normal* and *poisson* models.
 	* ``num_iters=25000``: Number of iterations of bayes sampling.
 	* ``posterior_width=0.08``: The stopping criterion, threshold of the posterior width.
-    * ``inference=sampling``: 'sampling' for MCMC sampling method or 'variational' for variational inference method to approximate the posterior distribution.
+	* ``inference=sampling``: 'sampling' for MCMC sampling method or 'variational' for variational inference method to approximate the posterior distribution.
 
 
 Interpreting result

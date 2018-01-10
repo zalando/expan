@@ -14,7 +14,7 @@ Assumptions used in analysis
 
 2. Welch t-test
 
-  * Mean of means is t-distributed (or normally distributed) 
+  * Mean of means is t-distributed (or normally distributed)
 
 3. In general
 
@@ -83,11 +83,26 @@ You can find links to our detailed documentations for
 
 Subgroup analysis
 ------------------------------------
-Subgroup analysis in ExaAn will select subgroup (which is a segment of data) based on the input argument, and then perform a regular delta analysis per subgroup as described before. 
+Subgroup analysis in ExpAn will select subgroup (which is a segment of data) based on the input argument, and then perform a regular delta analysis per subgroup as described before.
 
 That is to say, we don't compare between subgroups, but compare treatment with control within each subgroup.
 
 
 Multiple testing problem
 ------------------------------------
-ToDo
+Multiple testing problem occurs when one considers a set of statistical inferences simultaneously. Consider a set of :math:`20` hypothesis that you wish to test at the
+significance level of :math:`0.05`.
+What is the probability of observing at least one significant result just due to chance?
+
+:math:`\Pr \textrm{(at least one significant result)} = 1 - \Pr \textrm{(no significant results)} = 1 - (1 - 0.05)^{20} \approx 0.64`
+
+With :math:`20` tests being considered, we have a :math:`64\%` chance of observing at least one significant result, even if all of the tests are actually not significant.
+Methods for dealing with multiple testing frequently call for adjusting :math:`\alpha` in some way, so that the probability of observing at least one significant result due to chance
+remains below your desired significance level.
+
+ExpAn allows you to correct :math:`\alpha` by setting ``multi_test_correction`` flag to True. It uses the simplest, but quite conservative Bonferroni correction method.
+The Bonferroni correction sets the significance cut-off at :math:`\frac{\alpha}{n}` where :math:`n` is the number of tests.
+With multiple correction of :math:`25` experiments your adjusted percentiles change from :math:`[2.5, 97.5]` to :math:`[0.1, 99.9]`.
+
+We understand that the Bonferroni correction may be very conservative and the correction comes at the cost of increasing the probability of producing type II errors (false negatives),
+that's why we plan to make updates for supporting more clever correction methods like Benjamini-Hochberg or Benjamini-Krieger-Yekutieli, which will come soon.

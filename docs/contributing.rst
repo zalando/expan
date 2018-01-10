@@ -126,7 +126,7 @@ The flow would then look like follows:
 5. :code:`make docs`
 6. :code:`git add CHANGELOG.*`
 7. :code:`git commit -m "updated changelog"`
-8. :code:`git push --followTags`
+8. :code:`git push --follow-tags`
 
 You can then check if the triggered Travis CI job is tagged (the name should be eg. 'v1.2.3' instead of 'master').
 
