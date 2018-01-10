@@ -2,7 +2,21 @@
 
 ## [Unreleased](https://github.com/zalando/expan/tree/HEAD)
 
-[Full Changelog](https://github.com/zalando/expan/compare/v0.6.5...HEAD)
+[Full Changelog](https://github.com/zalando/expan/compare/v0.6.6...HEAD)
+
+**Closed issues:**
+
+- Group Sequential - Percentile Issue [\#176](https://github.com/zalando/expan/issues/176)
+
+**Merged pull requests:**
+
+- Increase version to 0.6.7 [\#181](https://github.com/zalando/expan/pull/181) ([shansfolder](https://github.com/shansfolder))
+- fixed last command in "Deploying to PyPI" part of contributing.rst [\#180](https://github.com/zalando/expan/pull/180) ([mkolarek](https://github.com/mkolarek))
+- Extended multiple correction for group sequential, added doc for multiple correction. [\#179](https://github.com/zalando/expan/pull/179) ([daryadedik](https://github.com/daryadedik))
+- Fix information fraction calculation [\#177](https://github.com/zalando/expan/pull/177) ([shansfolder](https://github.com/shansfolder))
+
+## [v0.6.6](https://github.com/zalando/expan/tree/v0.6.6) (2017-11-27)
+[Full Changelog](https://github.com/zalando/expan/compare/v0.6.5...v0.6.6)
 
 **Closed issues:**
 
