@@ -84,7 +84,9 @@ class DeltaTestCases(StatisticsTestCase):
             self.samples.temperature[self.samples.gender == 1],
             self.samples.temperature[self.samples.gender == 2],
             percentiles=[2.5, 97.5],
-            assume_normal=True, num_tests=25)
+            assume_normal=True,
+            multi_test_correction=True,
+            num_tests=25)
 
         value025 = find_list_of_dicts_element(res['confidence_interval'], 'percentile', 0.1, 'value')
         value975 = find_list_of_dicts_element(res['confidence_interval'], 'percentile', 99.9, 'value')
@@ -100,7 +102,8 @@ class DeltaTestCases(StatisticsTestCase):
             self.samples.temperature[self.samples.gender == 1],
             self.samples.temperature[self.samples.gender == 2],
             percentiles=[2.5, 97.5],
-            assume_normal=True, num_tests=1)
+            multi_test_correction=True,
+            num_tests=1)
 
         value025 = find_list_of_dicts_element(res['confidence_interval'], 'percentile', 2.5, 'value')
         value975 = find_list_of_dicts_element(res['confidence_interval'], 'percentile', 97.5, 'value')
@@ -406,13 +409,14 @@ class BootstrapTestCases(StatisticsTestCase):
         # Checking if no bootstrap data was passed
         self.assertIsNone(result3[1])
 
-        # Defining data and computing bootstrap
+        # Bootstrap with multiple correction
         sample4 = self.samples.temperature[self.samples.gender == 1]
         sample5 = self.samples.temperature[self.samples.gender == 2]
-        result4 = statx.bootstrap(sample4, sample5, percentiles=[0.1, 99.9])
-        # Checking if lower percentile of result3 is correct
+        result4 = statx.bootstrap(sample4, sample5, percentiles=[2.5, 97.5],
+                                  multi_test_correction=True, num_tests=25)
+        # Checking if lower percentile of result4 is correct
         self.assertAlmostEqual(result4[0][0.1], -0.67078000000000748)
-        # Checking if upper percentile of result3 is correct
+        # Checking if upper percentile of result4 is correct
         self.assertAlmostEqual(result4[0][99.9], 0.093849230769235695)
 
 
