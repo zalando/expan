@@ -96,8 +96,8 @@ def delta(x, y, assume_normal=True, percentiles=[2.5, 97.5],
             c_i = normal_sample_difference(x=_x, y=_y, percentiles=percentiles, relative=relative,
                                            multi_test_correction=multi_test_correction, num_tests=num_tests)
         else:
-            c_i, _ = bootstrap(x=_x, y=_y, percentiles=percentiles, nruns=nruns,
-                               relative=relative)
+            c_i, _ = bootstrap(x=_x, y=_y, percentiles=percentiles, nruns=nruns, relative=relative,
+                               multi_test_correction=multi_test_correction, num_tests=num_tests)
 
     # Return the result structure
     # return mu, c_i, ss_x, ss_y, np.nanmean(_x), np.nanmean(_y)
@@ -250,7 +250,8 @@ def alpha_to_percentiles(alpha):
 
 
 def bootstrap(x, y, func=_delta_mean, nruns=10000, percentiles=[2.5, 97.5],
-              min_observations=20, return_bootstraps=False, relative=False):
+              min_observations=20, return_bootstraps=False, relative=False,
+              multi_test_correction=False, num_tests=1):
     """
     Bootstraps the Confidence Intervals for a particular function comparing
     two samples. NaNs are ignored (discarded before calculation).
@@ -273,6 +274,8 @@ def bootstrap(x, y, func=_delta_mean, nruns=10000, percentiles=[2.5, 97.5],
             absolute values. In	this case, the interval is mean-ret_val[0] to
             mean+ret_val[1]. This is more useful in many situations because it
             corresponds with the sem() and std() functions.
+        multi_test_correction (boolean): flag of whether the correction for multiple testing is needed.
+        num_tests (integer): number of tests or reported kpis used for multiple correction.
 
     Returns:
         tuple:
@@ -288,6 +291,11 @@ def bootstrap(x, y, func=_delta_mean, nruns=10000, percentiles=[2.5, 97.5],
     _y = np.array(y, dtype=float)
     ss_x = _x.size - np.isnan(_x).sum()
     ss_y = _y.size - np.isnan(_y).sum()
+
+    # Adjusting percentiles, Bonferroni correction
+    if multi_test_correction:
+        percentiles = [float(p) / num_tests if p < 50.0
+                       else 100 - (100 - float(p)) / num_tests if p > 50.0 else p for p in percentiles]
 
     # Checking if enough observations are left after dropping NaNs
     if min(ss_x, ss_y) < min_observations:
