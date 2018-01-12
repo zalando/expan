@@ -1,5 +1,16 @@
 # Change Log
 
+## [Unreleased](https://github.com/zalando/expan/tree/HEAD)
+
+[Full Changelog](https://github.com/zalando/expan/compare/v0.6.8...HEAD)
+
+**Merged pull requests:**
+
+- Update deployment flow [\#182](https://github.com/zalando/expan/pull/182) ([shansfolder](https://github.com/shansfolder))
+
+## [v0.6.8](https://github.com/zalando/expan/tree/v0.6.8) (2018-01-12)
+[Full Changelog](https://github.com/zalando/expan/compare/v0.6.7...v0.6.8)
+
 ## [v0.6.7](https://github.com/zalando/expan/tree/v0.6.7) (2018-01-10)
 [Full Changelog](https://github.com/zalando/expan/compare/v0.6.6...v0.6.7)
 
