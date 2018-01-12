@@ -46,15 +46,16 @@ The flow would then look like follows:
 1. :code:`bumpversion (patch|minor)`
 2. :code:`make docs`
 3. :code:`git add CHANGELOG.*`
-4. :code:`git commit -m "updated changelog"`
-5. :code:`git push --follow-tags`
+4. :code:`git commit -m "update changelog"`
+5. :code:`git push`
+6. :code:`git push --tags`
 
 You can then check if the triggered Travis CI job is tagged (the name should be eg. 'v1.2.3' instead of 'master').
 
 Note that it has a flaw that changelog generator will not put the changes of the current release, 
 because it reads the commit messages from git remote. 
 
-TODO: One solution could be to discard the automatic changelog generator and manually write the changelog before step 1, 
+ToDo: One solution could be to discard the automatic changelog generator and manually write the changelog before step 1, 
 and then config `make docs` to use this changelog file.
 
 
