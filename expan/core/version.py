@@ -1,6 +1,6 @@
 import subprocess
 
-__version__ = "0.6.9"
+__version__ = "0.6.10"
 
 def version_numbers():
     return [int(x) for x in __version__.split('.')]
