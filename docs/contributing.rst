@@ -28,7 +28,6 @@ See also the much simpler github flow
 `here <http://scottchacon.com/2011/08/31/github-flow.html>`__
 
 
-
 Release 
 =================
 
