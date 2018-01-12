@@ -1,7 +1,6 @@
 branches:
   only:
   - master
-  - dev
   - "/[v]\\d\\.\\d\\.\\d/"
 cache: pip
 deploy:
