@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """Update encrypted deploy password in Travis config file
+NB: This script is outdated and does not comply with the lateset travis setting
 """
 
 from __future__ import print_function
@@ -27,11 +28,11 @@ TRAVIS_CONFIG_FILE = os.path.join(
 
 def load_key(pubkey):
 	"""Load public RSA key, with work-around for keys using
-  incorrect header/footer format.
+	incorrect header/footer format.
 
-  Read more about RSA encryption with cryptography:
-  https://cryptography.io/latest/hazmat/primitives/asymmetric/rsa/
-  """
+	Read more about RSA encryption with cryptography:
+	https://cryptography.io/latest/hazmat/primitives/asymmetric/rsa/
+	"""
 	try:
 		return load_pem_public_key(pubkey.encode(), default_backend())
 	except ValueError:
@@ -43,9 +44,9 @@ def load_key(pubkey):
 def encrypt(pubkey, password):
 	"""Encrypt password using given RSA public key and encode it with base64.
 
-  The encrypted password can only be decrypted by someone with the
-  private key (in this case, only Travis).
-  """
+	The encrypted password can only be decrypted by someone with the
+	private key (in this case, only Travis).
+	"""
 	key = load_key(pubkey)
 	encrypted_password = key.encrypt(password, PKCS1v15())
 	return base64.b64encode(encrypted_password)
@@ -67,7 +68,7 @@ def fetch_public_key(repo):
 
 def prepend_line(filepath, line):
 	"""Rewrite a file adding a line to its beginning.
-  """
+    """
 	with open(filepath) as f:
 		lines = f.readlines()
 
@@ -89,8 +90,8 @@ def save_yaml_config(filepath, config):
 
 def update_travis_deploy_password(encrypted_password):
 	"""Update the deploy section of the .travis.yml file
-  to use the given encrypted password.
-  """
+    to use the given encrypted password.
+    """
 	config = load_yaml_config(TRAVIS_CONFIG_FILE)
 
 	config['deploy']['password'] = dict(secure=encrypted_password)
