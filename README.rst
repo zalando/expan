@@ -10,7 +10,6 @@ ExpAn: Experiment Analysis
         :target: https://coveralls.io/github/zalando/expan
         :alt: Code coverage
 
-
 .. image:: https://img.shields.io/pypi/v/expan.svg
         :target: https://pypi.python.org/pypi/expan
         :alt: Latest PyPI version
