@@ -6,17 +6,22 @@ ExpAn: Experiment Analysis
         :target: https://travis-ci.org/zalando/expan
         :alt: Build status
 
+.. image:: https://coveralls.io/repos/github/zalando/expan/badge.svg
+        :target: https://coveralls.io/github/zalando/expan
+        :alt: Code coverage
+
+
 .. image:: https://img.shields.io/pypi/v/expan.svg
         :target: https://pypi.python.org/pypi/expan
         :alt: Latest PyPI version
 
 .. image:: https://img.shields.io/pypi/status/expan.svg
-   :target: https://pypi.python.org/pypi/expan
-   :alt: Development Status
+        :target: https://pypi.python.org/pypi/expan
+        :alt: Development Status
 
 .. image:: https://img.shields.io/pypi/pyversions/expan.svg
-   :target: https://pypi.python.org/pypi/expan
-   :alt: Python Versions
+        :target: https://pypi.python.org/pypi/expan
+        :alt: Python Versions
 
 .. image:: https://img.shields.io/pypi/l/expan.svg
         :target: https://pypi.python.org/pypi/expan/
