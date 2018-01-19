@@ -294,24 +294,24 @@ class ExperimentClassTestCases(ExperimentTestCase):
             self.assertTrue(issubclass(w[-1].category, UserWarning))
 
 
-    def test_sga_invalid_bin_list(self):
+    def test_sga_invalid_bin_list_type(self):
         exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
         dimension_to_bin = {"normal_same": Bin("numerical", 1, 10, True, True)}
-        with self.assertRaises(TypeError):
+        with self.assertRaisesRegexp(TypeError, "Value of the input dict needs to be a list of Bin objects."):
             exp.sga(dimension_to_bin)
 
 
     def test_sga_invalid_dimension_type(self):
         exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
         dimension_to_bin = {123: [Bin("numerical", 1, 10, True, True)]}
-        with self.assertRaises(TypeError):
+        with self.assertRaisesRegexp(TypeError, "Key of the input dict needs to be string, indicating the name of dimension."):
             exp.sga(dimension_to_bin)
 
 
     def test_sga_invalid_dimension_name(self):
         exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
         dimension_to_bin = {"dimension_does_not_exist": [Bin("numerical", 1, 10, True, True)]}
-        with self.assertRaises(KeyError):
+        with self.assertRaisesRegexp(KeyError, "No column dimension_does_not_exist provided in data."):
             exp.sga(dimension_to_bin)
 
 
@@ -358,6 +358,29 @@ class ExperimentClassTestCases(ExperimentTestCase):
         self.assertEqual(numerical_dimension_name, 'normal_same')
         categorical_dimension_name = find_list_of_dicts_element(sga_result, "segment", "['non']", "dimension")
         self.assertEqual(categorical_dimension_name, 'feature')
+
+
+    def test_sga_not_valid_data_for_one_subgroup(self):
+        '''
+        It should not raise error if there is not enough data in one subgroup,
+        which means one subgroup might contain zero or only one variant. (e.g. "browser" = "hack name")
+        
+        sga should ignore this subgroup and continue analysis with other subgroups.
+        '''
+        exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
+        dimension_to_bin = {
+            "normal_same": [
+                Bin("numerical", 1, 2, True, False),
+                Bin("numerical", 2, 3, True, False),
+                Bin("numerical", 999998, 999999, False, False)],  # bin which does not have any data
+            "feature": [
+                Bin("categorical", ["has"]),
+                Bin("categorical", ["non"]),
+                Bin("categorical", ["feature that only has one data point"])  # bin which has only one data point
+            ]
+        }
+        sga_result = exp.sga(dimension_to_bin)
+
 
     def test_sga_date(self):
         exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])

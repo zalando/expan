@@ -217,7 +217,7 @@ class Experiment(object):
                 raise TypeError("Value of the input dict needs to be a list of Bin objects.")
             # check whether data contains this column
             if feature not in self.data:
-                raise KeyError('No column %s provided in data.' % feature)
+                raise KeyError("No column %s provided in data." % feature)
 
         subgroups = []
         for feature in feature_name_to_bins:
