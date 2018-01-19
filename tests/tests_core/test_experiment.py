@@ -365,7 +365,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
         It should not raise error if there is not enough data in one subgroup,
         which means one subgroup might contain zero or only one variant. (e.g. "browser" = "hack name")
         
-        sga should ignore this subgroup and continue analysis with other subgroups.
+        sga should ignore this subgroup and continue doing analysis with other subgroups.
         '''
         exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
         dimension_to_bin = {
@@ -380,6 +380,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
             ]
         }
         sga_result = exp.sga(dimension_to_bin)
+        self.assertEqual(len(sga_result), 4)
 
 
     def test_sga_date(self):

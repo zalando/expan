@@ -226,7 +226,7 @@ class Experiment(object):
                             'segment': str(bin.representation)}
                 subgroup_data = bin(self.data, feature)
 
-                if subgroup_data is None:
+                if self._isNotValidForAnalysis(subgroup_data):
                     continue
 
                 subgroup_res = self._delta(method='fixed_horizon', data=subgroup_data,
@@ -235,6 +235,21 @@ class Experiment(object):
                 subgroups.append(subgroup)
 
         return subgroups
+
+    def _isNotValidForAnalysis(self, df):
+        """
+        Check whether the quality of data is good enough to perform analysis.
+        This can be 1. there is no data
+                    2. the data does not contain all the variants to perform analysis
+        :param df: data in the format of pandas dataframe
+        :return: boolean
+        """
+        if df is None:
+            return True
+        for variant_name in self.variant_names:
+            if len(df[df["variant"] == variant_name]) < 1:
+                return True
+        return False
 
     def sga_date(self, multi_test_correction=False):
         """
