@@ -2,7 +2,18 @@
 
 ## [Unreleased](https://github.com/zalando/expan/tree/HEAD)
 
-[Full Changelog](https://github.com/zalando/expan/compare/v0.6.8...HEAD)
+[Full Changelog](https://github.com/zalando/expan/compare/v0.6.10...HEAD)
+
+**Merged pull requests:**
+
+- Axo-91 bug fix sga [\#184](https://github.com/zalando/expan/pull/184) ([shansfolder](https://github.com/shansfolder))
+- added code coverage badge and reformatted README.rst a bit [\#183](https://github.com/zalando/expan/pull/183) ([mkolarek](https://github.com/mkolarek))
+
+## [v0.6.10](https://github.com/zalando/expan/tree/v0.6.10) (2018-01-12)
+[Full Changelog](https://github.com/zalando/expan/compare/v0.6.9...v0.6.10)
+
+## [v0.6.9](https://github.com/zalando/expan/tree/v0.6.9) (2018-01-12)
+[Full Changelog](https://github.com/zalando/expan/compare/v0.6.8...v0.6.9)
 
 **Merged pull requests:**
 

@@ -5,7 +5,28 @@ Change Log
 -----------------------------------------------------------
 
 `Full
-Changelog <https://github.com/zalando/expan/compare/v0.6.8...HEAD>`__
+Changelog <https://github.com/zalando/expan/compare/v0.6.10...HEAD>`__
+
+**Merged pull requests:**
+
+-  Axo-91 bug fix sga
+   `#184 <https://github.com/zalando/expan/pull/184>`__
+   (`shansfolder <https://github.com/shansfolder>`__)
+-  added code coverage badge and reformatted README.rst a bit
+   `#183 <https://github.com/zalando/expan/pull/183>`__
+   (`mkolarek <https://github.com/mkolarek>`__)
+
+`v0.6.10 <https://github.com/zalando/expan/tree/v0.6.10>`__ (2018-01-12)
+------------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/zalando/expan/compare/v0.6.9...v0.6.10>`__
+
+`v0.6.9 <https://github.com/zalando/expan/tree/v0.6.9>`__ (2018-01-12)
+----------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/zalando/expan/compare/v0.6.8...v0.6.9>`__
 
 **Merged pull requests:**
 
