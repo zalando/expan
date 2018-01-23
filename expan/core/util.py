@@ -113,6 +113,7 @@ def generate_random_data():
         = np.random.normal(loc=1.0, size=size_shifted_B)
 
     test_data_frame['feature'] = np.random.choice(['has', 'non'], size=size)
+    test_data_frame.loc[0, 'feature'] = 'feature that only has one data point'
     test_data_frame['normal_shifted_by_feature'] = np.random.normal(size=size)
 
     ii = (test_data_frame['variant'] == 'B') & (test_data_frame['feature'] == 'has')

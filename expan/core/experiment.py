@@ -217,7 +217,7 @@ class Experiment(object):
                 raise TypeError("Value of the input dict needs to be a list of Bin objects.")
             # check whether data contains this column
             if feature not in self.data:
-                raise KeyError('No column %s provided in data.' % feature)
+                raise KeyError("No column %s provided in data." % feature)
 
         subgroups = []
         for feature in feature_name_to_bins:
@@ -226,7 +226,7 @@ class Experiment(object):
                             'segment': str(bin.representation)}
                 subgroup_data = bin(self.data, feature)
 
-                if subgroup_data is None:
+                if not self._isValidForAnalysis(subgroup_data):
                     continue
 
                 subgroup_res = self._delta(method='fixed_horizon', data=subgroup_data,
@@ -235,6 +235,21 @@ class Experiment(object):
                 subgroups.append(subgroup)
 
         return subgroups
+
+    def _isValidForAnalysis(self, df):
+        """
+        Check whether the quality of data is good enough to perform analysis.
+        Invalid cases can be 1. there is no data
+                             2. the data does not contain all the variants to perform analysis
+        :param df: data in the format of pandas dataframe
+        :return: boolean
+        """
+        if df is None:
+            return False
+        for variant_name in self.variant_names:
+            if len(df[df["variant"] == variant_name]) < 1:
+                return False
+        return True
 
     def sga_date(self, multi_test_correction=False):
         """
