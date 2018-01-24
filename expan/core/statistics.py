@@ -108,7 +108,9 @@ def delta(x, y, assume_normal=True, percentiles=[2.5, 97.5],
             'treatment_sample_size' : int(ss_x),
             'control_sample_size'   : int(ss_y),
             'treatment_mean'        : float(np.nanmean(_x)),
-            'control_mean'          : float(np.nanmean(_y))}
+            'control_mean'          : float(np.nanmean(_y)),
+            'treatment_variance'    : float(np.nanvar(_x)),
+            'control_variance'      : float(np.nanvar(_y))}
 
 
 def sample_size(x):

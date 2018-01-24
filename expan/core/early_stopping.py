@@ -117,7 +117,9 @@ def group_sequential(x,
             'treatment_sample_size' : int(n_x),
             'control_sample_size'   : int(n_y),
             'treatment_mean'        : float(mu_x),
-            'control_mean'          : float(mu_y)}
+            'control_mean'          : float(mu_y),
+            'treatment_variance'    : float(np.nanvar(_x)),
+            'control_variance'      : float(np.nanvar(_y))}
 
 
 def HDI_from_MCMC(posterior_samples, credible_mass=0.95):
