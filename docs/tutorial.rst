@@ -142,7 +142,7 @@ The output of the ``delta`` method has the following structure:
 	        {
 	          "name": "A",
 	          "delta_statistics": {
-	            "stop": true,
+	            "stop": true,   # only available for early-stopping deltas: group_sequential, bayes_factor and bayes_precision
 	            "delta": 0.0,
 	            "confidence_interval": [
 	              {
@@ -156,11 +156,11 @@ The output of the ``delta`` method has the following structure:
 	            ],
 	            "treatment_sample_size": 6108,
 	            "control_sample_size": 6108,
-              "control_variance": 33019.25141863071,
-              "treatmen_variance": 33019.25324523451,
+                "control_variance": 33019.25141863071,  # only available for frequentist deltas: fixed_horizon, group_sequential
+                "treatment_variance": 33019.25324523451, # only available for frequentist deltas: fixed_horizon, group_sequential
 	            "treatment_mean": -4.572524000045541,
 	            "control_mean": -4.572524000045541,
-	            "number_of_iterations": 25000,
+	            "number_of_iterations": 25000, # only available for Bayesian deltas: bayes_factor and bayes_precision
 	            "statistical_power": 0.050000000000000044
 	          }
 	        },
@@ -184,8 +184,8 @@ The output of the ``delta`` method has the following structure:
 	            "treatment_mean": -0.007948584804651233,
 	            "control_mean": -4.572524000045541,
 	            "number_of_iterations": 25000,
-              "control_variance": 33019.25141863071,
-              "treatmen_variance": 33019.25324523451,
+                "control_variance": 33019.25141863071,
+                "treatment_variance": 33019.25324523451,
 	            "statistical_power": 0.46900387352149797
 	          }
 	        }
