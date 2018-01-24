@@ -157,7 +157,7 @@ The output of the ``delta`` method has the following structure:
 	            "treatment_sample_size": 6108,
 	            "control_sample_size": 6108,
                 "control_variance": 33019.25141863071,  # only available for frequentist deltas: fixed_horizon, group_sequential
-                "treatmen_variance": 33019.25324523451, # only available for frequentist deltas: fixed_horizon, group_sequential
+                "treatment_variance": 33019.25324523451, # only available for frequentist deltas: fixed_horizon, group_sequential
 	            "treatment_mean": -4.572524000045541,
 	            "control_mean": -4.572524000045541,
 	            "number_of_iterations": 25000, # only available for Bayesian deltas: group_sequential, bayes_factor and bayes_precision
@@ -185,7 +185,7 @@ The output of the ``delta`` method has the following structure:
 	            "control_mean": -4.572524000045541,
 	            "number_of_iterations": 25000,
                 "control_variance": 33019.25141863071,
-                "treatmen_variance": 33019.25324523451,
+                "treatment_variance": 33019.25324523451,
 	            "statistical_power": 0.46900387352149797
 	          }
 	        }
