@@ -156,6 +156,8 @@ The output of the ``delta`` method has the following structure:
 	            ],
 	            "treatment_sample_size": 6108,
 	            "control_sample_size": 6108,
+              "control_variance": 33019.25141863071,
+              "treatmen_variance": 33019.25324523451,
 	            "treatment_mean": -4.572524000045541,
 	            "control_mean": -4.572524000045541,
 	            "number_of_iterations": 25000,
@@ -182,6 +184,8 @@ The output of the ``delta`` method has the following structure:
 	            "treatment_mean": -0.007948584804651233,
 	            "control_mean": -4.572524000045541,
 	            "number_of_iterations": 25000,
+              "control_variance": 33019.25141863071,
+              "treatmen_variance": 33019.25324523451,
 	            "statistical_power": 0.46900387352149797
 	          }
 	        }
@@ -190,10 +194,15 @@ The output of the ``delta`` method has the following structure:
 	  ]
 	}
 
+(note that some values shown here can be made up)
+
+
 The corresponding fields are:
 
 	* ``treatment_mean``: the mean of the treatment group.
 	* ``control_mean``: the mean of the control group.
+	* ``treatment_variance``: the variance of the treatment group.
+	* ``control_variance``: the variance of the control group.
 	* ``control_sample_size``: the sample size for the control group.
 	* ``treatment_sample_size``: the sample size for the treatment group.
 	* ``delta``: the difference between the ``treatment_mean`` and ``control_mean``.
