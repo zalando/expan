@@ -25,7 +25,7 @@ Assumptions used in analysis
 Per-entity ratio vs. ratio of totals
 ------------------------------------
 
-There are two different definitions of a ratio metric (think of e.g. conversion rate, which is the ratio between the number of orders and the number of visits): 1) one that is based on the entity level or 2) ratio between the total sums, and **ExpAn** supports both of them.
+There are two different definitions of a ratio metric (think of e.g. conversion rate, which is the ratio between the number of orders and the number of visits): 1) one that is based on the entity level or 2) ratio between the total sums.
 
 In a nutshell, one can reweight the individual **per-entity ratio** to calculate the **ratio of totals**. This enables to use the existing ``statistics.delta()`` function to calculate both ratio statistics (either using normal assumtion or bootstraping).
 
@@ -69,6 +69,7 @@ To have such functionality as a more generic approach in **ExpAn**, we can intro
 
 With this input it calculates :math:`\alpha` as described above and outputs the result of ``statistics.delta()``.
 
+**NB: At the moment, Expan always uses the reweighting trick for ratio-based KPIs.** This is how such KPIs are defined in Zalando.
 
 Early stopping
 ------------------------------------
@@ -87,6 +88,7 @@ Subgroup analysis in ExpAn will select subgroup (which is a segment of data) bas
 
 That is to say, we don't compare between subgroups, but compare treatment with control within each subgroup.
 
+To support automatic detection of those interesting subgroups, also known as Heterogeneous Treatment Effect, is under planning.
 
 Multiple testing problem
 ------------------------------------
