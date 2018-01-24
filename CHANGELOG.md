@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/zalando/expan/tree/HEAD)
 
-[Full Changelog](https://github.com/zalando/expan/compare/v0.6.10...HEAD)
+[Full Changelog](https://github.com/zalando/expan/compare/v0.6.11...HEAD)
+
+**Merged pull requests:**
+
+- Doc update [\#186](https://github.com/zalando/expan/pull/186) ([shansfolder](https://github.com/shansfolder))
+- AXO-103 include variance in delta / group-sequential reports [\#185](https://github.com/zalando/expan/pull/185) ([gbordyugov](https://github.com/gbordyugov))
+
+## [v0.6.11](https://github.com/zalando/expan/tree/v0.6.11) (2018-01-23)
+[Full Changelog](https://github.com/zalando/expan/compare/v0.6.10...v0.6.11)
 
 **Merged pull requests:**
 
