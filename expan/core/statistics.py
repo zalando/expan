@@ -137,14 +137,13 @@ def sample_size(x):
     return len(x) - x_nan
 
 
-def estimate_sample_size(x, mde, n, r, alpha=0.05, beta=0.2):
+def estimate_sample_size(x, mde, r, alpha=0.05, beta=0.2):
     """
     Estimates sample size based on sample mean and variance given MDE (Minimum Detectable effect), number of variants and variant split ratio
 
     Args:
         x (pd.Series or pd.DataFrame): sample to base estimation on
         mde (float): minimum detectable effect
-        n (int): number of variants
         r (float): variant split ratio
         alpha (float): significance level
         beta (float): type II error
@@ -155,12 +154,6 @@ def estimate_sample_size(x, mde, n, r, alpha=0.05, beta=0.2):
     """
     if not isinstance(x, pd.Series) and not isinstance(x, pd.DataFrame):
         raise TypeError("Sample x needs to be either Series or DataFrame.")
-
-    if not isinstance(n, int):
-        raise TypeError("Number of variants needs to be an integer.")
-
-    if n <= 0:
-        raise ValueError("Number of variants needs to be higher than 0.")
 
     if r <= 0:
         raise ValueError("Variant split ratio needs to be higher than 0.")
