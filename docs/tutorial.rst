@@ -84,7 +84,7 @@ If you would like to change any of the default values, just pass them as paramet
 
 .. code-block:: python
 
-	exp.delta(method='fixed_horizon', assume_normal=True, percentiles=[2.5, 99.5])
+	exp.delta(method='fixed_horizon', assume_normal=True, percentiles=[2.5, 97.5])
 	exp.delta(method='group_sequential', estimated_sample_size=1000)
 	exp.delta(method='bayes_factor', distribution='normal')
 
@@ -93,8 +93,8 @@ You may also find the description in our :ref:`API <modindex>` page.
 
 *fixed_horizon* is the default method:
 
-	* ``assume_normal=True``: Specifies whether normal distribution assumptions can be made. A t-test is performed under normal assuption. We use bootstrapping otherwise. Bootstrapping takes considerably longer time than assuming the normality before running experiment. If we do not have an explicit reason to use it, it is almost always better to leave it off.
-	* ``percentiles=[2.5, 97.5``: A list of percentile values for confidence bounds.
+	* ``assume_normal=True``: Specifies whether normal distribution assumptions can be made. A t-test is performed under normal assumption. We use bootstrapping otherwise. Bootstrapping takes considerably longer time than assuming the normality before running experiment. If we do not have an explicit reason to use it, it is almost always better to leave it off.
+	* ``percentiles=[2.5, 97.5]``: A list of percentile values for confidence bounds.
 	* ``min_observations=20``: Minimum number of observations needed.
 	* ``nruns=10000``: Only used if assume normal is false.
 	* ``relative=False``: If relative==True, then the values will be returned as distances below and above the mean, respectively, rather than the absolute values.
