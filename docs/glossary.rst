@@ -27,7 +27,7 @@ Per-entity ratio vs. ratio of totals
 
 There are two different definitions of a ratio metric (think of e.g. conversion rate, which is the ratio between the number of orders and the number of visits): 1) one that is based on the entity level or 2) ratio between the total sums.
 
-In a nutshell, one can reweight the individual **per-entity ratio** to calculate the **ratio of totals**. This enables to use the existing ``statistics.delta()`` function to calculate both ratio statistics (either using normal assumtion or bootstraping).
+In a nutshell, one can re-weight the individual **per-entity ratio** to calculate the **ratio of totals**. This enables to use the existing ``statistics.delta()`` function to calculate both ratio statistics (either using normal assumption or bootstrapping).
 
 Calculating conversion rate
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -38,7 +38,7 @@ As an example let's look at how to calculate the conversion rate, which might be
 
 	\overline{CR}^{(pe)} = \frac{1}{n} \sum_{i=1}^n CR_i = \frac{1}{n} \sum_{i=1}^n \frac{O_i}{V_i}
 
-The ratio of totals is a reweighted version of :math:`CR_i` to reflect not the entities' contributions (e.g. contribution per custormer) but overall equal contributions to the conversion rate, which can be formulated as:
+The ratio of totals is a re-weighted version of :math:`CR_i` to reflect not the entities' contributions (e.g. contribution per customer) but overall equal contributions to the conversion rate, which can be formulated as:
 
 .. math::
 
@@ -47,7 +47,7 @@ The ratio of totals is a reweighted version of :math:`CR_i` to reflect not the e
 Overall as Reweighted Individual
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-One can calculate the :math:`CR^{(rt)}` from the :math:`\overline{CR}^{(pe)}` using the following weighting factor (easily proved by paper and pencile):
+One can calculate the :math:`CR^{(rt)}` from the :math:`\overline{CR}^{(pe)}` using the following weighting factor (easily proved by paper and pencil):
 
 .. math::
 
@@ -69,7 +69,7 @@ To have such functionality as a more generic approach in **ExpAn**, we can intro
 
 With this input it calculates :math:`\alpha` as described above and outputs the result of ``statistics.delta()``.
 
-**NB: At the moment, Expan always uses the reweighting trick for ratio-based KPIs.** This is how such KPIs are defined in Zalando.
+**NB: At the moment, Expan always uses the re-weighting trick for ratio-based KPIs.** This is how such KPIs are defined in Zalando.
 
 Early stopping
 ------------------------------------
