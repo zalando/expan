@@ -43,4 +43,5 @@ class StatisticalTestCase(unittest.TestCase):
         multi_test_suite = MultipleTestSuite(tests, MultipleTestingCorrectionMethod.benjamini_hochberg_correction)
 
         self.assertEqual(multi_test_suite.size, 4)
-        self.assertEqual(multi_test_suite.correction_method, MultipleTestingCorrectionMethod.benjamini_hochberg_correction)
+        self.assertEqual(multi_test_suite.correction_method,
+                         MultipleTestingCorrectionMethod.benjamini_hochberg_correction)
