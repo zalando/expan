@@ -54,9 +54,10 @@ class StatisticalTestCase(unittest.TestCase):
         self.correction_method = MultipleTestingCorrectionMethod.bonferroni_correction
 
         self.statistical_test = StatisticalTest('revenue', [], variants)
-        self.statistical_test_result_1 = StatisticalTestResults(self.statistical_test, self.simple_stats_corrected)
-        self.statistical_test_result_2 = StatisticalTestResults(self.statistical_test, self.es_stats_corrected)
-        test_results = [self.statistical_test_result_1, self.statistical_test_result_2]
+        self.statistical_test_result = StatisticalTestResult(self.statistical_test, self.simple_stats_corrected)
+
+        test_results = [CorrectedTestStatistics(self.simple_stats, self.simple_stats_corrected),
+                        CorrectedTestStatistics(self.es_stats, self.es_stats_corrected)]
         self.statistical_test_results = MultipleTestSuiteResult(test_results, self.correction_method)
 
     def tearDown(self):
@@ -87,12 +88,12 @@ class StatisticalTestCase(unittest.TestCase):
         type1 = str(type(self.simple_stats))
         type2 = str(type(self.es_stats_corrected))
         error_msg = "Type mismatch for type " + type1 + " and " + type2
-        with self.assertRaisesRegex(RuntimeError, error_msg):
+        with self.assertRaisesRegexp(RuntimeError, error_msg):
             CorrectedTestStatistics(self.simple_stats, self.es_stats_corrected)
 
     def test_statistical_test_results(self):
-        self.assertEqual(self.statistical_test_result_1.test.kpi_name, 'revenue')
-        self.assertAlmostEqual(self.statistical_test_result_1.results.delta, 1.0)
+        self.assertEqual(self.statistical_test_result.test.kpi_name, 'revenue')
+        self.assertAlmostEqual(self.statistical_test_result.result.delta, 1.0)
 
     def test_multi_test_suite_results(self):
         self.assertEqual(len(self.statistical_test_results.statistical_test_results), 2)
