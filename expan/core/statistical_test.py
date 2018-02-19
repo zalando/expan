@@ -4,10 +4,11 @@ from enum import Enum
 class StatisticalTest(object):
     """ this class describes what has to be tested against what and
     represent a unit of statistical testing """
-    def __init__(self, kpi_name, features, variants):
+    def __init__(self, kpi_name, features, variants, formula=None):
         self.kpi_name  = kpi_name    # name of kpi
         self.features  = features    # list of type FeatureFilter for features
         self.variants  = variants    # of type Variant
+        self.formula   = formula     # formula of the kpi, if this is a derived kpi
 
 
 class MultipleTestingCorrectionMethod(Enum):
