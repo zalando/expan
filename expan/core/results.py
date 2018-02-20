@@ -67,14 +67,12 @@ class CorrectedTestStatistics(object):
     :type  corrected_test_statistics: SimpleTestStatistics or EarlyStoppingTestStatistics
     """
     def __init__(self, original_test_statistics, corrected_test_statistics):
-        if not isinstance(original_test_statistics, BaseTestStatistics):
-            raise RuntimeError("original_test_statistics should be instance of BaseTestStatistics or its subclass")
-        if not isinstance(corrected_test_statistics, BaseTestStatistics):
-            raise RuntimeError("corrected_test_statistics should be instance of BaseTestStatistics or its subclass")
         type1 = type(original_test_statistics)
         type2 = type(corrected_test_statistics)
         if type1 != type2:
             raise RuntimeError("Type mismatch for type " + str(type1) + " and " + str(type2))
+        if not isinstance(original_test_statistics, BaseTestStatistics):
+            raise RuntimeError("Input should be instances of BaseTestStatistics or its subclass")
         self.original_test_statistics  = original_test_statistics
         self.corrected_test_statistics = corrected_test_statistics
 

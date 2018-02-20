@@ -1,22 +1,42 @@
+import re
 from enum import Enum
 
 
 class StatisticalTest(object):
     """ This class describes what has to be tested against what and represent a unit of statistical testing. 
-    :param kpi_name: name of the kpi
-    :type  kpi_name: str
+    :param kpi: the kpi to perform on
+    :type  kpi: KPI or its subclass
     :param features: list of features used for subgroups
     :type  features: list[FeatureFilter]
     :param variants: variant column name and their values
     :type  variants: Variants
-    :param formula: formula of the kpi, if this is a derived kpi
-    :type  formula: str
     """
-    def __init__(self, kpi_name, features, variants, formula=None):
-        self.kpi_name  = kpi_name
+    def __init__(self, kpi, features, variants):
+        self.kpi       = kpi
         self.features  = features
         self.variants  = variants
-        self.formula   = formula
+
+
+class KPI(object):
+    """ This class represents a basic kpi.
+    :param name: name of the kpi
+    :type  name: str
+    """
+    def __init__(self, name):
+        self.name = name
+
+
+class DerivedKPI(KPI):
+    """ This class represents a derived KPI which is a ratio of two columns.
+    :param name: name of the kpi
+    :type  name: str
+    :param formula: formula of the kpi. It should be a ratio of two column. e.g. 'revenue/session'
+    :type  formula: str
+    """
+    def __init__(self, name, formula):
+        super(DerivedKPI, self).__init__(name)
+        self.formula = formula
+        self.reference_kpi = re.sub('([a-zA-Z][0-9a-zA-Z_]*)/', '', formula)
 
 
 class MultipleTestingCorrectionMethod(Enum):

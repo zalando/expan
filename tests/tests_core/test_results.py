@@ -53,7 +53,8 @@ class StatisticalTestCase(unittest.TestCase):
         variants = Variants('variant', 'control', 'treatment')
         self.correction_method = MultipleTestingCorrectionMethod.bonferroni_correction
 
-        self.statistical_test = StatisticalTest('revenue', [], variants)
+        kpi = KPI('revenue')
+        self.statistical_test = StatisticalTest(kpi, [], variants)
         self.statistical_test_result = StatisticalTestResult(self.statistical_test, self.simple_stats_corrected)
 
         test_results = [CorrectedTestStatistics(self.simple_stats, self.simple_stats_corrected),
@@ -92,7 +93,7 @@ class StatisticalTestCase(unittest.TestCase):
             CorrectedTestStatistics(self.simple_stats, self.es_stats_corrected)
 
     def test_statistical_test_results(self):
-        self.assertEqual(self.statistical_test_result.test.kpi_name, 'revenue')
+        self.assertEqual(self.statistical_test_result.test.kpi.name, 'revenue')
         self.assertAlmostEqual(self.statistical_test_result.result.delta, 1.0)
 
     def test_multi_test_suite_results(self):
