@@ -36,14 +36,15 @@ class SimpleTestStatistics(BaseTestStatistics):
     :type delta: float
     :type p: float
     :type statistical_power: float
-    :type ci: ConfidenceInterval
+    :param ci: a dict where keys are percentiles and values are the corresponding value for the statistic.
+    :type  ci: dict
     """
     def __init__(self, control_statistics, treatment_statistics, delta, ci, p, statistical_power):
         super(SimpleTestStatistics, self).__init__(control_statistics, treatment_statistics)
         self.delta               = delta
         self.p                   = p
         self.statistical_power   = statistical_power
-        self.confidence_interval = ci
+        self.confidence_interval = [{'percentile': p, 'value': v} for (p, v) in ci.items()]
 
 
 class EarlyStoppingTestStatistics(SimpleTestStatistics):
@@ -53,7 +54,8 @@ class EarlyStoppingTestStatistics(SimpleTestStatistics):
     :type delta: float
     :type p: float
     :type statistical_power: float
-    :type ci: ConfidenceInterval
+    :param ci: a dict where keys are percentiles and values are the corresponding value for the statistic.
+    :type  ci: dict
     :type stop: bool
     """
     def __init__(self, control_statistics, treatment_statistics, delta, ci, p, statistical_power, stop):
@@ -78,16 +80,6 @@ class CorrectedTestStatistics(JsonSerializable):
             raise RuntimeError("Input should be instances of BaseTestStatistics or its subclass")
         self.original_test_statistics  = original_test_statistics
         self.corrected_test_statistics = corrected_test_statistics
-
-
-class ConfidenceInterval(JsonSerializable):
-    """ This class represents the confidence interval. 
-    :param confidence_interval: a dict where keys are percentiles and values are the corresponding value for the statistic.
-    :type  confidence_interval: dict
-    """
-    def __init__(self, confidence_interval):
-        c_i = [{'percentile': p, 'value': v} for (p, v) in confidence_interval.items()]
-        self.confidence_interval = c_i
 
 
 # --------- Below are the data structure of test results --------- #
