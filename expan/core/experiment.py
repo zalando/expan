@@ -1,5 +1,4 @@
 import logging
-import re
 import warnings
 
 import numpy as np
@@ -7,23 +6,20 @@ import pandas as pd
 
 import expan.core.early_stopping as es
 import expan.core.statistics as statx
-from expan.core.util import get_column_names_by_type
-from expan.core.version import __version__
 from expan.core.binning import create_bins
+from expan.core.statistical_test import *
+from expan.core.util import get_kpi_by_name_and_variant
+from expan.core.version import __version__
 
 warnings.simplefilter('always', UserWarning)
-
 logger = logging.getLogger(__name__)
 
 
-# TODO: add filtering functionality: we should be able to operate on this
-# class to exclude data points, and save all these operations in a log that then
-# is preserved in all results.
 class Experiment(object):
-    """
-    Class which adds the analysis functions to experimental data.
-    """
-    def __init__(self, control_variant_name, data, metadata, report_kpi_names=None, derived_kpis=None):
+    """ Class which adds the analysis functions to experimental data. """
+    def __init__(self, data, metadata):
+
+        '''
         report_kpi_names = report_kpi_names or []
         derived_kpis = derived_kpis or []
 
@@ -64,42 +60,68 @@ class Experiment(object):
         for c in required_column_names:
             if c not in data:
                 raise ValueError('No column %s provided'%c)
-
-        self.data                 =     data.copy()
-        self.metadata             = metadata.copy()
-        self.report_kpi_names     = report_kpi_names_needed
-        self.derived_kpis         = derived_kpis
-        self.variant_names        = set(self.data.variant)
-        self.control_variant_name = control_variant_name
-        self.reference_kpis       = {}
-
+                
         # add derived KPIs to the data frame
         for name, formula in zip(derived_kpi_names, derived_kpi_formulas):
             self.data.loc[:, name] = eval(re.sub(kpi_name_pattern, r'self.data.\1.astype(float)', formula))
             self.reference_kpis[name] = re.sub(kpi_name_pattern + '/', '', formula)
-
-    def get_kpi_by_name_and_variant(self, data, name, variant):
-        return data.reset_index().set_index('variant').loc[variant, name]
+        '''
+        self.data     = data.copy()
+        self.metadata = metadata.copy()
 
     def __str__(self):
-        variants = self.variant_names
+        return 'Experiment "{:s}" with {:d} entities.'.format(self.metadata['experiment'], len(self.data))
 
-        return 'Experiment "{:s}" with {:d} derived kpis, {:d} report kpis, {:d} entities and {:d} variants: {}'.format(
-            self.metadata['experiment'], len(self.derived_kpis), len(self.report_kpi_names), len(self.data),
-            len(variants), ', '.join([('*' + k + '*') if (k == self.control_variant_name) else k for k in variants]))
+    def filter(self, kpis, percentile=99.0, threshold_type='upper'):
+        """ Method that filters out entities whose KPIs exceed the value at a given percentile.
+        If any of the KPIs exceeds its threshold the entity is filtered out.
+        :param kpis: list of KPI names
+        :type  kpis: list[str]
+        :param percentile: percentile considered as threshold
+        :type  percentile: float
+        :param threshold_type: type of threshold used ('lower' or 'upper')
+        :type  threshold_type: str
+        :returns: No return value. Will filter out outliers in self.data in place.
+        """
+        # check if provided KPIs are present in the data
+        for kpi in kpis:
+            if kpi not in self.data.columns:
+                raise KeyError(kpi + ' identifier not present in dataframe columns!')
+        # check if provided percentile is valid
+        if 0.0 < percentile <= 100.0 is False:
+            raise ValueError("Percentile value needs to be between 0.0 and 100.0!")
+        # check if provided filtering kind is valid
+        if threshold_type not in ['upper', 'lower']:
+            raise ValueError("Threshold type needs to be either 'upper' or 'lower'!")
 
-    def _get_weights(self, data, kpi, variant):
-        if kpi not in self.reference_kpis:
-            return 1.0
-        reference_kpi  = self.reference_kpis[kpi]
-        x              = self.get_kpi_by_name_and_variant(data, reference_kpi, variant)
-        zeros_and_nans = sum(x == 0) + np.isnan(x).sum()
-        non_zeros      = len(x) - zeros_and_nans
-        return non_zeros/np.nansum(x) * x
+        # run quantile filtering
+        flags = self._quantile_filtering(kpis=kpis, percentile=percentile, threshold_type=threshold_type)
+        # log which columns were filtered and how many entities were filtered out
+        self.metadata['filtered_columns'] = kpis
+        self.metadata['filtered_entities_number'] = len(flags[flags == True])
+        self.metadata['filtered_threshold_kind'] = threshold_type
+        # throw warning if too many entities have been filtered out
+        if (len(flags[flags == True]) / float(len(self.data))) > 0.02:
+            warnings.warn('More than 2% of entities have been filtered out, consider adjusting the percentile value.')
+        self.data = self.data[flags == False]
 
-    def delta(self, method='fixed_horizon', **worker_args):
-        return self._delta(method=method, data=self.data, **worker_args)
 
+
+
+
+    # TODO: Add docstring
+    # TODO: Implement it!
+    def delta(self, test, testmethod='fixed_horizon', **worker_args):
+        if not isinstance(test, StatisticalTestSuite):
+            raise RuntimeError("test should be of type StatisticalTestSuite")
+        # TODO: implementation
+        pass
+
+
+
+
+
+    # TODO: delete this method and put the logic into delta using StatisticalTestSuite and MultipleTestSuiteResult.
     def _delta(self, method, data, **worker_args):
         # entity should be unique
         if data.entity.duplicated().any():
@@ -129,11 +151,11 @@ class Experiment(object):
         for kpi in self.report_kpi_names:
             res_kpi = {'name': kpi,
                        'variants': []}
-            control         = self.get_kpi_by_name_and_variant(data, kpi, self.control_variant_name)
+            control         = get_kpi_by_name_and_variant(data, kpi, self.control_variant_name)
             control_weight  = self._get_weights(data, kpi, self.control_variant_name)
             control_data    = control * control_weight
             for variant in self.variant_names:
-                treatment        = self.get_kpi_by_name_and_variant(data, kpi, variant)
+                treatment        = get_kpi_by_name_and_variant(data, kpi, variant)
                 treatment_weight = self._get_weights(data, kpi, variant)
                 treatment_data   = treatment * treatment_weight
                 with warnings.catch_warnings(record=True) as w:
@@ -149,55 +171,11 @@ class Experiment(object):
         result['kpis'] = kpis
         return result
 
-    def _quantile_filtering(self, kpis, percentile, threshold_type):
-        method_table = {'upper': lambda x: x > threshold, 'lower': lambda x: x <= threshold}
-        flags = pd.Series(data=[False]*len(self.data))
-        for column in self.data[kpis].columns:
-            threshold = np.percentile(self.data[column], percentile)
-            flags = flags | self.data[column].apply(method_table[threshold_type])
-        return flags
 
-    def filter(self, kpis, percentile=99.0, threshold_type='upper'):
-        """
-        Method that filters out entities whose KPIs exceed the value at a given percentile.
-        If any of the KPIs exceeds its threshold the entity is filtered out.
 
-        Args:
-            kpis (list): list of KPI names
-            percentile (float): percentile considered as threshold
-            threshold_type (string): type of threshold used ('lower' or 'upper')
 
-        Returns:
-            No return value. Will filter out outliers in self.data in place.
-        """
 
-        # check if provided KPIs are present in the data
-        for kpi in kpis:
-            if kpi not in self.data.columns:
-                raise KeyError(kpi + ' identifier not present in dataframe columns!')
-
-        # check if provided percentile is valid
-        if 0.0 < percentile <= 100.0 is False:
-            raise ValueError("Percentile value needs to be between 0.0 and 100.0!")
-
-        # check if provided filtering kind is valid
-        if threshold_type not in ['upper', 'lower']:
-            raise ValueError("Threshold type needs to be either 'upper' or 'lower'!")
-
-        # run quantile filtering
-        flags = self._quantile_filtering(kpis=kpis, percentile=percentile, threshold_type=threshold_type)
-
-        # log which columns were filtered and how many entities were filtered out
-        self.metadata['filtered_columns'] = kpis
-        self.metadata['filtered_entities_number'] = len(flags[flags == True])
-        self.metadata['filtered_threshold_kind'] = threshold_type
-
-        # throw warning if too many entities have been filtered out
-        if (len(flags[flags == True]) / float(len(self.data))) > 0.02:
-            warnings.warn('More than 2% of entities have been filtered out, consider adjusting the percentile value.')
-
-        self.data = self.data[flags == False]
-
+    # TODO: we don't need the method but the code might be useful in other methods
     def sga(self, feature_name_to_bins, multi_test_correction=False):
         """
         Perform subgroup analysis.
@@ -236,21 +214,13 @@ class Experiment(object):
 
         return subgroups
 
-    def _isValidForAnalysis(self, df):
-        """
-        Check whether the quality of data is good enough to perform analysis.
-        Invalid cases can be 1. there is no data
-                             2. the data does not contain all the variants to perform analysis
-        :param df: data in the format of pandas dataframe
-        :return: boolean
-        """
-        if df is None:
-            return False
-        for variant_name in self.variant_names:
-            if len(df[df["variant"] == variant_name]) < 1:
-                return False
-        return True
 
+
+
+
+
+    # TODO: adapt this. Use StatisticalTestSuite
+    # TODO: Add docstring
     def sga_date(self, multi_test_correction=False):
         """
         Perform subgroup analysis on date partitioning each day from start day till end date. Produces non-cumulative
@@ -278,3 +248,42 @@ class Experiment(object):
             subgroups.append(subgroup)
 
         return subgroups
+
+
+
+
+
+
+    # ----- below are helper methods can still be used directly
+    def _isValidForAnalysis(self, df):
+        """ Check whether the quality of data is good enough to perform analysis.
+        Invalid cases can be 1. there is no data
+                             2. the data does not contain all the variants to perform analysis
+        :type df: DataFrame
+        :returns: boolean 
+        """
+        if df is None:
+            return False
+        for variant_name in self.variant_names:
+            if len(df[df["variant"] == variant_name]) < 1:
+                return False
+        return True
+
+    def _get_weights(self, data, kpi, variant):
+        # TODO: Add docstring
+        if kpi not in self.reference_kpis:
+            return 1.0
+        reference_kpi  = self.reference_kpis[kpi]
+        x              = get_kpi_by_name_and_variant(data, reference_kpi, variant)
+        number_of_zeros_and_nans      = sum(x == 0) + np.isnan(x).sum()
+        number_of_non_zeros_and_nanas = len(x) - number_of_zeros_and_nans
+        return number_of_non_zeros_and_nanas/np.nansum(x) * x
+
+    def _quantile_filtering(self, kpis, percentile, threshold_type):
+        # TODO: Add docstring
+        method_table = {'upper': lambda x: x > threshold, 'lower': lambda x: x <= threshold}
+        flags = pd.Series(data=[False]*len(self.data))
+        for column in self.data[kpis].columns:
+            threshold = np.percentile(self.data[column], percentile)
+            flags = flags | self.data[column].apply(method_table[threshold_type])
+        return flags

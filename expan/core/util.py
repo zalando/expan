@@ -180,3 +180,9 @@ def generate_random_data_n_variants(n_variants=3):
 
     return test_data_frame, metadata
 
+
+def get_kpi_by_name_and_variant(data, name, variant):
+    result = data.reset_index().set_index('variant').loc[variant, name]
+    if not isinstance(result, pd.DataFrame):
+        result = pd.DataFrame([result])
+    return result

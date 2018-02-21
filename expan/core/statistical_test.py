@@ -48,7 +48,7 @@ class MultipleTestingCorrectionMethod(Enum):
     benjamini_hochberg_correction = 2
 
 
-class MultipleTestSuite(JsonSerializable):
+class StatisticalTestSuite(JsonSerializable):
     """ This class consists of a number of tests plus choice of the correction method. 
     :param tests: list of statistical tests in the suite
     :type  tests: list[StatisticalTest]
