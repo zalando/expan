@@ -4,3 +4,4 @@ scipy == 0.19.1
 numpy == 1.13.1
 simplejson == 3.11.1
 pystan == 2.16.0.0
+enum34 == 1.1.6
