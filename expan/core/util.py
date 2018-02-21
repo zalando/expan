@@ -1,8 +1,18 @@
+import json
+from enum import Enum
 from warnings import warn
 
 import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
+
+
+class JsonSerializable(object):
+    def toJson(self):
+        return json.dumps(self, default=lambda o: o.name if isinstance(o, Enum) else o.__dict__, sort_keys=True, indent=4)
+
+    def __repr__(self):
+        return self.toJson()
 
 
 def find_list_of_dicts_element(items, key1, value, key2):
