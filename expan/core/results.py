@@ -2,7 +2,10 @@ from expan.core.statistical_test import MultipleTestingCorrectionMethod
 
 
 # --------- Below are the data structure of statistics --------- #
-class BaseTestStatistics(object):
+from expan.core.util import JsonSerializable
+
+
+class BaseTestStatistics(JsonSerializable):
     """ Holds only statistics for the control and treatment group. 
     :param control_statistics: statistics within the control group
     :type  control_statistics: SampleStatistics
@@ -14,7 +17,7 @@ class BaseTestStatistics(object):
         self.treatment_statistics = treatment_statistics
 
 
-class SampleStatistics(object):
+class SampleStatistics(JsonSerializable):
     """ This class holds sample size, mean and variance.
     :type sample_size: int
     :type mean: float
@@ -33,14 +36,15 @@ class SimpleTestStatistics(BaseTestStatistics):
     :type delta: float
     :type p: float
     :type statistical_power: float
-    :type ci: ConfidenceInterval
+    :param ci: a dict where keys are percentiles and values are the corresponding value for the statistic.
+    :type  ci: dict
     """
     def __init__(self, control_statistics, treatment_statistics, delta, ci, p, statistical_power):
         super(SimpleTestStatistics, self).__init__(control_statistics, treatment_statistics)
         self.delta               = delta
         self.p                   = p
         self.statistical_power   = statistical_power
-        self.confidence_interval = ci
+        self.confidence_interval = [{'percentile': p, 'value': v} for (p, v) in ci.items()]
 
 
 class EarlyStoppingTestStatistics(SimpleTestStatistics):
@@ -50,7 +54,8 @@ class EarlyStoppingTestStatistics(SimpleTestStatistics):
     :type delta: float
     :type p: float
     :type statistical_power: float
-    :type ci: ConfidenceInterval
+    :param ci: a dict where keys are percentiles and values are the corresponding value for the statistic.
+    :type  ci: dict
     :type stop: bool
     """
     def __init__(self, control_statistics, treatment_statistics, delta, ci, p, statistical_power, stop):
@@ -58,7 +63,7 @@ class EarlyStoppingTestStatistics(SimpleTestStatistics):
         self.stop = stop
 
 
-class CorrectedTestStatistics(object):
+class CorrectedTestStatistics(JsonSerializable):
     """ Holds original and corrected statistics. This class should be used to hold statistics for multiple testing.
     original_test_statistics and corrected_test_statistics should have the same type.
     :param original_test_statistics: test result before correction
@@ -77,18 +82,8 @@ class CorrectedTestStatistics(object):
         self.corrected_test_statistics = corrected_test_statistics
 
 
-class ConfidenceInterval(object):
-    """ This class represents the confidence interval. 
-    :param confidence_interval: a dict where keys are percentiles and values are the corresponding value for the statistic.
-    :type  confidence_interval: dict
-    """
-    def __init__(self, confidence_interval):
-        c_i = [{'percentile': p, 'value': v} for (p, v) in confidence_interval.items()]
-        self.confidence_interval = c_i
-
-
 # --------- Below are the data structure of test results --------- #
-class StatisticalTestResult(object):
+class StatisticalTestResult(JsonSerializable):
     """ This class holds the results of a single statistical test.
     :param test: information about the statistical test
     :type  test: StatisticalTest
@@ -100,7 +95,7 @@ class StatisticalTestResult(object):
         self.result = result
 
 
-class MultipleTestSuiteResult(object):
+class MultipleTestSuiteResult(JsonSerializable):
     """ This class holds the results of a MultipleTestSuite.
     :param statistical_test_results: test results for all statistical testing unit
     :type  statistical_test_results: list[StatisticalTestResult]

@@ -13,11 +13,11 @@ class StatisticalTestCase(unittest.TestCase):
         self.delta                = 1.0
         self.p                    = 0.04
         self.statistical_power    = 0.8
-        self.confidence_interval  = ConfidenceInterval({2.5: 0.1, 97.5: 1.1})
+        self.confidence_interval  = {2.5: 0.1, 97.5: 1.1}
         self.stop                 = True
 
         self.corrected_p          = 0.02
-        self.corrected_ci         = ConfidenceInterval({1.0: -0.7, 99.0: 0.7})
+        self.corrected_ci         = {1.0: -0.7, 99.0: 0.7}
         self.corrected_stop       = False
 
         self.simple_stats = SimpleTestStatistics(self.control_statistics,
@@ -57,8 +57,11 @@ class StatisticalTestCase(unittest.TestCase):
         self.statistical_test = StatisticalTest(kpi, [], variants)
         self.statistical_test_result = StatisticalTestResult(self.statistical_test, self.simple_stats_corrected)
 
-        test_results = [CorrectedTestStatistics(self.simple_stats, self.simple_stats_corrected),
-                        CorrectedTestStatistics(self.es_stats, self.es_stats_corrected)]
+        test_result1 = StatisticalTestResult(self.statistical_test,
+                                             CorrectedTestStatistics(self.simple_stats, self.simple_stats_corrected))
+        test_result2 = StatisticalTestResult(self.statistical_test,
+                                             CorrectedTestStatistics(self.es_stats, self.es_stats_corrected))
+        test_results = [test_result1, test_result2]
         self.statistical_test_results = MultipleTestSuiteResult(test_results, self.correction_method)
 
     def tearDown(self):
@@ -66,11 +69,11 @@ class StatisticalTestCase(unittest.TestCase):
 
     def test_simple_test_statistics(self):
         self.assertAlmostEqual(self.simple_stats.delta, 1.0)
-        self.assertEqual(len(self.simple_stats.confidence_interval.confidence_interval), 2)
+        self.assertEqual(len(self.simple_stats.confidence_interval), 2)
 
     def test_early_stopping_test_statistics(self):
         self.assertAlmostEqual(self.es_stats.delta, 1.0)
-        self.assertEqual(len(self.es_stats.confidence_interval.confidence_interval), 2)
+        self.assertEqual(len(self.es_stats.confidence_interval), 2)
         self.assertTrue(self.es_stats.stop)
 
     def test_corrected_test_statistics_simple(self):

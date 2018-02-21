@@ -1,8 +1,10 @@
 import re
 from enum import Enum
 
+from expan.core.util import JsonSerializable
 
-class StatisticalTest(object):
+
+class StatisticalTest(JsonSerializable):
     """ This class describes what has to be tested against what and represent a unit of statistical testing. 
     :param kpi: the kpi to perform on
     :type  kpi: KPI or its subclass
@@ -17,7 +19,7 @@ class StatisticalTest(object):
         self.variants  = variants
 
 
-class KPI(object):
+class KPI(JsonSerializable):
     """ This class represents a basic kpi.
     :param name: name of the kpi
     :type  name: str
@@ -46,7 +48,7 @@ class MultipleTestingCorrectionMethod(Enum):
     benjamini_hochberg_correction = 2
 
 
-class MultipleTestSuite(object):
+class MultipleTestSuite(JsonSerializable):
     """ This class consists of a number of tests plus choice of the correction method. 
     :param tests: list of statistical tests in the suite
     :type  tests: list[StatisticalTest]
@@ -62,7 +64,7 @@ class MultipleTestSuite(object):
         return len(self.tests)
 
 
-class FeatureFilter(object):
+class FeatureFilter(JsonSerializable):
     """ This class represents a filter, restricting a DataFrame to rows with column_value in column_name. 
     It can be used to specify subgroup conditions.
     :param column_name: name of the column to perform filter on
@@ -75,7 +77,7 @@ class FeatureFilter(object):
         self.column_value = column_value
 
 
-class Variants(object):
+class Variants(JsonSerializable):
     """ This class represents information of variants.
     :param variant_column_name: name of the column that represents variant
     :type  variant_column_name: str
