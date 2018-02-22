@@ -8,8 +8,9 @@ import expan.core.early_stopping as es
 import expan.core.statistics as statx
 from expan.core.binning import create_bins
 from expan.core.statistical_test import *
-from expan.core.util import get_kpi_by_name_and_variant
+from expan.core.util import get_kpi_by_name_and_variant, subset_data_by_kpi_variant_features
 from expan.core.version import __version__
+from expan.core.results import StatisticalTestResult, MultipleTestSuiteResult
 
 warnings.simplefilter('always', UserWarning)
 logger = logging.getLogger(__name__)
@@ -105,20 +106,84 @@ class Experiment(object):
             warnings.warn('More than 2% of entities have been filtered out, consider adjusting the percentile value.')
         self.data = self.data[flags == False]
 
+    def analyze_statistical_test(self, test, testmethod, **worker_args):
 
+        # entity should be unique
+        if self.data.entity.duplicated().any():
+            raise ValueError('Entities in data should be unique.')
+
+        if not isinstance(test, StatisticalTest):
+            raise TypeError("Statistical test should be of type StatisticalTest.")
+
+        if test.variants.variant_column_name not in self.data.columns():
+            raise RuntimeError("There is no '{}' column in the data.".format(test.variants.variant_column_name))
+        if test.variants.treatment_name not in np.unique(self.data[test.variants.variant_column_name]):
+            raise RuntimeError("There is no treatment with the name '{}' in the data.".format(test.variants.treatment_name))
+        if test.variants.control_name not in np.unique(self.data[test.variants.variant_column_name]):
+            raise RuntimeError("There is no control with the name '{}' in the data.".format(test.variants.control_name))
+
+        if not isinstance(test.features, list):
+            raise TypeError("Features should be a list.")
+        if not all(isinstance(n, FeatureFilter) for n in test.features):
+            raise TypeError("Some features are not of the type FeatureFilter.")
+        for feature in test.features:
+            if feature.column_name not in self.data.columns:
+                raise RuntimeError("Feature name '{}' does not exist in the data.".format(feature.column_name))
+
+        if type(test.kpi) is KPI and (test.kpi.name not in self.data.columns()):
+            raise RuntimeError("There is no column of name '{}' in the data.".format(test.kpi.name))
+        if type(test.kpi) is DerivedKPI:
+            if type(test.kpi.formula) is not str:
+                raise RuntimeError("Formula of derived KPI '{}' does not exist.".format(test.kpi.name))
+
+
+
+
+        logger.info("One analysis with kpi '{}', control variant '{}', treatment variant '{}' and features [{}] "
+                    "has just started".format(test.kpi_name, test.variants.control_name,
+                                              test.variants.treatment_name,
+                                              [(feature.column_name, feature.column_value) for feature in test.features]))
+
+
+        # subset data by kpi name and features
+        dataset = subset_data_by_kpi_variant_features(test, test.kpi_name, test.variant, test.features)
+
+
+        worker_table = {
+            'fixed_horizon': statx.make_delta,
+            'group_sequential': es.make_group_sequential,
+            'bayes_factor': es.make_bayes_factor,
+            'bayes_precision': es.make_bayes_precision
+        }
+
+        if not testmethod in worker_table:
+            raise NotImplementedError
+
+        worker = worker_table[testmethod](**worker_args)
+        test_results = StatisticalTestResult()
 
 
 
     # TODO: Add docstring
     # TODO: Implement it!
-    def delta(self, test, testmethod='fixed_horizon', **worker_args):
-        if not isinstance(test, StatisticalTestSuite):
-            raise RuntimeError("test should be of type StatisticalTestSuite")
-        # TODO: implementation
-        pass
+    def analyze_statistical_test_suite(self, test_suite, testmethod='fixed_horizon', **worker_args):
+        """
+        Method runs delta analysis on a set of tests of the class StatisticalTestSuite and returns results for each
+        statistical test in the suite along with the information about each test (instance of StatisticalTestSuite) 
+        :param test_suite: instance of StatisticalTestSuite
+        :param testmethod: testing method
+        :param worker_args: additional arguments
+        :return: instance of MultipleTestSuiteResult
+        """
 
+        if not isinstance(test_suite, StatisticalTestSuite):
+            raise RuntimeError("Test suite should be of type StatisticalTestSuite!")
 
-
+        statistical_test_results = MultipleTestSuiteResult([], test_suite.correction_method)
+        for test in test_suite:
+            one_analysis_result = self.analyze_statistical_test(test, testmethod, **worker_args)
+            statistical_test_results.statistical_test_results.append(one_analysis_result)
+        return statistical_test_results
 
 
     # TODO: delete this method and put the logic into delta using StatisticalTestSuite and MultipleTestSuiteResult.

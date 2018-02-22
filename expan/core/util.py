@@ -1,10 +1,13 @@
 import json
+import logging
 from enum import Enum
 from warnings import warn
 
 import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
+
+logger = logging.getLogger(__name__)
 
 
 class JsonSerializable(object):
@@ -18,11 +21,14 @@ class JsonSerializable(object):
 def find_list_of_dicts_element(items, key1, value, key2):
     return [item[key2] for item in items if item[key1] == value][0]
 
+
 def is_number_and_nan(obj):
     return obj != obj
 
+
 def get_column_names_by_type(df, dtype):
     return [c for c in df.columns if np.issubdtype(df.dtypes[c], dtype)]
+
 
 def drop_nan(np_array):
     if np_array.ndim == 1:
@@ -186,3 +192,24 @@ def get_kpi_by_name_and_variant(data, name, variant):
     if not isinstance(result, pd.DataFrame):
         result = pd.DataFrame([result])
     return result
+
+
+def subset_data_by_kpi_variant_features(data, kpi, variant, features):
+    '''
+    Subsets data into a dataset of specific kpi, variant and features
+    :param data: data in form of dataframe
+    :param kpi: kpi name by which to subset
+    :param variant: variant name by which to subset
+    :param features: feature tuples
+    :return: subset of data corresponding to specified 
+    '''
+    columns = ['entity', 'variant', kpi]
+    columns.extend([x[0] for x in features])
+    dataset = data.loc[:, columns][data['variant'] == variant]
+
+    for feature in features:
+        dataset = dataset[dataset[feature[0]] == feature[1]]
+
+    logger.info("Dataset size is %d", len(dataset))
+
+    return dataset
