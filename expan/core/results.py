@@ -1,10 +1,7 @@
-from expan.core.statistical_test import MultipleTestingCorrectionMethod
-
-
-# --------- Below are the data structure of statistics --------- #
 from expan.core.util import JsonSerializable
 
 
+# --------- Below are the data structure of statistics --------- #
 class BaseTestStatistics(JsonSerializable):
     """ Holds only statistics for the control and treatment group. 
     :param control_statistics: statistics within the control group
@@ -99,9 +96,14 @@ class MultipleTestSuiteResult(JsonSerializable):
     """ This class holds the results of a MultipleTestSuite.
     :param statistical_test_results: test results for all statistical testing unit
     :type  statistical_test_results: list[StatisticalTestResult]
-    :param correction_method: method used for multiple testing correction
-    :type  correction_method: MultipleTestingCorrectionMethod
+    :param correction_method: method used for multiple testing correction. Possible values are:
+                              "none": no correction
+                              "bh": benjamini hochberg correction
+                              "bf": bonferroni correction
+    :type  correction_method: str
     """
-    def __init__(self, statistical_test_results, correction_method=MultipleTestingCorrectionMethod.no_correction):
+    def __init__(self, statistical_test_results, correction_method="none"):
         self.statistical_test_results = statistical_test_results
-        self.correction_method        = correction_method
+        if correction_method not in ["none", "bh", "bf"]:
+            raise ValueError('Correction method is not implemented. We support "none", "bh", and "bf".')
+        self.correction_method = correction_method

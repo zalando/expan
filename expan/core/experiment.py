@@ -1,18 +1,14 @@
 import logging
-import warnings
 
 import numpy as np
 import pandas as pd
 
 import expan.core.early_stopping as es
 import expan.core.statistics as statx
-from expan.core.binning import create_bins
 from expan.core.statistical_test import *
-from expan.core.util import get_kpi_by_name_and_variant, subset_data_by_kpi_variant_features
-from expan.core.version import __version__
+from expan.core.util import get_kpi_by_name_and_variant
 from expan.core.results import StatisticalTestResult, MultipleTestSuiteResult
 
-warnings.simplefilter('always', UserWarning)
 logger = logging.getLogger(__name__)
 
 
@@ -31,40 +27,6 @@ class Experiment(object):
 
     def __str__(self):
         return 'Experiment "{:s}" with {:d} entities.'.format(self.metadata['experiment'], len(self.data))
-
-
-    def filter(self, kpis, percentile=99.0, threshold_type='upper'):
-        """ Method that filters out entities whose KPIs exceed the value at a given percentile.
-        If any of the KPIs exceeds its threshold the entity is filtered out.
-        :param kpis: list of KPI names
-        :type  kpis: list[str]
-        :param percentile: percentile considered as threshold
-        :type  percentile: float
-        :param threshold_type: type of threshold used ('lower' or 'upper')
-        :type  threshold_type: str
-        :returns: No return value. Will filter out outliers in self.data in place.
-        """
-        # check if provided KPIs are present in the data
-        for kpi in kpis:
-            if kpi not in self.data.columns:
-                raise KeyError(kpi + ' identifier not present in dataframe columns!')
-        # check if provided percentile is valid
-        if 0.0 < percentile <= 100.0 is False:
-            raise ValueError("Percentile value needs to be between 0.0 and 100.0!")
-        # check if provided filtering kind is valid
-        if threshold_type not in ['upper', 'lower']:
-            raise ValueError("Threshold type needs to be either 'upper' or 'lower'!")
-
-        # run quantile filtering
-        flags = self._quantile_filtering(kpis=kpis, percentile=percentile, threshold_type=threshold_type)
-        # log which columns were filtered and how many entities were filtered out
-        self.metadata['filtered_columns'] = kpis
-        self.metadata['filtered_entities_number'] = len(flags[flags == True])
-        self.metadata['filtered_threshold_kind'] = threshold_type
-        # throw warning if too many entities have been filtered out
-        if (len(flags[flags == True]) / float(len(self.data))) > 0.02:
-            warnings.warn('More than 2% of entities have been filtered out, consider adjusting the percentile value.')
-        self.data = self.data[flags == False]
 
 
     #TODO: docstring
@@ -132,36 +94,14 @@ class Experiment(object):
         treatment_weight = self._get_weights(data_for_analysis, test.kpi.name, test.variants.treatment_name)
         treatment_data   = treatment * treatment_weight
 
-        with warnings.catch_warnings(record=True) as w:
-            # run the test method
-            statistics = worker(x=treatment_data, y=control_data)
-            power = statx.compute_statistical_power(treatment_data, control_data)
+        # run the test method
+        test_statistics = worker(x=treatment_data, y=control_data)
+        # TODO: implement power into the return value of worker()
+        # power = statx.compute_statistical_power(treatment_data, control_data)
+        # TODO: implement worker() returns an instance of child class of BaseTestStatistics
 
-            if len(w):
-                result['warnings'].append('kpi: {}, variant: {}: {}'.format(kpi, variant, w[-1].message))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        test_result.result = test_statistics
+        return test_result
 
 
     # TODO: Add docstring
@@ -174,168 +114,53 @@ class Experiment(object):
         :param worker_args: additional arguments
         :return: instance of MultipleTestSuiteResult
         """
-
         if not isinstance(test_suite, StatisticalTestSuite):
-            raise RuntimeError("Test suite should be of type StatisticalTestSuite!")
+            raise RuntimeError("Test suite should be of type StatisticalTestSuite.")
 
         statistical_test_results = MultipleTestSuiteResult([], test_suite.correction_method)
         for test in test_suite:
             one_analysis_result = self.analyze_statistical_test(test, testmethod, **worker_args)
             statistical_test_results.statistical_test_results.append(one_analysis_result)
-            
-        # TODO: implement correction, create CorrectedTestStatistics, and update the statistical_test_results
+
+        # TODO: implement correction method, create CorrectedTestStatistics, and update the statistical_test_results
         return statistical_test_results
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    # TODO: delete this method and put the logic into delta using StatisticalTestSuite and MultipleTestSuiteResult.
-    def _delta(self, method, data, **worker_args):
-        # entity should be unique
-        if data.entity.duplicated().any():
-            raise ValueError('Entities in data should be unique')
-
-        worker_table = {
-            'fixed_horizon'    : statx.make_delta,
-            'group_sequential' : es.make_group_sequential,
-            'bayes_factor'     : es.make_bayes_factor,
-            'bayes_precision'  : es.make_bayes_precision
-        }
-
-        if not method in worker_table:
-            raise NotImplementedError
-
-        if 'multi_test_correction' in worker_args:
-            worker_args['num_tests'] = len(self.report_kpi_names)
-
-        worker = worker_table[method](**worker_args)
-
-        result = {'warnings': [],
-                  'errors': [],
-                  'expan_version': __version__,
-                  'control_variant': self.control_variant_name}
-        kpis = []
-
-        for kpi in self.report_kpi_names:
-            res_kpi = {'name': kpi,
-                       'variants': []}
-            control         = get_kpi_by_name_and_variant(data, kpi, self.control_variant_name)
-            control_weight  = self._get_weights(data, kpi, self.control_variant_name)
-            control_data    = control * control_weight
-            for variant in self.variant_names:
-                treatment        = get_kpi_by_name_and_variant(data, kpi, variant)
-                treatment_weight = self._get_weights(data, kpi, variant)
-                treatment_data   = treatment * treatment_weight
-                with warnings.catch_warnings(record=True) as w:
-                    statistics = worker(x=treatment_data, y=control_data)
-                    # add statistical power
-                    power = statx.compute_statistical_power(treatment_data, control_data)
-                    statistics['statistical_power'] = power
-                if len(w):
-                    result['warnings'].append('kpi: {}, variant: {}: {}'.format(kpi, variant, w[-1].message))
-                res_kpi['variants'].append({'name': variant, 'delta_statistics': statistics})
-            kpis.append(res_kpi)
-
-        result['kpis'] = kpis
-        return result
-
-
-
-
-
-    # TODO: we don't need the method but the code might be useful in other methods
-    def sga(self, feature_name_to_bins, multi_test_correction=False):
+    def outlier_filter(self, kpis, percentile=99.0, threshold_type='upper'):
+        """ Method that filters out entities whose KPIs exceed the value at a given percentile.
+        If any of the KPIs exceeds its threshold the entity is filtered out.
+        :param kpis: list of KPI names
+        :type  kpis: list[str]
+        :param percentile: percentile considered as threshold
+        :type  percentile: float
+        :param threshold_type: type of threshold used ('lower' or 'upper')
+        :type  threshold_type: str
+        :returns: No return value. Will filter out outliers in self.data in place.
         """
-        Perform subgroup analysis.
-        Args:
-            feature_name_to_bins (dict): a dict of feature name (key) to list of Bin objects (value). 
-                                      This dict defines how and on which column to perform the subgroup split.
-            multi_test_correction (boolean): flag of whether the correction for multiple testing is needed.
-        Returns:
-            Analysis results per subgroup. 
-        """
+        # check if provided KPIs are present in the data
+        for kpi in kpis:
+            if kpi not in self.data.columns:
+                raise KeyError(kpi + ' identifier not present in dataframe columns!')
+        # check if provided percentile is valid
+        if 0.0 < percentile <= 100.0 is False:
+            raise ValueError("Percentile value needs to be between 0.0 and 100.0!")
+        # check if provided filtering kind is valid
+        if threshold_type not in ['upper', 'lower']:
+            raise ValueError("Threshold type needs to be either 'upper' or 'lower'!")
 
-        for feature in feature_name_to_bins:
-            # check type
-            if type(feature) is not str:
-                raise TypeError("Key of the input dict needs to be string, indicating the name of dimension.")
-            if type(feature_name_to_bins[feature]) is not list:
-                raise TypeError("Value of the input dict needs to be a list of Bin objects.")
-            # check whether data contains this column
-            if feature not in self.data:
-                raise KeyError("No column %s provided in data." % feature)
-
-        subgroups = []
-        for feature in feature_name_to_bins:
-            for bin in feature_name_to_bins[feature]:
-                subgroup = {'dimension': feature,
-                            'segment': str(bin.representation)}
-                subgroup_data = bin(self.data, feature)
-
-                if not self._is_valid_for_analysis(subgroup_data):
-                    continue
-
-                subgroup_res = self._delta(method='fixed_horizon', data=subgroup_data,
-                                           multi_test_correction=multi_test_correction)
-                subgroup['result'] = subgroup_res
-                subgroups.append(subgroup)
-
-        return subgroups
+        # run quantile filtering
+        flags = self._quantile_filtering(kpis=kpis, percentile=percentile, threshold_type=threshold_type)
+        # log which columns were filtered and how many entities were filtered out
+        self.metadata['filtered_columns'] = kpis
+        self.metadata['filtered_entities_number'] = len(flags[flags == True])
+        self.metadata['filtered_threshold_kind'] = threshold_type
+        # throw warning if too many entities have been filtered out
+        if (len(flags[flags == True]) / float(len(self.data))) > 0.02:
+            logger.warning('More than 2% of entities have been filtered out, consider adjusting the percentile value.')
+        self.data = self.data[flags == False]
 
 
-
-
-
-
-    # TODO: adapt this. Use StatisticalTestSuite
-    # TODO: Add docstring
-    def sga_date(self, multi_test_correction=False):
-        """
-        Perform subgroup analysis on date partitioning each day from start day till end date. Produces non-cumulative
-        delta and CIs for each subgroup.
-        Args:
-            multi_test_correction (boolean): flag of whether the correction for multiple testing is needed.
-        Returns:
-            Analysis results per date
-        """
-
-        if 'date' not in self.data:
-            raise KeyError('No column date provided in data.')
-
-        num_bins = len(set(self.data['date']))
-        bins = create_bins(self.data['date'], num_bins)
-
-        subgroups = []
-        for bin in bins:
-            subgroup = {'dimension': 'date',
-                        'segment': str(bin.representation)}
-            subgroup_data = bin(self.data, 'date')
-            subgroup_res = self._delta(method='fixed_horizon', data=subgroup_data,
-                                       multi_test_correction=multi_test_correction)
-            subgroup['result'] = subgroup_res
-            subgroups.append(subgroup)
-
-        return subgroups
-
-
-
-
-
-
-    # ----- below are helper methods can still be used directly
+    # ----- below are helper methods
     def _is_valid_for_analysis(self, data, test):
         """ Check whether the quality of data is good enough to perform analysis.
         Invalid cases can be 1. there is no data

@@ -51,7 +51,7 @@ class StatisticalTestCase(unittest.TestCase):
                                                               self.corrected_stop)
 
         variants = Variants('variant', 'control', 'treatment')
-        self.correction_method = MultipleTestingCorrectionMethod.bonferroni_correction
+        self.correction_method = "bf"
 
         kpi = KPI('revenue')
         self.statistical_test = StatisticalTest(kpi, [], variants)

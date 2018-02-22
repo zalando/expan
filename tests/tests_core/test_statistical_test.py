@@ -42,8 +42,7 @@ class StatisticalTestCase(unittest.TestCase):
         test_revenue_tablet = StatisticalTest(kpi, [tablet], variants)
 
         tests = [test_revenue_overall, test_revenue_mobile, test_revenue_desktop, test_revenue_tablet]
-        multi_test_suite = StatisticalTestSuite(tests, MultipleTestingCorrectionMethod.benjamini_hochberg_correction)
+        multi_test_suite = StatisticalTestSuite(tests, "bh")
 
         self.assertEqual(multi_test_suite.size, 4)
-        self.assertEqual(multi_test_suite.correction_method,
-                         MultipleTestingCorrectionMethod.benjamini_hochberg_correction)
+        self.assertEqual(multi_test_suite.correction_method, "bh")
