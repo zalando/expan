@@ -4,6 +4,7 @@ from expan.core.util import JsonSerializable
 # --------- Below are the data structure of statistics --------- #
 class BaseTestStatistics(JsonSerializable):
     """ Holds only statistics for the control and treatment group. 
+    
     :param control_statistics: statistics within the control group
     :type  control_statistics: SampleStatistics
     :param treatment_statistics: statistics within the treatment group
@@ -16,6 +17,7 @@ class BaseTestStatistics(JsonSerializable):
 
 class SampleStatistics(JsonSerializable):
     """ This class holds sample size, mean and variance.
+    
     :type sample_size: int
     :type mean: float
     :type variance: float
@@ -28,6 +30,7 @@ class SampleStatistics(JsonSerializable):
 
 class SimpleTestStatistics(BaseTestStatistics):
     """ Additionally to BaseTestStatistics, holds delta, confidence interval, statistical power, and p value.
+    
     :type control_statistics: SampleStatistics
     :type treatment_statistics: SampleStatistics
     :type delta: float
@@ -46,6 +49,7 @@ class SimpleTestStatistics(BaseTestStatistics):
 
 class EarlyStoppingTestStatistics(SimpleTestStatistics):
     """ Additionally to SimpleTestStatistics, holds boolean flag for early stopping.
+    
     :type control_statistics: SampleStatistics
     :type treatment_statistics: SampleStatistics
     :type delta: float
@@ -63,6 +67,7 @@ class EarlyStoppingTestStatistics(SimpleTestStatistics):
 class CorrectedTestStatistics(JsonSerializable):
     """ Holds original and corrected statistics. This class should be used to hold statistics for multiple testing.
     original_test_statistics and corrected_test_statistics should have the same type.
+    
     :param original_test_statistics: test result before correction
     :type  original_test_statistics: SimpleTestStatistics or EarlyStoppingTestStatistics
     :param corrected_test_statistics: test result after correction
@@ -82,6 +87,7 @@ class CorrectedTestStatistics(JsonSerializable):
 # --------- Below are the data structure of test results --------- #
 class StatisticalTestResult(JsonSerializable):
     """ This class holds the results of a single statistical test.
+    
     :param test: information about the statistical test
     :type  test: StatisticalTest
     :param result: result of this statistical test
@@ -94,6 +100,7 @@ class StatisticalTestResult(JsonSerializable):
 
 class MultipleTestSuiteResult(JsonSerializable):
     """ This class holds the results of a MultipleTestSuite.
+    
     :param statistical_test_results: test results for all statistical testing unit
     :type  statistical_test_results: list[StatisticalTestResult]
     :param correction_method: method used for multiple testing correction. Possible values are:

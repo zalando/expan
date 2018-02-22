@@ -29,8 +29,17 @@ class Experiment(object):
         return 'Experiment "{:s}" with {:d} entities.'.format(self.metadata['experiment'], len(self.data))
 
 
-    #TODO: docstring
     def analyze_statistical_test(self, test, testmethod, **worker_args):
+        """ Runs delta analysis on one statistical test and returns statistical results.
+        
+        :param test: a statistical test to run
+        :type  test: StatisticalTest
+        :param testmethod: analysis method
+        :type  testmethod: str
+        :param **worker_args: additional arguments for the analysis method
+        :return: statistical result of the test
+        :rtype: StatisticalTestResult
+        """
         if not isinstance(test, StatisticalTest):
             raise TypeError("Statistical test should be of type StatisticalTest.")
 
@@ -96,23 +105,25 @@ class Experiment(object):
 
         # run the test method
         test_statistics = worker(x=treatment_data, y=control_data)
-        # TODO: implement power into the return value of worker()
-        # power = statx.compute_statistical_power(treatment_data, control_data)
         # TODO: implement worker() returns an instance of child class of BaseTestStatistics
+        # note: include power into the return value of worker()
+        # power = statx.compute_statistical_power(treatment_data, control_data)
 
         test_result.result = test_statistics
         return test_result
 
 
-    # TODO: Add docstring
     def analyze_statistical_test_suite(self, test_suite, testmethod='fixed_horizon', **worker_args):
         """
-        Method runs delta analysis on a set of tests of the class StatisticalTestSuite and returns results for each
-        statistical test in the suite along with the information about each test (instance of StatisticalTestSuite) 
-        :param test_suite: instance of StatisticalTestSuite
-        :param testmethod: testing method
-        :param worker_args: additional arguments
-        :return: instance of MultipleTestSuiteResult
+        Runs delta analysis on a set of tests and returns statsitical results for each statistical test in the suite.
+        
+        :param test_suite: a suite of statistical test to run
+        :type  test_suite: StatisticalTestSuite
+        :param testmethod: analysis method
+        :type  testmethod: str
+        :param **worker_args: additional arguments for the analysis method
+        :return: statistical result of the test suite
+        :rtype: MultipleTestSuiteResult
         """
         if not isinstance(test_suite, StatisticalTestSuite):
             raise RuntimeError("Test suite should be of type StatisticalTestSuite.")
@@ -122,20 +133,21 @@ class Experiment(object):
             one_analysis_result = self.analyze_statistical_test(test, testmethod, **worker_args)
             statistical_test_results.statistical_test_results.append(one_analysis_result)
 
-        # TODO: implement correction method, create CorrectedTestStatistics, and update the statistical_test_results
+        # TODO: Implement correction method, create CorrectedTestStatistics, and update the statistical_test_results
         return statistical_test_results
 
 
     def outlier_filter(self, kpis, percentile=99.0, threshold_type='upper'):
         """ Method that filters out entities whose KPIs exceed the value at a given percentile.
         If any of the KPIs exceeds its threshold the entity is filtered out.
+        
         :param kpis: list of KPI names
         :type  kpis: list[str]
-        :param percentile: percentile considered as threshold
+        :param percentile: percentile considered as filtering threshold
         :type  percentile: float
         :param threshold_type: type of threshold used ('lower' or 'upper')
         :type  threshold_type: str
-        :returns: No return value. Will filter out outliers in self.data in place.
+        :return: No return value. Will filter out outliers in self.data in place.
         """
         # check if provided KPIs are present in the data
         for kpi in kpis:
@@ -160,14 +172,15 @@ class Experiment(object):
         self.data = self.data[flags == False]
 
 
-    # ----- below are helper methods
+    # ----- below are helper methods ----- #
     def _is_valid_for_analysis(self, data, test):
-        """ Check whether the quality of data is good enough to perform analysis.
-        Invalid cases can be 1. there is no data
-                             2. the data does not contain all the variants to perform analysis
+        """ Check whether the quality of data is good enough to perform analysis. Invalid cases can be:
+        1. there is no data
+        2. the data does not contain all the variants to perform analysis
+        
         :type data: DataFrame
         :type test: StatisticalTest
-        :returns: boolean 
+        :rtype: bool 
         """
         if data is None:
             logger.warning("Data is empty for the current analysis.")
@@ -181,14 +194,13 @@ class Experiment(object):
 
 
     def _get_weights(self, data, kpi, variant):
-        """
-        Reweighting trick
-        :param self: 
-        :param data: 
-        :param kpi: 
-        :type  kpi: KPI
-        :param variant: 
-        :return: 
+        """ Perform the reweighting trick. 
+        See http://expan.readthedocs.io/en/latest/glossary.html#per-entity-ratio-vs-ratio-of-totals
+        
+        :type data: pd.DataFrame
+        :type kpi: KPI
+        :type variant: str
+        :rtype: pd.DataFrame
         """
         if type(kpi) is not DerivedKPI:
             return 1.0
@@ -199,7 +211,18 @@ class Experiment(object):
 
 
     def _quantile_filtering(self, kpis, percentile, threshold_type):
-        # TODO: Add docstring
+        """ Make the filtering based on the given quantile level. 
+        Filtering is performed for each kpi independently.
+        
+        :param kpis: the kpis to perform filtering
+        :type  kpis: list[str]
+        :param percentile: percentile considered as filtering threshold
+        :type  percentile: float
+        :param threshold_type: type of threshold used ('lower' or 'upper')
+        :type  threshold_type: str
+        :return: boolean values indicating whether the row should be filtered
+        :rtype: pd.Series
+        """
         method_table = {'upper': lambda x: x > threshold, 'lower': lambda x: x <= threshold}
         flags = pd.Series(data=[False]*len(self.data))
         for column in self.data[kpis].columns:
