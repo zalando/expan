@@ -91,7 +91,7 @@ class Experiment(object):
             data_for_analysis = data_for_analysis[feature.column_name == feature.column_value]
 
         if not self._is_valid_for_analysis(data_for_analysis, test):
-            logger.warning("Data are not valid for analysis!")
+            logger.warning("Data is not valid for the analysis!")
             return test_result
 
         # get control and treatment values for the kpi
@@ -206,8 +206,8 @@ class Experiment(object):
             return 1.0
         x = get_kpi_by_name_and_variant(data, kpi.reference_kpi, variant)
         number_of_zeros_and_nans      = sum(x == 0) + np.isnan(x).sum()
-        number_of_non_zeros_and_nanas = len(x) - number_of_zeros_and_nans
-        return number_of_non_zeros_and_nanas/np.nansum(x) * x
+        number_of_non_zeros_and_nans = len(x) - number_of_zeros_and_nans
+        return number_of_non_zeros_and_nans/np.nansum(x) * x
 
 
     def _quantile_filtering(self, kpis, percentile, threshold_type):
