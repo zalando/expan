@@ -192,24 +192,3 @@ def get_kpi_by_name_and_variant(data, name, variant):
     if not isinstance(result, pd.DataFrame):
         result = pd.DataFrame([result])
     return result
-
-
-def subset_data_by_kpi_variant_features(data, kpi, variant, features):
-    '''
-    Subsets data into a dataset of specific kpi, variant and features
-    :param data: data in form of dataframe
-    :param kpi: kpi name by which to subset
-    :param variant: variant name by which to subset
-    :param features: feature tuples
-    :return: subset of data corresponding to specified 
-    '''
-    columns = ['entity', 'variant', kpi]
-    columns.extend([x[0] for x in features])
-    dataset = data.loc[:, columns][data['variant'] == variant]
-
-    for feature in features:
-        dataset = dataset[dataset[feature[0]] == feature[1]]
-
-    logger.info("Dataset size is %d", len(dataset))
-
-    return dataset

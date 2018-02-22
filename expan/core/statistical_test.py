@@ -40,6 +40,10 @@ class DerivedKPI(KPI):
         self.formula = formula
         self.reference_kpi = re.sub('([a-zA-Z][0-9a-zA-Z_]*)/', '', formula)
 
+    def make_derived_kpi(self, data):
+        kpi_name_pattern = '([a-zA-Z][0-9a-zA-Z_]*)'
+        data.loc[:, self.name] = eval(re.sub(kpi_name_pattern, r'self.data.\1.astype(float)', self.formula))
+
 
 class MultipleTestingCorrectionMethod(Enum):
     """ Enum with three possible correction methods. """

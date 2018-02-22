@@ -19,59 +19,19 @@ logger = logging.getLogger(__name__)
 class Experiment(object):
     """ Class which adds the analysis functions to experimental data. """
     def __init__(self, data, metadata):
+        self.data         = data.copy()
+        self.metadata     = metadata.copy()
+        self.worker_table = {
+            'fixed_horizon': statx.make_delta,
+            'group_sequential': es.make_group_sequential,
+            'bayes_factor': es.make_bayes_factor,
+            'bayes_precision': es.make_bayes_precision
+        }
 
-        '''
-        report_kpi_names = report_kpi_names or []
-        derived_kpis = derived_kpis or []
-
-        experiment_column_names = set(['entity', 'variant'])
-        numerical_column_names = set(get_column_names_by_type(data, np.number))
-
-        if type(report_kpi_names) is str:
-            report_kpi_names = [report_kpi_names]
-
-        if type(report_kpi_names) is not list:
-            raise TypeError('report_kpi_names should be a list of str')
-
-        if report_kpi_names:
-            report_kpi_names_needed = set(report_kpi_names)
-        else:
-            report_kpi_names_needed = numerical_column_names - experiment_column_names
-
-        # check derived_kpis structure (should have keys namely 'name' and 'formula')
-        for i in derived_kpis:
-            if not isinstance(i, dict):
-                raise TypeError('Derived kpis should be an array of dictionaries')
-            if 'formula' not in i:
-                raise KeyError('Dictionary should have key "formula"')
-            if 'name' not in i:
-                raise KeyError('Dictionary should have key "name"')
-
-        derived_kpi_names    = [k['name']    for k in derived_kpis]
-        derived_kpi_formulas = [k['formula'] for k in derived_kpis]
-
-        # what columns do we expect to find in the data frame?
-        required_column_names = (report_kpi_names_needed | experiment_column_names) - set(derived_kpi_names)
-        kpi_name_pattern = '([a-zA-Z][0-9a-zA-Z_]*)'
-        # add names from all formulas
-        for formula in derived_kpi_formulas:
-            names = re.findall(kpi_name_pattern, formula)
-            required_column_names = required_column_names | set(names)
-
-        for c in required_column_names:
-            if c not in data:
-                raise ValueError('No column %s provided'%c)
-                
-        # add derived KPIs to the data frame
-        for name, formula in zip(derived_kpi_names, derived_kpi_formulas):
-            self.data.loc[:, name] = eval(re.sub(kpi_name_pattern, r'self.data.\1.astype(float)', formula))
-            self.reference_kpis[name] = re.sub(kpi_name_pattern + '/', '', formula)
-        '''
-        self.data     = data.copy()
-        self.metadata = metadata.copy()
 
     def __str__(self):
         return 'Experiment "{:s}" with {:d} entities.'.format(self.metadata['experiment'], len(self.data))
+
 
     def filter(self, kpis, percentile=99.0, threshold_type='upper'):
         """ Method that filters out entities whose KPIs exceed the value at a given percentile.
@@ -106,14 +66,16 @@ class Experiment(object):
             warnings.warn('More than 2% of entities have been filtered out, consider adjusting the percentile value.')
         self.data = self.data[flags == False]
 
+
+    #TODO: docstring
     def analyze_statistical_test(self, test, testmethod, **worker_args):
-
-        # entity should be unique
-        if self.data.entity.duplicated().any():
-            raise ValueError('Entities in data should be unique.')
-
         if not isinstance(test, StatisticalTest):
             raise TypeError("Statistical test should be of type StatisticalTest.")
+
+        if 'entity' not in self.data.columns():
+            raise RuntimeError("There is no 'entity' column in the data.")
+        if self.data.entity.duplicated().any():
+            raise ValueError('Entities in data should be unique.')
 
         if test.variants.variant_column_name not in self.data.columns():
             raise RuntimeError("There is no '{}' column in the data.".format(test.variants.variant_column_name))
@@ -135,37 +97,74 @@ class Experiment(object):
         if type(test.kpi) is DerivedKPI:
             if type(test.kpi.formula) is not str:
                 raise RuntimeError("Formula of derived KPI '{}' does not exist.".format(test.kpi.name))
-
-
-
+            # create the derived kpi column if it is not yet created
+            if not test.kpi.name in self.data.columns:
+                test.kpi.make_derived_kpi(self.data)
 
         logger.info("One analysis with kpi '{}', control variant '{}', treatment variant '{}' and features [{}] "
                     "has just started".format(test.kpi_name, test.variants.control_name,
                                               test.variants.treatment_name,
                                               [(feature.column_name, feature.column_value) for feature in test.features]))
 
+        if not testmethod in self.worker_table:
+            raise NotImplementedError("Test method '{}' is not implemented.".format(testmethod))
+        worker = self.worker_table[testmethod](**worker_args)
 
-        # subset data by kpi name and features
-        dataset = subset_data_by_kpi_variant_features(test, test.kpi_name, test.variant, test.features)
+        data_for_analysis = self.data.copy()
+
+        # create test result object with empty result first
+        test_result = StatisticalTestResult(test, None)
+
+        # apply feature filter to data
+        for feature in test.features:
+            data_for_analysis = data_for_analysis[feature.column_name == feature.column_value]
+
+        if not self._is_valid_for_analysis(data_for_analysis, test):
+            logger.warning("Data are not valid for analysis!")
+            return test_result
+
+        # get control and treatment values for the kpi
+        control          = get_kpi_by_name_and_variant(data_for_analysis, test.kpi, test.variants.control_name)
+        control_weight   = self._get_weights(data_for_analysis, test.kpi.name, test.variants.control_name)
+        control_data     = control * control_weight
+
+        treatment        = get_kpi_by_name_and_variant(data_for_analysis, test.kpi, test.variants.treatment_name)
+        treatment_weight = self._get_weights(data_for_analysis, test.kpi.name, test.variants.treatment_name)
+        treatment_data   = treatment * treatment_weight
+
+        with warnings.catch_warnings(record=True) as w:
+            # run the test method
+            statistics = worker(x=treatment_data, y=control_data)
+            power = statx.compute_statistical_power(treatment_data, control_data)
+
+            if len(w):
+                result['warnings'].append('kpi: {}, variant: {}: {}'.format(kpi, variant, w[-1].message))
 
 
-        worker_table = {
-            'fixed_horizon': statx.make_delta,
-            'group_sequential': es.make_group_sequential,
-            'bayes_factor': es.make_bayes_factor,
-            'bayes_precision': es.make_bayes_precision
-        }
 
-        if not testmethod in worker_table:
-            raise NotImplementedError
 
-        worker = worker_table[testmethod](**worker_args)
-        test_results = StatisticalTestResult()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
     # TODO: Add docstring
-    # TODO: Implement it!
     def analyze_statistical_test_suite(self, test_suite, testmethod='fixed_horizon', **worker_args):
         """
         Method runs delta analysis on a set of tests of the class StatisticalTestSuite and returns results for each
@@ -183,7 +182,24 @@ class Experiment(object):
         for test in test_suite:
             one_analysis_result = self.analyze_statistical_test(test, testmethod, **worker_args)
             statistical_test_results.statistical_test_results.append(one_analysis_result)
+            
+        # TODO: implement correction, create CorrectedTestStatistics, and update the statistical_test_results
         return statistical_test_results
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     # TODO: delete this method and put the logic into delta using StatisticalTestSuite and MultipleTestSuiteResult.
@@ -269,7 +285,7 @@ class Experiment(object):
                             'segment': str(bin.representation)}
                 subgroup_data = bin(self.data, feature)
 
-                if not self._isValidForAnalysis(subgroup_data):
+                if not self._is_valid_for_analysis(subgroup_data):
                     continue
 
                 subgroup_res = self._delta(method='fixed_horizon', data=subgroup_data,
@@ -320,29 +336,42 @@ class Experiment(object):
 
 
     # ----- below are helper methods can still be used directly
-    def _isValidForAnalysis(self, df):
+    def _is_valid_for_analysis(self, data, test):
         """ Check whether the quality of data is good enough to perform analysis.
         Invalid cases can be 1. there is no data
                              2. the data does not contain all the variants to perform analysis
-        :type df: DataFrame
+        :type data: DataFrame
+        :type test: StatisticalTest
         :returns: boolean 
         """
-        if df is None:
+        if data is None:
+            logger.warning("Data is empty for the current analysis.")
             return False
-        for variant_name in self.variant_names:
-            if len(df[df["variant"] == variant_name]) < 1:
-                return False
+        if len(data[data[test.variants.variant_column_name] == test.variants.control_name]) <= 1:
+            logger.warning("Control group only contains 1 or 0 entities.")
+            return False
+        if len(data[data[test.variants.variant_column_name] == test.variants.treatment_name]) <= 1:
+            logger.warning("Treatment group only contains 1 or 0 entities.")
         return True
 
+
     def _get_weights(self, data, kpi, variant):
-        # TODO: Add docstring
-        if kpi not in self.reference_kpis:
+        """
+        Reweighting trick
+        :param self: 
+        :param data: 
+        :param kpi: 
+        :type  kpi: KPI
+        :param variant: 
+        :return: 
+        """
+        if type(kpi) is not DerivedKPI:
             return 1.0
-        reference_kpi  = self.reference_kpis[kpi]
-        x              = get_kpi_by_name_and_variant(data, reference_kpi, variant)
+        x = get_kpi_by_name_and_variant(data, kpi.reference_kpi, variant)
         number_of_zeros_and_nans      = sum(x == 0) + np.isnan(x).sum()
         number_of_non_zeros_and_nanas = len(x) - number_of_zeros_and_nans
         return number_of_non_zeros_and_nanas/np.nansum(x) * x
+
 
     def _quantile_filtering(self, kpis, percentile, threshold_type):
         # TODO: Add docstring
