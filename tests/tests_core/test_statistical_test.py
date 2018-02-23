@@ -59,3 +59,12 @@ class StatisticalTestCase(unittest.TestCase):
 
         # checks if values of new columns are of type float
         self.assertTrue(all(isinstance(kpi_value, float) for kpi_value in self.data[derived_kpi_name]))
+
+    def test_get_variant(self):
+        kpi = KPI('normal_same')
+        variants = Variants('variant', 'A', 'B')
+        test_revenue_overall = StatisticalTest(kpi, [], variants)
+        control = test_revenue_overall.variants.get_variant(
+            self.data, test_revenue_overall.variants.control_name)[test_revenue_overall.kpi.name]
+        self.assertEqual(len(control), 6108)
+        self.assertTrue(isinstance(control, pd.Series))

@@ -83,7 +83,7 @@ class FeatureFilter(JsonSerializable):
         self.column_value = column_value
 
     def apply_to_data(self, data):
-        return data[self.column_name == self.column_value]
+        return data[data[self.column_name] == self.column_value]
 
 
 class Variants(JsonSerializable):
@@ -102,7 +102,7 @@ class Variants(JsonSerializable):
         self.treatment_name      = treatment_name
 
     def get_variant(self, data, variant_name):
-        result = data[data[self.variant_column_name == variant_name]]
+        result = data[data[self.variant_column_name] == variant_name]
         if not isinstance(result, pd.DataFrame):
             result = pd.DataFrame([result])
         return result
