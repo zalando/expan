@@ -2,11 +2,14 @@ import unittest
 import numpy as np
 
 from expan.core.statistical_test import *
-
+from expan.core.util import generate_random_data
 
 class StatisticalTestCase(unittest.TestCase):
     def setUp(self):
         np.random.seed(41)
+
+        data, metadata = generate_random_data()
+        self.data, self.metadata = data, metadata
 
     def tearDown(self):
         pass
@@ -46,3 +49,15 @@ class StatisticalTestCase(unittest.TestCase):
 
         self.assertEqual(multi_test_suite.size, 4)
         self.assertEqual(multi_test_suite.correction_method, "bh")
+
+    def test_make_derived_kpi(self):
+        nominator = "normal_same"
+        denominator = "normal_shifted"
+        derived_kpi_name = "derived_kpi_one"
+        DerivedKPI(derived_kpi_name, nominator, denominator).make_derived_kpi(self.data)
+
+        # checks if column with the derived kpi was created
+        self.assertTrue(derived_kpi_name in self.data.columns)
+
+        # checks if values of new columns are of type float
+        self.assertTrue(all(isinstance(kpi_value, float) for kpi_value in self.data[derived_kpi_name]))

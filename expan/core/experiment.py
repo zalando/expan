@@ -66,14 +66,16 @@ class Experiment(object):
         if type(test.kpi) is KPI and (test.kpi.name not in self.data.columns()):
             raise RuntimeError("There is no column of name '{}' in the data.".format(test.kpi.name))
         if type(test.kpi) is DerivedKPI:
-            if type(test.kpi.formula) is not str:
-                raise RuntimeError("Formula of derived KPI '{}' does not exist.".format(test.kpi.name))
+            if type(test.kpi.nominator) is not str or test.kpi.nominator not in self.data.columns:
+                raise RuntimeError("Nominator '{}' of the derived KPI does not exist in the data.".format(test.kpi.nominator))
+            if type(test.kpi.denominator) is not str or test.kpi.denominator not in self.data.columns:
+                raise RuntimeError("Denominator '{}' of the derived KPI does not exist in the data.".format(test.kpi.denominator))
             # create the derived kpi column if it is not yet created
-            if not test.kpi.name in self.data.columns:
+            if test.kpi.name not in self.data.columns:
                 test.kpi.make_derived_kpi(self.data)
 
         logger.info("One analysis with kpi '{}', control variant '{}', treatment variant '{}' and features [{}] "
-                    "has just started".format(test.kpi_name, test.variants.control_name,
+                    "has just started".format(test.kpi, test.variants.control_name,
                                               test.variants.treatment_name,
                                               [(feature.column_name, feature.column_value) for feature in test.features]))
 
@@ -81,7 +83,7 @@ class Experiment(object):
             raise NotImplementedError("Test method '{}' is not implemented.".format(testmethod))
         worker = self.worker_table[testmethod](**worker_args)
 
-        data_for_analysis = self.data.copy()
+        data_for_analysis = self.data
 
         # create test result object with empty result first
         test_result = StatisticalTestResult(test, None)
@@ -96,11 +98,11 @@ class Experiment(object):
 
         # get control and treatment values for the kpi
         control          = get_kpi_by_name_and_variant(data_for_analysis, test.kpi, test.variants.control_name)
-        control_weight   = self._get_weights(data_for_analysis, test.kpi.name, test.variants.control_name)
+        control_weight   = self._get_weights(data_for_analysis, test.kpi, test.variants.control_name)
         control_data     = control * control_weight
 
         treatment        = get_kpi_by_name_and_variant(data_for_analysis, test.kpi, test.variants.treatment_name)
-        treatment_weight = self._get_weights(data_for_analysis, test.kpi.name, test.variants.treatment_name)
+        treatment_weight = self._get_weights(data_for_analysis, test.kpi, test.variants.treatment_name)
         treatment_data   = treatment * treatment_weight
 
         # run the test method
@@ -204,7 +206,7 @@ class Experiment(object):
         """
         if type(kpi) is not DerivedKPI:
             return 1.0
-        x = get_kpi_by_name_and_variant(data, kpi.reference_kpi, variant)
+        x = get_kpi_by_name_and_variant(data, kpi.denominator, variant)
         number_of_zeros_and_nans      = sum(x == 0) + np.isnan(x).sum()
         number_of_non_zeros_and_nans = len(x) - number_of_zeros_and_nans
         return number_of_non_zeros_and_nans/np.nansum(x) * x

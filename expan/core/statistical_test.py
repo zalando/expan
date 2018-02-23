@@ -33,17 +33,18 @@ class DerivedKPI(KPI):
     
     :param name: name of the kpi
     :type  name: str
-    :param formula: formula of the kpi. It should be a ratio of two column. e.g. 'revenue/session'
-    :type  formula: str
+    :param nominator: the nominator for the derived KPI
+    :type  nominator: str
+    :param denominator: the denominator for the derived KPI
+    :type  denominator: str
     """
-    def __init__(self, name, formula):
+    def __init__(self, name, nominator, denominator):
         super(DerivedKPI, self).__init__(name)
-        self.formula = formula
-        self.reference_kpi = re.sub('([a-zA-Z][0-9a-zA-Z_]*)/', '', formula)
+        self.nominator = nominator
+        self.denominator = denominator
 
     def make_derived_kpi(self, data):
-        kpi_name_pattern = '([a-zA-Z][0-9a-zA-Z_]*)'
-        data.loc[:, self.name] = eval(re.sub(kpi_name_pattern, r'self.data.\1.astype(float)', self.formula))
+        data.loc[:, self.name] = data[self.nominator]/data[self.denominator].astype(float)
 
 
 class StatisticalTestSuite(JsonSerializable):
