@@ -101,14 +101,8 @@ class Variants(JsonSerializable):
         self.control_name        = control_name
         self.treatment_name      = treatment_name
 
-    def get_treatment(self, data):
-        treatment = data[data.variant_column_name == self.treatment_name]
-        if not isinstance(treatment, pd.DataFrame):
-            treatment = pd.DataFrame([treatment])
-        return treatment
-
-    def get_control(self, data):
-        control = data[data.variant_column_name == self.control_name]
-        if not isinstance(control, pd.DataFrame):
-            control = pd.DataFrame([control])
-        return control
+    def get_variant(self, data, variant_name):
+        result = data[data.variant_column_name == variant_name]
+        if not isinstance(result, pd.DataFrame):
+            result = pd.DataFrame([result])
+        return result

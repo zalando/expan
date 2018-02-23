@@ -95,12 +95,12 @@ class Experiment(object):
             return test_result
 
         # get control and treatment values for the kpi
-        control          = test.variants.get_control(data_for_analysis)[test.kpi.name]
-        control_weight   = self._get_weights(data_for_analysis, test.kpi, test.variants.control_name)
+        control          = test.variants.get_variant(data_for_analysis, test.variants.control_name)[test.kpi.name]
+        control_weight   = self._get_weights(data_for_analysis, test, test.variants.control_name)
         control_data     = control * control_weight
 
-        treatment        = test.variants.get_treatment(data_for_analysis)[test.kpi.name]
-        treatment_weight = self._get_weights(data_for_analysis, test.kpi, test.variants.treatment_name)
+        treatment        = test.variants.get_variant(data_for_analysis, test.variants.treatment_name)[test.kpi.name]
+        treatment_weight = self._get_weights(data_for_analysis, test, test.variants.treatment_name)
         treatment_data   = treatment * treatment_weight
 
         # run the test method
@@ -193,19 +193,20 @@ class Experiment(object):
         return True
 
 
-    def _get_weights(self, data, kpi, variant):
+    def _get_weights(self, data, test, variant_name):
         """ Perform the reweighting trick. 
         See http://expan.readthedocs.io/en/latest/glossary.html#per-entity-ratio-vs-ratio-of-totals
         
         :type data: pd.DataFrame
-        :type kpi: KPI
-        :type variant: str
+        :type test: StatisticalTest
+        :type variant_name: str
         :rtype: pd.DataFrame
         """
-        if type(kpi) is not DerivedKPI:
+        if type(test.kpi) is not DerivedKPI:
             return 1.0
-        x = kpi.denominator.apply_to_data(data, variant)
-        number_of_zeros_and_nans      = sum(x == 0) + np.isnan(x).sum()
+
+        x = test.variants.get_variant(data, variant_name)
+        number_of_zeros_and_nans     = sum(x == 0) + np.isnan(x).sum()
         number_of_non_zeros_and_nans = len(x) - number_of_zeros_and_nans
         return number_of_non_zeros_and_nans/np.nansum(x) * x
 
