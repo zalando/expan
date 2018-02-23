@@ -102,7 +102,7 @@ class Variants(JsonSerializable):
         self.treatment_name      = treatment_name
 
     def get_variant(self, data, variant_name):
-        result = data[data.variant_column_name == variant_name]
+        result = data[data[self.variant_column_name == variant_name]]
         if not isinstance(result, pd.DataFrame):
             result = pd.DataFrame([result])
         return result
