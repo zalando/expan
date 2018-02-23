@@ -38,18 +38,18 @@ class DerivedKPI(KPI):
     
     :param name: name of the kpi
     :type  name: str
-    :param nominator: the nominator for the derived KPI
-    :type  nominator: str
+    :param numerator: the numerator for the derived KPI
+    :type  numerator: str
     :param denominator: the denominator for the derived KPI
     :type  denominator: str
     """
-    def __init__(self, name, nominator, denominator):
+    def __init__(self, name, numerator, denominator):
         super(DerivedKPI, self).__init__(name)
-        self.nominator = nominator
+        self.numerator = numerator
         self.denominator = denominator
 
     def make_derived_kpi(self, data):
-        data.loc[:, self.name] = data[self.nominator]/data[self.denominator].astype(float)
+        data.loc[:, self.name] = data[self.numerator]/data[self.denominator].astype(float)
 
 
 class StatisticalTestSuite(JsonSerializable):

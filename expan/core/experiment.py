@@ -65,8 +65,8 @@ class Experiment(object):
         if type(test.kpi) is KPI and (test.kpi.name not in self.data.columns()):
             raise RuntimeError("There is no column of name '{}' in the data.".format(test.kpi.name))
         if type(test.kpi) is DerivedKPI:
-            if type(test.kpi.nominator) is not str or test.kpi.nominator not in self.data.columns:
-                raise RuntimeError("Nominator '{}' of the derived KPI does not exist in the data.".format(test.kpi.nominator))
+            if type(test.kpi.numerator) is not str or test.kpi.numerator not in self.data.columns:
+                raise RuntimeError("Numerator '{}' of the derived KPI does not exist in the data.".format(test.kpi.numerator))
             if type(test.kpi.denominator) is not str or test.kpi.denominator not in self.data.columns:
                 raise RuntimeError("Denominator '{}' of the derived KPI does not exist in the data.".format(test.kpi.denominator))
             # create the derived kpi column if it is not yet created
