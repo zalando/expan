@@ -1,5 +1,4 @@
-import re
-
+import pandas as pd
 from expan.core.util import JsonSerializable
 
 
@@ -26,6 +25,12 @@ class KPI(JsonSerializable):
     """
     def __init__(self, name):
         self.name = name
+
+    def apply_to_data(self, data, variant):
+        result = data.reset_index().set_index('variant').loc[variant, self.name]
+        if not isinstance(result, pd.DataFrame):
+            result = pd.DataFrame([result])
+        return result
 
 
 class DerivedKPI(KPI):
@@ -81,6 +86,9 @@ class FeatureFilter(JsonSerializable):
     def __init__(self, column_name, column_value):
         self.column_name  = column_name
         self.column_value = column_value
+
+    def apply_to_data(self, data):
+        return data[self.column_name == self.column_value]
 
 
 class Variants(JsonSerializable):

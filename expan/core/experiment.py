@@ -6,7 +6,6 @@ import pandas as pd
 import expan.core.early_stopping as es
 import expan.core.statistics as statx
 from expan.core.statistical_test import *
-from expan.core.util import get_kpi_by_name_and_variant
 from expan.core.results import StatisticalTestResult, MultipleTestSuiteResult
 
 logger = logging.getLogger(__name__)
@@ -83,25 +82,24 @@ class Experiment(object):
             raise NotImplementedError("Test method '{}' is not implemented.".format(testmethod))
         worker = self.worker_table[testmethod](**worker_args)
 
-        data_for_analysis = self.data
-
         # create test result object with empty result first
         test_result = StatisticalTestResult(test, None)
 
+        data_for_analysis = self.data
         # apply feature filter to data
         for feature in test.features:
-            data_for_analysis = data_for_analysis[feature.column_name == feature.column_value]
+            data_for_analysis = feature.apply_to_data(data_for_analysis)
 
         if not self._is_valid_for_analysis(data_for_analysis, test):
             logger.warning("Data is not valid for the analysis!")
             return test_result
 
         # get control and treatment values for the kpi
-        control          = get_kpi_by_name_and_variant(data_for_analysis, test.kpi, test.variants.control_name)
+        control          = test.kpi.apply_to_data(data_for_analysis, test.variants.control_name)
         control_weight   = self._get_weights(data_for_analysis, test.kpi, test.variants.control_name)
         control_data     = control * control_weight
 
-        treatment        = get_kpi_by_name_and_variant(data_for_analysis, test.kpi, test.variants.treatment_name)
+        treatment        = test.kpi.apply_to_data(data_for_analysis, test.variants.treatment_name)
         treatment_weight = self._get_weights(data_for_analysis, test.kpi, test.variants.treatment_name)
         treatment_data   = treatment * treatment_weight
 
@@ -206,7 +204,7 @@ class Experiment(object):
         """
         if type(kpi) is not DerivedKPI:
             return 1.0
-        x = get_kpi_by_name_and_variant(data, kpi.denominator, variant)
+        x = kpi.denominator.apply_to_data(data, variant)
         number_of_zeros_and_nans      = sum(x == 0) + np.isnan(x).sum()
         number_of_non_zeros_and_nans = len(x) - number_of_zeros_and_nans
         return number_of_non_zeros_and_nans/np.nansum(x) * x
