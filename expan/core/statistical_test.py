@@ -26,15 +26,10 @@ class KPI(JsonSerializable):
     def __init__(self, name):
         self.name = name
 
-    def apply_to_data(self, data, variant):
-        result = data.reset_index().set_index('variant').loc[variant, self.name]
-        if not isinstance(result, pd.DataFrame):
-            result = pd.DataFrame([result])
-        return result
-
 
 class DerivedKPI(KPI):
-    """ This class represents a derived KPI which is a ratio of two columns.
+    """ This class represents a derived KPI which is a ratio of two columns. 
+    Names of the the two columns are passed as numerator and denominator.
     
     :param name: name of the kpi
     :type  name: str
@@ -105,3 +100,15 @@ class Variants(JsonSerializable):
         self.variant_column_name = variant_column_name
         self.control_name        = control_name
         self.treatment_name      = treatment_name
+
+    def get_treatment(self, data):
+        treatment = data[data.variant_column_name == self.treatment_name]
+        if not isinstance(treatment, pd.DataFrame):
+            treatment = pd.DataFrame([treatment])
+        return treatment
+
+    def get_control(self, data):
+        control = data[data.variant_column_name == self.control_name]
+        if not isinstance(control, pd.DataFrame):
+            control = pd.DataFrame([control])
+        return control

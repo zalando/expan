@@ -95,11 +95,11 @@ class Experiment(object):
             return test_result
 
         # get control and treatment values for the kpi
-        control          = test.kpi.apply_to_data(data_for_analysis, test.variants.control_name)
+        control          = test.variants.get_control(data_for_analysis)[test.kpi.name]
         control_weight   = self._get_weights(data_for_analysis, test.kpi, test.variants.control_name)
         control_data     = control * control_weight
 
-        treatment        = test.kpi.apply_to_data(data_for_analysis, test.variants.treatment_name)
+        treatment        = test.variants.get_treatment(data_for_analysis)[test.kpi.name]
         treatment_weight = self._get_weights(data_for_analysis, test.kpi, test.variants.treatment_name)
         treatment_data   = treatment * treatment_weight
 
