@@ -54,10 +54,6 @@ class Experiment(object):
         if test.variants.control_name not in np.unique(self.data[test.variants.variant_column_name]):
             raise RuntimeError("There is no control with the name '{}' in the data.".format(test.variants.control_name))
 
-        if not isinstance(test.features, list):
-            raise TypeError("Features should be a list.")
-        if not all(isinstance(n, FeatureFilter) for n in test.features):
-            raise TypeError("Some features are not of the type FeatureFilter.")
         for feature in test.features:
             if feature.column_name not in self.data.columns:
                 raise RuntimeError("Feature name '{}' does not exist in the data.".format(feature.column_name))
@@ -69,9 +65,7 @@ class Experiment(object):
                 raise RuntimeError("Numerator '{}' of the derived KPI does not exist in the data.".format(test.kpi.numerator))
             if type(test.kpi.denominator) is not str or test.kpi.denominator not in self.data.columns:
                 raise RuntimeError("Denominator '{}' of the derived KPI does not exist in the data.".format(test.kpi.denominator))
-            # create the derived kpi column if it is not yet created
-            if test.kpi.name not in self.data.columns:
-                test.kpi.make_derived_kpi(self.data)
+            test.kpi.make_derived_kpi(self.data)
 
         logger.info("One analysis with kpi '{}', control variant '{}', treatment variant '{}' and features [{}] "
                     "has just started".format(test.kpi, test.variants.control_name,

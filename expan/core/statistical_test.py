@@ -13,6 +13,10 @@ class StatisticalTest(JsonSerializable):
     :type  variants: Variants
     """
     def __init__(self, kpi, features, variants):
+        if not isinstance(features, list):
+            raise TypeError("Features should be a list.")
+        if not all(isinstance(n, FeatureFilter) for n in features):
+            raise TypeError("Some features are not of the type FeatureFilter.")
         self.kpi       = kpi
         self.features  = features
         self.variants  = variants
@@ -44,7 +48,9 @@ class DerivedKPI(KPI):
         self.denominator = denominator
 
     def make_derived_kpi(self, data):
-        data.loc[:, self.name] = data[self.numerator]/data[self.denominator].astype(float)
+        """ Create the derived kpi column if it is not yet created. """
+        if self.name not in data.columns:
+            data.loc[:, self.name] = data[self.numerator]/data[self.denominator].astype(float)
 
 
 class StatisticalTestSuite(JsonSerializable):
