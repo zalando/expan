@@ -1,31 +1,33 @@
 import warnings
+import logging
 
 import numpy as np
 import pandas as pd
 from scipy import stats
+from expan.core.results import BaseTestStatistics, SampleStatistics, SimpleTestStatistics
+
+logger = logging.getLogger(__name__)
 
 
 def _delta_mean(x, y):
-    """Implemented as function to allow calling from bootstrap. """
+    """ Implemented as function to allow calling from bootstrap. """
     return np.nanmean(x) - np.nanmean(y)
 
 
-def make_delta(assume_normal=True, percentiles=[2.5, 97.5],
-               min_observations=20, nruns=10000, relative=False, multi_test_correction=False, num_tests=1):
-    """ a closure to the below delta function """
+def make_delta(assume_normal=True, alpha=0.05, percentiles=[2.5, 97.5],
+               min_observations=20, nruns=10000, relative=False):
+    """ A closure to the delta function """
 
-    def f(x, y, x_weights=1, y_weights=1):
-        return delta(x, y, assume_normal, percentiles, min_observations,
-                     nruns, relative, x_weights, y_weights, multi_test_correction, num_tests)
+    def f(x, y):
+        return delta(x, y, assume_normal, alpha, percentiles, min_observations,
+                     nruns, relative)
 
     return f
 
 
-def delta(x, y, assume_normal=True, percentiles=[2.5, 97.5],
-          min_observations=20, nruns=10000, relative=False, x_weights=1, y_weights=1,
-          multi_test_correction=False, num_tests=1):
-    """
-    Calculates the difference of means between the samples (x-y) in a
+def delta(x, y, assume_normal=True, alpha=0.05, percentiles=[2.5, 97.5],
+          min_observations=20, nruns=10000, relative=False):
+    """ Calculates the difference of means between the samples (x-y) in a
     statistical sense, i.e. with confidence intervals.
 
     NaNs are ignored: treated as if they weren't included at all. This is done
@@ -36,48 +38,50 @@ def delta(x, y, assume_normal=True, percentiles=[2.5, 97.5],
     with zeros, however, would be completely incorrect for return rates.
 
     Computation is done in form of treatment minus control, i.e. x-y
-
-    Args:
-        x (array_like): sample of a treatment group
-        y (array_like): sample of a control group
-        assume_normal (boolean): specifies whether normal distribution
-            assumptions can be made
-        percentiles (list): list of percentile values for confidence bounds
-        min_observations (integer): minimum number of observations needed
-        nruns (integer): only used if assume normal is false
-        relative (boolean): if relative==True, then the values will be returned
+    
+    :param x: sample of the treatment group
+    :type x: pd.Series or list (array-like)
+    :param y: sample of the control group
+    :type y: pd.Series or list (array-like)
+    :param assume_normal: specifies whether normal distribution assumptions can be made
+    :type assume_normal: boolean
+    :param alpha: significance level (alpha)
+    :type alpha: float
+    :param percentiles: list of percentile values for confidence bounds
+    :type percentiles: list
+    :param min_observations: minimum number of observations needed
+    :type min_observations: int
+    :param nruns: only used if assume normal is false
+    :type nruns: int
+    :param relative: if relative==True, then the values will be returned
             as distances below and above the mean, respectively, rather than the
             absolute values. In	this case, the interval is mean-ret_val[0] to
             mean+ret_val[1]. This is more useful in many situations because it
             corresponds with the sem() and std() functions.
-        x_weights (list): weights for the x vector, in order to calculate
-            the weighted mean and confidence intervals, which is equivalent
-            to the overall metric. This weighted approach is only relevant
-            for ratios.
-        y_weights (list): weights for the y vector, in order to calculate
-            the weighted mean and confidence intervals, which is equivalent
-            to the overall metric. This weighted approach is only relevant
-            for ratios.
-        multi_test_correction (boolean): flag of whether the correction for multiple testing is needed.
-        num_tests (integer): number of tests or reported kpis used for multiple correction.
-
-    Returns:
-        DeltaStatistics object
+    :type: relative: boolean
+    :return delta_statistics: results of type SimpleTestStatistics
+    :rtype delta_statistics: SimpleTestStatistics
     """
-    # Checking if data was provided
+
+    # Check if data was provided and it has correct format
     if x is None or y is None:
         raise ValueError('Please provide two non-None samples.')
+    if not isinstance(x, pd.Series) or not isinstance(y, pd.Series):
+        if not isinstance(x, list) or not isinstance(y, list):
+            raise TypeError('Please provide samples of type Series or list.')
 
     # Coercing missing values to right format
-    _x = np.array(x, dtype=float) * x_weights
-    _y = np.array(y, dtype=float) * y_weights
+    _x = np.array(x, dtype=float)
+    _y = np.array(y, dtype=float)
 
     x_nan = np.isnan(_x).sum()
     y_nan = np.isnan(_y).sum()
     if x_nan > 0:
         warnings.warn('Discarding ' + str(x_nan) + ' NaN(s) in the x array!')
+        logger.warning('Discarding ' + str(x_nan) + ' NaN(s) in the x array!')
     if y_nan > 0:
         warnings.warn('Discarding ' + str(y_nan) + ' NaN(s) in the y array!')
+        logger.warning('Discarding ' + str(x_nan) + ' NaN(s) in the x array!')
 
     ss_x = sample_size(_x)
     ss_y = sample_size(_y)
@@ -93,34 +97,32 @@ def delta(x, y, assume_normal=True, percentiles=[2.5, 97.5],
         mu = _delta_mean(_x, _y)
         # Computing the confidence intervals
         if assume_normal:
-            c_i = normal_sample_difference(x=_x, y=_y, percentiles=percentiles, relative=relative,
-                                           multi_test_correction=multi_test_correction, num_tests=num_tests)
+            logger.info("The distribution of two samples is assumed normal. "
+                        "Performing the sample difference distribution calculation.")
+            c_i = normal_sample_difference(x=_x, y=_y, percentiles=percentiles, relative=relative)
         else:
-            c_i, _ = bootstrap(x=_x, y=_y, percentiles=percentiles, nruns=nruns, relative=relative,
-                               multi_test_correction=multi_test_correction, num_tests=num_tests)
+            logger.info("The distribution of two samples is not normal. Performing the bootstrap.")
+            c_i, _ = bootstrap(x=_x, y=_y, percentiles=percentiles, nruns=nruns, relative=relative)
 
-    # Return the result structure
-    # return mu, c_i, ss_x, ss_y, np.nanmean(_x), np.nanmean(_y)
-    c_i = [{'percentile': p, 'value': v} for (p, v) in c_i.items()]
+    treatment_statistics = SampleStatistics(ss_x, float(np.nanmean(_x)), float(np.nanvar(_x)))
+    control_statistics   = SampleStatistics(ss_y, float(np.nanmean(_y)), float(np.nanvar(_y)))
+    variant_statistics   = BaseTestStatistics(control_statistics, treatment_statistics)
+    p_value              = compute_p_value(_x, _y, ss_x, ss_y)
+    statistical_power    = compute_statistical_power(_x, _y, alpha)
 
-    return {'delta'                 : float(mu),
-            'confidence_interval'   : c_i,
-            'treatment_sample_size' : int(ss_x),
-            'control_sample_size'   : int(ss_y),
-            'treatment_mean'        : float(np.nanmean(_x)),
-            'control_mean'          : float(np.nanmean(_y)),
-            'treatment_variance'    : float(np.nanvar(_x)),
-            'control_variance'      : float(np.nanvar(_y))}
+    logger.info("Delta calculation finished!")
+    return SimpleTestStatistics(variant_statistics.control_statistics,
+                                variant_statistics.treatment_statistics,
+                                float(mu), c_i, p_value, statistical_power)
 
 
 def sample_size(x):
     """
     Calculates sample size of a sample x
-    Args:
-        x (array_like): sample to calculate sample size
-
-    Returns:
-        int: sample size of the sample excluding nans
+    :param x: sample to calculate the sample size
+    :type x: pd.Series or list (array-like)
+    :return: sample size of the sample excluding nans
+    :rtype: int
     """
     # cast into a dummy numpy array to infer the dtype
     x_as_array = np.array(x)
@@ -139,18 +141,20 @@ def sample_size(x):
 
 def estimate_sample_size(x, mde, r, alpha=0.05, beta=0.2):
     """
-    Estimates sample size based on sample mean and variance given MDE (Minimum Detectable effect), number of variants and variant split ratio
-
-    Args:
-        x (pd.Series or pd.DataFrame): sample to base estimation on
-        mde (float): minimum detectable effect
-        r (float): variant split ratio
-        alpha (float): significance level
-        beta (float): type II error
-
-    Returns:
-        float or pd.Series: estimated sample size
-
+    Estimates sample size based on sample mean and variance given MDE (Minimum Detectable effect), 
+    number of variants and variant split ratio
+    :param x: sample to base estimation on
+    :type x: pd.Series or pd.DataFrame
+    :param mde: minimum detectable effect
+    :type mde: float
+    :param r: variant split ratio
+    :type r: float
+    :param alpha: significance level
+    :type alpha: float
+    :param beta: type II error
+    :type beta: float
+    :return: estimated sample size
+    :rtype: float or pd.Series
     """
     if not isinstance(x, pd.Series) and not isinstance(x, pd.DataFrame):
         raise TypeError("Sample x needs to be either Series or DataFrame.")
@@ -167,18 +171,18 @@ def estimate_sample_size(x, mde, r, alpha=0.05, beta=0.2):
 def chi_square(x, y, min_counts=5):
     """
     Performs the chi-square homogeneity test on categorical arrays x and y
-
-    Args:
-        x (array_like): sample of the treatment variable to check
-        y (array_like): sample of the control variable to check
-        min_counts (int): drop categories where minimum number of observations
+    :param x: sample of the treatment variable to check
+    :type x: pd.Series or list (array-like)
+    :param y: sample of the control variable to check
+    :type y: pd.Series or list (array-like)
+    :param min_counts: drop categories where minimum number of observations
                         or expected observations is below min_counts for x or y
-
-    Returns:
-        tuple:
-            * float: p-value
+    :type min_counts: int
+    :return * float: p-value
             * float: chi-square value
             * int: number of attributes used (after dropping)
+    :rtype: tuple
+
     """
     # Checking if data was provided
     if x is None or y is None:
@@ -236,49 +240,47 @@ def chi_square(x, y, min_counts=5):
 def alpha_to_percentiles(alpha):
     """
     Transforms alpha value to corresponding percentile.
-
-    Args:
-        alpha (float): alpha values to transform
-
-    Returns:
-        list of percentiles corresponding to given alpha
+    :param alpha: alpha values to transform
+    :type alpha: float
+    :return: list of percentiles corresponding to given alpha
+    :rtype: list
     """
-    # Compute the percentiles
     return [100. * alpha / 2, 100. * (1 - (alpha / 2))]
 
 
 def bootstrap(x, y, func=_delta_mean, nruns=10000, percentiles=[2.5, 97.5],
-              min_observations=20, return_bootstraps=False, relative=False,
-              multi_test_correction=False, num_tests=1):
+              min_observations=20, return_bootstraps=False, relative=False):
     """
     Bootstraps the Confidence Intervals for a particular function comparing
     two samples. NaNs are ignored (discarded before calculation).
-
-    Args:
-        x (array like): sample of treatment group
-        y (array like): sample of control group
-        func (function): function of which the distribution is to be computed.
+    :param x: sample of the treatment group
+    :type x: pd.Series or list (array-like)
+    :param y: sample of the control group
+    :type y: pd.Series or list (array-like)
+    :param func: function of which the distribution is to be computed.
             The default comparison metric is the difference of means. For
             bootstraping correlation: func=lambda x,y: np.stats.pearsonr(x,y)[0]
-        nruns (integer): number of bootstrap runs to perform
-        percentiles (list):	The values corresponding to the given percentiles
+    :type func: function
+    :param nruns: number of bootstrap runs to perform
+    :type nruns: int
+    :param percentiles: The values corresponding to the given percentiles
             are returned. The default percentiles (2.5% and 97.5%) correspond to
             an alpha of 0.05.
-        min_observations (integer): minimum number of observations necessary
-        return_bootstraps (boolean): If this variable is set the bootstrap sets
+    :type percentiles: list
+    :param min_observations: minimum number of observations necessary
+    :type min_observations: int
+    :param return_bootstraps:If this variable is set the bootstrap sets
             are returned otherwise the first return value is empty.
-        relative (boolean): if relative==True, then the values will be returned
+    :type return_bootstraps: bool
+    :param relative: if relative==True, then the values will be returned
             as distances below and above the mean, respectively, rather than the
             absolute values. In	this case, the interval is mean-ret_val[0] to
             mean+ret_val[1]. This is more useful in many situations because it
             corresponds with the sem() and std() functions.
-        multi_test_correction (boolean): flag of whether the correction for multiple testing is needed.
-        num_tests (integer): number of tests or reported kpis used for multiple correction.
-
-    Returns:
-        tuple:
-            * dict: percentile levels (index) and values
-            * np.array (nruns): array containing the bootstraping results per run
+    :type relative: bool
+    :return dict: percentile levels (index) and values
+    :return np.array (nruns): array containing the bootstraping results per run
+    :rtype: tuple
     """
     # Checking if data was provided
     if x is None or y is None:
@@ -289,11 +291,6 @@ def bootstrap(x, y, func=_delta_mean, nruns=10000, percentiles=[2.5, 97.5],
     _y = np.array(y, dtype=float)
     ss_x = _x.size - np.isnan(_x).sum()
     ss_y = _y.size - np.isnan(_y).sum()
-
-    # Adjusting percentiles, Bonferroni correction
-    if multi_test_correction:
-        percentiles = [float(p) / num_tests if p < 50.0
-                       else 100 - (100 - float(p)) / num_tests if p > 50.0 else p for p in percentiles]
 
     # Checking if enough observations are left after dropping NaNs
     if min(ss_x, ss_y) < min_observations:
@@ -419,28 +416,27 @@ def normal_sample_percentiles(values, percentiles=[2.5, 97.5], relative=False):
                               relative=relative)
 
 
-def normal_sample_difference(x, y, percentiles=[2.5, 97.5], relative=False, multi_test_correction=False, num_tests=1):
+def normal_sample_difference(x, y, percentiles=[2.5, 97.5], relative=False):
     """
-    Calculates the difference distribution of two normal distributions given
-    by their samples.
+    Calculates the difference distribution of two normal distributions given by their samples.
 
-    Computation is done in form of treatment minus control. It is assumed that
-    the standard deviations of both distributions do not differ too much.
+    Computation is done in form of treatment minus control. 
+    It is assumed that the standard deviations of both distributions do not differ too much.
 
-    Args:
-        x (array-like): sample of a treatment group
-        y (array-like): sample of a control group
-        percentiles (list): list of percentile values to compute
-        relative (boolean): If relative==True, then the values will be returned
-            as distances below and above the mean, respectively, rather than the
-            absolute values. In this case, the interval is mean-ret_val[0] to
-            mean+ret_val[1]. This is more useful in many situations because it
-            corresponds with the sem() and std() functions.
-        multi_test_correction (boolean): flag of whether the correction for multiple testing is needed.
-        num_tests (integer): number of tests or reported kpis used for multiple correction.
-
-    Returns:
-        dict: percentiles and corresponding values
+    :param x: sample of a treatment group
+    :type x: pd.Series or list (array-like)
+    :param y: sample of a control group
+    :type x: pd.Series or list (array-like)
+    :param percentiles: list of percentile values to compute
+    :type percentiles: list
+    :param relative: If relative==True, then the values will be returned
+                     as distances below and above the mean, respectively, rather than the
+                     absolute values. In this case, the interval is mean-ret_val[0] to
+                     mean+ret_val[1]. This is more useful in many situations because it
+                     corresponds with the sem() and std() functions.
+    :type relative: bool
+    :return: percentiles and corresponding values
+    :rtype: dict
     """
     # Coerce data to right format
     _x = np.array(x, dtype=float)
@@ -458,12 +454,10 @@ def normal_sample_difference(x, y, percentiles=[2.5, 97.5], relative=False, mult
 
     # Push calculation to normal difference function
     return normal_difference(mean1=mean1, std1=std1, n1=n1, mean2=mean2,
-                             std2=std2, n2=n2, percentiles=percentiles, relative=relative,
-                             multi_test_correction=multi_test_correction, num_tests=num_tests)
+                             std2=std2, n2=n2, percentiles=percentiles, relative=relative)
 
 
-def normal_difference(mean1, std1, n1, mean2, std2, n2, percentiles=[2.5, 97.5],
-                      relative=False, multi_test_correction=False, num_tests=1):
+def normal_difference(mean1, std1, n1, mean2, std2, n2, percentiles=[2.5, 97.5], relative=False):
     """
     Calculates the difference distribution of two normal distributions.
 
@@ -483,8 +477,6 @@ def normal_difference(mean1, std1, n1, mean2, std2, n2, percentiles=[2.5, 97.5],
             absolute values. In	this case, the interval is mean-ret_val[0] to
             mean+ret_val[1]. This is more useful in many situations because it
             corresponds with the sem() and std() functions.
-        multi_test_correction (boolean): flag of whether the correction for multiple testing is needed.
-        num_tests (integer): number of tests or reported kpis used for multiple correction.
 
     Returns:
         dict: percentiles and corresponding values
@@ -499,11 +491,6 @@ def normal_difference(mean1, std1, n1, mean2, std2, n2, percentiles=[2.5, 97.5],
     st_error = std * np.sqrt(1. / n1 + 1. / n2)
     # Computing degrees of freedom
     d_free = n1 + n2 - 2
-
-    # Adjusting percentiles, Bonferroni correction.
-    if multi_test_correction:
-        percentiles = [float(p) / num_tests if p < 50.0
-                       else 100 - (100 - float(p)) / num_tests if p > 50.0 else p for p in percentiles]
 
     # Mapping percentiles via standard error
     if relative:
@@ -585,3 +572,26 @@ def _get_power(mean1, std1, n1, mean2, std2, n2, z_1_minus_alpha):
     power = 1 - beta
 
     return power
+
+
+def compute_p_value(x, y, ss_x, ss_y):
+    """
+    Calculates p values in terms of statistical Student's or Welch's T-test.
+    :param x: treatment samples
+    :param ss_x: samples size of the treatment
+    :type ss_x: int
+    :param y: control samples
+    :param ss_y: samples size of the control
+    :type ss_y: int
+    :return: p-value
+    :rtype: float
+    """
+    if x is None or y is None:
+        raise ValueError('Please provide two non-None samples to compute p-values.')
+    equal_variance = True
+    if np.nanvar(x) != np.nanvar(y) or ss_x != ss_y:
+        logger.info("Sample variances or sample sizes are not equal. Running Welch's test.")
+        equal_variance = False
+
+    test = stats.ttest_ind(x, y, equal_var=equal_variance)
+    return test[1]

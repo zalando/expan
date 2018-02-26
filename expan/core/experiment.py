@@ -42,12 +42,12 @@ class Experiment(object):
         if not isinstance(test, StatisticalTest):
             raise TypeError("Statistical test should be of type StatisticalTest.")
 
-        if 'entity' not in self.data.columns():
+        if 'entity' not in self.data.columns:
             raise RuntimeError("There is no 'entity' column in the data.")
         if self.data.entity.duplicated().any():
             raise ValueError('Entities in data should be unique.')
 
-        if test.variants.variant_column_name not in self.data.columns():
+        if test.variants.variant_column_name not in self.data.columns:
             raise RuntimeError("There is no '{}' column in the data.".format(test.variants.variant_column_name))
         if test.variants.treatment_name not in np.unique(self.data[test.variants.variant_column_name]):
             raise RuntimeError("There is no treatment with the name '{}' in the data.".format(test.variants.treatment_name))
@@ -58,7 +58,7 @@ class Experiment(object):
             if feature.column_name not in self.data.columns:
                 raise RuntimeError("Feature name '{}' does not exist in the data.".format(feature.column_name))
 
-        if type(test.kpi) is KPI and (test.kpi.name not in self.data.columns()):
+        if type(test.kpi) is KPI and (test.kpi.name not in self.data.columns):
             raise RuntimeError("There is no column of name '{}' in the data.".format(test.kpi.name))
         if type(test.kpi) is DerivedKPI:
             if type(test.kpi.numerator) is not str or test.kpi.numerator not in self.data.columns:
@@ -99,10 +99,6 @@ class Experiment(object):
 
         # run the test method
         test_statistics = worker(x=treatment_data, y=control_data)
-        # TODO: implement worker() returns an instance of child class of BaseTestStatistics
-        # note: include power into the return value of worker()
-        # power = statx.compute_statistical_power(treatment_data, control_data)
-
         test_result.result = test_statistics
         return test_result
 
