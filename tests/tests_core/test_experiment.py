@@ -391,6 +391,27 @@ class ExperimentClassTestCases(ExperimentTestCase):
         numerical_dimension_name = find_list_of_dicts_element(sga_result, "segment", "['2016-01-21']", "dimension")
         self.assertEqual(numerical_dimension_name, 'date')
 
+    # TODO: new test
+    '''
+    def test_analyze_statistical_test_fixed_horizon(self):
+        experiment = Experiment(self.data, self.metadata)
+        results = experiment.analyze_statistical_test(self.test_revenue_overall, testmethod='fixed_horizon', alpha=0.05)
+
+        # Control sample size
+        self.assertEqual(results.result.control_statistics.sample_size, 6108)
+
+        # Treatment sample size
+        self.assertEqual(results.result.treatment_statistics.sample_size, 3892)
+
+        # Statistical power
+        self.assertAlmostEqual(results.result.statistical_power, 0.36400577293301273)
+
+        # Test statistical power with 0.1 alpha is bigger than with 0.05
+        results_2 = experiment.analyze_statistical_test(self.test_revenue_overall, testmethod='fixed_horizon', alpha=0.1)
+        self.assertEqual(results_2.result.statistical_power, 0.4869722734005255)
+        self.assertTrue(results_2.result.statistical_power > results.result.statistical_power)
+    '''
 
 if __name__ == '__main__':
     unittest.main()
+
