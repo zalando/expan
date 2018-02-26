@@ -1,10 +1,12 @@
 import json
+import logging
 from enum import Enum
-from warnings import warn
 
 import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
+
+logger = logging.getLogger(__name__)
 
 
 class JsonSerializable(object):
@@ -18,93 +20,20 @@ class JsonSerializable(object):
 def find_list_of_dicts_element(items, key1, value, key2):
     return [item[key2] for item in items if item[key1] == value][0]
 
+
 def is_number_and_nan(obj):
     return obj != obj
 
+
 def get_column_names_by_type(df, dtype):
     return [c for c in df.columns if np.issubdtype(df.dtypes[c], dtype)]
+
 
 def drop_nan(np_array):
     if np_array.ndim == 1:
         return np_array[~np.isnan(np_array)]
     elif np_array.ndim == 2:
         return np_array[~np.isnan(np_array).any(axis=1)]
-
-
-def scale_range(x, new_min=0.0, new_max=1.0, old_min=None, old_max=None, squash_outside_range=True, squash_inf=False, ):
-    """
-    Scales a sequence to fit within a new range.
-
-    If squash_inf is set, then infinite values will take on the
-    extremes of the new range (as opposed to staying infinite).
-
-    Args:
-        x:
-        new_min:
-        new_max:
-        old_min:
-        old_max:
-        squash_outside_range:
-        squash_inf:
-
-    Note:
-        Infinity in the input is disregarded in the construction of the scale of the mapping.
-
-  >>> scale_range([1,3,5])
-  array([ 0. ,  0.5,  1. ])
-
-  >>> scale_range([1,2,3,4,5])
-  array([ 0.  ,  0.25,  0.5 ,  0.75,  1.  ])
-
-  >>> scale_range([1,3,5, np.inf])
-  array([ 0. ,  0.5,  1. ,  inf])
-
-  >>> scale_range([1,3,5, -np.inf])
-  array([ 0. ,  0.5,  1. , -inf])
-
-  >>> scale_range([1,3,5, -np.inf], squash_inf=True)
-  array([ 0. ,  0.5,  1. ,  0. ])
-
-  >>> scale_range([1,3,5, np.inf], squash_inf=True)
-  array([ 0. ,  0.5,  1. ,  1. ])
-
-  >>> scale_range([1,3,5], new_min=0.5)
-  array([ 0.5 ,  0.75,  1.  ])
-
-  >>> scale_range([1,3,5], old_min=1, old_max=4)
-  array([ 0.        ,  0.66666667,  1.        ])
-
-  >>> scale_range([5], old_max=4)
-  array([ 1.])
-
-  """
-    if squash_inf and not squash_outside_range:
-        warn(ValueError('Makes no sense to squash infinity but not other numbers outside the source range. \
-         Will squash all outside range.'))
-        squash_outside_range = True
-
-    if isinstance(x, list):
-        x = np.array(x)
-
-    if old_min is None:
-        old_min = np.min(x[~np.isinf(x)])
-    if old_max is None:
-        old_max = np.max(x[~np.isinf(x)])
-    old_range = old_max - old_min
-    new_max = float(new_max)
-    new_min = float(new_min)
-    new_range = new_max - new_min
-
-    retval = (new_range * (x - old_min) / old_range) + new_min
-    if squash_inf:
-        retval[np.isinf(x) & (x > 0)] = new_max
-        retval[np.isinf(x) & (x < 0)] = new_min
-
-    if squash_outside_range:
-        retval[~np.isinf(x) & (x > old_max)] = new_max
-        retval[~np.isinf(x) & (x < old_min)] = new_min
-
-    return retval
 
 
 def generate_random_data():
@@ -179,4 +108,3 @@ def generate_random_data_n_variants(n_variants=3):
     }
 
     return test_data_frame, metadata
-

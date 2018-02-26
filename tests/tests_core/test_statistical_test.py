@@ -2,11 +2,12 @@ import unittest
 import numpy as np
 
 from expan.core.statistical_test import *
-
+from expan.core.util import generate_random_data
 
 class StatisticalTestCase(unittest.TestCase):
     def setUp(self):
         np.random.seed(41)
+        self.data, self.metadata = generate_random_data()
 
     def tearDown(self):
         pass
@@ -42,8 +43,28 @@ class StatisticalTestCase(unittest.TestCase):
         test_revenue_tablet = StatisticalTest(kpi, [tablet], variants)
 
         tests = [test_revenue_overall, test_revenue_mobile, test_revenue_desktop, test_revenue_tablet]
-        multi_test_suite = MultipleTestSuite(tests, MultipleTestingCorrectionMethod.benjamini_hochberg_correction)
+        multi_test_suite = StatisticalTestSuite(tests, "bh")
 
         self.assertEqual(multi_test_suite.size, 4)
-        self.assertEqual(multi_test_suite.correction_method,
-                         MultipleTestingCorrectionMethod.benjamini_hochberg_correction)
+        self.assertEqual(multi_test_suite.correction_method, "bh")
+
+    def test_make_derived_kpi(self):
+        numerator = "normal_same"
+        denominator = "normal_shifted"
+        derived_kpi_name = "derived_kpi_one"
+        DerivedKPI(derived_kpi_name, numerator, denominator).make_derived_kpi(self.data)
+
+        # checks if column with the derived kpi was created
+        self.assertTrue(derived_kpi_name in self.data.columns)
+
+        # checks if values of new columns are of type float
+        self.assertTrue(all(isinstance(kpi_value, float) for kpi_value in self.data[derived_kpi_name]))
+
+    def test_get_variant(self):
+        kpi = KPI('normal_same')
+        variants = Variants('variant', 'A', 'B')
+        test_revenue_overall = StatisticalTest(kpi, [], variants)
+        control = test_revenue_overall.variants.get_variant(
+            self.data, test_revenue_overall.variants.control_name)[test_revenue_overall.kpi.name]
+        self.assertEqual(len(control), 6108)
+        self.assertTrue(isinstance(control, pd.Series))

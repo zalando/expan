@@ -242,7 +242,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
 
     def test_quantile_filtering_multiple_columns(self):
         exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
-        exp.filter(
+        exp.outlier_filter(
             kpis=[
                 'normal_same',
                 'normal_shifted',
@@ -255,7 +255,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
 
     def test_quantile_filtering_lower_threshold(self):
         exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
-        exp.filter(
+        exp.outlier_filter(
             kpis=[
                 'normal_same',
                 'normal_shifted',
@@ -271,25 +271,25 @@ class ExperimentClassTestCases(ExperimentTestCase):
     def test_quantile_filtering_unsupported_kpi(self):
         exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
         with self.assertRaises(KeyError):
-            exp.filter(kpis=['revenue'])
+            exp.outlier_filter(kpis=['revenue'])
 
 
     def test_quantile_filtering_unsupported_percentile(self):
         exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
         with self.assertRaises(ValueError):
-            exp.filter(kpis=['normal_same'], percentile=101.0)
+            exp.outlier_filter(kpis=['normal_same'], percentile=101.0)
 
 
     def test_quantile_filtering_unsupported_threshold_kind(self):
         exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
         with self.assertRaises(ValueError):
-            exp.filter(kpis=['normal_same'], threshold_type='uppper')
+            exp.outlier_filter(kpis=['normal_same'], threshold_type='uppper')
 
 
     def test_quantile_filtering_high_filtering_percentage(self):
         exp = self.getExperiment([self.derived_kpi_1['name']], [self.derived_kpi_1])
         with warnings.catch_warnings(record=True) as w:
-            exp.filter(kpis=['normal_same'], percentile=97.9)
+            exp.outlier_filter(kpis=['normal_same'], percentile=97.9)
             self.assertEqual(len(w), 1)
             self.assertTrue(issubclass(w[-1].category, UserWarning))
 
