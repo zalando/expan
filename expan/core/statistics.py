@@ -53,7 +53,6 @@ def delta(x, y, assume_normal=True, alpha=0.05, percentiles=[2.5, 97.5],
     :return: results of type SimpleTestStatistics
     :rtype: SimpleTestStatistics
     """
-
     # Check if data was provided and it has correct format
     if x is None or y is None:
         raise ValueError('Please provide two non-None samples.')
@@ -99,7 +98,7 @@ def delta(x, y, assume_normal=True, alpha=0.05, percentiles=[2.5, 97.5],
     control_statistics   = SampleStatistics(ss_y, float(np.nanmean(_y)), float(np.nanvar(_y)))
     variant_statistics   = BaseTestStatistics(control_statistics, treatment_statistics)
     p_value              = compute_p_value(_x, _y, ss_x, ss_y)
-    statistical_power    = compute_statistical_power(_x, _y, alpha)
+    statistical_power    = compute_statistical_power_from_samples(_x, _y, alpha)
 
     logger.info("Delta calculation finished!")
     return SimpleTestStatistics(variant_statistics.control_statistics,
@@ -341,14 +340,14 @@ def normal_difference(mean1, std1, n1, mean2, std2, n2, percentiles=[2.5, 97.5],
                      for p in percentiles])
 
 
-def compute_statistical_power(x, y, alpha=0.05):
-    """ Compute statistical power.
+def compute_statistical_power_from_samples(x, y, alpha=0.05):
+    """ Compute statistical power given data samples of control and treatment.
 
     :param x: (array-like) sample of a treatment group
     :param y: (array-like) sample of a control group
     :param alpha: Type I error (false positive rate)
     
-    :return: statistical power --- the probability of a test to detect an effect if the effect actually exists
+    :return: statistical power---the probability of a test to detect an effect if the effect actually exists
     :rtype: float
     """
     z_1_minus_alpha = stats.norm.ppf(1 - alpha/2.)
@@ -363,7 +362,30 @@ def compute_statistical_power(x, y, alpha=0.05):
     std2 = np.std(_y)
     n1 = len(_x)
     n2 = len(_y)
+    return compute_statistical_power(mean1, std1, n1, mean2, std2, n2, z_1_minus_alpha)
 
+
+def compute_statistical_power(mean1, std1, n1, mean2, std2, n2, z_1_minus_alpha):
+    """ Compute statistical power given statistics of control and treatment.
+    
+    :param mean1: mean value of the treatment distribution
+    :type  mean1: float
+    :param std1: standard deviation of the treatment distribution
+    :type  std1: float
+    :param n1: number of samples of the treatment distribution
+    :type  n1: int
+    :param mean2: mean value of the control distribution
+    :type  mean2: float
+    :param std2: standard deviation of the control distribution
+    :type  std2: float
+    :param n2: number of samples of the control distribution
+    :type  n2: int
+    :param z_1_minus_alpha: critical value for significance level alpha. That is, z-value for 1-alpha.
+    :type  z_1_minus_alpha: float
+    
+    :return: statistical power---the probability of a test to detect an effect if the effect actually exists
+    :rtype: float
+    """
     effect_size = mean1 - mean2
     std = pooled_std(std1, n1, std2, n2)
     tmp = (n1 * n2 * effect_size**2) / ((n1 + n2) * std**2)
@@ -382,7 +404,7 @@ def compute_p_value(x, y, ss_x, ss_y):
     :param y: control samples
     :param ss_y: samples size of the control
     :type  ss_y: int
-    
+
     :return: p-value
     :rtype: float
     """
