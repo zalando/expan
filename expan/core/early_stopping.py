@@ -113,7 +113,7 @@ def group_sequential(x, y, spending_function='obrien_fleming', estimated_sample_
     treatment_statistics = SampleStatistics(int(n_x), float(np.nanmean(_x)), float(np.nanvar(_x)))
     control_statistics   = SampleStatistics(int(n_y), float(np.nanmean(_y)), float(np.nanvar(_y)))
     variant_statistics   = BaseTestStatistics(control_statistics, treatment_statistics)
-    p_value              = statx.compute_p_value(_x, _y, int(n_x), int(n_y))
+    p_value              = statx.compute_p_value_from_samples(_x, _y)
     statistical_power    = statx.compute_statistical_power_from_samples(_x, _y, alpha)
 
     logger.info("Group sequential analysis finished!")
@@ -364,7 +364,7 @@ def get_or_compile_stan_model(model_file, distribution):
     """
     python_version = '{0[0]}.{0[1]}'.format(sys.version_info)
     compiled_model_file = tempfile.gettempdir() + '/expan_early_stop_compiled_stan_model_' \
-                          + distribution + '_' + python_version + '.pkl'
+                                                + distribution + '_' + python_version + '.pkl'
 
     if os.path.isfile(compiled_model_file):
         sm = pickle.load(open(compiled_model_file, 'rb'))
