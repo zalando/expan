@@ -268,17 +268,36 @@ class NormalSampleDifferenceTestCases(StatisticsTestCase):
 
 class StatisticalPowerTestCases(StatisticsTestCase):
     def test_compute_statistical_power(self):
-        # pre-computed value by hand via power analysis
-        # alpha=0.05, beta=0.2, sigma=1, delta=1, n1=12, n2=13
-        z_1_minus_alpha = stats.norm.ppf(0.95)
-        power = statx.compute_statistical_power(0, 1, 13, 1, 1, 12, z_1_minus_alpha)
-        self.assertAlmostEqual(power, 0.8, 2)
+        float_precision = 2
+        # Confirm with pre-computed value by hand via power analysis
+        alpha = 0.05
+        beta  = 0.2
+        sigma = 1
+        mean1 = 1
+        mean2 = 0
+        n1    = 13
+        n2    = 12
+        z_1_minus_alpha = stats.norm.ppf(1-alpha)
+
+        power = statx.compute_statistical_power(mean1, sigma, n1, mean2, sigma, n2, z_1_minus_alpha)
+        self.assertAlmostEqual(power, 1-beta, float_precision)
 
 
 class PValueTestCases(StatisticsTestCase):
     def test_compute_p_value(self):
-        pass
+        float_precision = 2
+        # Confirm with pre-computed value by hand via looking up t table
+        # Given the following values, pooled std and standard error should both be 1.
+        # By looking up from two-tailed t-table of degree of freedom 2, t=4.303 will lead to p=0.05.
+        sigma      = 1
+        mean1      = 4.303
+        mean2      = 0
+        n1         = 2
+        n2         = 2
+        expected_p = 0.05
 
+        p = statx.compute_p_value(mean1, sigma, n1, mean2, sigma, n2)
+        self.assertAlmostEqual(p, expected_p, float_precision)
 
 
 if __name__ == '__main__':

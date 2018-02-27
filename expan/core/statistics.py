@@ -409,11 +409,13 @@ def compute_p_value_from_samples(x, y):
     :rtype: float
     """
     if x is None or y is None:
-        raise ValueError('Please provide two non-None samples to compute p-values.')
+        raise ValueError('Please provide two non-empty samples to compute p-values.')
+
     _x = np.array(x, dtype=float)
     _x = _x[~np.isnan(_x)]
     _y = np.array(y, dtype=float)
     _y = _y[~np.isnan(_y)]
+
     mean1 = np.mean(_x)
     mean2 = np.mean(_y)
     std1 = np.std(_x)
