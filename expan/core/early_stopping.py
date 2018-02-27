@@ -26,7 +26,7 @@ def obrien_fleming(information_fraction, alpha=0.05):
 
     :param information_fraction: share of the information  amount at the point of evaluation, 
                                  e.g. the share of the maximum sample size
-    :type  information_fraction: scalar or array-like
+    :type  information_fraction: float
     :param alpha: type-I error rate
 
     :return: redistributed alpha value at the time point with the given information fraction
@@ -63,10 +63,11 @@ def group_sequential(x, y, spending_function='obrien_fleming', estimated_sample_
     """
     # Checking if data was provided
     if x is None or y is None:
-        raise ValueError('Please provide two non-None samples.')
-    if not isinstance(x, pd.Series) or not isinstance(y, pd.Series):
-        if not isinstance(x, list) or not isinstance(y, list):
-            raise TypeError('Please provide samples of type Series or list.')
+        raise ValueError('Please provide two non-empty samples.')
+    if not isinstance(x, pd.Series) and not isinstance(x, np.ndarray) and not isinstance(x, list):
+        raise TypeError('Please provide samples of type Series or list.')
+    if type(x) != type(y):
+        raise TypeError('Please provide samples of the same type.')
 
     logger.info("Started running group sequential.")
 
@@ -269,7 +270,7 @@ def bayes_factor(x, y, distribution='normal', num_iters=25000, inference='sampli
                                        variant_statistics.treatment_statistics,
                                        float(mu_x - mu_y),
                                        dict([(p*100, v) for p, v in zip([p1, p2], credible_interval)]),
-                                       None, None, bool(stop))
+                                       None, None, stop)
 
 
 def make_bayes_precision(distribution='normal', posterior_width=0.08, num_iters=25000, inference='sampling'):
@@ -320,7 +321,7 @@ def bayes_precision(x, y, distribution='normal', posterior_width=0.08, num_iters
                                        variant_statistics.treatment_statistics,
                                        float(mu_x - mu_y),
                                        dict([(p * 100, v) for p, v in zip([p1, p2], credible_interval_delta)]),
-                                       None, None, bool(stop))
+                                       None, None, stop)
 
 
 def get_trace_normalized_effect_size(distribution, traces):
