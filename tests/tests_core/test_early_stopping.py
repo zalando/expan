@@ -15,12 +15,12 @@ class EarlyStoppingTestCase(unittest.TestCase):
         """
         np.random.seed(0)
 
-        self.rand_s1 = list(np.random.normal (loc=0.0, size=1000))
-        self.rand_s2 = list(np.random.normal (loc=0.1, size=1000))
-        self.rand_s3 = list(np.random.poisson(lam=1.0, size=1000))
-        self.rand_s4 = list(np.random.poisson(lam=3.0, size=1000))
-        self.rand_s5 = list(np.random.normal (loc=0.0, size=1000))
-        self.rand_s6 = list(np.random.normal (loc=0.1, size=1000))
+        self.rand_s1 = np.random.normal (loc=0.0, size=1000)
+        self.rand_s2 = np.random.normal (loc=0.1, size=1000)
+        self.rand_s3 = np.random.poisson(lam=1.0, size=1000)
+        self.rand_s4 = np.random.poisson(lam=3.0, size=1000)
+        self.rand_s5 = np.random.normal (loc=0.0, size=1000)
+        self.rand_s6 = np.random.normal (loc=0.1, size=1000)
         self.rand_s5[0] = np.nan
         self.rand_s6[0] = np.nan
         self.rand_s6[1] = np.nan
