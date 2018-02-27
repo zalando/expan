@@ -41,33 +41,19 @@ class DeltaTestCases(StatisticsTestCase):
             percentiles=[2.5, 97.5],
             assume_normal=True)
         # Checking if mean has right value
-        self.assertAlmostEqual(res['delta'], -0.28923076923075541)
+        self.assertAlmostEqual(res.delta, -0.28923076923075541)
 
-        value025 = find_list_of_dicts_element(res['confidence_interval'], 'percentile',  2.5, 'value')
-        value975 = find_list_of_dicts_element(res['confidence_interval'], 'percentile', 97.5, 'value')
+        value025 = find_list_of_dicts_element(res.confidence_interval, 'percentile',  2.5, 'value')
+        value975 = find_list_of_dicts_element(res.confidence_interval, 'percentile', 97.5, 'value')
 
         # Checking if lower percentile has right value
         self.assertAlmostEqual(value025, -0.53770569567692295)
         # Checking if uper percentile has right value
         self.assertAlmostEqual(value975, -0.040755842784587965)
         # Checking if sample size 1 is correct
-        self.assertEqual(res['treatment_sample_size'], 65)
+        self.assertEqual(res.treatment_statistics.sample_size, 65)
         # Checking if sample size 2 is correct
-        self.assertEqual(res['control_sample_size'], 65)
-
-    def test__delta__2percentiles_25_tests(self):
-        """ Percentiles of delta() for sga are corrected for 25 tests. """
-        res = statx.delta(
-            self.samples.temperature[self.samples.gender == 1],
-            self.samples.temperature[self.samples.gender == 2],
-            percentiles=[2.5, 97.5],
-            assume_normal=True)
-
-        value025 = find_list_of_dicts_element(res['confidence_interval'], 'percentile', 0.1, 'value')
-        value975 = find_list_of_dicts_element(res['confidence_interval'], 'percentile', 99.9, 'value')
-
-        self.assertAlmostEqual(value025, -0.68544085117601006)
-        self.assertAlmostEqual(value975, 0.1069793127145035)
+        self.assertEqual(res.control_statistics.sample_size, 65)
 
     def test__delta__2percentiles_no_tests(self):
         """ Percentiles of delta() for sga are corrected for no tests (1 as a default). """
@@ -76,8 +62,8 @@ class DeltaTestCases(StatisticsTestCase):
             self.samples.temperature[self.samples.gender == 2],
             percentiles=[2.5, 97.5])
 
-        value025 = find_list_of_dicts_element(res['confidence_interval'], 'percentile', 2.5, 'value')
-        value975 = find_list_of_dicts_element(res['confidence_interval'], 'percentile', 97.5, 'value')
+        value025 = find_list_of_dicts_element(res.confidence_interval, 'percentile', 2.5, 'value')
+        value975 = find_list_of_dicts_element(res.confidence_interval, 'percentile', 97.5, 'value')
 
         self.assertAlmostEqual(value025, -0.53770569567692295)
         self.assertAlmostEqual(value975, -0.040755842784587965)
@@ -85,16 +71,16 @@ class DeltaTestCases(StatisticsTestCase):
     def test__delta__nan_handling(self):
         """ Test correct handling of nans. (ignored). """
         res = statx.delta(self.rand_s1, self.rand_s2)
-        self.assertEqual(res['treatment_sample_size'], 1000)
-        self.assertEqual(res['control_sample_size'], 1000)
+        self.assertEqual(res.treatment_statistics.sample_size, 1000)
+        self.assertEqual(res.control_statistics.sample_size, 1000)
 
         r1 = self.rand_s1.copy()
         r1[90:] = np.nan
         res = statx.delta(r1, self.rand_s2)
 
-        self.assertAlmostEqual (res['delta'], -0.1, 1)
-        self.assertEqual       (res['treatment_sample_size'],    90)
-        self.assertEqual       (res['control_sample_size'],    1000)
+        self.assertAlmostEqual (res.delta, -0.1, 1)
+        self.assertEqual       (res.treatment_statistics.sample_size, 90)
+        self.assertEqual       (res.control_statistics.sample_size, 1000)
 
     def test__delta__computation_not_assumed_normal(self):
         """ Result of delta() not assuming normality equals expected result. """
@@ -105,19 +91,19 @@ class DeltaTestCases(StatisticsTestCase):
             percentiles=[2.5, 97.5],
             assume_normal=True)
         # Checking if mean has right value
-        self.assertAlmostEqual(res['delta'],          -0.28923076923075541)
+        self.assertAlmostEqual(res.delta, -0.28923076923075541)
 
-        value025 = find_list_of_dicts_element(res['confidence_interval'], 'percentile',  2.5, 'value')
-        value975 = find_list_of_dicts_element(res['confidence_interval'], 'percentile', 97.5, 'value')
+        value025 = find_list_of_dicts_element(res.confidence_interval, 'percentile',  2.5, 'value')
+        value975 = find_list_of_dicts_element(res.confidence_interval, 'percentile', 97.5, 'value')
 
         # Checking if lower percentile has right value
         self.assertAlmostEqual(value025, -0.53770569567692295)
         # Checking if uper percentile has right value
         self.assertAlmostEqual(value975, -0.040755842784587965)
         # Checking if sample size 1 is correct
-        self.assertEqual(res['treatment_sample_size'], 65)
+        self.assertEqual(res.treatment_statistics.sample_size, 65)
         # Checking if sample size 2 is correct
-        self.assertEqual(res['control_sample_size'], 65)
+        self.assertEqual(res.control_statistics.sample_size, 65)
 
 
 class SampleSizeTestCases(StatisticsTestCase):
@@ -282,11 +268,36 @@ class NormalSampleDifferenceTestCases(StatisticsTestCase):
 
 class StatisticalPowerTestCases(StatisticsTestCase):
     def test_compute_statistical_power(self):
-        # pre-computed value by hand via power analysis
-        # alpha=0.05, beta=0.2, sigma=1, delta=1, n1=12, n2=13
-        z_1_minus_alpha = stats.norm.ppf(0.95)
-        power = statx.compute_statistical_power(0, 1, 13, 1, 1, 12, z_1_minus_alpha)
-        self.assertAlmostEqual(power, 0.8, 2)
+        float_precision = 2
+        # Confirm with pre-computed value by hand via power analysis
+        alpha = 0.05
+        beta  = 0.2
+        sigma = 1
+        mean1 = 1
+        mean2 = 0
+        n1    = 13
+        n2    = 12
+        z_1_minus_alpha = stats.norm.ppf(1-alpha)
+
+        power = statx.compute_statistical_power(mean1, sigma, n1, mean2, sigma, n2, z_1_minus_alpha)
+        self.assertAlmostEqual(power, 1-beta, float_precision)
+
+
+class PValueTestCases(StatisticsTestCase):
+    def test_compute_p_value(self):
+        float_precision = 2
+        # Confirm with pre-computed value by hand via looking up t table
+        # Given the following values, pooled std and standard error should both be 1.
+        # By looking up from two-tailed t-table of degree of freedom 2, t=4.303 will lead to p=0.05.
+        sigma      = 1
+        mean1      = 4.303
+        mean2      = 0
+        n1         = 2
+        n2         = 2
+        expected_p = 0.05
+
+        p = statx.compute_p_value(mean1, sigma, n1, mean2, sigma, n2)
+        self.assertAlmostEqual(p, expected_p, float_precision)
 
 
 if __name__ == '__main__':
