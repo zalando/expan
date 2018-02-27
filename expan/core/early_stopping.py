@@ -26,10 +26,11 @@ def obrien_fleming(information_fraction, alpha=0.05):
 
     :param information_fraction: share of the information  amount at the point of evaluation, 
                                  e.g. the share of the maximum sample size
-    :type information_fraction: scalar or array-like
+    :type  information_fraction: scalar or array-like
     :param alpha: type-I error rate
+
     :return: redistributed alpha value at the time point with the given information fraction
-    :rtype: float
+    :rtype:  float
     """
     return (1 - norm.cdf(norm.ppf(1 - alpha / 2) / np.sqrt(information_fraction))) * 2
 
@@ -45,19 +46,20 @@ def group_sequential(x, y, spending_function='obrien_fleming', estimated_sample_
     """ Group sequential method to determine whether to stop early or not.
 
     :param x: sample of a treatment group
-    :type x: pd.Series or list (array-like)
+    :type  x: pd.Series or list (array-like)
     :param y: sample of a control group
-    :type y: pd.Series or list (array-like)
+    :type  y : pd.Series or list (array-like)
     :param spending_function: name of the alpha spending function, currently supports: 'obrien_fleming'
-    :type spending_function: str
+    :type  spending_function: str
     :param estimated_sample_size: sample size to be achieved towards the end of experiment
-    :type estimated_sample_size: int
+    :type  estimated_sample_size: int
     :param alpha: type-I error rate
-    :type alpha: float
+    :type  alpha: float
     :param cap: upper bound of the adapted z-score
-    :type cap: int
+    :type  cap: int
+
     :return: results of type EarlyStoppingTestStatistics
-    :rtype: EarlyStoppingTestStatistics
+    :rtype:  EarlyStoppingTestStatistics
     """
     # Checking if data was provided
     if x is None or y is None:
@@ -127,11 +129,12 @@ def HDI_from_MCMC(posterior_samples, credible_mass=0.95):
     http://stackoverflow.com/questions/22284502/highest-posterior-density-region-and-central-credible-region
     
     :param posterior_samples: sample of data points from posterior distribution of some parameter
-    :type posterior_samples: array-like
+    :type  posterior_samples: array-like
     :param credible_mass: the range of credible interval. 0.95 means 95% represents credible interval.
-    :type credible_mass: float
+    :type  credible_mass: float
+
     :return: corresponding lower and upper bound for the credible interval
-    :rtype: list[float]
+    :rtype:  list[float]
     """
 
     sorted_points = sorted(posterior_samples)
@@ -150,15 +153,16 @@ def _bayes_sampling(x, y, distribution='normal', num_iters=25000, inference="sam
     """ Helper function for bayesian sampling.
 
     :param x: sample of a treatment group
-    :type x: pd.Series or list (array-like)
+    :type  x: pd.Series or list (array-like)
     :param y: sample of a control group
-    :type y: pd.Series or list (array-like)
+    :type  y: pd.Series or list (array-like)
     :param distribution: name of the KPI distribution model, which assumes a Stan model file with the same name exists
-    :type distribution: str
+    :type  distribution: str
     :param num_iters: number of iterations of sampling
-    :type num_iters: int
+    :type  num_iters: int
+
     :return: the posterior samples, sample size of x, sample size of y, absolute mean of x, absolute mean of y
-    :rtype: tuple[array-like, array-like, array-like, float, float]
+    :rtype:  tuple[array-like, array-like, array-like, float, float]
     """
     # Checking if data was provided
     if x is None or y is None:
@@ -227,17 +231,18 @@ def bayes_factor(x, y, distribution='normal', num_iters=25000, inference='sampli
     """ Bayes factor computation.
 
     :param x: sample of a treatment group
-    :type x: pd.Series or list (array-like)
+    :type  x: pd.Series or list (array-like)
     :param y: sample of a control group
-    :type y: pd.Series or list (array-like)
+    :type  y: pd.Series or list (array-like)
     :param distribution: name of the KPI distribution model, which assumes a Stan model file with the same name exists
-    :type distribution: str
+    :type  distribution: str
     :param num_iters: number of iterations of bayes sampling
-    :type num_iters: int
+    :type  num_iters: int
     :param inference: sampling or variational inference method for approximation the posterior
-    :type inference: str
+    :type  inference: str
+
     :return: results of type EarlyStoppingTestStatistics (without p-value and stat. power)
-    :rtype: EarlyStoppingTestStatistics
+    :rtype:  EarlyStoppingTestStatistics
     """
     traces, n_x, n_y, mu_x, mu_y = _bayes_sampling(x, y, distribution=distribution, num_iters=num_iters,
                                                    inference=inference)
@@ -277,19 +282,20 @@ def bayes_precision(x, y, distribution='normal', posterior_width=0.08, num_iters
     """ Bayes precision computation.
 
     :param x: sample of a treatment group
-    :type x: pd.Series or list (array-like)
+    :type  x: pd.Series or list (array-like)
     :param y: sample of a control group
-    :type y: pd.Series or list (array-like)
+    :type  y: pd.Series or list (array-like)
     :param distribution: name of the KPI distribution model, which assumes a Stan model file with the same name exists
-    :type distribution: str
+    :type  distribution: str
     :param posterior_width: the stopping criterion, threshold of the posterior  width
-    :type posterior_width: float
+    :type  posterior_width: float
     :param num_iters: number of iterations of bayes sampling
-    :type num_iters: int
+    :type  num_iters: int
     :param inference: sampling or variational inference method for approximation the posterior
-    :type inference: str
+    :type  inference: str
+
     :return: results of type EarlyStoppingTestStatistics (without p-value and stat. power)
-    :rtype: EarlyStoppingTestStatistics
+    :rtype:  EarlyStoppingTestStatistics
     """
     traces, n_x, n_y, mu_x, mu_y = _bayes_sampling(x, y, distribution=distribution,
                                                    num_iters=num_iters, inference=inference)
@@ -322,8 +328,9 @@ def get_trace_normalized_effect_size(distribution, traces):
 
     :param distribution: name of the KPI distribution model, which assumes a Stan model file with the same name exists
     :param traces: sampling statistics
+
     :return: sample of data points from posterior distribution of some parameter
-    :rtype: array-like
+    :rtype:  array-like
     """
     if distribution == 'normal':
         return traces['alpha']
@@ -348,11 +355,12 @@ def get_or_compile_stan_model(model_file, distribution):
         which vary based on the current platform and settings. Cleaning up a temp dir is done on boot.
 
     :param model_file: model file location
-    :type model_file: str
+    :type  model_file: str
     :param distribution: name of the KPI distribution model, which assumes a Stan model file with the same name exists
-    :type distribution: str
+    :type  distribution: str
+
     :return: compiled Stan model for the selected distribution or normal distribution as a default option
-    :rtype: Class representing a compiled Stan model
+    :rtype:  Class representing a compiled Stan model
     """
     python_version = '{0[0]}.{0[1]}'.format(sys.version_info)
     compiled_model_file = tempfile.gettempdir() + '/expan_early_stop_compiled_stan_model_' \
