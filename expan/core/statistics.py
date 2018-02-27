@@ -30,9 +30,9 @@ def delta(x, y, assume_normal=True, alpha=0.05, percentiles=[2.5, 97.5],
     Note that NaNs are treated as if they do not exist in the data. 
     
     :param x: sample of the treatment group
-    :type  x: pd.Series or list (array-like)
+    :type  x: pd.Series or array-like
     :param y: sample of the control group
-    :type  y: pd.Series or list (array-like)
+    :type  y: pd.Series or array-like
     :param assume_normal: specifies whether normal distribution assumptions can be made
     :type  assume_normal: boolean
     :param alpha: significance level (alpha)
@@ -56,9 +56,10 @@ def delta(x, y, assume_normal=True, alpha=0.05, percentiles=[2.5, 97.5],
     # Check if data was provided and it has correct format
     if x is None or y is None:
         raise ValueError('Please provide two non-None samples.')
-    if not isinstance(x, pd.Series) or not isinstance(y, pd.Series):
-        if not isinstance(x, list) or not isinstance(y, list):
-            raise TypeError('Please provide samples of type Series or list.')
+    if not isinstance(x, pd.Series) and not isinstance(x, np.ndarray) and not isinstance(x, list):
+        raise TypeError('Please provide samples of type Series or list.')
+    if type(x) != type(y):
+        raise TypeError('Please provide samples of the same type.')
 
     # Coercing missing values to right format
     _x = np.array(x, dtype=float)
