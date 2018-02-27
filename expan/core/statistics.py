@@ -98,7 +98,7 @@ def delta(x, y, assume_normal=True, alpha=0.05, percentiles=[2.5, 97.5],
     treatment_statistics = SampleStatistics(ss_x, float(np.nanmean(_x)), float(np.nanvar(_x)))
     control_statistics   = SampleStatistics(ss_y, float(np.nanmean(_y)), float(np.nanvar(_y)))
     variant_statistics   = BaseTestStatistics(control_statistics, treatment_statistics)
-    p_value              = compute_p_value(_x, _y, ss_x, ss_y)
+    p_value              = compute_p_value_from_samples(_x, _y)
     statistical_power    = compute_statistical_power_from_samples(_x, _y, alpha)
 
     logger.info("Delta calculation finished!")
@@ -288,8 +288,9 @@ def normal_sample_difference(x, y, percentiles=[2.5, 97.5], relative=False):
     n2 = len(_y)
 
     # Push calculation to normal difference function
-    return normal_difference(mean1=mean1, std1=std1, n1=n1, mean2=mean2,
-                             std2=std2, n2=n2, percentiles=percentiles, relative=relative)
+    return normal_difference(mean1=mean1, std1=std1, n1=n1,
+                             mean2=mean2, std2=std2, n2=n2,
+                             percentiles=percentiles, relative=relative)
 
 
 def normal_difference(mean1, std1, n1, mean2, std2, n2, percentiles=[2.5, 97.5], relative=False):
@@ -334,18 +335,18 @@ def normal_difference(mean1, std1, n1, mean2, std2, n2, percentiles=[2.5, 97.5],
 
     # Mapping percentiles via standard error
     if relative:
-        return dict([(round(p, 5), stats.t.ppf(p / 100.0, df=d_free) * st_error)
-                     for p in percentiles])
+        return dict([(round(p, 5), stats.t.ppf(p / 100.0, df=d_free) * st_error) for p in percentiles])
     else:
-        return dict([(round(p, 5), mean + stats.t.ppf(p / 100.0, df=d_free) * st_error)
-                     for p in percentiles])
+        return dict([(round(p, 5), mean + stats.t.ppf(p / 100.0, df=d_free) * st_error) for p in percentiles])
 
 
 def compute_statistical_power_from_samples(x, y, alpha=0.05):
     """ Compute statistical power given data samples of control and treatment.
 
-    :param x: (array-like) sample of a treatment group
-    :param y: (array-like) sample of a control group
+    :param x: samples of a treatment group
+    :type  x: pd.Series or array-like
+    :param y: samples of a control group
+    :type  y: pd.Series or array-like
     :param alpha: Type I error (false positive rate)
     
     :return: statistical power---the probability of a test to detect an effect if the effect actually exists
@@ -396,25 +397,37 @@ def compute_statistical_power(mean1, std1, n1, mean2, std2, n2, z_1_minus_alpha)
     return power
 
 
-def compute_p_value(x, y, ss_x, ss_y):
-    """ Calculates p values in terms of statistical Student's or Welch's T-test.
+def compute_p_value_from_samples(x, y, ss_x, ss_y):
+    """ Calculates two-tailed p value in terms of statistical Student's T-test based on pooled standard deviation.
 
-    :param x: treatment samples
-    :param ss_x: samples size of the treatment
-    :type  ss_x: int
-    :param y: control samples
-    :param ss_y: samples size of the control
-    :type  ss_y: int
+    :param x: samples of a treatment group
+    :type  x: pd.Series or array-like
+    :param y: samples of a control group
+    :type  y: pd.Series or array-like
 
-    :return: p-value
+    :return: two-tailed p-value 
     :rtype: float
     """
     if x is None or y is None:
         raise ValueError('Please provide two non-None samples to compute p-values.')
-    equal_variance = True
-    if np.nanvar(x) != np.nanvar(y) or ss_x != ss_y:
-        logger.info("Sample variances or sample sizes are not equal. Running Welch's test.")
-        equal_variance = False
 
-    test = stats.ttest_ind(x, y, equal_var=equal_variance)
-    return test[1]
+    _x = np.array(x, dtype=float)
+    _x = _x[~np.isnan(_x)]
+    _y = np.array(y, dtype=float)
+    _y = _y[~np.isnan(_y)]
+
+    mean1 = np.mean(_x)
+    mean2 = np.mean(_y)
+    std1 = np.std(_x)
+    std2 = np.std(_y)
+    n1 = len(_x)
+    n2 = len(_y)
+
+    mean_diff = mean1 - mean2
+    std       = pooled_std(std1, n1, std2, n2)
+    st_error  = std * np.sqrt(1. / n1 + 1. / n2)
+    d_free    = n1 + n2 - 2
+    t         = mean_diff / st_error
+    p         = stats.t.cdf(-abs(t), df=d_free) * 2
+
+    return p

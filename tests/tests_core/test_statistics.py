@@ -275,5 +275,11 @@ class StatisticalPowerTestCases(StatisticsTestCase):
         self.assertAlmostEqual(power, 0.8, 2)
 
 
+class PValueTestCases(StatisticsTestCase):
+    def test_compute_p_value(self):
+        pass
+
+
+
 if __name__ == '__main__':
     unittest.main()
