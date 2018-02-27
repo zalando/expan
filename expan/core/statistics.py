@@ -397,8 +397,8 @@ def compute_statistical_power(mean1, std1, n1, mean2, std2, n2, z_1_minus_alpha)
     return power
 
 
-def compute_p_value_from_samples(x, y, ss_x, ss_y):
-    """ Calculates two-tailed p value in terms of statistical Student's T-test based on pooled standard deviation.
+def compute_p_value_from_samples(x, y):
+    """ Calculates two-tailed p value for statistical Student's T-test based on pooled standard deviation.
 
     :param x: samples of a treatment group
     :type  x: pd.Series or array-like
@@ -410,24 +410,42 @@ def compute_p_value_from_samples(x, y, ss_x, ss_y):
     """
     if x is None or y is None:
         raise ValueError('Please provide two non-None samples to compute p-values.')
-
     _x = np.array(x, dtype=float)
     _x = _x[~np.isnan(_x)]
     _y = np.array(y, dtype=float)
     _y = _y[~np.isnan(_y)]
-
     mean1 = np.mean(_x)
     mean2 = np.mean(_y)
     std1 = np.std(_x)
     std2 = np.std(_y)
     n1 = len(_x)
     n2 = len(_y)
+    return compute_p_value(mean1, std1, n1, mean2, std2, n2)
 
+
+def compute_p_value(mean1, std1, n1, mean2, std2, n2):
+    """ Compute two-tailed p value for statistical Student's T-test given statistics of control and treatment.
+    
+    :param mean1: mean value of the treatment distribution
+    :type  mean1: float
+    :param std1: standard deviation of the treatment distribution
+    :type  std1: float
+    :param n1: number of samples of the treatment distribution
+    :type  n1: int
+    :param mean2: mean value of the control distribution
+    :type  mean2: float
+    :param std2: standard deviation of the control distribution
+    :type  std2: float
+    :param n2: number of samples of the control distribution
+    :type  n2: int
+    
+    :return: two-tailed p-value 
+    :rtype: float
+    """
     mean_diff = mean1 - mean2
     std       = pooled_std(std1, n1, std2, n2)
     st_error  = std * np.sqrt(1. / n1 + 1. / n2)
     d_free    = n1 + n2 - 2
     t         = mean_diff / st_error
     p         = stats.t.cdf(-abs(t), df=d_free) * 2
-
     return p
