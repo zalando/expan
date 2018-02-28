@@ -44,7 +44,7 @@ class GroupSequentialTestCases(EarlyStoppingTestCase):
         res_2 = es.obrien_fleming(0.5)
         self.assertAlmostEqual(res_2, 0.005574596680784305)
 
-        # Check int as inputq
+        # Check int as input
         res_3 = es.obrien_fleming(1)
         self.assertAlmostEqual(res_3, 0.05)
 
