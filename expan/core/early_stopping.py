@@ -69,7 +69,8 @@ def group_sequential(x, y, spending_function='obrien_fleming', estimated_sample_
     if type(x) != type(y):
         raise TypeError('Please provide samples of the same type.')
 
-    logger.info("Started running group sequential.")
+    logger.info("Started running group sequential early stopping; spending function is {}, size of treatment {} "
+                "and size of control {}".format(spending_function, len(x), len(y)))
 
     # Coercing missing values to right format
     _x = np.array(x, dtype=float)
@@ -107,7 +108,6 @@ def group_sequential(x, y, spending_function='obrien_fleming', estimated_sample_
     else:
         stop = False
 
-    #TODO: why return frequentist confidence interval in bayesian method
     interval = statx.normal_difference(mu_x, sigma_x, n_x, mu_y, sigma_y, n_y,
                                        [alpha_new * 100 / 2, 100 - alpha_new * 100 / 2])
 
@@ -117,7 +117,8 @@ def group_sequential(x, y, spending_function='obrien_fleming', estimated_sample_
     p_value              = statx.compute_p_value_from_samples(_x, _y)
     statistical_power    = statx.compute_statistical_power_from_samples(_x, _y, alpha)
 
-    logger.info("Group sequential analysis finished!")
+    logger.info("Finished running group sequential early stopping; spending function is {}, size of treatment is {} "
+                "and size of control is {}".format(spending_function, len(x), len(y)))
     return EarlyStoppingTestStatistics(variant_statistics.control_statistics,
                                        variant_statistics.treatment_statistics,
                                        float(mu_x - mu_y), interval, p_value, statistical_power, stop)
@@ -161,13 +162,22 @@ def _bayes_sampling(x, y, distribution='normal', num_iters=25000, inference="sam
     :type  distribution: str
     :param num_iters: number of iterations of sampling
     :type  num_iters: int
+    :param inference: 'sampling' for MCMC sampling method or 'variational' for variational inference
+    :type  inference: str
 
     :return: the posterior samples, sample size of x, sample size of y, absolute mean of x, absolute mean of y
     :rtype:  tuple[array-like, array-like, array-like, float, float]
     """
     # Checking if data was provided
     if x is None or y is None:
-        raise ValueError('Please provide two non-None samples.')
+        raise ValueError('Please provide two non-empty samples.')
+    if not isinstance(x, pd.Series) and not isinstance(x, np.ndarray) and not isinstance(x, list):
+        raise TypeError('Please provide samples of type Series or list.')
+    if type(x) != type(y):
+        raise TypeError('Please provide samples of the same type.')
+
+    logger.info("Started running bayesian inference with {} procedure, treatment group of size {}, "
+                "control group of size {}, {} distribution.".format(inference, len(x), len(y), distribution, inference))
 
     # Coercing missing values to right format
     _x = np.array(x, dtype=float)
@@ -218,6 +228,8 @@ def _bayes_sampling(x, y, distribution='normal', num_iters=25000, inference="sam
     if cache_sampling_results:
         sampling_results[key] = (traces, n_x, n_y, mu_x, mu_y)
 
+    logger.info("Finished running bayesian inference with {} procedure, treatment group of size {}, "
+                "control group of size {}, {} distribution.".format(inference, len(x), len(y), distribution, inference))
     return traces, n_x, n_y, mu_x, mu_y
 
 
@@ -328,18 +340,24 @@ def get_trace_normalized_effect_size(distribution, traces):
     """ Obtaining a Stan model statistics for 'normal' or 'poisson' distribution
 
     :param distribution: name of the KPI distribution model, which assumes a Stan model file with the same name exists
+    :type  distribution: str
     :param traces: sampling statistics
+    :type  traces: dict
 
     :return: sample of data points from posterior distribution of some parameter
     :rtype:  array-like
     """
+    # check of traces type, if traces is not dict "traces['alpha']" will return KeyError
+    if not isinstance(traces, dict):
+        raise TypeError("Traces statistics is not a dictionary and does not contain alpha or delta statistics.")
+
     if distribution == 'normal':
         return traces['alpha']
     elif distribution == 'poisson':
         variance = np.nanmean(np.array(traces['delta']))
         return traces['delta'] / np.sqrt(np.absolute(variance))
     else:
-        raise ValueError("model " + distribution + " is not implemented.")
+        raise ValueError("Model " + distribution + " is not implemented.")
 
 
 def get_or_compile_stan_model(model_file, distribution):
@@ -363,6 +381,10 @@ def get_or_compile_stan_model(model_file, distribution):
     :return: compiled Stan model for the selected distribution or normal distribution as a default option
     :rtype:  Class representing a compiled Stan model
     """
+
+    if distribution is not 'normal' and distribution is not 'poisson':
+        raise ValueError("Model " + distribution + " is not implemented.")
+
     python_version = '{0[0]}.{0[1]}'.format(sys.version_info)
     compiled_model_file = tempfile.gettempdir() + '/expan_early_stop_compiled_stan_model_' \
                                                 + distribution + '_' + python_version + '.pkl'

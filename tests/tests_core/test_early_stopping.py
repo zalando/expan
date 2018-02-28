@@ -26,10 +26,7 @@ class EarlyStoppingTestCase(unittest.TestCase):
         self.rand_s6[1] = np.nan
 
     def tearDown(self):
-        """
-        Clean up after the test
-        """
-        # TODO: find out if we have to remove data manually
+        """Clean up after the test"""
         pass
 
 
@@ -39,18 +36,20 @@ class GroupSequentialTestCases(EarlyStoppingTestCase):
     def test_obrien_fleming(self):
         """ Check the O'Brien-Fleming spending function."""
         # Check array as input
-        res = es.obrien_fleming(np.linspace(0, 1, 5 + 1)[1:])
+        res_1 = es.obrien_fleming(np.linspace(0, 1, 5 + 1)[1:])
         expected_res = [1.17264468e-05, 1.94191300e-03, 1.13964185e-02, 2.84296308e-02, 5.00000000e-02]
-        np.testing.assert_almost_equal(res, expected_res)
+        np.testing.assert_almost_equal(res_1, expected_res)
 
         # Check float as input
-        res = es.obrien_fleming(0.5)
-        self.assertAlmostEqual(res, 0.005574596680784305)
+        res_2 = es.obrien_fleming(0.5)
+        self.assertAlmostEqual(res_2, 0.005574596680784305)
+
+        # Check int as inputq
+        res_3 = es.obrien_fleming(1)
+        self.assertAlmostEqual(res_3, 0.05)
 
     def test_group_sequential(self):
-        """
-        Check the group sequential function.
-        """
+        """ Check the group sequential function."""
         res = es.group_sequential(self.rand_s1, self.rand_s2)
 
         self.assertEqual(res.treatment_statistics.sample_size,     1000)
