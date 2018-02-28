@@ -247,6 +247,7 @@ def pooled_std(std1, n1, std2, n2):
     """
     if not (0.5 < (std1 ** 2) / (std2 ** 2) < 2.):
         warnings.warn('Sample variances differ too much to assume that population variances are equal.')
+        logger.warning('Sample variances differ too much to assume that population variances are equal.')
 
     return np.sqrt(((n1 - 1) * std1 ** 2 + (n2 - 1) * std2 ** 2) / (n1 + n2 - 2))
 
