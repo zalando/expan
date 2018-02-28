@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class JsonSerializable(object):
+    """ Interface for serializable classes."""
     def toJson(self):
         return json.dumps(self, default=lambda o: o.name if isinstance(o, Enum) else o.__dict__, sort_keys=True, indent=4)
 
@@ -17,94 +18,100 @@ class JsonSerializable(object):
         return self.toJson()
 
 
-def find_list_of_dicts_element(items, key1, value, key2):
-    return [item[key2] for item in items if item[key1] == value][0]
+def find_value_by_key_with_condition(items, condition_key, condition_value, lookup_key):
+    """ Find the value of lookup key where the dictionary contains condition key = condition value.
+    
+    :param items: list of dictionaries
+    :type  items: list
+    :param condition_key: condition key
+    :param condition_value: condition value
+    :param lookup_key: lookup key
+    
+    :return: lookup value
+    """
+    return [item[lookup_key] for item in items if item[condition_key] == condition_value][0]
 
 
-def is_number_and_nan(obj):
+def is_nan(obj):
+    """ Checks whether the input is NaN. It uses the trick that NaN is not equal to NaN."""
     return obj != obj
 
 
-def get_column_names_by_type(df, dtype):
-    return [c for c in df.columns if np.issubdtype(df.dtypes[c], dtype)]
-
-
-def drop_nan(np_array):
-    if np_array.ndim == 1:
-        return np_array[~np.isnan(np_array)]
-    elif np_array.ndim == 2:
-        return np_array[~np.isnan(np_array).any(axis=1)]
+def drop_nan(array):
+    """ Drop Nan values from the given numpy array.
+    
+    :param array: input array
+    :type  array: np.ndarray
+    
+    :return: a new array without NaN values
+    :rtype: np.ndarray
+    """
+    if array.ndim == 1:
+        return array[~np.isnan(array)]
+    elif array.ndim == 2:
+        return array[~np.isnan(array).any(axis=1)]
 
 
 def generate_random_data():
+    """ Generate random data for two variants. It can be used in unit tests or demo. """
     np.random.seed(42)
     size = 10000
 
-    test_data_frame = pd.DataFrame()
-    test_data_frame['entity'] = list(range(size))
-    test_data_frame['variant'] = np.random.choice(['A', 'B'], size=size, p=[0.6, 0.4])
+    data = pd.DataFrame()
+    data['entity'] = list(range(size))
+    data['variant'] = np.random.choice(['A', 'B'], size=size, p=[0.6, 0.4])
 
-    test_data_frame['normal_same'] = np.random.normal(size=size)
-    test_data_frame['normal_shifted'] = np.random.normal(size=size)
+    data['normal_same'] = np.random.normal(size=size)
+    data['normal_shifted'] = np.random.normal(size=size)
 
-    size_shifted_B = test_data_frame['normal_shifted'][test_data_frame['variant'] == 'B'].shape[0]
-    test_data_frame.loc[test_data_frame['variant'] == 'B', 'normal_shifted'] \
-        = np.random.normal(loc=1.0, size=size_shifted_B)
+    size_shifted_B = data['normal_shifted'][data['variant'] == 'B'].shape[0]
+    data.loc[data['variant'] == 'B', 'normal_shifted'] = np.random.normal(loc=1.0, size=size_shifted_B)
 
-    test_data_frame['feature'] = np.random.choice(['has', 'non'], size=size)
-    test_data_frame.loc[0, 'feature'] = 'feature that only has one data point'
-    test_data_frame['normal_shifted_by_feature'] = np.random.normal(size=size)
+    data['feature'] = np.random.choice(['has', 'non'], size=size)
+    data.loc[0, 'feature'] = 'feature that only has one data point'
+    data['normal_shifted_by_feature'] = np.random.normal(size=size)
 
-    ii = (test_data_frame['variant'] == 'B') & (test_data_frame['feature'] == 'has')
+    ii = (data['variant'] == 'B') & (data['feature'] == 'has')
     randdata_shifted_mean = np.random.normal(loc=1.0, size=sum(ii == True))
-    test_data_frame.loc[ii, 'normal_shifted_by_feature'] = randdata_shifted_mean
+    data.loc[ii, 'normal_shifted_by_feature'] = randdata_shifted_mean
 
-    test_data_frame['treatment_start_time'] = np.random.choice(list(range(10)), size=size)
-    test_data_frame['normal_unequal_variance'] = np.random.normal(size=size)
+    data['treatment_start_time'] = np.random.choice(list(range(10)), size=size)
+    data['normal_unequal_variance'] = np.random.normal(size=size)
 
-    size_unequalvar_B = test_data_frame['normal_unequal_variance'][test_data_frame['variant'] == 'B'].shape[0]
-    test_data_frame.loc[test_data_frame['variant'] == 'B','normal_unequal_variance'] \
-        = np.random.normal(scale=10, size=size_unequalvar_B)
+    size_unequalvar_B = data['normal_unequal_variance'][data['variant'] == 'B'].shape[0]
+    data.loc[data['variant'] == 'B', 'normal_unequal_variance'] = np.random.normal(scale=10, size=size_unequalvar_B)
 
     # Add date column
     d1 = datetime.strptime('2015-01-01', '%Y-%m-%d')
     d2 = datetime.strptime('2016-03-01', '%Y-%m-%d')
     date_col = []
-
     delta = d2 - d1
     for i in range(delta.days * 24 + 1):
         date_col.append((d1 + timedelta(hours=i)).strftime('%Y-%m-%d'))
-
-    test_data_frame['date'] = date_col[:size]
+    data['date'] = date_col[:size]
 
     metadata = {
         'primary_KPI': 'normal_shifted',
         'source': 'simulated',
         'experiment': 'random_data_generation'
     }
-
-    return test_data_frame, metadata
+    return data, metadata
 
 
 def generate_random_data_n_variants(n_variants=3):
+    """ Generate random data for multiple variants. """
     np.random.seed(42)
     size = 10000
-
-    test_data_frame = pd.DataFrame()
-    test_data_frame['entity'] = list(range(size))
-    test_data_frame['variant'] = np.random.choice(list(map(chr, list(range(65, 65 + n_variants)))), size=size)
-
-    test_data_frame['normal_same'] = np.random.normal(size=size)
-    test_data_frame['poisson_same'] = np.random.poisson(size=size)
-
-    test_data_frame['feature'] = np.random.choice(['has', 'non'], size=size)
-
-    test_data_frame['treatment_start_time'] = np.random.choice(list(range(10)), size=size)
-
+    data = pd.DataFrame()
+    data['entity'] = list(range(size))
+    data['variant'] = np.random.choice(list(map(chr, list(range(65, 65 + n_variants)))), size=size)
+    data['normal_same'] = np.random.normal(size=size)
+    data['poisson_same'] = np.random.poisson(size=size)
+    data['feature'] = np.random.choice(['has', 'non'], size=size)
+    data['treatment_start_time'] = np.random.choice(list(range(10)), size=size)
     metadata = {
         'primary_KPI': 'normal_same',
         'source': 'simulated',
         'experiment': 'random_data_generation'
     }
-
-    return test_data_frame, metadata
+    return data, metadata

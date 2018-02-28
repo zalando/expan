@@ -6,7 +6,7 @@ import numpy as np
 from expan.core.binning import Bin
 from expan.core.experiment import Experiment
 # from expan.core.results import Results
-from expan.core.util import generate_random_data, get_column_names_by_type, find_list_of_dicts_element
+from expan.core.util import generate_random_data, get_column_names_by_type, find_value_by_key_with_condition
 
 # from tests.tests_core.test_results import mock_results_object
 
@@ -133,8 +133,8 @@ class ExperimentClassTestCases(ExperimentTestCase):
         ndecimals = 5
         res = self.getExperiment(['normal_same']).delta(method='fixed_horizon')
 
-        variants = find_list_of_dicts_element(res['kpis'], 'name', 'normal_same', 'variants')
-        aStats   = find_list_of_dicts_element(variants, 'name', 'A', 'delta_statistics')
+        variants = find_value_by_key_with_condition(res['kpis'], 'name', 'normal_same', 'variants')
+        aStats   = find_value_by_key_with_condition(variants, 'name', 'A', 'delta_statistics')
 
         self.assertNumericalEqual(aStats['delta'], 0.033053, ndecimals)
 
@@ -159,8 +159,8 @@ class ExperimentClassTestCases(ExperimentTestCase):
         ndecimals = 5
         res = self.getExperiment(['normal_same']).delta(method='group_sequential')
 
-        variants = find_list_of_dicts_element(res['kpis'], 'name', 'normal_same', 'variants')
-        aStats   = find_list_of_dicts_element(variants, 'name', 'A', 'delta_statistics')
+        variants = find_value_by_key_with_condition(res['kpis'], 'name', 'normal_same', 'variants')
+        aStats   = find_value_by_key_with_condition(variants, 'name', 'A', 'delta_statistics')
         self.assertNumericalEqual(aStats['delta'],           0.033053, ndecimals)
 
         self.assertNumericalEqual(aStats['confidence_interval'][0]['value'], -0.007135, ndecimals)
@@ -185,8 +185,8 @@ class ExperimentClassTestCases(ExperimentTestCase):
         ndecimals = 5
         res = self.getExperiment(['normal_same']).delta(method='bayes_factor', num_iters=2000)
 
-        variants = find_list_of_dicts_element(res['kpis'], 'name', 'normal_same', 'variants')
-        aStats   = find_list_of_dicts_element(variants, 'name', 'A', 'delta_statistics')
+        variants = find_value_by_key_with_condition(res['kpis'], 'name', 'normal_same', 'variants')
+        aStats   = find_value_by_key_with_condition(variants, 'name', 'A', 'delta_statistics')
         self.assertNumericalEqual(aStats['delta'], 0.033053, ndecimals)
 
         self.assertEqual(aStats['stop'],      True, ndecimals)
@@ -215,8 +215,8 @@ class ExperimentClassTestCases(ExperimentTestCase):
         ndecimals = 5
         res = self.getExperiment(['normal_same']).delta(method='bayes_precision', num_iters=2000)
 
-        variants = find_list_of_dicts_element(res['kpis'], 'name', 'normal_same', 'variants')
-        aStats   = find_list_of_dicts_element(variants, 'name', 'A', 'delta_statistics')
+        variants = find_value_by_key_with_condition(res['kpis'], 'name', 'normal_same', 'variants')
+        aStats   = find_value_by_key_with_condition(variants, 'name', 'A', 'delta_statistics')
         self.assertNumericalEqual(aStats['delta'], 0.033053, ndecimals)
 
         self.assertEqual(aStats['stop'], True, ndecimals)
@@ -336,7 +336,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
         sga_result = exp.sga(dimension_to_bin)
 
         self.assertEqual(len(sga_result), 2)
-        dimension_name = find_list_of_dicts_element(sga_result, "segment", "[1, 2)", "dimension")
+        dimension_name = find_value_by_key_with_condition(sga_result, "segment", "[1, 2)", "dimension")
         self.assertEqual(dimension_name, 'normal_same')
 
 
@@ -354,9 +354,9 @@ class ExperimentClassTestCases(ExperimentTestCase):
         sga_result = exp.sga(dimension_to_bin)
 
         self.assertEqual(len(sga_result), 4)
-        numerical_dimension_name = find_list_of_dicts_element(sga_result, "segment", "[1, 2)", "dimension")
+        numerical_dimension_name = find_value_by_key_with_condition(sga_result, "segment", "[1, 2)", "dimension")
         self.assertEqual(numerical_dimension_name, 'normal_same')
-        categorical_dimension_name = find_list_of_dicts_element(sga_result, "segment", "['non']", "dimension")
+        categorical_dimension_name = find_value_by_key_with_condition(sga_result, "segment", "['non']", "dimension")
         self.assertEqual(categorical_dimension_name, 'feature')
 
 
@@ -388,7 +388,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
 
         sga_result = exp.sga_date()
         self.assertEqual(len(sga_result), 417)
-        numerical_dimension_name = find_list_of_dicts_element(sga_result, "segment", "['2016-01-21']", "dimension")
+        numerical_dimension_name = find_value_by_key_with_condition(sga_result, "segment", "['2016-01-21']", "dimension")
         self.assertEqual(numerical_dimension_name, 'date')
 
 

@@ -5,7 +5,7 @@ import numpy as np
 from scipy import stats
 
 import expan.core.statistics as statx
-from expan.core.util import find_list_of_dicts_element
+from expan.core.util import find_value_by_key_with_condition
 from .util import *
 
 
@@ -43,8 +43,8 @@ class DeltaTestCases(StatisticsTestCase):
         # Checking if mean has right value
         self.assertAlmostEqual(res.delta, -0.28923076923075541)
 
-        value025 = find_list_of_dicts_element(res.confidence_interval, 'percentile',  2.5, 'value')
-        value975 = find_list_of_dicts_element(res.confidence_interval, 'percentile', 97.5, 'value')
+        value025 = find_value_by_key_with_condition(res.confidence_interval, 'percentile', 2.5, 'value')
+        value975 = find_value_by_key_with_condition(res.confidence_interval, 'percentile', 97.5, 'value')
 
         # Checking if lower percentile has right value
         self.assertAlmostEqual(value025, -0.53770569567692295)
@@ -62,8 +62,8 @@ class DeltaTestCases(StatisticsTestCase):
             self.samples.temperature[self.samples.gender == 2],
             percentiles=[2.5, 97.5])
 
-        value025 = find_list_of_dicts_element(res.confidence_interval, 'percentile', 2.5, 'value')
-        value975 = find_list_of_dicts_element(res.confidence_interval, 'percentile', 97.5, 'value')
+        value025 = find_value_by_key_with_condition(res.confidence_interval, 'percentile', 2.5, 'value')
+        value975 = find_value_by_key_with_condition(res.confidence_interval, 'percentile', 97.5, 'value')
 
         self.assertAlmostEqual(value025, -0.53770569567692295)
         self.assertAlmostEqual(value975, -0.040755842784587965)
@@ -93,8 +93,8 @@ class DeltaTestCases(StatisticsTestCase):
         # Checking if mean has right value
         self.assertAlmostEqual(res.delta, -0.28923076923075541)
 
-        value025 = find_list_of_dicts_element(res.confidence_interval, 'percentile',  2.5, 'value')
-        value975 = find_list_of_dicts_element(res.confidence_interval, 'percentile', 97.5, 'value')
+        value025 = find_value_by_key_with_condition(res.confidence_interval, 'percentile', 2.5, 'value')
+        value975 = find_value_by_key_with_condition(res.confidence_interval, 'percentile', 97.5, 'value')
 
         # Checking if lower percentile has right value
         self.assertAlmostEqual(value025, -0.53770569567692295)
