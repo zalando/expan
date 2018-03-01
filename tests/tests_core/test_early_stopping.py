@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 
 import expan.core.early_stopping as es
-from expan.core.util import find_list_of_dicts_element
+from expan.core.util import find_value_by_key_with_condition
 
 
 class EarlyStoppingTestCase(unittest.TestCase):
@@ -60,8 +60,8 @@ class GroupSequentialTestCases(EarlyStoppingTestCase):
         self.assertAlmostEqual(res.control_statistics.variance,    0.9373337542827797)
 
         self.assertAlmostEqual(res.delta, -0.15887364780635896)
-        value025 = find_list_of_dicts_element(res.confidence_interval, 'percentile', 2.5, 'value')
-        value975 = find_list_of_dicts_element(res.confidence_interval, 'percentile', 97.5, 'value')
+        value025 = find_value_by_key_with_condition(res.confidence_interval, 'percentile', 2.5, 'value')
+        value975 = find_value_by_key_with_condition(res.confidence_interval, 'percentile', 97.5, 'value')
         np.testing.assert_almost_equal(value025, -0.24461812530841959, decimal=5)
         np.testing.assert_almost_equal(value975, -0.07312917030429833, decimal=5)
 
@@ -75,8 +75,8 @@ class GroupSequentialTestCases(EarlyStoppingTestCase):
         """
         res = es.group_sequential(self.rand_s1, self.rand_s2, estimated_sample_size=100)
 
-        value025 = find_list_of_dicts_element(res.confidence_interval, 'percentile',  2.5, 'value')
-        value975 = find_list_of_dicts_element(res.confidence_interval, 'percentile', 97.5, 'value')
+        value025 = find_value_by_key_with_condition(res.confidence_interval, 'percentile', 2.5, 'value')
+        value975 = find_value_by_key_with_condition(res.confidence_interval, 'percentile', 97.5, 'value')
         np.testing.assert_almost_equal (value025, -0.24461812530841959, decimal=5)
         np.testing.assert_almost_equal (value975, -0.07312917030429833, decimal=5)
 
@@ -97,8 +97,8 @@ class BayesFactorTestCases(EarlyStoppingTestCase):
         self.assertAlmostEqual(res.control_statistics.variance,    0.9373337542827797)
 
         self.assertAlmostEqual(res.delta, -0.15887364780635896)
-        value025 = find_list_of_dicts_element(res.confidence_interval, 'percentile', 2.5, 'value')
-        value975 = find_list_of_dicts_element(res.confidence_interval, 'percentile', 97.5, 'value')
+        value025 = find_value_by_key_with_condition(res.confidence_interval, 'percentile', 2.5, 'value')
+        value975 = find_value_by_key_with_condition(res.confidence_interval, 'percentile', 97.5, 'value')
         np.testing.assert_almost_equal(value025, -0.24293384641452503, decimal=5)
         np.testing.assert_almost_equal(value975, -0.075064346336461404, decimal=5)
         self.assertEqual(res.p,                 None)
@@ -118,8 +118,8 @@ class BayesFactorTestCases(EarlyStoppingTestCase):
         self.assertAlmostEqual(res.control_statistics.variance,     2.901375)
 
         self.assertAlmostEqual(res.delta, -1.9589999999999999)
-        value025 = find_list_of_dicts_element(res.confidence_interval, 'percentile', 2.5, 'value')
-        value975 = find_list_of_dicts_element(res.confidence_interval, 'percentile', 97.5, 'value')
+        value025 = find_value_by_key_with_condition(res.confidence_interval, 'percentile', 2.5, 'value')
+        value975 = find_value_by_key_with_condition(res.confidence_interval, 'percentile', 97.5, 'value')
         np.testing.assert_almost_equal(value025, -2.0713281392132465, decimal=5)
         np.testing.assert_almost_equal(value975, -1.8279692168150592, decimal=5)
         self.assertEqual(res.p,                 None)
@@ -158,8 +158,8 @@ class BayesPrecisionTestCases(EarlyStoppingTestCase):
         self.assertAlmostEqual(res.control_statistics.variance, 0.9373337542827797)
 
         self.assertAlmostEqual(res.delta, -0.15887364780635896)
-        value025 = find_list_of_dicts_element(res.confidence_interval, 'percentile', 2.5, 'value')
-        value975 = find_list_of_dicts_element(res.confidence_interval, 'percentile', 97.5, 'value')
+        value025 = find_value_by_key_with_condition(res.confidence_interval, 'percentile', 2.5, 'value')
+        value975 = find_value_by_key_with_condition(res.confidence_interval, 'percentile', 97.5, 'value')
         np.testing.assert_almost_equal(value025, -0.24293384641452503, decimal=5)
         np.testing.assert_almost_equal(value975, -0.07506434633646140, decimal=5)
         self.assertEqual(res.p,                 None)

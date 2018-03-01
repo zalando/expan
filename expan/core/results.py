@@ -44,6 +44,7 @@ class SimpleTestStatistics(BaseTestStatistics):
         self.delta               = delta
         self.p                   = p
         self.statistical_power   = statistical_power
+        # TODO: think of structure {p: v} (the same as ci)
         self.confidence_interval = [{'percentile': p, 'value': v} for (p, v) in ci.items()]
 
 
