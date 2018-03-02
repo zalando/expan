@@ -7,6 +7,7 @@ import expan.core.early_stopping as es
 import expan.core.statistics as statx
 from expan.core.statistical_test import *
 from expan.core.results import StatisticalTestResult, MultipleTestSuiteResult
+from expan.core.correction import add_corrected_test_statistics
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +37,7 @@ class Experiment(object):
         :param testmethod: analysis method
         :type  testmethod: str
         :param **worker_args: additional arguments for the analysis method
+
         :return: statistical result of the test
         :rtype: StatisticalTestResult
         """
@@ -104,14 +106,14 @@ class Experiment(object):
 
 
     def analyze_statistical_test_suite(self, test_suite, testmethod='fixed_horizon', **worker_args):
-        """
-        Runs delta analysis on a set of tests and returns statsitical results for each statistical test in the suite.
+        """ Runs delta analysis on a set of tests and returns statsitical results for each statistical test in the suite.
         
         :param test_suite: a suite of statistical test to run
         :type  test_suite: StatisticalTestSuite
         :param testmethod: analysis method
         :type  testmethod: str
         :param **worker_args: additional arguments for the analysis method
+
         :return: statistical result of the test suite
         :rtype: MultipleTestSuiteResult
         """
@@ -123,7 +125,9 @@ class Experiment(object):
             one_analysis_result = self.analyze_statistical_test(test, testmethod, **worker_args)
             statistical_test_results.statistical_test_results.append(one_analysis_result)
 
-        # TODO: Implement correction method, create CorrectedTestStatistics, and update the statistical_test_results
+        if test_suite.correction_method is not "none":
+            statistical_test_results = add_corrected_test_statistics(statistical_test_results)
+
         return statistical_test_results
 
 
@@ -137,6 +141,7 @@ class Experiment(object):
         :type  percentile: float
         :param threshold_type: type of threshold used ('lower' or 'upper')
         :type  threshold_type: str
+
         :return: No return value. Will filter out outliers in self.data in place.
         """
         # check if provided KPIs are present in the data
@@ -211,6 +216,7 @@ class Experiment(object):
         :type  percentile: float
         :param threshold_type: type of threshold used ('lower' or 'upper')
         :type  threshold_type: str
+
         :return: boolean values indicating whether the row should be filtered
         :rtype: pd.Series
         """

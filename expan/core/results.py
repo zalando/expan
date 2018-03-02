@@ -115,3 +115,6 @@ class MultipleTestSuiteResult(JsonSerializable):
         if correction_method not in ["none", "bh", "bf"]:
             raise ValueError('Correction method is not implemented. We support "none", "bh", and "bf".')
         self.correction_method = correction_method
+
+    def __getitem__(self, item):
+        return item
