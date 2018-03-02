@@ -45,28 +45,28 @@ class Experiment(object):
             raise TypeError("Statistical test should be of type StatisticalTest.")
 
         if 'entity' not in self.data.columns:
-            raise RuntimeError("There is no 'entity' column in the data.")
+            raise KeyError("There is no 'entity' column in the data.")
         if self.data.entity.duplicated().any():
             raise ValueError('Entities in data should be unique.')
 
         if test.variants.variant_column_name not in self.data.columns:
-            raise RuntimeError("There is no '{}' column in the data.".format(test.variants.variant_column_name))
+            raise KeyError("There is no '{}' column in the data.".format(test.variants.variant_column_name))
         if test.variants.treatment_name not in np.unique(self.data[test.variants.variant_column_name]):
-            raise RuntimeError("There is no treatment with the name '{}' in the data.".format(test.variants.treatment_name))
+            raise KeyError("There is no treatment with the name '{}' in the data.".format(test.variants.treatment_name))
         if test.variants.control_name not in np.unique(self.data[test.variants.variant_column_name]):
-            raise RuntimeError("There is no control with the name '{}' in the data.".format(test.variants.control_name))
+            raise KeyError("There is no control with the name '{}' in the data.".format(test.variants.control_name))
 
         for feature in test.features:
             if feature.column_name not in self.data.columns:
-                raise RuntimeError("Feature name '{}' does not exist in the data.".format(feature.column_name))
+                raise KeyError("Feature name '{}' does not exist in the data.".format(feature.column_name))
 
         if type(test.kpi) is KPI and (test.kpi.name not in self.data.columns):
-            raise RuntimeError("There is no column of name '{}' in the data.".format(test.kpi.name))
+            raise KeyError("There is no column of name '{}' in the data.".format(test.kpi.name))
         if type(test.kpi) is DerivedKPI:
             if type(test.kpi.numerator) is not str or test.kpi.numerator not in self.data.columns:
-                raise RuntimeError("Numerator '{}' of the derived KPI does not exist in the data.".format(test.kpi.numerator))
+                raise KeyError("Numerator '{}' of the derived KPI does not exist in the data.".format(test.kpi.numerator))
             if type(test.kpi.denominator) is not str or test.kpi.denominator not in self.data.columns:
-                raise RuntimeError("Denominator '{}' of the derived KPI does not exist in the data.".format(test.kpi.denominator))
+                raise KeyError("Denominator '{}' of the derived KPI does not exist in the data.".format(test.kpi.denominator))
             test.kpi.make_derived_kpi(self.data)
 
         logger.info("One analysis with kpi '{}', control variant '{}', treatment variant '{}' and features [{}] "
@@ -74,7 +74,7 @@ class Experiment(object):
                                               test.variants.treatment_name,
                                               [(feature.column_name, feature.column_value) for feature in test.features]))
 
-        if not testmethod in self.worker_table:
+        if testmethod not in self.worker_table:
             raise NotImplementedError("Test method '{}' is not implemented.".format(testmethod))
         worker = self.worker_table[testmethod](**worker_args)
 
@@ -118,7 +118,7 @@ class Experiment(object):
         :rtype: MultipleTestSuiteResult
         """
         if not isinstance(test_suite, StatisticalTestSuite):
-            raise RuntimeError("Test suite should be of type StatisticalTestSuite.")
+            raise TypeError("Test suite should be of type StatisticalTestSuite.")
 
         statistical_test_results = MultipleTestSuiteResult([], test_suite.correction_method)
         for test in test_suite:

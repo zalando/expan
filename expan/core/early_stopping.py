@@ -61,7 +61,7 @@ def group_sequential(x, y, spending_function='obrien_fleming', estimated_sample_
     :return: results of type EarlyStoppingTestStatistics
     :rtype:  EarlyStoppingTestStatistics
     """
-    # Checking if data was provided
+    # Checking if data was provided and it has correct format
     if x is None or y is None:
         raise ValueError('Please provide two non-empty samples.')
     if not isinstance(x, pd.Series) and not isinstance(x, np.ndarray) and not isinstance(x, list):
@@ -136,7 +136,7 @@ def HDI_from_MCMC(posterior_samples, credible_mass=0.95):
     :type  credible_mass: float
 
     :return: corresponding lower and upper bound for the credible interval
-    :rtype:  list[float]
+    :rtype:  tuple[float]
     """
 
     sorted_points = sorted(posterior_samples)
@@ -148,7 +148,7 @@ def HDI_from_MCMC(posterior_samples, credible_mass=0.95):
 
     HDImin = sorted_points[ciWidth.index(min(ciWidth))]
     HDImax = sorted_points[ciWidth.index(min(ciWidth)) + ciIdxInc]
-    return [HDImin, HDImax]
+    return (HDImin, HDImax)
 
 
 def _bayes_sampling(x, y, distribution='normal', num_iters=25000, inference="sampling"):
@@ -168,7 +168,7 @@ def _bayes_sampling(x, y, distribution='normal', num_iters=25000, inference="sam
     :return: the posterior samples, sample size of x, sample size of y, absolute mean of x, absolute mean of y
     :rtype:  tuple[array-like, array-like, array-like, float, float]
     """
-    # Checking if data was provided
+    # Checking if data was provided and it has correct format
     if x is None or y is None:
         raise ValueError('Please provide two non-empty samples.')
     if not isinstance(x, pd.Series) and not isinstance(x, np.ndarray) and not isinstance(x, list):
