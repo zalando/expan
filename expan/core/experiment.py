@@ -172,9 +172,6 @@ class Experiment(object):
         :type test: StatisticalTest
         :rtype: bool 
         """
-        if data is None:
-            logger.warning("Data is empty for the current analysis.")
-            return False
         if len(data[data[test.variants.variant_column_name] == test.variants.control_name]) <= 1:
             logger.warning("Control group only contains 1 or 0 entities.")
             return False
@@ -184,7 +181,7 @@ class Experiment(object):
 
 
     def _get_weights(self, data, test, variant_name):
-        """ Perform the reweighting trick. 
+        """ Perform the re-weighting trick. 
         See http://expan.readthedocs.io/en/latest/glossary.html#per-entity-ratio-vs-ratio-of-totals
         
         :type data: pd.DataFrame
