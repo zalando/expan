@@ -75,18 +75,14 @@ class CorrectedTestStatistics(JsonSerializable):
     :type  corrected_test_statistics: SimpleTestStatistics or EarlyStoppingTestStatistics
     """
     def __init__(self, original_test_statistics, corrected_test_statistics):
-        self.original_test_statistics  = original_test_statistics
-        self.corrected_test_statistics = corrected_test_statistics
-
-    def check_type(self):
-        """ Check the type of properties. 
-        This is a separate method since we may need to create an instance of this class with empty fields."""
         type1 = type(self.original_test_statistics)
         type2 = type(self.corrected_test_statistics)
         if type1 != type2:
             raise RuntimeError("Type mismatch for type " + str(type1) + " and " + str(type2))
         if not isinstance(self.original_test_statistics, BaseTestStatistics):
             raise RuntimeError("Input should be instances of BaseTestStatistics or its subclass")
+        self.original_test_statistics  = original_test_statistics
+        self.corrected_test_statistics = corrected_test_statistics
 
 
 # --------- Below are the data structure of test results --------- #
