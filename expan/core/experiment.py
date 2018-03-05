@@ -15,6 +15,14 @@ logger = logging.getLogger(__name__)
 class Experiment(object):
     """ Class which adds the analysis functions to experimental data. """
     def __init__(self, data, metadata):
+        """
+        Constructor of the experiment object.
+        
+        :param data: all information of the experiment data. (e.g. KPIs, variant, entity, features, etc)
+        :type  data: pd.DataFrame
+        :param metadata: additional information about the experiment. (e.g. primary KPI, source, etc)
+        :type  metadata: dict
+        """
         self.data         = data.copy()
         self.metadata     = metadata.copy()
         self.worker_table = {
@@ -51,9 +59,9 @@ class Experiment(object):
 
         if test.variants.variant_column_name not in self.data.columns:
             raise KeyError("There is no '{}' column in the data.".format(test.variants.variant_column_name))
-        if test.variants.treatment_name not in np.unique(self.data[test.variants.variant_column_name]):
+        if test.variants.treatment_name not in pd.unique(self.data[test.variants.variant_column_name]):
             raise KeyError("There is no treatment with the name '{}' in the data.".format(test.variants.treatment_name))
-        if test.variants.control_name not in np.unique(self.data[test.variants.variant_column_name]):
+        if test.variants.control_name not in pd.unique(self.data[test.variants.variant_column_name]):
             raise KeyError("There is no control with the name '{}' in the data.".format(test.variants.control_name))
 
         for feature in test.features:
@@ -177,9 +185,6 @@ class Experiment(object):
         :type test: StatisticalTest
         :rtype: bool 
         """
-        if data is None:
-            logger.warning("Data is empty for the current analysis.")
-            return False
         if len(data[data[test.variants.variant_column_name] == test.variants.control_name]) <= 1:
             logger.warning("Control group only contains 1 or 0 entities.")
             return False
@@ -189,7 +194,7 @@ class Experiment(object):
 
 
     def _get_weights(self, data, test, variant_name):
-        """ Perform the reweighting trick. 
+        """ Perform the re-weighting trick. 
         See http://expan.readthedocs.io/en/latest/glossary.html#per-entity-ratio-vs-ratio-of-totals
         
         :type data: pd.DataFrame
