@@ -6,6 +6,7 @@ import copy
 
 import expan.core.early_stopping as es
 import expan.core.statistics as statx
+import expan.core.correction as correction
 from expan.core.statistical_test import *
 from expan.core.results import StatisticalTestResult, MultipleTestSuiteResult, CorrectedTestStatistics
 
@@ -135,8 +136,8 @@ class Experiment(object):
 
         # look up table for correction method
         correction_table = {
-            CorrectionMethod.BONFERRONI: bonferroni,
-            CorrectionMethod.BH: benjamini_hochberg
+            CorrectionMethod.BONFERRONI: correction.bonferroni,
+            CorrectionMethod.BH: correction.benjamini_hochberg
         }
 
         # test_suite_result hold statistical results from all statistical tests
