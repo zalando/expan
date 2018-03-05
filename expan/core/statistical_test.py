@@ -1,3 +1,5 @@
+from enum import Enum
+
 import pandas as pd
 from expan.core.util import JsonSerializable
 
@@ -53,21 +55,22 @@ class DerivedKPI(KPI):
             data.loc[:, self.name] = data[self.numerator]/data[self.denominator].astype(float)
 
 
+class CorrectionMethod(Enum):
+    NONE       = 1   # no correction
+    BONFERRONI = 2   # Bonferrnoi correction. Used to correct false positive rate.
+    BH         = 3   # Benjamini-Hochberg procedure. Used to correct false discovery rate.
+
+
 class StatisticalTestSuite(JsonSerializable):
     """ This class consists of a number of tests plus choice of the correction method.
     
     :param tests: list of statistical tests in the suite
     :type  tests: list[StatisticalTest]
-    :param correction_method: method used for multiple testing correction. Possible values are:
-                              "none": no correction
-                              "bh": benjamini hochberg correction
-                              "bf": bonferroni correction
-    :type  correction_method: str
+    :param correction_method: method used for multiple testing correction
+    :type  correction_method: CorrectionMethod
     """
-    def __init__(self, tests, correction_method="none"):
+    def __init__(self, tests, correction_method=CorrectionMethod.NONE):
         self.tests = tests
-        if correction_method not in ["none", "bh", "bf"]:
-            raise ValueError('Correction method is not implemented. We support "none", "bh", and "bf".')
         self.correction_method = correction_method
 
     @property
