@@ -1,3 +1,4 @@
+from expan.core.statistical_test import CorrectionMethod
 from expan.core.util import JsonSerializable
 
 
@@ -44,7 +45,6 @@ class SimpleTestStatistics(BaseTestStatistics):
         self.delta               = delta
         self.p                   = p
         self.statistical_power   = statistical_power
-        # TODO: think of structure {p: v} (the same as ci)
         self.confidence_interval = [{'percentile': p, 'value': v} for (p, v) in ci.items()]
 
 
@@ -104,14 +104,9 @@ class MultipleTestSuiteResult(JsonSerializable):
     
     :param statistical_test_results: test results for all statistical testing unit
     :type  statistical_test_results: list[StatisticalTestResult]
-    :param correction_method: method used for multiple testing correction. Possible values are:
-                              "none": no correction
-                              "bh": benjamini hochberg correction
-                              "bf": bonferroni correction
-    :type  correction_method: str
+    :param correction_method: method used for multiple testing correction
+    :type  correction_method: CorrectionMethod
     """
-    def __init__(self, statistical_test_results, correction_method="none"):
+    def __init__(self, statistical_test_results, correction_method=CorrectionMethod.NONE):
         self.statistical_test_results = statistical_test_results
-        if correction_method not in ["none", "bh", "bf"]:
-            raise ValueError('Correction method is not implemented. We support "none", "bh", and "bf".')
         self.correction_method = correction_method

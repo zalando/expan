@@ -50,10 +50,10 @@ class StatisticalTestCase(unittest.TestCase):
         test_revenue_tablet = StatisticalTest(kpi, [tablet], variants)
 
         tests = [test_revenue_overall, test_revenue_mobile, test_revenue_desktop, test_revenue_tablet]
-        multi_test_suite = StatisticalTestSuite(tests, "bh")
+        multi_test_suite = StatisticalTestSuite(tests, CorrectionMethod.BH)
 
         self.assertEqual(multi_test_suite.size, 4)
-        self.assertEqual(multi_test_suite.correction_method, "bh")
+        self.assertEqual(multi_test_suite.correction_method, CorrectionMethod.BH)
 
     def test_make_derived_kpi(self):
         numerator = "normal_same"

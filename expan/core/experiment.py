@@ -44,7 +44,7 @@ class Experiment(object):
         :param testmethod: analysis method
         :type  testmethod: str
         :param **worker_args: additional arguments for the analysis method
-        :return: statistical result of the test
+        :return: statistical analysis result of the test
         :rtype: StatisticalTestResult
         """
         if not isinstance(test, StatisticalTest):
