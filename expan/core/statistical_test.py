@@ -57,7 +57,7 @@ class DerivedKPI(KPI):
 
 class CorrectionMethod(Enum):
     NONE       = 1   # no correction
-    BONFERRONI = 2   # Bonferrnoi correction. Used to correct false positive rate.
+    BONFERRONI = 2   # Bonferroni correction. Used to correct false positive rate.
     BH         = 3   # Benjamini-Hochberg procedure. Used to correct false discovery rate.
 
 

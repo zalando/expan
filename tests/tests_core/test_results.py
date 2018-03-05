@@ -100,5 +100,5 @@ class StatisticalTestCase(unittest.TestCase):
         self.assertAlmostEqual(self.statistical_test_result.result.delta, 1.0)
 
     def test_multi_test_suite_results(self):
-        self.assertEqual(len(self.statistical_test_results.statistical_test_results), 2)
+        self.assertEqual(len(self.statistical_test_results.results), 2)
         self.assertEqual(self.statistical_test_results.correction_method, self.correction_method)

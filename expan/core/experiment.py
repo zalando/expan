@@ -2,12 +2,12 @@ import logging
 
 import numpy as np
 import pandas as pd
+import copy
 
 import expan.core.early_stopping as es
 import expan.core.statistics as statx
 from expan.core.statistical_test import *
-from expan.core.results import StatisticalTestResult, MultipleTestSuiteResult
-from expan.core.correction import add_corrected_test_statistics
+from expan.core.results import StatisticalTestResult, MultipleTestSuiteResult, CorrectedTestStatistics
 
 logger = logging.getLogger(__name__)
 
@@ -114,13 +114,14 @@ class Experiment(object):
 
 
     def analyze_statistical_test_suite(self, test_suite, testmethod='fixed_horizon', **worker_args):
-        """ Runs delta analysis on a set of tests and returns statsitical results for each statistical test in the suite.
+        """ Runs delta analysis on a set of tests and returns statistical results for each statistical test in the suite.
         
         :param test_suite: a suite of statistical test to run
         :type  test_suite: StatisticalTestSuite
-        :param testmethod: analysis method
+        :param testmethod: analysis method to perform. 
+                           It can be 'fixed_horizon', 'group_sequential', 'bayes_factor' or 'bayes_precision'.
         :type  testmethod: str
-        :param **worker_args: additional arguments for the analysis method
+        :param **worker_args: additional arguments for the analysis method (see signatures of corresponding methods)
 
         :return: statistical result of the test suite
         :rtype: MultipleTestSuiteResult
@@ -128,15 +129,37 @@ class Experiment(object):
         if not isinstance(test_suite, StatisticalTestSuite):
             raise TypeError("Test suite should be of type StatisticalTestSuite.")
 
-        statistical_test_results = MultipleTestSuiteResult([], test_suite.correction_method)
-        for test in test_suite:
-            one_analysis_result = self.analyze_statistical_test(test, testmethod, **worker_args)
-            statistical_test_results.statistical_test_results.append(one_analysis_result)
+        if testmethod not in ['fixed_horizon', 'group_sequential']:
+            test_suite.correction_method = CorrectionMethod.NONE
+        requires_correction = test_suite.correction_method is not CorrectionMethod.NONE
 
-        if test_suite.correction_method is not "none":
-            statistical_test_results = add_corrected_test_statistics(statistical_test_results)
+        # look up table for correction method
+        correction_table = {
+            CorrectionMethod.BONFERRONI: bonferroni,
+            CorrectionMethod.BH: benjamini_hochberg
+        }
 
-        return statistical_test_results
+        # test_suite_result hold statistical results from all statistical tests
+        test_suite_result = MultipleTestSuiteResult([], test_suite.correction_method)
+        for test in test_suite.tests:
+            original_analysis = self.analyze_statistical_test(test, testmethod, **worker_args)
+            test_suite_result.results.append(original_analysis)
+
+        # if correction is needed, get p values, do correction on alpha, and run the same analysis for new alpha
+        if requires_correction:
+            original_alpha    = worker_args.get('alpha', 0.05)
+            original_p_values = [item.result.p for item in test_suite_result.results]
+            corrected_alpha   = correction_table[test_suite.correction_method](original_alpha, original_p_values)
+            new_worker_args   = copy.deepcopy(worker_args)
+            new_worker_args['alpha'] = corrected_alpha
+
+            for test_index, test in enumerate(test_suite.tests):
+                original_analysis        = test_suite_result.results[test_index]
+                corrected_analysis       = self.analyze_statistical_test(test, testmethod, **new_worker_args)
+                combined_result          = CorrectedTestStatistics(original_analysis.result, corrected_analysis.result)
+                original_analysis.result = combined_result
+
+        return test_suite_result
 
 
     def outlier_filter(self, kpis, percentile=99.0, threshold_type='upper'):

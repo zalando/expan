@@ -75,14 +75,18 @@ class CorrectedTestStatistics(JsonSerializable):
     :type  corrected_test_statistics: SimpleTestStatistics or EarlyStoppingTestStatistics
     """
     def __init__(self, original_test_statistics, corrected_test_statistics):
-        type1 = type(original_test_statistics)
-        type2 = type(corrected_test_statistics)
-        if type1 != type2:
-            raise RuntimeError("Type mismatch for type " + str(type1) + " and " + str(type2))
-        if not isinstance(original_test_statistics, BaseTestStatistics):
-            raise RuntimeError("Input should be instances of BaseTestStatistics or its subclass")
         self.original_test_statistics  = original_test_statistics
         self.corrected_test_statistics = corrected_test_statistics
+
+    def check_type(self):
+        """ Check the type of properties. 
+        This is a separate method since we may need to create an instance of this class with empty fields."""
+        type1 = type(self.original_test_statistics)
+        type2 = type(self.corrected_test_statistics)
+        if type1 != type2:
+            raise RuntimeError("Type mismatch for type " + str(type1) + " and " + str(type2))
+        if not isinstance(self.original_test_statistics, BaseTestStatistics):
+            raise RuntimeError("Input should be instances of BaseTestStatistics or its subclass")
 
 
 # --------- Below are the data structure of test results --------- #
@@ -102,14 +106,11 @@ class StatisticalTestResult(JsonSerializable):
 class MultipleTestSuiteResult(JsonSerializable):
     """ This class holds the results of a MultipleTestSuite.
     
-    :param statistical_test_results: test results for all statistical testing unit
-    :type  statistical_test_results: list[StatisticalTestResult]
+    :param results: test results for all statistical testing unit
+    :type  results: list[StatisticalTestResult]
     :param correction_method: method used for multiple testing correction
     :type  correction_method: CorrectionMethod
     """
-    def __init__(self, statistical_test_results, correction_method=CorrectionMethod.NONE):
-        self.statistical_test_results = statistical_test_results
+    def __init__(self, results, correction_method=CorrectionMethod.NONE):
+        self.results = results
         self.correction_method = correction_method
-
-    def __getitem__(self, item):
-        return item

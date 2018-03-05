@@ -14,17 +14,13 @@ def _delta_mean(x, y):
     Implemented as function to allow being called from bootstrap. """
     return np.nanmean(x) - np.nanmean(y)
 
-def make_delta(assume_normal=True, alpha=0.05, percentiles=[2.5, 97.5],
-               min_observations=20, nruns=10000, relative=False):
+
+def make_delta(assume_normal=True, alpha=0.05, min_observations=20, nruns=10000, relative=False):
     """ A closure to the delta function. """
-    def f(x, y):
-        return delta(x, y, assume_normal, alpha, percentiles, min_observations,
-                     nruns, relative)
-    return f
+    return lambda x, y: delta(x, y, assume_normal, alpha, min_observations, nruns, relative)
 
 
-def delta(x, y, assume_normal=True, alpha=0.05, percentiles=[2.5, 97.5],
-          min_observations=20, nruns=10000, relative=False):
+def delta(x, y, assume_normal=True, alpha=0.05, min_observations=20, nruns=10000, relative=False):
     """ Calculates the difference of means between the samples in a statistical sense.
     Computation is done in form of treatment minus control, i.e. x-y.
     Note that NaNs are treated as if they do not exist in the data. 
@@ -37,8 +33,6 @@ def delta(x, y, assume_normal=True, alpha=0.05, percentiles=[2.5, 97.5],
     :type  assume_normal: boolean
     :param alpha: significance level (alpha)
     :type  alpha: float
-    :param percentiles: list of percentile values for confidence bounds
-    :type  percentiles: list
     :param min_observations: minimum number of observations needed
     :type  min_observations: int
     :param nruns: only used if assume normal is false
@@ -60,6 +54,8 @@ def delta(x, y, assume_normal=True, alpha=0.05, percentiles=[2.5, 97.5],
         raise TypeError('Please provide samples of type Series or list.')
     if type(x) != type(y):
         raise TypeError('Please provide samples of the same type.')
+
+    percentiles = [alpha * 100 / 2, 100 - alpha * 100 / 2]
 
     # Coercing missing values to right format
     _x = np.array(x, dtype=float)
