@@ -1,4 +1,5 @@
 import logging
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -194,6 +195,7 @@ class Experiment(object):
         self.metadata['filtered_threshold_kind'] = threshold_type
         # throw warning if too many entities have been filtered out
         if (len(flags[flags == True]) / float(len(self.data))) > 0.02:
+            warnings.warn('More than 2% of entities have been filtered out, consider adjusting the percentile value.')
             logger.warning('More than 2% of entities have been filtered out, consider adjusting the percentile value.')
         self.data = self.data[flags == False]
 
