@@ -33,7 +33,6 @@ class Experiment(object):
             'bayes_precision': es.make_bayes_precision
         }
 
-
     def __str__(self):
         return 'Experiment "{:s}" with {:d} entities.'.format(self.metadata['experiment'], len(self.data))
 

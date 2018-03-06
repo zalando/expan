@@ -14,10 +14,8 @@ def benjamini_hochberg(false_discovery_rate, original_p_values):
     """
     p_values_sorted = np.sort(np.asarray(original_p_values))
     number_tests = len(original_p_values)
-    if len([i for i, val in enumerate(p_values_sorted, 1) if val <= i * false_discovery_rate / number_tests]) != 0:
-        rank = np.max([i for i, val in enumerate(p_values_sorted, 1) if val <= i * false_discovery_rate / number_tests])
-    else:
-        rank = 1
+    significant_ranks = [i for i, val in enumerate(p_values_sorted, 1) if val <= i * false_discovery_rate / number_tests]
+    rank = np.max(significant_ranks) if significant_ranks else 1
     return rank * false_discovery_rate / number_tests
 
 

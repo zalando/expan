@@ -3,7 +3,6 @@ import numpy as np
 
 from expan.core.statistical_test import *
 from expan.core.util import generate_random_data
-from expan.core.experiment import Experiment
 
 
 class StatisticalTestCase(unittest.TestCase):
