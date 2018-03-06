@@ -1,7 +1,4 @@
-import logging
 import numpy as np
-
-logger = logging.getLogger(__name__)
 
 
 def benjamini_hochberg(false_discovery_rate, original_p_values):

@@ -1,10 +1,5 @@
 import unittest
-
-import numpy as np
-from expan.core.results import *
 from expan.core.correction import *
-from expan.core.statistical_test import *
-from expan.core.util import find_value_by_key_with_condition
 
 
 class CorrectionTestCase(unittest.TestCase):
