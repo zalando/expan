@@ -2,7 +2,7 @@ import numpy as np
 
 
 def benjamini_hochberg(false_discovery_rate, original_p_values):
-    """ Benjamini–Hochberg procedure.
+    """ Benjamini-Hochberg procedure.
     
     :param false_discovery_rate: proportion of significant results that are actually false positives
     :type  false_discovery_rate: float
