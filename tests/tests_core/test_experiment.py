@@ -25,6 +25,11 @@ class ExperimentTestCase(unittest.TestCase):
         self.test_normal_same = StatisticalTest(self.kpi, [], self.variants)
         self.test_nonsense_variant = StatisticalTest(self.kpi, [], self.nonsense_variants)
 
+        # statistical test with derived kpi
+        self.derived_kpi = DerivedKPI('derived_kpi_one', 'normal_same', 'normal_shifted')
+        self.test_derived_kpi = StatisticalTest(self.derived_kpi, [], self.variants)
+
+
     def tearDown(self):
         """ Clean up after the test """
         pass
@@ -187,7 +192,16 @@ class ExperimentClassTestCases(ExperimentTestCase):
 
     # Test _get_weights
     def test_get_weights(self):
-        pass
+        exp = self.getExperiment()
+        res = exp._get_weights(self.data, self.test_normal_same, 'B')
+        self.assertEqual(res, 1.0)
+
+    # Test _get_weights for derived kpis
+    def test_get_weights_derived_kpi(self):
+        exp = self.getExperiment()
+        self.derived_kpi.make_derived_kpi(self.data)
+        res = exp._get_weights(self.data, self.test_derived_kpi, 'B')
+        self.assertTrue(isinstance(res, pd.Series))
 
 if __name__ == '__main__':
     unittest.main()

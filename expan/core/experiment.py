@@ -219,18 +219,20 @@ class Experiment(object):
 
 
     def _get_weights(self, data, test, variant_name):
-        """ Perform the re-weighting trick. 
+        """ Perform the re-weighting trick on the selected derived kpi
         See http://expan.readthedocs.io/en/latest/glossary.html#per-entity-ratio-vs-ratio-of-totals
         
         :type data: pd.DataFrame
         :type test: StatisticalTest
         :type variant_name: str
-        :rtype: pd.DataFrame
+        
+        :return returns re-weighted kpi values of type pd.Series
+        :rtype: pd.Series
         """
         if type(test.kpi) is not DerivedKPI:
             return 1.0
 
-        x = test.variants.get_variant(data, variant_name)
+        x = test.variants.get_variant(data, variant_name)[test.kpi.name]
         number_of_zeros_and_nans     = sum(x == 0) + np.isnan(x).sum()
         number_of_non_zeros_and_nans = len(x) - number_of_zeros_and_nans
         return number_of_non_zeros_and_nans/np.nansum(x) * x
