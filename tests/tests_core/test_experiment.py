@@ -19,9 +19,11 @@ class ExperimentTestCase(unittest.TestCase):
         self.data, self.metadata = data, metadata
 
         # simple statistical test
-        self.test_kpi = KPI('normal_same')
-        self.test_variants = Variants('variant', 'B', 'A')
-        self.test_normal_same = StatisticalTest(self.test_kpi, [], self.test_variants)
+        self.kpi = KPI('normal_same')
+        self.variants = Variants('variant', 'B', 'A')
+        self.nonsense_variants = Variants('variant', 'C', 'D')
+        self.test_normal_same = StatisticalTest(self.kpi, [], self.variants)
+        self.test_nonsense_variant = StatisticalTest(self.kpi, [], self.nonsense_variants)
 
     def tearDown(self):
         """ Clean up after the test """
@@ -124,20 +126,21 @@ class ExperimentClassTestCases(ExperimentTestCase):
 
         self.assertEqual(res.result.stop, True)
 
-    # Test quantile filtering
     def test_quantile_filtering_multiple_columns(self):
         exp = self.getExperiment()
-        exp.outlier_filter(
+        flags = exp._quantile_filtering(
             kpis=[
                 'normal_same',
                 'normal_shifted',
                 'normal_shifted_by_feature',
                 'normal_unequal_variance'
-            ]
+            ],
+            percentile=99.0,
+            threshold_type='upper'
         )
-        self.assertEqual(len(self.data) - len(exp.data), exp.metadata['filtered_entities_number'])
+        self.assertEqual(len(flags[flags==True]), 386)
 
-    def test_quantile_filtering_lower_threshold(self):
+    def test_outlier_filtering_lower_threshold(self):
         exp = self.getExperiment()
         exp.outlier_filter(
             kpis=[
@@ -151,28 +154,40 @@ class ExperimentClassTestCases(ExperimentTestCase):
         )
         self.assertEqual(len(self.data) - len(exp.data), exp.metadata['filtered_entities_number'])
 
-    def test_quantile_filtering_unsupported_kpi(self):
+    def test_outlier_filtering_unsupported_kpi(self):
         exp = self.getExperiment()
         with self.assertRaises(KeyError):
             exp.outlier_filter(kpis=['revenue'])
 
-    def test_quantile_filtering_unsupported_percentile(self):
+    def test_outlier_filtering_unsupported_percentile(self):
         exp = self.getExperiment()
         with self.assertRaises(ValueError):
             exp.outlier_filter(kpis=['normal_same'], percentile=101.0)
 
-    def test_quantile_filtering_unsupported_threshold_kind(self):
+    def test_outlier_filtering_unsupported_threshold_kind(self):
         exp = self.getExperiment()
         with self.assertRaises(ValueError):
             exp.outlier_filter(kpis=['normal_same'], threshold_type='uppper')
 
-    def test_quantile_filtering_high_filtering_percentage(self):
+    def test_outlier_filtering_high_filtering_percentage(self):
         exp = self.getExperiment()
         with warnings.catch_warnings(record=True) as w:
             exp.outlier_filter(kpis=['normal_same'], percentile=97.9)
             self.assertEqual(len(w), 1)
             self.assertTrue(issubclass(w[-1].category, UserWarning))
 
+    # Test is_valid_for_analysis
+    def test_is_valid_for_analysis(self):
+        exp = self.getExperiment()
+        is_valid = exp._is_valid_for_analysis(self.data, self.test_normal_same)
+        self.assertTrue(is_valid)
+
+        is_not_valid = exp._is_valid_for_analysis(self.data, self.test_nonsense_variant)
+        self.assertFalse(is_not_valid)
+
+    # Test _get_weights
+    def test_get_weights(self):
+        pass
 
 if __name__ == '__main__':
     unittest.main()
