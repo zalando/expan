@@ -15,14 +15,13 @@ def benjamini_hochberg(false_discovery_rate, original_p_values):
     :return: new critical value (i.e. the corrected alpha)
     :rtype: float
     """
-    pvals = np.asarray(original_p_values)
-    pvals_sorted = np.sort(pvals)
-    numtests = len(original_p_values)
-    if len([i for i, val in enumerate(pvals_sorted, 1) if val <= i * false_discovery_rate / numtests]) != 0:
-        R = np.max([i for i, val in enumerate(pvals_sorted, 1) if val <= i * false_discovery_rate / numtests])
+    p_values_sorted = np.sort(np.asarray(original_p_values))
+    number_tests = len(original_p_values)
+    if len([i for i, val in enumerate(p_values_sorted, 1) if val <= i * false_discovery_rate / number_tests]) != 0:
+        rank = np.max([i for i, val in enumerate(p_values_sorted, 1) if val <= i * false_discovery_rate / number_tests])
     else:
-        R = 1
-    return R * false_discovery_rate / numtests
+        rank = 1
+    return rank * false_discovery_rate / number_tests
 
 
 def bonferroni(false_positive_rate, original_p_values):
