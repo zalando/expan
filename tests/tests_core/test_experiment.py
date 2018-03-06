@@ -3,7 +3,6 @@ import warnings
 
 import numpy as np
 
-from expan.core.binning import Bin
 from expan.core.statistical_test import *
 from expan.core.experiment import Experiment
 from expan.core.util import generate_random_data, find_value_by_key_with_condition
@@ -102,7 +101,6 @@ class ExperimentClassTestCases(ExperimentTestCase):
         self.assertNumericalEqual(res.result.treatment_statistics.mean, 0.025219, ndecimals)
         self.assertNumericalEqual(res.result.control_statistics.mean, -0.007833, ndecimals)
 
-        self.assertNumericalEqual(res.result.statistical_power, 0.36401, ndecimals)
         self.assertEqual(res.result.stop, True)
         self.assertEqual(res.test.kpi.name, 'normal_same')
 
@@ -124,7 +122,6 @@ class ExperimentClassTestCases(ExperimentTestCase):
         self.assertNumericalEqual(res.result.treatment_statistics.mean, 0.025219, ndecimals)
         self.assertNumericalEqual(res.result.control_statistics.mean, -0.007833, ndecimals)
 
-        self.assertNumericalEqual(res.result.statistical_power, 0.36401, ndecimals)
         self.assertEqual(res.result.stop, True)
 
     # Test quantile filtering
