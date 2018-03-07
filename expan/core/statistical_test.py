@@ -52,12 +52,12 @@ class DerivedKPI(KPI):
     def make_derived_kpi(self, data):
         """ Create the derived kpi column if it is not yet created. """
         if self.name not in data.columns:
-            data.loc[:, self.name] = data[self.numerator]/data[self.denominator].astype(float)
+            data.loc[:, self.name] = (data[self.numerator]/data[self.denominator]).astype("float64")
 
 
 class CorrectionMethod(Enum):
     NONE       = 1   # no correction
-    BONFERRONI = 2   # Bonferrnoi correction. Used to correct false positive rate.
+    BONFERRONI = 2   # Bonferroni correction. Used to correct false positive rate.
     BH         = 3   # Benjamini-Hochberg procedure. Used to correct false discovery rate.
 
 
@@ -70,6 +70,8 @@ class StatisticalTestSuite(JsonSerializable):
     :type  correction_method: CorrectionMethod
     """
     def __init__(self, tests, correction_method=CorrectionMethod.NONE):
+        if len(tests) is 1:
+            correction_method = CorrectionMethod.NONE
         self.tests = tests
         self.correction_method = correction_method
 

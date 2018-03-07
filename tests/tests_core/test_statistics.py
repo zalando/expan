@@ -38,7 +38,6 @@ class DeltaTestCases(StatisticsTestCase):
         res = statx.delta(
             self.samples.temperature[self.samples.gender == 1],
             self.samples.temperature[self.samples.gender == 2],
-            percentiles=[2.5, 97.5],
             assume_normal=True)
         # Checking if mean has right value
         self.assertAlmostEqual(res.delta, -0.28923076923075541)
@@ -59,8 +58,7 @@ class DeltaTestCases(StatisticsTestCase):
         """ Percentiles of delta() for sga are corrected for no tests (1 as a default). """
         res = statx.delta(
             self.samples.temperature[self.samples.gender == 1],
-            self.samples.temperature[self.samples.gender == 2],
-            percentiles=[2.5, 97.5])
+            self.samples.temperature[self.samples.gender == 2])
 
         value025 = find_value_by_key_with_condition(res.confidence_interval, 'percentile', 2.5, 'value')
         value975 = find_value_by_key_with_condition(res.confidence_interval, 'percentile', 97.5, 'value')
@@ -88,7 +86,6 @@ class DeltaTestCases(StatisticsTestCase):
         res = statx.delta(
             self.samples.temperature[self.samples.gender == 1],
             self.samples.temperature[self.samples.gender == 2],
-            percentiles=[2.5, 97.5],
             assume_normal=True)
         # Checking if mean has right value
         self.assertAlmostEqual(res.delta, -0.28923076923075541)

@@ -1,13 +1,17 @@
 import logging
+import warnings
 
 import numpy as np
 import pandas as pd
+import copy
 
 import expan.core.early_stopping as es
 import expan.core.statistics as statx
+import expan.core.correction as correction
 from expan.core.statistical_test import *
-from expan.core.results import StatisticalTestResult, MultipleTestSuiteResult
+from expan.core.results import StatisticalTestResult, MultipleTestSuiteResult, CorrectedTestStatistics
 
+warnings.simplefilter('always', UserWarning)
 logger = logging.getLogger(__name__)
 
 
@@ -22,15 +26,14 @@ class Experiment(object):
         :param metadata: additional information about the experiment. (e.g. primary KPI, source, etc)
         :type  metadata: dict
         """
-        self.data         = data.copy()
-        self.metadata     = metadata.copy()
+        self.data         = data.convert_objects(convert_numeric=True)
+        self.metadata     = metadata
         self.worker_table = {
             'fixed_horizon': statx.make_delta,
             'group_sequential': es.make_group_sequential,
             'bayes_factor': es.make_bayes_factor,
             'bayes_precision': es.make_bayes_precision
         }
-
 
     def __str__(self):
         return 'Experiment "{:s}" with {:d} entities.'.format(self.metadata['experiment'], len(self.data))
@@ -44,7 +47,8 @@ class Experiment(object):
         :param testmethod: analysis method
         :type  testmethod: str
         :param **worker_args: additional arguments for the analysis method
-        :return: statistical analysis result of the test
+
+        :return: statistical result of the test
         :rtype: StatisticalTestResult
         """
         if not isinstance(test, StatisticalTest):
@@ -112,27 +116,53 @@ class Experiment(object):
 
 
     def analyze_statistical_test_suite(self, test_suite, testmethod='fixed_horizon', **worker_args):
-        """
-        Runs delta analysis on a set of tests and returns statsitical results for each statistical test in the suite.
+        """ Runs delta analysis on a set of tests and returns statistical results for each statistical test in the suite.
         
         :param test_suite: a suite of statistical test to run
         :type  test_suite: StatisticalTestSuite
-        :param testmethod: analysis method
+        :param testmethod: analysis method to perform. 
+                           It can be 'fixed_horizon', 'group_sequential', 'bayes_factor' or 'bayes_precision'.
         :type  testmethod: str
-        :param **worker_args: additional arguments for the analysis method
+        :param **worker_args: additional arguments for the analysis method (see signatures of corresponding methods)
+
         :return: statistical result of the test suite
         :rtype: MultipleTestSuiteResult
         """
         if not isinstance(test_suite, StatisticalTestSuite):
             raise TypeError("Test suite should be of type StatisticalTestSuite.")
 
-        statistical_test_results = MultipleTestSuiteResult([], test_suite.correction_method)
-        for test in test_suite:
-            one_analysis_result = self.analyze_statistical_test(test, testmethod, **worker_args)
-            statistical_test_results.statistical_test_results.append(one_analysis_result)
+        if testmethod not in ['fixed_horizon', 'group_sequential']:
+            test_suite.correction_method = CorrectionMethod.NONE
+        requires_correction = test_suite.correction_method is not CorrectionMethod.NONE
 
-        # TODO: Implement correction method, create CorrectedTestStatistics, and update the statistical_test_results
-        return statistical_test_results
+        # look up table for correction method
+        correction_table = {
+            CorrectionMethod.BONFERRONI: correction.bonferroni,
+            CorrectionMethod.BH: correction.benjamini_hochberg
+        }
+
+        # test_suite_result hold statistical results from all statistical tests
+        test_suite_result = MultipleTestSuiteResult([], test_suite.correction_method)
+        for test in test_suite.tests:
+            original_analysis = self.analyze_statistical_test(test, testmethod, **worker_args)
+            test_suite_result.results.append(original_analysis)
+
+        # if correction is needed, get p values, do correction on alpha, and run the same analysis for new alpha
+        if requires_correction:
+            original_alpha    = worker_args.get('alpha', 0.05)
+            original_p_values = [item.result.p for item in test_suite_result.results if item.result is not None]
+            corrected_alpha   = correction_table[test_suite.correction_method](original_alpha, original_p_values)
+            new_worker_args   = copy.deepcopy(worker_args)
+            new_worker_args['alpha'] = corrected_alpha
+
+            for test_index, test_item in enumerate(test_suite_result.results):
+                if test_item.result:
+                    original_analysis = test_suite_result.results[test_index]
+                    corrected_analysis = self.analyze_statistical_test(test_item.test, testmethod, **new_worker_args)
+                    combined_result = CorrectedTestStatistics(original_analysis.result, corrected_analysis.result)
+                    original_analysis.result = combined_result
+
+        return test_suite_result
 
 
     def outlier_filter(self, kpis, percentile=99.0, threshold_type='upper'):
@@ -145,6 +175,7 @@ class Experiment(object):
         :type  percentile: float
         :param threshold_type: type of threshold used ('lower' or 'upper')
         :type  threshold_type: str
+
         :return: No return value. Will filter out outliers in self.data in place.
         """
         # check if provided KPIs are present in the data
@@ -166,6 +197,7 @@ class Experiment(object):
         self.metadata['filtered_threshold_kind'] = threshold_type
         # throw warning if too many entities have been filtered out
         if (len(flags[flags == True]) / float(len(self.data))) > 0.02:
+            warnings.warn('More than 2% of entities have been filtered out, consider adjusting the percentile value.')
             logger.warning('More than 2% of entities have been filtered out, consider adjusting the percentile value.')
         self.data = self.data[flags == False]
 
@@ -189,21 +221,23 @@ class Experiment(object):
 
 
     def _get_weights(self, data, test, variant_name):
-        """ Perform the re-weighting trick. 
+        """ Perform the re-weighting trick on the selected derived kpi
         See http://expan.readthedocs.io/en/latest/glossary.html#per-entity-ratio-vs-ratio-of-totals
         
         :type data: pd.DataFrame
         :type test: StatisticalTest
         :type variant_name: str
-        :rtype: pd.DataFrame
+        
+        :return returns re-weighted kpi values of type pd.Series
+        :rtype: pd.Series
         """
         if type(test.kpi) is not DerivedKPI:
             return 1.0
 
-        x = test.variants.get_variant(data, variant_name)
+        x = test.variants.get_variant(data, variant_name)[test.kpi.denominator]
         number_of_zeros_and_nans     = sum(x == 0) + np.isnan(x).sum()
         number_of_non_zeros_and_nans = len(x) - number_of_zeros_and_nans
-        return number_of_non_zeros_and_nans/np.nansum(x) * x
+        return number_of_non_zeros_and_nans / np.nansum(x) * x
 
 
     def _quantile_filtering(self, kpis, percentile, threshold_type):
@@ -216,6 +250,7 @@ class Experiment(object):
         :type  percentile: float
         :param threshold_type: type of threshold used ('lower' or 'upper')
         :type  threshold_type: str
+
         :return: boolean values indicating whether the row should be filtered
         :rtype: pd.Series
         """

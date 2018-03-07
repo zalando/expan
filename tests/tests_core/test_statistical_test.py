@@ -3,7 +3,6 @@ import numpy as np
 
 from expan.core.statistical_test import *
 from expan.core.util import generate_random_data
-from expan.core.experiment import Experiment
 
 
 class StatisticalTestCase(unittest.TestCase):
@@ -14,7 +13,7 @@ class StatisticalTestCase(unittest.TestCase):
         # simple statistical test
         self.test_kpi = KPI('normal_same')
         self.test_variants = Variants('variant', 'A', 'B')
-        self.test_revenue_overall = StatisticalTest(self.test_kpi, [], self.test_variants)
+        self.test_normal_same = StatisticalTest(self.test_kpi, [], self.test_variants)
 
     def tearDown(self):
         pass
@@ -68,7 +67,7 @@ class StatisticalTestCase(unittest.TestCase):
         self.assertTrue(all(isinstance(kpi_value, float) for kpi_value in self.data[derived_kpi_name]))
 
     def test_get_variant(self):
-        control = self.test_revenue_overall.variants.get_variant(
-            self.data, self.test_revenue_overall.variants.control_name)[self.test_revenue_overall.kpi.name]
+        control = self.test_normal_same.variants.get_variant(
+            self.data, self.test_normal_same.variants.control_name)[self.test_normal_same.kpi.name]
         self.assertEqual(len(control), 6108)
         self.assertTrue(isinstance(control, pd.Series))

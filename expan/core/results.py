@@ -102,11 +102,11 @@ class StatisticalTestResult(JsonSerializable):
 class MultipleTestSuiteResult(JsonSerializable):
     """ This class holds the results of a MultipleTestSuite.
     
-    :param statistical_test_results: test results for all statistical testing unit
-    :type  statistical_test_results: list[StatisticalTestResult]
+    :param results: test results for all statistical testing unit
+    :type  results: list[StatisticalTestResult]
     :param correction_method: method used for multiple testing correction
     :type  correction_method: CorrectionMethod
     """
-    def __init__(self, statistical_test_results, correction_method=CorrectionMethod.NONE):
-        self.statistical_test_results = statistical_test_results
+    def __init__(self, results, correction_method=CorrectionMethod.NONE):
+        self.results = results
         self.correction_method = correction_method

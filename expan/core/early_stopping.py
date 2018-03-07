@@ -37,9 +37,7 @@ def obrien_fleming(information_fraction, alpha=0.05):
 
 def make_group_sequential(spending_function='obrien_fleming', estimated_sample_size=None, alpha=0.05, cap=8):
     """ A closure to the group_sequential function. """
-    def f(x, y):
-        return group_sequential(x, y, spending_function, estimated_sample_size, alpha, cap)
-    return f
+    return lambda x, y: group_sequential(x, y, spending_function, estimated_sample_size, alpha, cap)
 
 
 def group_sequential(x, y, spending_function='obrien_fleming', estimated_sample_size=None, alpha=0.05, cap=8):
