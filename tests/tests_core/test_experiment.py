@@ -190,7 +190,7 @@ class StatisticalTestSuiteTestCases(ExperimentTestCase):
         self.assertNumericalEqual(simple_stat_res.control_statistics.mean,   -0.007833, ndecimals)
         self.assertNumericalEqual(simple_stat_res.statistical_power, 0.36401, ndecimals)
 
-    def test_one_test_in_suite(self):
+    def test_one_test_in_suite_with_wrong_correction(self):
         res = self.getExperiment().analyze_statistical_test_suite(self.suite_with_one_test_correction)
         self.assertEqual(res.correction_method, CorrectionMethod.NONE)
         self.assertEqual(len(res.results), 1)
@@ -199,6 +199,12 @@ class StatisticalTestSuiteTestCases(ExperimentTestCase):
         res = self.getExperiment().analyze_statistical_test_suite(self.suite_with_two_tests)
         self.assertEqual(res.correction_method, CorrectionMethod.BONFERRONI)
         self.assertEqual(len(res.results), 2)
+
+        res_normal_same = res.results[0]
+        res_derived_kpi = res.results[1]
+
+        self.assertEqual(res_normal_same.test.kpi.name, "normal_same")
+        self.assertEqual(res_derived_kpi.test.kpi.name, "derived_kpi_one")
 
 
 
