@@ -96,22 +96,3 @@ def generate_random_data():
         'experiment': 'random_data_generation'
     }
     return data, metadata
-
-
-def generate_random_data_n_variants(n_variants=3):
-    """ Generate random data for multiple variants. """
-    np.random.seed(42)
-    size = 10000
-    data = pd.DataFrame()
-    data['entity'] = list(range(size))
-    data['variant'] = np.random.choice(list(map(chr, list(range(65, 65 + n_variants)))), size=size)
-    data['normal_same'] = np.random.normal(size=size)
-    data['poisson_same'] = np.random.poisson(size=size)
-    data['feature'] = np.random.choice(['has', 'non'], size=size)
-    data['treatment_start_time'] = np.random.choice(list(range(10)), size=size)
-    metadata = {
-        'primary_KPI': 'normal_same',
-        'source': 'simulated',
-        'experiment': 'random_data_generation'
-    }
-    return data, metadata

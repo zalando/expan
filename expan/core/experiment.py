@@ -11,6 +11,7 @@ import expan.core.correction as correction
 from expan.core.statistical_test import *
 from expan.core.results import StatisticalTestResult, MultipleTestSuiteResult, CorrectedTestStatistics
 
+warnings.simplefilter('always', UserWarning)
 logger = logging.getLogger(__name__)
 
 
@@ -149,16 +150,17 @@ class Experiment(object):
         # if correction is needed, get p values, do correction on alpha, and run the same analysis for new alpha
         if requires_correction:
             original_alpha    = worker_args.get('alpha', 0.05)
-            original_p_values = [item.result.p for item in test_suite_result.results]
+            original_p_values = [item.result.p for item in test_suite_result.results if item.result is not None]
             corrected_alpha   = correction_table[test_suite.correction_method](original_alpha, original_p_values)
             new_worker_args   = copy.deepcopy(worker_args)
             new_worker_args['alpha'] = corrected_alpha
 
-            for test_index, test in enumerate(test_suite.tests):
-                original_analysis        = test_suite_result.results[test_index]
-                corrected_analysis       = self.analyze_statistical_test(test, testmethod, **new_worker_args)
-                combined_result          = CorrectedTestStatistics(original_analysis.result, corrected_analysis.result)
-                original_analysis.result = combined_result
+            for test_index, test_item in enumerate(test_suite_result.results):
+                if test_item.result:
+                    original_analysis = test_suite_result.results[test_index]
+                    corrected_analysis = self.analyze_statistical_test(test_item.test, testmethod, **new_worker_args)
+                    combined_result = CorrectedTestStatistics(original_analysis.result, corrected_analysis.result)
+                    original_analysis.result = combined_result
 
         return test_suite_result
 
