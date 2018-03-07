@@ -52,7 +52,7 @@ class DerivedKPI(KPI):
     def make_derived_kpi(self, data):
         """ Create the derived kpi column if it is not yet created. """
         if self.name not in data.columns:
-            data.loc[:, self.name] = data[self.numerator]/data[self.denominator].astype(float)
+            data.loc[:, self.name] = (data[self.numerator]/data[self.denominator]).astype("float64")
 
 
 class CorrectionMethod(Enum):

@@ -29,6 +29,17 @@ class ExperimentTestCase(unittest.TestCase):
         self.derived_kpi = DerivedKPI('derived_kpi_one', 'normal_same', 'normal_shifted')
         self.test_derived_kpi = StatisticalTest(self.derived_kpi, [], self.variants)
 
+        # small dummy data frame
+        data_dummy = np.array([['index', 'entity', 'variant', 'normal_same', 'normal_shifted'],
+                               [0, 1, 'A', 2.0, 1.0], [1, 2, 'B', 3.0, 2.0],
+                               [2, 3, 'A', 3.0, 2.0], [3, 4, 'B', 2.5, 1.0]])
+        self.data_dummy_df = pd.DataFrame(data=data_dummy[1:, 1:], columns=data_dummy[0, 1:])
+
+        data_dummy_with_nan = np.array([['index', 'entity', 'variant', 'normal_same', 'normal_shifted'],
+                               [0, 1, 'A', 2.0, 1.0], [1, 2, 'B', 3.0, 2.0],
+                               [2, 3, 'A', 3.0, 2.0], [3, 4, 'B', 2.5, 1.0],
+                               [4, 5, 'A', 0.0, 0.0], [5, 6, 'B', None, None]])
+        self.data_dummy_df_with_nan = pd.DataFrame(data=data_dummy_with_nan[1:, 1:], columns=data_dummy_with_nan[0, 1:])
 
     def tearDown(self):
         """ Clean up after the test """
@@ -199,9 +210,27 @@ class ExperimentClassTestCases(ExperimentTestCase):
     # Test _get_weights for derived kpis
     def test_get_weights_derived_kpi(self):
         exp = self.getExperiment()
-        self.derived_kpi.make_derived_kpi(self.data)
-        res = exp._get_weights(self.data, self.test_derived_kpi, 'B')
+        self.derived_kpi.make_derived_kpi(exp.data)
+        res = exp._get_weights(exp.data, self.test_derived_kpi, 'B')
         self.assertTrue(isinstance(res, pd.Series))
+
+    # Test re-weighting trick with hardcoded data
+    def test_get_weights_hardcoded_data(self):
+        ndecimals = 5
+        exp = Experiment(self.data_dummy_df, self.metadata)
+        self.derived_kpi.make_derived_kpi(exp.data)
+        res = exp._get_weights(exp.data, self.test_derived_kpi, 'B')
+        self.assertAlmostEqual(res.iloc[0], 1.33333, ndecimals)
+        self.assertAlmostEqual(res.iloc[1], 0.66667, ndecimals)
+
+    def test_get_weights_hardcoded_data_with_nan(self):
+        ndecimals = 5
+        exp = Experiment(self.data_dummy_df_with_nan, self.metadata)
+        self.derived_kpi.make_derived_kpi(exp.data)
+        res = exp._get_weights(exp.data, self.test_derived_kpi, 'B')
+        self.assertAlmostEqual(res.iloc[0], 1.33333, ndecimals)
+        self.assertAlmostEqual(res.iloc[1], 0.66667, ndecimals)
+
 
 if __name__ == '__main__':
     unittest.main()

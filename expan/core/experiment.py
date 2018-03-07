@@ -25,8 +25,8 @@ class Experiment(object):
         :param metadata: additional information about the experiment. (e.g. primary KPI, source, etc)
         :type  metadata: dict
         """
-        self.data         = data.copy()
-        self.metadata     = metadata.copy()
+        self.data         = data.convert_objects(convert_numeric=True)
+        self.metadata     = metadata
         self.worker_table = {
             'fixed_horizon': statx.make_delta,
             'group_sequential': es.make_group_sequential,
@@ -232,10 +232,10 @@ class Experiment(object):
         if type(test.kpi) is not DerivedKPI:
             return 1.0
 
-        x = test.variants.get_variant(data, variant_name)[test.kpi.name]
+        x = test.variants.get_variant(data, variant_name)[test.kpi.denominator]
         number_of_zeros_and_nans     = sum(x == 0) + np.isnan(x).sum()
         number_of_non_zeros_and_nans = len(x) - number_of_zeros_and_nans
-        return number_of_non_zeros_and_nans/np.nansum(x) * x
+        return number_of_non_zeros_and_nans / np.nansum(x) * x
 
 
     def _quantile_filtering(self, kpis, percentile, threshold_type):
