@@ -223,6 +223,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
         self.assertAlmostEqual(res.iloc[0], 1.33333, ndecimals)
         self.assertAlmostEqual(res.iloc[1], 0.66667, ndecimals)
 
+    # Test re-weighting trick with hardcoded data with NaN values
     def test_get_weights_hardcoded_data_with_nan(self):
         ndecimals = 5
         exp = Experiment(self.data_dummy_df_with_nan, self.metadata)
