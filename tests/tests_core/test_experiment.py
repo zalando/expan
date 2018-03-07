@@ -18,12 +18,20 @@ class ExperimentTestCase(unittest.TestCase):
         data, metadata = generate_random_data()
         self.data, self.metadata = data, metadata
 
+        # subgroups
+        has = FeatureFilter('feature', 'has')
+        non = FeatureFilter('feature', 'non')
+        one = FeatureFilter('feature', 'feature that only has one data point')
+
         # simple statistical test
         self.kpi = KPI('normal_same')
         self.variants = Variants('variant', 'B', 'A')
         self.nonsense_variants = Variants('variant', 'C', 'D')
         self.test_normal_same = StatisticalTest(self.kpi, [], self.variants)
         self.test_nonsense_variant = StatisticalTest(self.kpi, [], self.nonsense_variants)
+        self.test_normal_same_feature_non = StatisticalTest(self.kpi, [non], self.variants)
+        self.test_normal_same_feature_has = StatisticalTest(self.kpi, [has], self.variants)
+        self.test_normal_same_feature_one = StatisticalTest(self.kpi, [one], self.variants)
 
         # statistical test with derived kpi
         self.derived_kpi = DerivedKPI('derived_kpi_one', 'normal_same', 'normal_shifted')
@@ -40,6 +48,17 @@ class ExperimentTestCase(unittest.TestCase):
                                [2, 3, 'A', 3.0, 2.0], [3, 4, 'B', 2.5, 1.0],
                                [4, 5, 'A', 0.0, 0.0], [5, 6, 'B', None, None]])
         self.data_dummy_df_with_nan = pd.DataFrame(data=data_dummy_with_nan[1:, 1:], columns=data_dummy_with_nan[0, 1:])
+
+        # statistical test suite
+        self.suite_with_one_test = StatisticalTestSuite([self.test_normal_same])
+        self.suite_with_one_test_correction = StatisticalTestSuite([self.test_normal_same], CorrectionMethod.BH)
+        self.suite_with_two_tests = StatisticalTestSuite([self.test_normal_same, self.test_derived_kpi],
+                                                         CorrectionMethod.BONFERRONI)
+        self.suite_with_one_subgroup = StatisticalTestSuite([self.test_normal_same_feature_one])
+        self.suite_with_three_subgroup = StatisticalTestSuite([self.test_normal_same_feature_non,
+                                                               self.test_normal_same_feature_has,
+                                                               self.test_normal_same_feature_one],
+                                                              CorrectionMethod.BH)
 
     def tearDown(self):
         """ Clean up after the test """
@@ -59,7 +78,11 @@ class ExperimentClassTestCases(ExperimentTestCase):
         self.assertTrue(isinstance(experiment.data, pd.DataFrame))
         self.assertTrue(isinstance(experiment.metadata, dict))
 
-    def test_fixed_horizon_analyze_statistical_test(self):
+
+class StatisticalTestTestCases(ExperimentTestCase):
+    """ Test the method analyze_statistical_test. """
+
+    def test_fixed_horizon(self):
         ndecimals = 5
         res = self.getExperiment().analyze_statistical_test(self.test_normal_same, testmethod='fixed_horizon')
 
@@ -79,7 +102,7 @@ class ExperimentClassTestCases(ExperimentTestCase):
         self.assertNumericalEqual(res.result.statistical_power, 0.36401, ndecimals)
         self.assertEqual(res.test.kpi.name, 'normal_same')
 
-    def test_group_sequential_delta(self):
+    def test_group_sequential(self):
         ndecimals = 5
         res = self.getExperiment().analyze_statistical_test(self.test_normal_same, testmethod='group_sequential')
 
@@ -142,6 +165,81 @@ class ExperimentClassTestCases(ExperimentTestCase):
 
         self.assertEqual(res.result.stop, True)
 
+
+class StatisticalTestSuiteTestCases(ExperimentTestCase):
+    """ Test the method analyze_statistical_test_suite. """
+
+    def test_one_test_in_suite(self):
+        ndecimals = 5
+        res = self.getExperiment().analyze_statistical_test_suite(self.suite_with_one_test)
+
+        self.assertEqual(res.correction_method, CorrectionMethod.NONE)
+        self.assertEqual(len(res.results), 1)
+        simple_stat_res = res.results[0].result
+
+        self.assertNumericalEqual(simple_stat_res.delta, 0.033053, ndecimals)
+        lower_bound_ci = find_value_by_key_with_condition(simple_stat_res.confidence_interval, 'percentile', 2.5, 'value')
+        upper_bound_ci = find_value_by_key_with_condition(simple_stat_res.confidence_interval, 'percentile', 97.5, 'value')
+        self.assertNumericalEqual(lower_bound_ci, -0.007135, ndecimals)
+        self.assertNumericalEqual(upper_bound_ci, 0.073240, ndecimals)
+
+        self.assertEqual(simple_stat_res.treatment_statistics.sample_size, 6108)
+        self.assertEqual(simple_stat_res.control_statistics.sample_size,   3892)
+
+        self.assertNumericalEqual(simple_stat_res.treatment_statistics.mean,  0.025219, ndecimals)
+        self.assertNumericalEqual(simple_stat_res.control_statistics.mean,   -0.007833, ndecimals)
+        self.assertNumericalEqual(simple_stat_res.statistical_power, 0.36401, ndecimals)
+
+    def test_one_test_in_suite(self):
+        res = self.getExperiment().analyze_statistical_test_suite(self.suite_with_one_test_correction)
+        self.assertEqual(res.correction_method, CorrectionMethod.NONE)
+        self.assertEqual(len(res.results), 1)
+
+    def test_two_tests_in_suite(self):
+        res = self.getExperiment().analyze_statistical_test_suite(self.suite_with_two_tests)
+        self.assertEqual(res.correction_method, CorrectionMethod.BONFERRONI)
+        self.assertEqual(len(res.results), 2)
+
+
+
+
+
+
+
+    def test_sga_not_valid_data_for_one_subgroup(self):
+        '''
+        It should not raise error if there is not enough data in one subgroup,
+        which means one subgroup might contain zero or only one variant. (e.g. "browser" = "hack name")
+
+        sga should ignore this subgroup and continue doing analysis with other subgroups.
+        '''
+        pass
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class OutlierFilteringTestCases(ExperimentTestCase):
+    """ Test outlier filtering and quantile filtering. """
+
     def test_quantile_filtering_multiple_columns(self):
         exp = self.getExperiment()
         flags = exp._quantile_filtering(
@@ -191,6 +289,10 @@ class ExperimentClassTestCases(ExperimentTestCase):
             exp.outlier_filter(kpis=['normal_same'], percentile=97.9)
             self.assertEqual(len(w), 1)
             self.assertTrue(issubclass(w[-1].category, UserWarning))
+
+
+class HelperMethodsTestCases(ExperimentTestCase):
+    """ Test other helper methods. """
 
     # Test is_valid_for_analysis
     def test_is_valid_for_analysis(self):

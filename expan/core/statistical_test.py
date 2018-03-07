@@ -70,6 +70,8 @@ class StatisticalTestSuite(JsonSerializable):
     :type  correction_method: CorrectionMethod
     """
     def __init__(self, tests, correction_method=CorrectionMethod.NONE):
+        if len(tests) is 1:
+            correction_method = CorrectionMethod.NONE
         self.tests = tests
         self.correction_method = correction_method
 
