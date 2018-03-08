@@ -141,6 +141,9 @@ class Experiment(object):
             CorrectionMethod.BH: correction.benjamini_hochberg
         }
 
+        logger.info("Statistical test suite analysis with {} tests, testmethod {}, correction method {} "
+                    "has just started".format(len(test_suite.tests), testmethod, test_suite.correction_method))
+
         # test_suite_result hold statistical results from all statistical tests
         test_suite_result = MultipleTestSuiteResult([], test_suite.correction_method)
         for test in test_suite.tests:
@@ -161,6 +164,9 @@ class Experiment(object):
                     corrected_analysis = self.analyze_statistical_test(test_item.test, testmethod, **new_worker_args)
                     combined_result = CorrectedTestStatistics(original_analysis.result, corrected_analysis.result)
                     original_analysis.result = combined_result
+
+        logger.info("Statistical test suite analysis with {} tests, testmethod {}, correction method {} "
+                    "has finished".format(len(test_suite.tests), testmethod, test_suite.correction_method))
 
         return test_suite_result
 

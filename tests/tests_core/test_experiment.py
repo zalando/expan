@@ -68,9 +68,6 @@ class ExperimentTestCase(unittest.TestCase):
     def getExperiment(self):
         return Experiment(self.data, self.metadata)
 
-    def assertNumericalEqual(self, a, b, decimals):
-        self.assertEqual(round(a, decimals), round(b, decimals))
-
 
 class ExperimentClassTestCases(ExperimentTestCase):
 
@@ -87,40 +84,40 @@ class StatisticalTestTestCases(ExperimentTestCase):
         ndecimals = 5
         res = self.getExperiment().analyze_statistical_test(self.test_normal_same, testmethod='fixed_horizon')
 
-        self.assertNumericalEqual(res.result.delta, 0.033053, ndecimals)
+        self.assertAlmostEqual(res.result.delta, 0.033053, ndecimals)
 
         lower_bound_ci = find_value_by_key_with_condition(res.result.confidence_interval, 'percentile', 2.5, 'value')
         upper_bound_ci = find_value_by_key_with_condition(res.result.confidence_interval, 'percentile', 97.5, 'value')
-        self.assertNumericalEqual(lower_bound_ci, -0.007135, ndecimals)
-        self.assertNumericalEqual(upper_bound_ci, 0.073240, ndecimals)
+        self.assertAlmostEqual(lower_bound_ci, -0.007135, ndecimals)
+        self.assertAlmostEqual(upper_bound_ci, 0.073240, ndecimals)
 
         self.assertEqual(res.result.treatment_statistics.sample_size, 6108)
         self.assertEqual(res.result.control_statistics.sample_size,   3892)
 
-        self.assertNumericalEqual(res.result.treatment_statistics.mean,  0.025219, ndecimals)
-        self.assertNumericalEqual(res.result.control_statistics.mean,   -0.007833, ndecimals)
+        self.assertAlmostEqual(res.result.treatment_statistics.mean,  0.025219, ndecimals)
+        self.assertAlmostEqual(res.result.control_statistics.mean,   -0.007833, ndecimals)
 
-        self.assertNumericalEqual(res.result.statistical_power, 0.36401, ndecimals)
+        self.assertAlmostEqual(res.result.statistical_power, 0.36401, ndecimals)
         self.assertEqual(res.test.kpi.name, 'normal_same')
 
     def test_group_sequential(self):
         ndecimals = 5
         res = self.getExperiment().analyze_statistical_test(self.test_normal_same, testmethod='group_sequential')
 
-        self.assertNumericalEqual(res.result.delta, 0.033053, ndecimals)
+        self.assertAlmostEqual(res.result.delta, 0.033053, ndecimals)
 
         lower_bound_ci = find_value_by_key_with_condition(res.result.confidence_interval, 'percentile', 2.5, 'value')
         upper_bound_ci = find_value_by_key_with_condition(res.result.confidence_interval, 'percentile', 97.5, 'value')
-        self.assertNumericalEqual(lower_bound_ci, -0.007135, ndecimals)
-        self.assertNumericalEqual(upper_bound_ci, 0.073240, ndecimals)
+        self.assertAlmostEqual(lower_bound_ci, -0.007135, ndecimals)
+        self.assertAlmostEqual(upper_bound_ci, 0.073240, ndecimals)
 
         self.assertEqual(res.result.treatment_statistics.sample_size, 6108)
         self.assertEqual(res.result.control_statistics.sample_size, 3892)
 
-        self.assertNumericalEqual(res.result.treatment_statistics.mean, 0.025219, ndecimals)
-        self.assertNumericalEqual(res.result.control_statistics.mean, -0.007833, ndecimals)
+        self.assertAlmostEqual(res.result.treatment_statistics.mean, 0.025219, ndecimals)
+        self.assertAlmostEqual(res.result.control_statistics.mean, -0.007833, ndecimals)
 
-        self.assertNumericalEqual(res.result.statistical_power, 0.36401, ndecimals)
+        self.assertAlmostEqual(res.result.statistical_power, 0.36401, ndecimals)
         self.assertEqual(res.result.stop, False)
         self.assertEqual(res.test.kpi.name, 'normal_same')
 
@@ -130,18 +127,18 @@ class StatisticalTestTestCases(ExperimentTestCase):
                                                             testmethod='bayes_factor',
                                                             num_iters=2000)
 
-        self.assertNumericalEqual(res.result.delta, 0.033053, ndecimals)
+        self.assertAlmostEqual(res.result.delta, 0.033053, ndecimals)
 
         lower_bound_ci = find_value_by_key_with_condition(res.result.confidence_interval, 'percentile', 2.5, 'value')
         upper_bound_ci = find_value_by_key_with_condition(res.result.confidence_interval, 'percentile', 97.5, 'value')
-        self.assertNumericalEqual(lower_bound_ci, -0.00829, ndecimals)
-        self.assertNumericalEqual(upper_bound_ci, 0.07127, ndecimals)
+        self.assertAlmostEqual(lower_bound_ci, -0.00829, ndecimals)
+        self.assertAlmostEqual(upper_bound_ci, 0.07127, ndecimals)
 
         self.assertEqual(res.result.treatment_statistics.sample_size, 6108)
         self.assertEqual(res.result.control_statistics.sample_size, 3892)
 
-        self.assertNumericalEqual(res.result.treatment_statistics.mean, 0.025219, ndecimals)
-        self.assertNumericalEqual(res.result.control_statistics.mean, -0.007833, ndecimals)
+        self.assertAlmostEqual(res.result.treatment_statistics.mean, 0.025219, ndecimals)
+        self.assertAlmostEqual(res.result.control_statistics.mean, -0.007833, ndecimals)
 
         self.assertEqual(res.result.stop, True)
         self.assertEqual(res.test.kpi.name, 'normal_same')
@@ -151,18 +148,18 @@ class StatisticalTestTestCases(ExperimentTestCase):
         res = self.getExperiment().analyze_statistical_test(self.test_normal_same,
                                                             testmethod='bayes_precision',
                                                             num_iters=2000)
-        self.assertNumericalEqual(res.result.delta, 0.033053, ndecimals)
+        self.assertAlmostEqual(res.result.delta, 0.033053, ndecimals)
 
         lower_bound_ci = find_value_by_key_with_condition(res.result.confidence_interval, 'percentile', 2.5, 'value')
         upper_bound_ci = find_value_by_key_with_condition(res.result.confidence_interval, 'percentile', 97.5, 'value')
-        self.assertNumericalEqual(lower_bound_ci, -0.00829, ndecimals)
-        self.assertNumericalEqual(upper_bound_ci, 0.07127, ndecimals)
+        self.assertAlmostEqual(lower_bound_ci, -0.00829, ndecimals)
+        self.assertAlmostEqual(upper_bound_ci, 0.07127, ndecimals)
 
         self.assertEqual(res.result.treatment_statistics.sample_size, 6108)
         self.assertEqual(res.result.control_statistics.sample_size, 3892)
 
-        self.assertNumericalEqual(res.result.treatment_statistics.mean, 0.025219, ndecimals)
-        self.assertNumericalEqual(res.result.control_statistics.mean, -0.007833, ndecimals)
+        self.assertAlmostEqual(res.result.treatment_statistics.mean, 0.025219, ndecimals)
+        self.assertAlmostEqual(res.result.control_statistics.mean, -0.007833, ndecimals)
 
         self.assertEqual(res.result.stop, True)
 
@@ -178,18 +175,19 @@ class StatisticalTestSuiteTestCases(ExperimentTestCase):
         self.assertEqual(len(res.results), 1)
         simple_stat_res = res.results[0].result
 
-        self.assertNumericalEqual(simple_stat_res.delta, 0.033053, ndecimals)
+        self.assertAlmostEqual(simple_stat_res.delta, 0.033053, ndecimals)
         lower_bound_ci = find_value_by_key_with_condition(simple_stat_res.confidence_interval, 'percentile', 2.5, 'value')
         upper_bound_ci = find_value_by_key_with_condition(simple_stat_res.confidence_interval, 'percentile', 97.5, 'value')
-        self.assertNumericalEqual(lower_bound_ci, -0.007135, ndecimals)
-        self.assertNumericalEqual(upper_bound_ci, 0.073240, ndecimals)
+        self.assertAlmostEqual(lower_bound_ci, -0.007135, ndecimals)
+        self.assertAlmostEqual(upper_bound_ci, 0.073240, ndecimals)
 
         self.assertEqual(simple_stat_res.treatment_statistics.sample_size, 6108)
         self.assertEqual(simple_stat_res.control_statistics.sample_size,   3892)
 
-        self.assertNumericalEqual(simple_stat_res.treatment_statistics.mean,  0.025219, ndecimals)
-        self.assertNumericalEqual(simple_stat_res.control_statistics.mean,   -0.007833, ndecimals)
-        self.assertNumericalEqual(simple_stat_res.statistical_power, 0.36401, ndecimals)
+        self.assertAlmostEqual(simple_stat_res.treatment_statistics.mean,  0.025219, ndecimals)
+        self.assertAlmostEqual(simple_stat_res.control_statistics.mean,   -0.007833, ndecimals)
+        self.assertAlmostEqual(simple_stat_res.statistical_power, 0.36401, ndecimals)
+        self.assertAlmostEqual(simple_stat_res.statistical_power, 0.36401, ndecimals)
 
     def test_one_test_in_suite_with_wrong_correction(self):
         res = self.getExperiment().analyze_statistical_test_suite(self.suite_with_one_test_correction)
@@ -213,12 +211,12 @@ class StatisticalTestSuiteTestCases(ExperimentTestCase):
 
         power_normal_same_before = res_normal_same.result.original_test_statistics.statistical_power
         power_normal_same_corrected = res_normal_same.result.corrected_test_statistics.statistical_power
-        self.assertNumericalEqual(power_normal_same_before, 0.36401, ndecimals)
+        self.assertAlmostEqual(power_normal_same_before, 0.36401, ndecimals)
         self.assertLess(power_normal_same_corrected, power_normal_same_before)
 
         power_derived_kpi_before = res_derived_kpi.result.original_test_statistics.statistical_power
         power_derived_kpi_corrected = res_derived_kpi.result.corrected_test_statistics.statistical_power
-        self.assertNumericalEqual(power_derived_kpi_before, 0.3472, ndecimals)
+        self.assertAlmostEqual(power_derived_kpi_before, 0.3472, ndecimals)
         self.assertLess(power_derived_kpi_corrected, power_derived_kpi_before)
 
     def test_one_subgroup_in_suite(self):

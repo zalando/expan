@@ -67,8 +67,8 @@ def group_sequential(x, y, spending_function='obrien_fleming', estimated_sample_
     if type(x) != type(y):
         raise TypeError('Please provide samples of the same type.')
 
-    logger.info("Started running group sequential early stopping; spending function is {}, size of treatment {} "
-                "and size of control {}".format(spending_function, len(x), len(y)))
+    logger.info("Started running group sequential early stopping; spending function is {}, size of treatment is {} "
+                "and size of control is {}".format(spending_function, len(x), len(y)))
 
     # Coercing missing values to right format
     _x = np.array(x, dtype=float)
@@ -227,7 +227,7 @@ def _bayes_sampling(x, y, distribution='normal', num_iters=25000, inference="sam
         sampling_results[key] = (traces, n_x, n_y, mu_x, mu_y)
 
     logger.info("Finished running bayesian inference with {} procedure, treatment group of size {}, "
-                "control group of size {}, {} distribution.".format(inference, len(x), len(y), distribution, inference))
+                "control group of size {}, {} distribution.".format(inference, len(x), len(y), distribution))
     return traces, n_x, n_y, mu_x, mu_y
 
 
@@ -255,6 +255,10 @@ def bayes_factor(x, y, distribution='normal', num_iters=25000, inference='sampli
     :return: results of type EarlyStoppingTestStatistics (without p-value and stat. power)
     :rtype:  EarlyStoppingTestStatistics
     """
+
+    logger.info("Started running bayes factor with {} procedure, treatment group of size {}, "
+                "control group of size {}, {} distribution.".format(len(x), len(y), distribution, inference))
+
     traces, n_x, n_y, mu_x, mu_y = _bayes_sampling(x, y, distribution=distribution, num_iters=num_iters,
                                                    inference=inference)
     trace_normalized_effect_size = get_trace_normalized_effect_size(distribution, traces)
@@ -275,6 +279,9 @@ def bayes_factor(x, y, distribution='normal', num_iters=25000, inference='sampli
     treatment_statistics = SampleStatistics(int(n_x), float(mu_x), float(np.nanvar(x)))
     control_statistics   = SampleStatistics(int(n_y), float(mu_y), float(np.nanvar(y)))
     variant_statistics   = BaseTestStatistics(control_statistics, treatment_statistics)
+
+    logger.info("Finished running bayes factor with {} procedure, treatment group of size {}, "
+                "control group of size {}, {} distribution.".format(len(x), len(y), distribution, inference))
 
     return EarlyStoppingTestStatistics(variant_statistics.control_statistics,
                                        variant_statistics.treatment_statistics,
@@ -308,6 +315,10 @@ def bayes_precision(x, y, distribution='normal', posterior_width=0.08, num_iters
     :return: results of type EarlyStoppingTestStatistics (without p-value and stat. power)
     :rtype:  EarlyStoppingTestStatistics
     """
+
+    logger.info("Started running bayes precision with {} procedure, treatment group of size {}, "
+                "control group of size {}, {} distribution.".format(len(x), len(y), distribution, inference))
+
     traces, n_x, n_y, mu_x, mu_y = _bayes_sampling(x, y, distribution=distribution,
                                                    num_iters=num_iters, inference=inference)
     trace_normalized_effect_size = get_trace_normalized_effect_size(distribution, traces)
@@ -326,6 +337,9 @@ def bayes_precision(x, y, distribution='normal', posterior_width=0.08, num_iters
     treatment_statistics = SampleStatistics(int(n_x), float(mu_x), float(np.nanvar(x)))
     control_statistics   = SampleStatistics(int(n_y), float(mu_y), float(np.nanvar(y)))
     variant_statistics   = BaseTestStatistics(control_statistics, treatment_statistics)
+
+    logger.info("Finished running bayes precision with {} procedure, treatment group of size {}, "
+                "control group of size {}, {} distribution.".format(len(x), len(y), distribution, inference))
 
     return EarlyStoppingTestStatistics(variant_statistics.control_statistics,
                                        variant_statistics.treatment_statistics,
@@ -379,6 +393,8 @@ def get_or_compile_stan_model(model_file, distribution):
     :return: compiled Stan model for the selected distribution or normal distribution as a default option
     :rtype:  Class representing a compiled Stan model
     """
+
+    logger.info("Started loading and compiling Stan model for {} distribution".format(distribution))
 
     if distribution is not 'normal' and distribution is not 'poisson':
         raise ValueError("Model " + distribution + " is not implemented.")
