@@ -16,7 +16,7 @@ def git_commit_count():
 
 
 def git_latest_commit():
-    """" Returns output of `git rev-parse HEAD`.
+    """ Returns output of `git rev-parse HEAD`.
     Note: http://programmers.stackexchange.com/a/151558. """
 
     return subprocess.check_output(["git", "rev-parse", "HEAD"]).strip()
