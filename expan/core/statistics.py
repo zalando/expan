@@ -10,8 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 def _delta_mean(x, y):
-    """ Calculate the delta of the two groups.
-    Implemented as function to allow being called from bootstrap. """
+    """ Calculate the delta of the two groups. Implemented as function to allow being called from bootstrap. """
     return np.nanmean(x) - np.nanmean(y)
 
 
@@ -233,7 +232,7 @@ def pooled_std(std1, n1, std2, n2):
     :type  std1: float
     :param n1: size of first sample
     :type  n1: int
-    :param std12: standard deviation of second sample
+    :param std2: standard deviation of second sample
     :type  std2: float
     :param n2: size of second sample
     :type  n2: int
@@ -345,6 +344,7 @@ def compute_statistical_power_from_samples(x, y, alpha=0.05):
     :param y: samples of a control group
     :type  y: pd.Series or array-like
     :param alpha: Type I error (false positive rate)
+    :type  alpha: float
     
     :return: statistical power---the probability of a test to detect an effect if the effect actually exists
     :rtype: float

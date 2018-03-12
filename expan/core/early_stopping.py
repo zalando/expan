@@ -28,6 +28,7 @@ def obrien_fleming(information_fraction, alpha=0.05):
                                  e.g. the share of the maximum sample size
     :type  information_fraction: float
     :param alpha: type-I error rate
+    :type  alpha: float
 
     :return: redistributed alpha value at the time point with the given information fraction
     :rtype:  float
@@ -291,6 +292,7 @@ def bayes_factor(x, y, distribution='normal', num_iters=25000, inference='sampli
 
 
 def make_bayes_precision(distribution='normal', posterior_width=0.08, num_iters=25000, inference='sampling'):
+    """ Closure method for the bayes_precision"""
     def f(x, y):
         return bayes_precision(x, y, distribution, posterior_width, num_iters, inference)
     return f
@@ -379,7 +381,7 @@ def get_or_compile_stan_model(model_file, distribution):
     Note: compiled_model_file is the hardcoded file path which may cause some issues in future.
     There are 2 alternative implementations for Stan models handling:
         1. Using global variables
-        2. Pre-compiling stan models and adding them as a part of expan project
+        2. Pre-compiling stan models and adding them as a part of ExpAn project
         (3). Using temporary files with tempfile module is not currently possible, since it 
             generates a unique file name which is difficult to track.
         However, compiled modules are saved in temporary directory using tempfile module 

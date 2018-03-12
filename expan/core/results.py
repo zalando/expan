@@ -19,8 +19,11 @@ class BaseTestStatistics(JsonSerializable):
 class SampleStatistics(JsonSerializable):
     """ This class holds sample size, mean and variance.
     
-    :type sample_size: int
-    :type mean: float
+    :param sample_size: samples size of the control or treatment group
+    :type  sample_size: int
+    :param mean: mean of the control or treatment group
+    :type  mean: float
+    :param variance: variance of the control or treatment group
     :type variance: float
     """
     def __init__(self, sample_size, mean, variance):
@@ -32,11 +35,16 @@ class SampleStatistics(JsonSerializable):
 class SimpleTestStatistics(BaseTestStatistics):
     """ Additionally to BaseTestStatistics, holds delta, confidence interval, statistical power, and p value.
     
-    :type control_statistics: SampleStatistics
-    :type treatment_statistics: SampleStatistics
-    :type delta: float
-    :type p: float
-    :type statistical_power: float
+    :param control_statistics: sample size, mean, variance for the control group
+    :type  control_statistics: SampleStatistics
+    :param treatment_statistics: sample size, mean, variance for the treatment group
+    :type  treatment_statistics: SampleStatistics
+    :param delta: delta (relative or absolute difference between control and treatment, uplift)
+    :type  delta: float
+    :param p: p value
+    :type  p: float
+    :param statistical_power: statistical power value
+    :type  statistical_power: float
     :param ci: a dict where keys are percentiles and values are the corresponding value for the statistic.
     :type  ci: dict
     """
@@ -51,14 +59,17 @@ class SimpleTestStatistics(BaseTestStatistics):
 class EarlyStoppingTestStatistics(SimpleTestStatistics):
     """ Additionally to SimpleTestStatistics, holds boolean flag for early stopping.
     
-    :type control_statistics: SampleStatistics
-    :type treatment_statistics: SampleStatistics
-    :type delta: float
-    :type p: float
-    :type statistical_power: float
+    :param control_statistics: sample size, mean, variance for the control group
+    :type  control_statistics: SampleStatistics
+    :param treatment_statistics: sample size, mean, variance for the treatment group
+    :type  treatment_statistics: SampleStatistics
+    :type  delta: float
+    :type  p: float
+    :type  statistical_power: float
     :param ci: a dict where keys are percentiles and values are the corresponding value for the statistic.
     :type  ci: dict
-    :type stop: bool
+    :param stop: early-stopping flag
+    :type  stop: bool
     """
     def __init__(self, control_statistics, treatment_statistics, delta, ci, p, statistical_power, stop):
         super(EarlyStoppingTestStatistics, self).__init__(control_statistics, treatment_statistics, delta, ci, p, statistical_power)

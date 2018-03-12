@@ -214,8 +214,12 @@ class Experiment(object):
         1. there is no data
         2. the data does not contain all the variants to perform analysis
         
-        :type data: DataFrame
-        :type test: StatisticalTest
+        :param data: data frame for which a check for validity will be made
+        :type  data: DataFrame
+        :param test: a statistical test for control name and treatment name
+        :type  test: StatisticalTest
+        
+        :return True if data is valid for analysis and False if not
         :rtype: bool 
         """
         if len(data[data[test.variants.variant_column_name] == test.variants.control_name]) <= 1:
@@ -230,9 +234,12 @@ class Experiment(object):
         """ Perform the re-weighting trick on the selected derived kpi
         See http://expan.readthedocs.io/en/latest/glossary.html#per-entity-ratio-vs-ratio-of-totals
         
-        :type data: pd.DataFrame
-        :type test: StatisticalTest
-        :type variant_name: str
+        :param data: data subset by derived kpi and variant, for which the re-weighting trick should be done
+        :type  data: pd.DataFrame
+        :param test: statistical test, provides the derived kpi denominator for the re-weighting trick
+        :type  test: StatisticalTest
+        :param variant_name: variant name for data subset by kpi and variant
+        :type  variant_name: str
         
         :return returns re-weighted kpi values of type pd.Series
         :rtype: pd.Series

@@ -24,10 +24,12 @@ def find_value_by_key_with_condition(items, condition_key, condition_value, look
     :param items: list of dictionaries
     :type  items: list
     :param condition_key: condition key
-    :param condition_value: condition value
-    :param lookup_key: lookup key
+    :type  condition_key: str
+    :param condition_value: a value for the condition key
+    :param lookup_key: lookup key or key you want to find the value for
+    :type  lookup_key: str
     
-    :return: lookup value
+    :return: lookup value or found value for the lookup key
     """
     return [item[lookup_key] for item in items if item[condition_key] == condition_value][0]
 
