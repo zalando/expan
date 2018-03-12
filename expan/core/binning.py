@@ -1,4 +1,4 @@
-# TODO: This module is deprecated
+""" NB: This module is deprecated. """
 
 import logging
 import warnings

@@ -17,7 +17,7 @@ Testing
 
 Easiest way to run tests is by running the command ``tox`` from the terminal. The default Python environments for testing with are py27 and py34, but you can specify your own by running e.g. ``tox -e py35``.
 
-Branching / Release
+Branching
 ===================
 
 We currently use the gitflow workflow. Feature branches are created from
@@ -59,6 +59,17 @@ and then config `make docs` to use this changelog file.
 
 
 We explain the individual steps below.
+
+
+Sphinx documentation
+-----------------------
+:code:`make docs` will create the html documentation if you have sphinx installed.
+You might need to install our theme explicitly by :code:`pip install sphinx_rtd_theme`. 
+
+If you have encountered an error like this: 
+:code:`API rate limit exceeded for github_username`, It's time to create a git token and set an environment variable for it.
+See instructions `here <https://github.com/skywinder/github-changelog-generator#github-token>`__.
+
 
 
 Versioning
