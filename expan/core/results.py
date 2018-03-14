@@ -103,7 +103,7 @@ class StatisticalTestResult(JsonSerializable):
     :param test: information about the statistical test
     :type  test: StatisticalTest
     :param result: result of this statistical test
-    :type  result: BaseTestStatistics or its subclasses or CorrectedTestStatistics  #TODO: better approach?
+    :type  result: BaseTestStatistics or its subclasses or CorrectedTestStatistics
     """
     def __init__(self, test, result):
         self.test   = test
