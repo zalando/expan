@@ -47,7 +47,7 @@ The ratio of totals is a re-weighted version of :math:`CR_i` to reflect not the 
 Overall as Reweighted Individual
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-One can calculate the :math:`CR^{(rt)}` from the :math:`\overline{CR}^{(pe)}` using the following weighting factor (easily proved by paper and pencil):
+One can calculate the :math:`CR^{(rt)}` from the :math:`\overline{CR}^{(pe)}` using the following weighting factor:
 
 .. math::
 

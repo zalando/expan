@@ -41,12 +41,6 @@ used by both data scientists optimizing a user interface and biologists
 running wet-lab experiments. The library is also standalone and can be
 imported and used from within other projects and from the command line.
 
-Major statistical functionalities include:
-
-- **delta**
-- **subgroup analysis**
-- **trend analysis** (coming soon)
-
 
 Installation
 ============
@@ -101,10 +95,15 @@ Some mock-up data:
 
     from expan.core.experiment import Experiment
     from expan.core.util import generate_random_data
+    from expan.core.statistical_test import KPI, Variants, StatisticalTest
 
     data, metadata = generate_random_data()
-    exp = Experiment(control_variant_name='B', data=data, metadata=metadata)
-    exp.delta()
+    exp = Experiment(data=data, metadata=metadata)
+
+    kpi = KPI('normal_same')
+    variants = Variants(variant_column_name='variant', control_name='B', treatment_name='A')
+    test = StatisticalTest(kpi=kpi, features=[], variants=variants)
+    exp.analyze_statistical_test(test)
 
 
 

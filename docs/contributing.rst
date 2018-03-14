@@ -67,7 +67,7 @@ Sphinx documentation
 You might need to install our theme explicitly by :code:`pip install sphinx_rtd_theme`. 
 
 If you have encountered an error like this: 
-:code:`API rate limit exceeded for github_username`, It's time to create a git token and set an environment variable for it.
+:code:`API rate limit exceeded for github_username`, you need to create a git token and set an environment variable for it.
 See instructions `here <https://github.com/skywinder/github-changelog-generator#github-token>`__.
 
 
@@ -76,7 +76,7 @@ Versioning
 ----------------
 
 **For the sake of reproducibility, always be sure to work with a release
-when doing the analysis!**. We use semantic versioning (http://semver.org).
+when doing the analysis!**. We use `semantic versioning <http://semver.org>`__.
 
 The version is maintained in ``setup.cfg``, and propagated from there to various files
 by the ``bumpversion`` program. The most important propagation destination is
@@ -112,10 +112,10 @@ Travis CI
 
 We use Travis CI for testing builds and deploying our PyPI package.
 
-A **build** and **test** is triggered when either
+A **build** with unit tests is triggered either
 
 - a commit is pushed to **master**
-- or a **pull request to **master** is opened.
+- or a **pull request** to **master** is opened.
 
 A release to PyPI will be triggered if a new tag is pushed to **master**.
 

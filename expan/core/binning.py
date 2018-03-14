@@ -24,8 +24,8 @@ class Bin(object):
         :param id: identifier (e.g. bin number) of the bin
         :param bin_type: "numerical" or "categorical"
         :param repr_args: arguments to represent this bin. 
-                          args for numerical bin includes lower, upper, lower_closed, upper_closed
-                          args for categorical bin includes a list of categories for this bin.
+        args for numerical bin includes lower, upper, lower_closed, upper_closed
+        args for categorical bin includes a list of categories for this bin.
         """
         if bin_type == "numerical" and len(repr_args) != 4:
             raise ValueError("args for numerical bin are lower, upper, lower_closed, upper_closed.")

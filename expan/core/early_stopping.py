@@ -42,13 +42,13 @@ def make_group_sequential(spending_function='obrien_fleming', estimated_sample_s
 
 
 def group_sequential(x, y, spending_function='obrien_fleming', estimated_sample_size=None, alpha=0.05, cap=8):
-    """ Group sequential method to determine whether to stop early or not.
+    """ Group sequential method to determine whether to stop early.
 
     :param x: sample of a treatment group
-    :type  x: pd.Series or list (array-like)
+    :type  x: pd.Series or array-like
     :param y: sample of a control group
-    :type  y : pd.Series or list (array-like)
-    :param spending_function: name of the alpha spending function, currently supports: 'obrien_fleming'
+    :type  y: pd.Series or array-like
+    :param spending_function: name of the alpha spending function, currently supports only 'obrien_fleming'.
     :type  spending_function: str
     :param estimated_sample_size: sample size to be achieved towards the end of experiment
     :type  estimated_sample_size: int
@@ -380,12 +380,14 @@ def get_or_compile_stan_model(model_file, distribution):
     
     Note: compiled_model_file is the hardcoded file path which may cause some issues in future.
     There are 2 alternative implementations for Stan models handling:
-        1. Using global variables
-        2. Pre-compiling stan models and adding them as a part of ExpAn project
-        (3). Using temporary files with tempfile module is not currently possible, since it 
-            generates a unique file name which is difficult to track.
-        However, compiled modules are saved in temporary directory using tempfile module 
-        which vary based on the current platform and settings. Cleaning up a temp dir is done on boot.
+
+    1. Using global variables
+    2. Pre-compiling stan models and adding them as a part of ExpAn project
+
+    Using temporary files with tempfile module is not currently possible,
+    since it generates a unique file name which is difficult to track.
+    However, compiled modules are saved in temporary directory using tempfile module 
+    which vary based on the current platform and settings. Cleaning up a temp dir is done on boot.
 
     :param model_file: model file location
     :type  model_file: str
