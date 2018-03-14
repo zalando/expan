@@ -167,13 +167,6 @@ An example of the result is shown below:
     }
 
 
-Statistical test suite
-----------------------------
-
-
-
-
-
 Subgroup analysis
 -------------------
 Subgroup analysis in ExaAn will select subgroup (which is a segment of data) based on the input argument,
@@ -181,20 +174,152 @@ and then perform a regular delta analysis per subgroup as described before.
 That is to say, we don't compare between subgroups, but compare treatment with control within each subgroup.
 
 
-An example is provided below.
+Statistical test suite
+----------------------------
+
+
+
+And an example result of statistical test suite is:
 
 .. code-block:: python
 
-	dimension_to_bins = {"treatment_start_time": [
-	    Bin("numerical", 0, 5, True, False),
-	    Bin("numerical", 5, 10, True, False)]
+	{
+	    "correction_method": "BH", 
+	    "results": [
+	        {
+	        	"test": {
+	                "features": [], 
+	                "kpi": {
+	                    "name": "revenue"
+	                }, 
+	                "variants": {
+	                    "control_name": "control", 
+	                    "treatment_name": "treatment", 
+	                    "variant_column_name": "variant"
+	                }
+	            },
+	            "result": {
+	                "corrected_test_statistics": {
+	                    "confidence_interval": [
+	                        {
+	                            "percentile": 1.0, 
+	                            "value": -0.7
+	                        }, 
+	                        {
+	                            "percentile": 99.0, 
+	                            "value": 0.7
+	                        }
+	                    ], 
+	                    "control_statistics": {
+	                        "mean": 0.0, 
+	                        "sample_size": 1000, 
+	                        "variance": 1.0
+	                    }, 
+	                    "delta": 1.0, 
+	                    "p": 0.02, 
+	                    "statistical_power": 0.8, 
+	                    "treatment_statistics": {
+	                        "mean": 1.0, 
+	                        "sample_size": 1200, 
+	                        "variance": 1.0
+	                    }
+	                }, 
+	                "original_test_statistics": {
+	                    "confidence_interval": [
+	                        {
+	                            "percentile": 2.5, 
+	                            "value": 0.1
+	                        }, 
+	                        {
+	                            "percentile": 97.5, 
+	                            "value": 1.1
+	                        }
+	                    ], 
+	                    "control_statistics": {
+	                        "mean": 0.0, 
+	                        "sample_size": 1000, 
+	                        "variance": 1.0
+	                    }, 
+	                    "delta": 1.0, 
+	                    "p": 0.04, 
+	                    "statistical_power": 0.8, 
+	                    "treatment_statistics": {
+	                        "mean": 1.0, 
+	                        "sample_size": 1200, 
+	                        "variance": 1.0
+	                    }
+	                }
+	            }
+	        },
+	        {
+	            "test": {
+	                "features": [], 
+	                "kpi": {
+	                    "name": "revenue"
+	                }, 
+	                "variants": {
+	                    "control_name": "control", 
+	                    "treatment_name": "treatment", 
+	                    "variant_column_name": "variant"
+	                }
+	            }, 
+	            "result": {
+	                "corrected_test_statistics": {
+	                    "confidence_interval": [
+	                        {
+	                            "percentile": 1.0, 
+	                            "value": -0.7
+	                        }, 
+	                        {
+	                            "percentile": 99.0, 
+	                            "value": 0.7
+	                        }
+	                    ], 
+	                    "control_statistics": {
+	                        "mean": 0.0, 
+	                        "sample_size": 1000, 
+	                        "variance": 1.0
+	                    }, 
+	                    "delta": 1.0, 
+	                    "p": 0.02, 
+	                    "statistical_power": 0.8, 
+	                    "stop": false, 
+	                    "treatment_statistics": {
+	                        "mean": 1.0, 
+	                        "sample_size": 1200, 
+	                        "variance": 1.0
+	                    }
+	                }, 
+	                "original_test_statistics": {
+	                    "confidence_interval": [
+	                        {
+	                            "percentile": 2.5, 
+	                            "value": 0.1
+	                        }, 
+	                        {
+	                            "percentile": 97.5, 
+	                            "value": 1.1
+	                        }
+	                    ], 
+	                    "control_statistics": {
+	                        "mean": 0.0, 
+	                        "sample_size": 1000, 
+	                        "variance": 1.0
+	                    }, 
+	                    "delta": 1.0, 
+	                    "p": 0.04, 
+	                    "statistical_power": 0.8, 
+	                    "stop": true, 
+	                    "treatment_statistics": {
+	                        "mean": 1.0, 
+	                        "sample_size": 1200, 
+	                        "variance": 1.0
+	                    }
+	                }
+	            }
+	        }
+	    ]
 	}
-	exp.sga(dimension_to_bins)
-
-And the result of subgroup analysis is:
-
-.. code-block:: python
-
 
 
 
