@@ -12,8 +12,8 @@ Contents:
    :maxdepth: 1
 
    readme
-   api
    tutorial
+   api
    glossary
    history
    contributing

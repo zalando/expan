@@ -46,7 +46,7 @@ class Experiment(object):
         :type  test: StatisticalTest
         :param testmethod: analysis method
         :type  testmethod: str
-        :param **worker_args: additional arguments for the analysis method
+        :param worker_args: additional arguments for the analysis method
 
         :return: statistical result of the test
         :rtype: StatisticalTestResult
@@ -123,7 +123,7 @@ class Experiment(object):
         :param testmethod: analysis method to perform. 
                            It can be 'fixed_horizon', 'group_sequential', 'bayes_factor' or 'bayes_precision'.
         :type  testmethod: str
-        :param **worker_args: additional arguments for the analysis method (see signatures of corresponding methods)
+        :param worker_args: additional arguments for the analysis method (see signatures of corresponding methods)
 
         :return: statistical result of the test suite
         :rtype: MultipleTestSuiteResult
