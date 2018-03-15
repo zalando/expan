@@ -15,7 +15,8 @@ with the following exceptions:
 Testing
 =========
 
-Easiest way to run tests is by running the command ``tox`` from the terminal. The default Python environments for testing with are py27 and py34, but you can specify your own by running e.g. ``tox -e py35``.
+Easiest way to run tests is by running the command ``tox`` from the terminal. The default Python environments for testing are python 2.7 and python 3.6.
+You can also specify your own by running e.g. ``tox -e py35``.
 
 Branching
 ===================
@@ -56,7 +57,7 @@ because it reads the commit messages from git remote.
 
 Solution: We need to run ``make docs`` on **master** once more *after the release* to update the documentation page.
 
-ToDo: A better solution could be to discard the automatic changelog generator and manually write the changelog before step 1, 
+A better solution could be to discard the automatic changelog generator and manually write the changelog before step 1, 
 and then config ``make docs`` to use this changelog file.
 
 

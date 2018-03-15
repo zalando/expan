@@ -1,6 +1,18 @@
 Change Log
 ==========
 
+`Unreleased <https://github.com/zalando/expan/tree/HEAD>`__
+-----------------------------------------------------------
+
+`Full
+Changelog <https://github.com/zalando/expan/compare/v0.6.13...HEAD>`__
+
+**Merged pull requests:**
+
+-  Fix logging sga error logging
+   `#203 <https://github.com/zalando/expan/pull/203>`__
+   (`igusher <https://github.com/igusher>`__)
+
 `v0.6.13 <https://github.com/zalando/expan/tree/v0.6.13>`__ (2018-03-15)
 ------------------------------------------------------------------------
 

@@ -17,7 +17,7 @@ First, let's generate some random data for the tutorial.
 It must contain a column for entity identifier named **entity**, 
 a column for variant, and one column per kpi/feature.
 
-``metadata`` is a python dict. Keys of it can contain:
+``metadata`` is a python dict. It should contain the following keys:
 
 	* ``experiment``: Name of the experiment, as known to stakeholders. It can be anything meaningful to you.
 	* ``sources`` (optional): Names of the data sources used in the preparation of this data.
@@ -56,16 +56,6 @@ Each statistical test consist of one kpi, treatment and control variant names, a
     kpi = KPI('normal_same')
     variants = Variants(variant_column_name='variant', control_name='B', treatment_name='A')
     test = StatisticalTest(kpi=kpi, features=[], variants=variants)
-
-If you wish to perform the test on a specific subgroup,
-you can use the ``FeatureFilter`` object:
-
-.. code-block:: python
-
-    feature = FeatureFilter('feature', 'has')
-    test = StatisticalTest(kpi=kpi, features=[feature], variants=variants)
-
-Subgroup analysis will be covered in later sections.
 
 
 Let's start analyzing!
@@ -173,13 +163,57 @@ Subgroup analysis in ExaAn will select subgroup (which is a segment of data) bas
 and then perform a regular delta analysis per subgroup as described before.
 That is to say, we don't compare between subgroups, but compare treatment with control within each subgroup.
 
+If you wish to perform the test on a specific subgroup,
+you can use the ``FeatureFilter`` object:
+
+.. code-block:: python
+
+    feature = FeatureFilter('feature', 'has')
+    test = StatisticalTest(kpi=kpi, features=[feature], variants=variants)
+
 
 Statistical test suite
 ----------------------------
 
+It is very common to run a suite of statistical tests. 
+In this case, you need to create a ``StatisticalTestSuite`` object to represent the test suite.
+A ``StatisticalTestSuite`` object consists of a list of ``StatisticalTest`` and a correction method:
+
+.. code-block:: python
+
+	from expan.core.statistical_test import *
+
+	kpi = KPI('normal_same')
+	variants = Variants(variant_column_name='variant', control_name='B', treatment_name='A')
+
+	feature_1 = FeatureFilter('feature', 'has')
+	feature_2 = FeatureFilter('feature', 'non')
+	feature_3 = FeatureFilter('feature', 'feature that only has one data point')
+
+	test_subgroup1 = StatisticalTest(kpi, [feature_1], variants)
+	test_subgroup2 = StatisticalTest(kpi, [feature_2], variants)
+	test_subgroup3 = StatisticalTest(kpi, [feature_3], variants)
+
+	tests = [test_subgroup1, test_subgroup2, test_subgroup3]
+	test_suite = StatisticalTestSuite(tests=tests, correction_method=CorrectionMethod.BH)
+
+And then you can use the ```Experiment``` instance to run the test suite.
+Method ``analyze_statistical_test_suite`` has the same arguments as ``analyze_statistical_test``. For example:
+
+.. code-block:: python
+
+	exp.analyze_statistical_test_suite(test_suite)
+	exp.analyze_statistical_test_suite(test_suite, method='group_sequential', estimated_sample_size=1000)
+	exp.analyze_statistical_test_suite(test_suite, method='bayes_factor', distribution='normal')
 
 
-And an example result of statistical test suite is:
+Result of statistical test suite
+--------------------------------------
+
+The output of the ``analyze_statistical_test_suite`` method is an instance of class :py:class:`core.result.MultipleTestSuiteResult`.
+Please refer to the :ref:`API <modindex>` page for result structure as well as descriptions of all fields.
+
+Following is an example of the analysis result of statistical test suite:
 
 .. code-block:: python
 
@@ -322,6 +356,7 @@ And an example result of statistical test suite is:
 	}
 
 
+That's it! 
 
-That's it! Try it out for yourself: `<github.com/zalando/expan>`_
+For API list and theoretical concepts, please read the next few sections.
 

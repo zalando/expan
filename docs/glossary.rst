@@ -67,9 +67,11 @@ To have such functionality as a more generic approach in **ExpAn**, we can intro
 - The per-entity metric, e.g. :math:`O_i/V_i`
 - A reference metric, on which the weighting factor is based, e.g. :math:`V_i`
 
-With this input it calculates :math:`\alpha` as described above and outputs the result of ``statistics.delta()``.
-
 **NB: At the moment, Expan always uses the re-weighting trick for ratio-based KPIs.** This is how such KPIs are defined in Zalando.
+
+In the implementation, we first calculate the per-entity metric by calculating the division of the two columns.
+Afterward, we multiply the per-entity metric by the weight :math:`\frac{V_i}{\sum_{i=1}^n V_i}`.
+
 
 Early stopping
 ------------------------------------
