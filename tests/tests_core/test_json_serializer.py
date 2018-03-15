@@ -84,7 +84,7 @@ class StatisticalTestCase(unittest.TestCase):
         test_result1 = StatisticalTestResult(statistical_test, CorrectedTestStatistics(simple_stats, simple_stats_corrected))
         test_result2 = StatisticalTestResult(statistical_test, CorrectedTestStatistics(es_stats, es_stats_corrected))
         test_results = [test_result1, test_result2]
-        statistical_test_results = MultipleTestSuiteResult(test_results, "none")
+        statistical_test_results = MultipleTestSuiteResult(test_results, CorrectionMethod.BH)
 
         js_result = statistical_test_results.toJson()  # no error/exception should be raise
         print(js_result)    # use pytest -s to check the output if needed

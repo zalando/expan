@@ -12,15 +12,16 @@ logger = logging.getLogger(__name__)
 
 def get_data(folder_path):
     """ Expects as input a folder containing the following files:
-     - one .csv or .csv.gz with 'data' in the filename
-     - one .json containing 'metadata' in the filename
+
+    - one .csv or .csv.gz with 'data' in the filename
+    - one .json containing 'metadata' in the filename
+
     Opens the files and uses them to create an Experiment object which it then returns.
 
     :param folder_path: path to the Experiment data
     :type  folder_path: str
     :return: Experiment object with data
     :rtype:  Experiment
-
     """
     files = [f for f in listdir(folder_path) if isfile(join(folder_path, f))]
 

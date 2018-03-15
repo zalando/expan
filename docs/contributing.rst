@@ -15,9 +15,10 @@ with the following exceptions:
 Testing
 =========
 
-Easiest way to run tests is by running the command ``tox`` from the terminal. The default Python environments for testing with are py27 and py34, but you can specify your own by running e.g. ``tox -e py35``.
+Easiest way to run tests is by running the command ``tox`` from the terminal. The default Python environments for testing are python 2.7 and python 3.6.
+You can also specify your own by running e.g. ``tox -e py35``.
 
-Branching / Release
+Branching
 ===================
 
 We currently use the gitflow workflow. Feature branches are created from
@@ -51,21 +52,34 @@ The flow would then look like follows:
 
 You can then check if the triggered Travis CI job is tagged (the name should be eg. 'v1.2.3' instead of 'master').
 
-Note that it has a flaw that changelog generator will not put the changes of the current release, 
+Note that this workflow has a flaw that changelog generator will not put the changes of the current release, 
 because it reads the commit messages from git remote. 
 
-ToDo: One solution could be to discard the automatic changelog generator and manually write the changelog before step 1, 
-and then config `make docs` to use this changelog file.
+Solution: We need to run ``make docs`` on **master** once more *after the release* to update the documentation page.
+
+A better solution could be to discard the automatic changelog generator and manually write the changelog before step 1, 
+and then config ``make docs`` to use this changelog file.
 
 
 We explain the individual steps below.
+
+
+Sphinx documentation
+-----------------------
+:code:`make docs` will create the html documentation if you have sphinx installed.
+You might need to install our theme explicitly by :code:`pip install sphinx_rtd_theme`. 
+
+If you have encountered an error like this: 
+:code:`API rate limit exceeded for github_username`, you need to create a git token and set an environment variable for it.
+See instructions `here <https://github.com/skywinder/github-changelog-generator#github-token>`__.
+
 
 
 Versioning
 ----------------
 
 **For the sake of reproducibility, always be sure to work with a release
-when doing the analysis!**. We use semantic versioning (http://semver.org).
+when doing the analysis!**. We use `semantic versioning <http://semver.org>`__.
 
 The version is maintained in ``setup.cfg``, and propagated from there to various files
 by the ``bumpversion`` program. The most important propagation destination is
@@ -101,10 +115,10 @@ Travis CI
 
 We use Travis CI for testing builds and deploying our PyPI package.
 
-A **build** and **test** is triggered when either
+A **build** with unit tests is triggered either
 
 - a commit is pushed to **master**
-- or a **pull request to **master** is opened.
+- or a **pull request** to **master** is opened.
 
 A release to PyPI will be triggered if a new tag is pushed to **master**.
 

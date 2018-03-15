@@ -1,11 +1,11 @@
-expan.data package
-==================
+expan\.data package
+===================
 
 Submodules
 ----------
 
-expan.data.csv_fetcher module
------------------------------
+expan\.data\.csv\_fetcher module
+--------------------------------
 
 .. automodule:: expan.data.csv_fetcher
     :members:
