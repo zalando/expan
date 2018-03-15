@@ -6,7 +6,6 @@ Subpackages
 
 .. toctree::
 
-    expan.cli
     expan.core
     expan.data
 

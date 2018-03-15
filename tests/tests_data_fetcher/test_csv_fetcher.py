@@ -14,23 +14,18 @@ TEST_FOLDER = join(__location__, 'test_folder')
 
 class CsvFetcherTestCase(unittest.TestCase):
     def setUp(self):
-
         # create test folder
         if not exists(TEST_FOLDER):
             makedirs(TEST_FOLDER)
-
-        # generate metrics and metadata
-        (metrics, metadata) = expan.core.util.generate_random_data()
-
-        # save metrics to .csv.gz file in test folder
-        metrics.to_csv(path_or_buf=join(TEST_FOLDER, 'metrics.csv.gz'), compression='gzip')
-
+        # generate data and metadata
+        (data, metadata) = expan.core.util.generate_random_data()
+        # save data to .csv.gz file in test folder
+        data.to_csv(path_or_buf=join(TEST_FOLDER, 'data.csv.gz'), compression='gzip')
         # save metadata to .json file in test folder
         with open(join(TEST_FOLDER, 'metadata.json'), 'w') as f:
             json.dump(metadata, f)
 
     def tearDown(self):
-
         # remove all test files and test folder
         for root, dirs, files in walk(TEST_FOLDER, topdown=False):
             for name in files:
@@ -40,9 +35,6 @@ class CsvFetcherTestCase(unittest.TestCase):
         rmdir(TEST_FOLDER)
 
     def test_csv_fetcher(self):
-        # should work:
-        csv_fetcher.get_data('B', TEST_FOLDER)
-
-        # should not work:
+        csv_fetcher.get_data(TEST_FOLDER)
         with self.assertRaises(AssertionError):
-            csv_fetcher.get_data('B', join(__location__, '..'))
+            csv_fetcher.get_data(join(__location__, '..'))

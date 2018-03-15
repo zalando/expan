@@ -109,7 +109,7 @@ exclude_patterns = ['_build']
 pygments_style = 'sphinx'
 
 # A list of ignored prefixes for module index sorting.
-modindex_common_prefix = ['expan.', 'expan.core.', 'expan.cli.', 'expan.data.']
+modindex_common_prefix = ['expan.', 'expan.core.', 'expan.data.']
 
 # If true, keep warnings as "system message" paragraphs in the built
 # documents.

@@ -2,39 +2,34 @@ import subprocess
 
 __version__ = "0.6.13"
 
+
 def version_numbers():
+    """ Returns ExpAn version. """
     return [int(x) for x in __version__.split('.')]
 
 
 def git_commit_count():
-    """
-    Returns the output of `git rev-list --count HEAD` as an int.
-
-    Note:
-        http://programmers.stackexchange.com/a/151558
-    """
+    """ Returns the output of `git rev-list --count HEAD` as an int.
+    Note: http://programmers.stackexchange.com/a/151558 """
 
     return int(subprocess.check_output(["git", "rev-list", "--count", "HEAD"]))
 
 
 def git_latest_commit():
-    """"
-    Returns output of `git rev-parse HEAD`.
+    """ Returns output of `git rev-parse HEAD`.
+    Note: http://programmers.stackexchange.com/a/151558. """
 
-    Note:
-        http://programmers.stackexchange.com/a/151558
-    """
     return subprocess.check_output(["git", "rev-parse", "HEAD"]).strip()
 
 
 def version(format_str='{short}'):
-    """
-    Returns current version number in specified format.
+    """ Returns current version number in specified format.
+    
+    :param format_str: format string for the version
+    :type  format_str: str
 
-    Args:
-        format_str (str):
-
-    Returns:
+    :return: version number in the specified format
+    :rtype: str
     """
     major, minor, patch = version_numbers()
 

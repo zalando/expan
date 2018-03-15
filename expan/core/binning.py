@@ -1,10 +1,12 @@
+""" NB: This module is deprecated. """
+
 import logging
 import warnings
 from heapq import heapify, heappush, heappop
 
 import numpy as np
 
-from expan.core.util import is_number_and_nan
+from expan.core.util import is_nan
 
 logger = logging.getLogger(__name__)
 
@@ -22,8 +24,8 @@ class Bin(object):
         :param id: identifier (e.g. bin number) of the bin
         :param bin_type: "numerical" or "categorical"
         :param repr_args: arguments to represent this bin. 
-                          args for numerical bin includes lower, upper, lower_closed, upper_closed
-                          args for categorical bin includes a list of categories for this bin.
+        args for numerical bin includes lower, upper, lower_closed, upper_closed
+        args for categorical bin includes a list of categories for this bin.
         """
         if bin_type == "numerical" and len(repr_args) != 4:
             raise ValueError("args for numerical bin are lower, upper, lower_closed, upper_closed.")
@@ -174,7 +176,7 @@ def create_bins(data, n_bins):
         raise ValueError('Less than one bin makes no sense.')
 
     insufficient_distinct = False
-    n_unique_values = len(np.unique([value for value in data if not is_number_and_nan(value)]))
+    n_unique_values = len(np.unique([value for value in data if not is_nan(value)]))
     if n_unique_values < n_bins:
         insufficient_distinct = True
         warnings.warn("Insufficient unique values for requested number of bins. " +

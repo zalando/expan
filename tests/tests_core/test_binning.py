@@ -1,3 +1,5 @@
+# TODO: This module is deprecated
+
 import sys
 import unittest
 
