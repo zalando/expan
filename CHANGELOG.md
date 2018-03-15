@@ -15,6 +15,7 @@
 
 **Merged pull requests:**
 
+- Wrap sga in try catch [\#202](https://github.com/zalando/expan/pull/202) ([igusher](https://github.com/igusher))
 - Multiple correction method module [\#201](https://github.com/zalando/expan/pull/201) ([shansfolder](https://github.com/shansfolder))
 - Adapted util module and util unit tests [\#199](https://github.com/zalando/expan/pull/199) ([daryadedik](https://github.com/daryadedik))
 - Adapt early stopping [\#198](https://github.com/zalando/expan/pull/198) ([daryadedik](https://github.com/daryadedik))

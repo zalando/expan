@@ -21,6 +21,9 @@ Changelog <https://github.com/zalando/expan/compare/v0.6.12...HEAD>`__
 
 **Merged pull requests:**
 
+-  Wrap sga in try catch
+   `#202 <https://github.com/zalando/expan/pull/202>`__
+   (`igusher <https://github.com/igusher>`__)
 -  Multiple correction method module
    `#201 <https://github.com/zalando/expan/pull/201>`__
    (`shansfolder <https://github.com/shansfolder>`__)
