@@ -2,7 +2,32 @@
 
 ## [Unreleased](https://github.com/zalando/expan/tree/HEAD)
 
-[Full Changelog](https://github.com/zalando/expan/compare/v0.6.11...HEAD)
+[Full Changelog](https://github.com/zalando/expan/compare/v0.6.12...HEAD)
+
+**Implemented enhancements:**
+
+- Applying bins to data frames [\#165](https://github.com/zalando/expan/issues/165)
+
+**Fixed bugs:**
+
+- Sample size with an unequal split ratio [\#187](https://github.com/zalando/expan/issues/187)
+- SGA Percentile Issue [\#178](https://github.com/zalando/expan/issues/178)
+
+**Merged pull requests:**
+
+- Wrap sga in try catch [\#202](https://github.com/zalando/expan/pull/202) ([igusher](https://github.com/igusher))
+- Multiple correction method module [\#201](https://github.com/zalando/expan/pull/201) ([shansfolder](https://github.com/shansfolder))
+- Adapted util module and util unit tests [\#199](https://github.com/zalando/expan/pull/199) ([daryadedik](https://github.com/daryadedik))
+- Adapt early stopping [\#198](https://github.com/zalando/expan/pull/198) ([daryadedik](https://github.com/daryadedik))
+- Adapt statistics.py [\#197](https://github.com/zalando/expan/pull/197) ([shansfolder](https://github.com/shansfolder))
+- Adapt experiment module [\#196](https://github.com/zalando/expan/pull/196) ([shansfolder](https://github.com/shansfolder))
+- Make result classes JSON serializable [\#195](https://github.com/zalando/expan/pull/195) ([shansfolder](https://github.com/shansfolder))
+- Results data structure [\#193](https://github.com/zalando/expan/pull/193) ([shansfolder](https://github.com/shansfolder))
+- fixed small typos in percentiles and doc text [\#191](https://github.com/zalando/expan/pull/191) ([daryadedik](https://github.com/daryadedik))
+- fixing sample size estimation [\#188](https://github.com/zalando/expan/pull/188) ([gbordyugov](https://github.com/gbordyugov))
+
+## [v0.6.12](https://github.com/zalando/expan/tree/v0.6.12) (2018-01-24)
+[Full Changelog](https://github.com/zalando/expan/compare/v0.6.11...v0.6.12)
 
 **Merged pull requests:**
 

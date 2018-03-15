@@ -5,7 +5,58 @@ Change Log
 -----------------------------------------------------------
 
 `Full
-Changelog <https://github.com/zalando/expan/compare/v0.6.11...HEAD>`__
+Changelog <https://github.com/zalando/expan/compare/v0.6.12...HEAD>`__
+
+**Implemented enhancements:**
+
+-  Applying bins to data frames
+   `#165 <https://github.com/zalando/expan/issues/165>`__
+
+**Fixed bugs:**
+
+-  Sample size with an unequal split ratio
+   `#187 <https://github.com/zalando/expan/issues/187>`__
+-  SGA Percentile Issue
+   `#178 <https://github.com/zalando/expan/issues/178>`__
+
+**Merged pull requests:**
+
+-  Wrap sga in try catch
+   `#202 <https://github.com/zalando/expan/pull/202>`__
+   (`igusher <https://github.com/igusher>`__)
+-  Multiple correction method module
+   `#201 <https://github.com/zalando/expan/pull/201>`__
+   (`shansfolder <https://github.com/shansfolder>`__)
+-  Adapted util module and util unit tests
+   `#199 <https://github.com/zalando/expan/pull/199>`__
+   (`daryadedik <https://github.com/daryadedik>`__)
+-  Adapt early stopping
+   `#198 <https://github.com/zalando/expan/pull/198>`__
+   (`daryadedik <https://github.com/daryadedik>`__)
+-  Adapt statistics.py
+   `#197 <https://github.com/zalando/expan/pull/197>`__
+   (`shansfolder <https://github.com/shansfolder>`__)
+-  Adapt experiment module
+   `#196 <https://github.com/zalando/expan/pull/196>`__
+   (`shansfolder <https://github.com/shansfolder>`__)
+-  Make result classes JSON serializable
+   `#195 <https://github.com/zalando/expan/pull/195>`__
+   (`shansfolder <https://github.com/shansfolder>`__)
+-  Results data structure
+   `#193 <https://github.com/zalando/expan/pull/193>`__
+   (`shansfolder <https://github.com/shansfolder>`__)
+-  fixed small typos in percentiles and doc text
+   `#191 <https://github.com/zalando/expan/pull/191>`__
+   (`daryadedik <https://github.com/daryadedik>`__)
+-  fixing sample size estimation
+   `#188 <https://github.com/zalando/expan/pull/188>`__
+   (`gbordyugov <https://github.com/gbordyugov>`__)
+
+`v0.6.12 <https://github.com/zalando/expan/tree/v0.6.12>`__ (2018-01-24)
+------------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/zalando/expan/compare/v0.6.11...v0.6.12>`__
 
 **Merged pull requests:**
 
