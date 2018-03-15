@@ -51,11 +51,13 @@ The flow would then look like follows:
 
 You can then check if the triggered Travis CI job is tagged (the name should be eg. 'v1.2.3' instead of 'master').
 
-Note that it has a flaw that changelog generator will not put the changes of the current release, 
+Note that this workflow has a flaw that changelog generator will not put the changes of the current release, 
 because it reads the commit messages from git remote. 
 
-ToDo: One solution could be to discard the automatic changelog generator and manually write the changelog before step 1, 
-and then config `make docs` to use this changelog file.
+Solution: We need to run ``make docs`` on **master** once more *after the release* to update the documentation page.
+
+ToDo: A better solution could be to discard the automatic changelog generator and manually write the changelog before step 1, 
+and then config ``make docs`` to use this changelog file.
 
 
 We explain the individual steps below.
