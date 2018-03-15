@@ -229,10 +229,13 @@ class Experiment(object):
                 if not self._isValidForAnalysis(subgroup_data):
                     continue
 
-                subgroup_res = self._delta(method='fixed_horizon', data=subgroup_data,
-                                           multi_test_correction=multi_test_correction)
-                subgroup['result'] = subgroup_res
-                subgroups.append(subgroup)
+                try:
+                    subgroup_res = self._delta(method='fixed_horizon', data=subgroup_data,
+                                               multi_test_correction=multi_test_correction)
+                    subgroup['result'] = subgroup_res
+                    subgroups.append(subgroup)
+                except Exception as e:
+                    logger.error("Failed sga for bin {}".format(str(bin)), e)
 
         return subgroups
 
