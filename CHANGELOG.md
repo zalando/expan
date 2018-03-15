@@ -1,8 +1,7 @@
 # Change Log
 
-## [Unreleased](https://github.com/zalando/expan/tree/HEAD)
-
-[Full Changelog](https://github.com/zalando/expan/compare/v0.6.12...HEAD)
+## [v0.6.13](https://github.com/zalando/expan/tree/v0.6.13) (2018-03-15)
+[Full Changelog](https://github.com/zalando/expan/compare/v0.6.12...v0.6.13)
 
 **Implemented enhancements:**
 
