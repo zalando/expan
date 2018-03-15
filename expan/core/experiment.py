@@ -235,7 +235,7 @@ class Experiment(object):
                     subgroup['result'] = subgroup_res
                     subgroups.append(subgroup)
                 except Exception as e:
-                    logger.error("Failed sga for bin {}".format(str(bin)), e)
+                    logger.exception("Failed sga for bin {}".format(str(bin)))
 
         return subgroups
 
