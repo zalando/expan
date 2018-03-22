@@ -358,5 +358,5 @@ Following is an example of the analysis result of statistical test suite:
 
 That's it!
 
-For API list and theoretical concepts, please read the next few sections.
+For API list and theoretical concepts, please read the next sections.
 

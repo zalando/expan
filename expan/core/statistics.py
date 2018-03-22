@@ -187,7 +187,7 @@ def bootstrap(x, y, func=_delta_mean, nruns=10000, percentiles=[2.5, 97.5],
     :type  relative: bool
     
     :return (c_val, bootstraps): c_val is a dict which contains percentile levels (index) and values
-                                 bootstraps is a np.array containing the bootstraping results per run
+                                 bootstraps is a np.array containing the bootstrapping results per run
     :rtype: tuple
     """
     # Checking if data was provided
