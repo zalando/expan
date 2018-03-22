@@ -12,6 +12,7 @@ from expan.core.statistical_test import *
 from expan.core.results import StatisticalTestResult, MultipleTestSuiteResult, CorrectedTestStatistics
 
 warnings.simplefilter('always', UserWarning)
+warnings.filterwarnings("ignore", category=FutureWarning)
 logger = logging.getLogger(__name__)
 
 
@@ -39,13 +40,14 @@ class Experiment(object):
         return 'Experiment "{:s}" with {:d} entities.'.format(self.metadata['experiment'], len(self.data))
 
 
-    def analyze_statistical_test(self, test, testmethod, **worker_args):
+    def analyze_statistical_test(self, test, test_method='fixed_horizon', **worker_args):
         """ Runs delta analysis on one statistical test and returns statistical results.
         
         :param test: a statistical test to run
         :type  test: StatisticalTest
-        :param testmethod: analysis method
-        :type  testmethod: str
+        :param test_method: analysis method to perform. 
+                           It can be 'fixed_horizon', 'group_sequential', 'bayes_factor' or 'bayes_precision'.
+        :type  test_method: str
         :param worker_args: additional arguments for the analysis method
 
         :return: statistical result of the test
@@ -84,9 +86,9 @@ class Experiment(object):
                                               test.variants.treatment_name,
                                               [(feature.column_name, feature.column_value) for feature in test.features]))
 
-        if testmethod not in self.worker_table:
-            raise NotImplementedError("Test method '{}' is not implemented.".format(testmethod))
-        worker = self.worker_table[testmethod](**worker_args)
+        if test_method not in self.worker_table:
+            raise NotImplementedError("Test method '{}' is not implemented.".format(test_method))
+        worker = self.worker_table[test_method](**worker_args)
 
         # create test result object with empty result first
         test_result = StatisticalTestResult(test, None)
@@ -115,14 +117,14 @@ class Experiment(object):
         return test_result
 
 
-    def analyze_statistical_test_suite(self, test_suite, testmethod='fixed_horizon', **worker_args):
+    def analyze_statistical_test_suite(self, test_suite, test_method='fixed_horizon', **worker_args):
         """ Runs delta analysis on a set of tests and returns statistical results for each statistical test in the suite.
         
         :param test_suite: a suite of statistical test to run
         :type  test_suite: StatisticalTestSuite
-        :param testmethod: analysis method to perform. 
+        :param test_method: analysis method to perform. 
                            It can be 'fixed_horizon', 'group_sequential', 'bayes_factor' or 'bayes_precision'.
-        :type  testmethod: str
+        :type  test_method: str
         :param worker_args: additional arguments for the analysis method (see signatures of corresponding methods)
 
         :return: statistical result of the test suite
@@ -131,7 +133,7 @@ class Experiment(object):
         if not isinstance(test_suite, StatisticalTestSuite):
             raise TypeError("Test suite should be of type StatisticalTestSuite.")
 
-        if testmethod not in ['fixed_horizon', 'group_sequential']:
+        if test_method not in ['fixed_horizon', 'group_sequential']:
             test_suite.correction_method = CorrectionMethod.NONE
         requires_correction = test_suite.correction_method is not CorrectionMethod.NONE
 
@@ -142,12 +144,12 @@ class Experiment(object):
         }
 
         logger.info("Statistical test suite analysis with {} tests, testmethod {}, correction method {} "
-                    "has just started".format(len(test_suite.tests), testmethod, test_suite.correction_method))
+                    "has just started".format(len(test_suite.tests), test_method, test_suite.correction_method))
 
         # test_suite_result hold statistical results from all statistical tests
         test_suite_result = MultipleTestSuiteResult([], test_suite.correction_method)
         for test in test_suite.tests:
-            original_analysis = self.analyze_statistical_test(test, testmethod, **worker_args)
+            original_analysis = self.analyze_statistical_test(test, test_method, **worker_args)
             test_suite_result.results.append(original_analysis)
 
         # if correction is needed, get p values, do correction on alpha, and run the same analysis for new alpha
@@ -161,12 +163,12 @@ class Experiment(object):
             for test_index, test_item in enumerate(test_suite_result.results):
                 if test_item.result:
                     original_analysis = test_suite_result.results[test_index]
-                    corrected_analysis = self.analyze_statistical_test(test_item.test, testmethod, **new_worker_args)
+                    corrected_analysis = self.analyze_statistical_test(test_item.test, test_method, **new_worker_args)
                     combined_result = CorrectedTestStatistics(original_analysis.result, corrected_analysis.result)
                     original_analysis.result = combined_result
 
         logger.info("Statistical test suite analysis with {} tests, testmethod {}, correction method {} "
-                    "has finished".format(len(test_suite.tests), testmethod, test_suite.correction_method))
+                    "has finished".format(len(test_suite.tests), test_method, test_suite.correction_method))
 
         return test_suite_result
 

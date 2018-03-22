@@ -82,7 +82,7 @@ class StatisticalTestTestCases(ExperimentTestCase):
 
     def test_fixed_horizon(self):
         ndecimals = 5
-        res = self.getExperiment().analyze_statistical_test(self.test_normal_same, testmethod='fixed_horizon')
+        res = self.getExperiment().analyze_statistical_test(self.test_normal_same, test_method='fixed_horizon')
 
         self.assertAlmostEqual(res.result.delta, 0.033053, ndecimals)
 
@@ -102,7 +102,7 @@ class StatisticalTestTestCases(ExperimentTestCase):
 
     def test_group_sequential(self):
         ndecimals = 5
-        res = self.getExperiment().analyze_statistical_test(self.test_normal_same, testmethod='group_sequential')
+        res = self.getExperiment().analyze_statistical_test(self.test_normal_same, test_method='group_sequential')
 
         self.assertAlmostEqual(res.result.delta, 0.033053, ndecimals)
 
@@ -124,7 +124,7 @@ class StatisticalTestTestCases(ExperimentTestCase):
     def test_bayes_factor_delta(self):
         ndecimals = 5
         res = self.getExperiment().analyze_statistical_test(self.test_normal_same,
-                                                            testmethod='bayes_factor',
+                                                            test_method='bayes_factor',
                                                             num_iters=2000)
 
         self.assertAlmostEqual(res.result.delta, 0.033053, ndecimals)
@@ -146,7 +146,7 @@ class StatisticalTestTestCases(ExperimentTestCase):
     def test_bayes_precision_delta(self):
         ndecimals = 5
         res = self.getExperiment().analyze_statistical_test(self.test_normal_same,
-                                                            testmethod='bayes_precision',
+                                                            test_method='bayes_precision',
                                                             num_iters=2000)
         self.assertAlmostEqual(res.result.delta, 0.033053, ndecimals)
 

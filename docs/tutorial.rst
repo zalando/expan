@@ -14,7 +14,7 @@ First, let's generate some random data for the tutorial.
 	data, metadata = generate_random_data()
 
 ``data`` is a pandas DataFrame.
-It must contain a column for entity identifier named **entity**, 
+It must contain a column for entity identifier named **entity**,
 a column for variant, and one column per kpi/feature.
 
 ``metadata`` is a python dict. It should contain the following keys:
@@ -66,16 +66,16 @@ Running an analysis is very simple:
 
 	exp.analyze_statistical_test(test)
 
-Currently ``delta`` supports 4 methods: ``fixed_horizon`` (default), ``group_sequential``, ``bayes_factor`` and ``bayes_precision``.
+Currently ``analyze_statistical_test`` supports 4 test methods: ``fixed_horizon`` (default), ``group_sequential``, ``bayes_factor`` and ``bayes_precision``.
 All methods requires different additional parameters.
 
 If you would like to change any of the default values, just pass them as parameters to delta. For example:
 
 .. code-block:: python
 
-	exp.analyze_statistical_test(test, method='fixed_horizon', assume_normal=True, percentiles=[2.5, 97.5])
-	exp.analyze_statistical_test(test, method='group_sequential', estimated_sample_size=1000)
-	exp.analyze_statistical_test(test, method='bayes_factor', distribution='normal')
+	exp.analyze_statistical_test(test, test_method='fixed_horizon', assume_normal=True, percentiles=[2.5, 97.5])
+	exp.analyze_statistical_test(test, test_method='group_sequential', estimated_sample_size=1000)
+	exp.analyze_statistical_test(test, test_method='bayes_factor', distribution='normal')
 
 Here is the list of addtional parameters.
 You may also find the description in our :ref:`API <modindex>` page.
@@ -122,35 +122,35 @@ An example of the result is shown below:
         "result": {
             "confidence_interval": [
             {
-                "percentile": 2.5, 
+                "percentile": 2.5,
                 "value": 0.1
-            }, 
+            },
             {
-                "percentile": 97.5, 
+                "percentile": 97.5,
                 "value": 1.1
-            }], 
+            }],
             "control_statistics": {
-                "mean": 0.0, 
-                "sample_size": 1000, 
+                "mean": 0.0,
+                "sample_size": 1000,
                 "variance": 1.0
-            }, 
-            "delta": 1.0, 
-            "p": 0.04, 
-            "statistical_power": 0.8, 
+            },
+            "delta": 1.0,
+            "p": 0.04,
+            "statistical_power": 0.8,
             "treatment_statistics": {
-                "mean": 1.0, 
-                "sample_size": 1200, 
+                "mean": 1.0,
+                "sample_size": 1200,
                 "variance": 1.0
             }
-        }, 
+        },
         "test": {
-            "features": [], 
+            "features": [],
             "kpi": {
                 "name": "revenue"
-            }, 
+            },
             "variants": {
-                "control_name": "control", 
-                "treatment_name": "treatment", 
+                "control_name": "control",
+                "treatment_name": "treatment",
                 "variant_column_name": "variant"
             }
         }
@@ -175,7 +175,7 @@ you can use the ``FeatureFilter`` object:
 Statistical test suite
 ----------------------------
 
-It is very common to run a suite of statistical tests. 
+It is very common to run a suite of statistical tests.
 In this case, you need to create a ``StatisticalTestSuite`` object to represent the test suite.
 A ``StatisticalTestSuite`` object consists of a list of ``StatisticalTest`` and a correction method:
 
@@ -203,8 +203,8 @@ Method ``analyze_statistical_test_suite`` has the same arguments as ``analyze_st
 .. code-block:: python
 
 	exp.analyze_statistical_test_suite(test_suite)
-	exp.analyze_statistical_test_suite(test_suite, method='group_sequential', estimated_sample_size=1000)
-	exp.analyze_statistical_test_suite(test_suite, method='bayes_factor', distribution='normal')
+	exp.analyze_statistical_test_suite(test_suite, test_method='group_sequential', estimated_sample_size=1000)
+	exp.analyze_statistical_test_suite(test_suite, test_method='bayes_factor', distribution='normal')
 
 
 Result of statistical test suite
@@ -218,17 +218,17 @@ Following is an example of the analysis result of statistical test suite:
 .. code-block:: python
 
 	{
-	    "correction_method": "BH", 
+	    "correction_method": "BH",
 	    "results": [
 	        {
 	        	"test": {
-	                "features": [], 
+	                "features": [],
 	                "kpi": {
 	                    "name": "revenue"
-	                }, 
+	                },
 	                "variants": {
-	                    "control_name": "control", 
-	                    "treatment_name": "treatment", 
+	                    "control_name": "control",
+	                    "treatment_name": "treatment",
 	                    "variant_column_name": "variant"
 	                }
 	            },
@@ -236,50 +236,50 @@ Following is an example of the analysis result of statistical test suite:
 	                "corrected_test_statistics": {
 	                    "confidence_interval": [
 	                        {
-	                            "percentile": 1.0, 
+	                            "percentile": 1.0,
 	                            "value": -0.7
-	                        }, 
+	                        },
 	                        {
-	                            "percentile": 99.0, 
+	                            "percentile": 99.0,
 	                            "value": 0.7
 	                        }
-	                    ], 
+	                    ],
 	                    "control_statistics": {
-	                        "mean": 0.0, 
-	                        "sample_size": 1000, 
+	                        "mean": 0.0,
+	                        "sample_size": 1000,
 	                        "variance": 1.0
-	                    }, 
-	                    "delta": 1.0, 
-	                    "p": 0.02, 
-	                    "statistical_power": 0.8, 
+	                    },
+	                    "delta": 1.0,
+	                    "p": 0.02,
+	                    "statistical_power": 0.8,
 	                    "treatment_statistics": {
-	                        "mean": 1.0, 
-	                        "sample_size": 1200, 
+	                        "mean": 1.0,
+	                        "sample_size": 1200,
 	                        "variance": 1.0
 	                    }
-	                }, 
+	                },
 	                "original_test_statistics": {
 	                    "confidence_interval": [
 	                        {
-	                            "percentile": 2.5, 
+	                            "percentile": 2.5,
 	                            "value": 0.1
-	                        }, 
+	                        },
 	                        {
-	                            "percentile": 97.5, 
+	                            "percentile": 97.5,
 	                            "value": 1.1
 	                        }
-	                    ], 
+	                    ],
 	                    "control_statistics": {
-	                        "mean": 0.0, 
-	                        "sample_size": 1000, 
+	                        "mean": 0.0,
+	                        "sample_size": 1000,
 	                        "variance": 1.0
-	                    }, 
-	                    "delta": 1.0, 
-	                    "p": 0.04, 
-	                    "statistical_power": 0.8, 
+	                    },
+	                    "delta": 1.0,
+	                    "p": 0.04,
+	                    "statistical_power": 0.8,
 	                    "treatment_statistics": {
-	                        "mean": 1.0, 
-	                        "sample_size": 1200, 
+	                        "mean": 1.0,
+	                        "sample_size": 1200,
 	                        "variance": 1.0
 	                    }
 	                }
@@ -287,66 +287,66 @@ Following is an example of the analysis result of statistical test suite:
 	        },
 	        {
 	            "test": {
-	                "features": [], 
+	                "features": [],
 	                "kpi": {
 	                    "name": "revenue"
-	                }, 
+	                },
 	                "variants": {
-	                    "control_name": "control", 
-	                    "treatment_name": "treatment", 
+	                    "control_name": "control",
+	                    "treatment_name": "treatment",
 	                    "variant_column_name": "variant"
 	                }
-	            }, 
+	            },
 	            "result": {
 	                "corrected_test_statistics": {
 	                    "confidence_interval": [
 	                        {
-	                            "percentile": 1.0, 
+	                            "percentile": 1.0,
 	                            "value": -0.7
-	                        }, 
+	                        },
 	                        {
-	                            "percentile": 99.0, 
+	                            "percentile": 99.0,
 	                            "value": 0.7
 	                        }
-	                    ], 
+	                    ],
 	                    "control_statistics": {
-	                        "mean": 0.0, 
-	                        "sample_size": 1000, 
+	                        "mean": 0.0,
+	                        "sample_size": 1000,
 	                        "variance": 1.0
-	                    }, 
-	                    "delta": 1.0, 
-	                    "p": 0.02, 
-	                    "statistical_power": 0.8, 
-	                    "stop": false, 
+	                    },
+	                    "delta": 1.0,
+	                    "p": 0.02,
+	                    "statistical_power": 0.8,
+	                    "stop": false,
 	                    "treatment_statistics": {
-	                        "mean": 1.0, 
-	                        "sample_size": 1200, 
+	                        "mean": 1.0,
+	                        "sample_size": 1200,
 	                        "variance": 1.0
 	                    }
-	                }, 
+	                },
 	                "original_test_statistics": {
 	                    "confidence_interval": [
 	                        {
-	                            "percentile": 2.5, 
+	                            "percentile": 2.5,
 	                            "value": 0.1
-	                        }, 
+	                        },
 	                        {
-	                            "percentile": 97.5, 
+	                            "percentile": 97.5,
 	                            "value": 1.1
 	                        }
-	                    ], 
+	                    ],
 	                    "control_statistics": {
-	                        "mean": 0.0, 
-	                        "sample_size": 1000, 
+	                        "mean": 0.0,
+	                        "sample_size": 1000,
 	                        "variance": 1.0
-	                    }, 
-	                    "delta": 1.0, 
-	                    "p": 0.04, 
-	                    "statistical_power": 0.8, 
-	                    "stop": true, 
+	                    },
+	                    "delta": 1.0,
+	                    "p": 0.04,
+	                    "statistical_power": 0.8,
+	                    "stop": true,
 	                    "treatment_statistics": {
-	                        "mean": 1.0, 
-	                        "sample_size": 1200, 
+	                        "mean": 1.0,
+	                        "sample_size": 1200,
 	                        "variance": 1.0
 	                    }
 	                }
@@ -356,7 +356,7 @@ Following is an example of the analysis result of statistical test suite:
 	}
 
 
-That's it! 
+That's it!
 
 For API list and theoretical concepts, please read the next few sections.
 
