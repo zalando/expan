@@ -9,9 +9,14 @@ Changelog <https://github.com/zalando/expan/compare/v0.6.13...HEAD>`__
 
 **Merged pull requests:**
 
+-  Finish Documentation
+   `#204 <https://github.com/zalando/expan/pull/204>`__
+   (`shansfolder <https://github.com/shansfolder>`__)
 -  Fix logging sga error logging
    `#203 <https://github.com/zalando/expan/pull/203>`__
    (`igusher <https://github.com/igusher>`__)
+-  Project Headache `#194 <https://github.com/zalando/expan/pull/194>`__
+   (`shansfolder <https://github.com/shansfolder>`__)
 
 `v0.6.13 <https://github.com/zalando/expan/tree/v0.6.13>`__ (2018-03-15)
 ------------------------------------------------------------------------

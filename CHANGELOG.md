@@ -6,7 +6,9 @@
 
 **Merged pull requests:**
 
+- Finish Documentation [\#204](https://github.com/zalando/expan/pull/204) ([shansfolder](https://github.com/shansfolder))
 - Fix logging sga error logging [\#203](https://github.com/zalando/expan/pull/203) ([igusher](https://github.com/igusher))
+- Project Headache [\#194](https://github.com/zalando/expan/pull/194) ([shansfolder](https://github.com/shansfolder))
 
 ## [v0.6.13](https://github.com/zalando/expan/tree/v0.6.13) (2018-03-15)
 [Full Changelog](https://github.com/zalando/expan/compare/v0.6.12...v0.6.13)
