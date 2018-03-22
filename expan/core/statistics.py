@@ -123,7 +123,7 @@ def sample_size(x):
     else:
         x_nan = list(x).count('NA')
 
-    return len(x) - x_nan
+    return int(len(x) - x_nan)
 
 
 def estimate_sample_size(x, mde, r, alpha=0.05, beta=0.2):
