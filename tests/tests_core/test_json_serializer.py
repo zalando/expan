@@ -29,7 +29,8 @@ class StatisticalTestCase(unittest.TestCase):
                                             confidence_interval,
                                             p,
                                             statistical_power)
-        statistical_test_result = StatisticalTestResult(statistical_test, simple_stats)
+        original_simple_stats = OriginalTestStatistics(simple_stats)
+        statistical_test_result = StatisticalTestResult(statistical_test, original_simple_stats)
 
         js_result = statistical_test_result.toJson()  # no error/exception should be raise
         print(js_result)    # use pytest -s to check the output if needed
@@ -81,8 +82,10 @@ class StatisticalTestCase(unittest.TestCase):
 
         statistical_test = StatisticalTest(kpi, [], variants)
 
-        test_result1 = StatisticalTestResult(statistical_test, CorrectedTestStatistics(simple_stats, simple_stats_corrected))
-        test_result2 = StatisticalTestResult(statistical_test, CorrectedTestStatistics(es_stats, es_stats_corrected))
+        test_result1 = StatisticalTestResult(statistical_test,
+                                             OriginalAndCorrectedTestStatistics(simple_stats, simple_stats_corrected))
+        test_result2 = StatisticalTestResult(statistical_test,
+                                             OriginalAndCorrectedTestStatistics(es_stats, es_stats_corrected))
         test_results = [test_result1, test_result2]
         statistical_test_results = MultipleTestSuiteResult(test_results, CorrectionMethod.BH)
 
