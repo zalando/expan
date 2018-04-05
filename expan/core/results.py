@@ -87,7 +87,7 @@ class OriginalTestStatistics(JsonSerializable):
 
 
 class OriginalAndCorrectedTestStatistics(OriginalTestStatistics):
-    """ Additionally to OriginalTestStatistics holds orrected statistics. 
+    """ Additionally to OriginalTestStatistics holds corrected statistics. 
     This class should be used to hold additionally statistics for multiple testing.
     original_test_statistics and corrected_test_statistics should have the same type.
     
