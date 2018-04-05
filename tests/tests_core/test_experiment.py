@@ -3,7 +3,7 @@ import warnings
 
 import numpy as np
 
-from expan.core.results import CorrectedTestStatistics
+from expan.core.results import OriginalAndCorrectedTestStatistics
 from expan.core.statistical_test import *
 from expan.core.experiment import Experiment
 from expan.core.util import generate_random_data, find_value_by_key_with_condition
@@ -206,8 +206,8 @@ class StatisticalTestSuiteTestCases(ExperimentTestCase):
 
         self.assertEqual(res_normal_same.test.kpi.name, "normal_same")
         self.assertEqual(res_derived_kpi.test.kpi.name, "derived_kpi_one")
-        self.assertTrue(isinstance(res_normal_same.result, CorrectedTestStatistics))
-        self.assertTrue(isinstance(res_derived_kpi.result, CorrectedTestStatistics))
+        self.assertTrue(isinstance(res_normal_same.result, OriginalAndCorrectedTestStatistics))
+        self.assertTrue(isinstance(res_derived_kpi.result, OriginalAndCorrectedTestStatistics))
 
         power_normal_same_before = res_normal_same.result.original_test_statistics.statistical_power
         power_normal_same_corrected = res_normal_same.result.corrected_test_statistics.statistical_power
@@ -244,8 +244,8 @@ class StatisticalTestSuiteTestCases(ExperimentTestCase):
         res_subgroup_feature_has = res.results[1]
         res_subgroup_feature_one = res.results[2]
 
-        self.assertTrue(isinstance(res_subgroup_feature_non.result, CorrectedTestStatistics))
-        self.assertTrue(isinstance(res_subgroup_feature_has.result, CorrectedTestStatistics))
+        self.assertTrue(isinstance(res_subgroup_feature_non.result, OriginalAndCorrectedTestStatistics))
+        self.assertTrue(isinstance(res_subgroup_feature_has.result, OriginalAndCorrectedTestStatistics))
         self.assertLess(res_subgroup_feature_non.result.corrected_test_statistics.statistical_power,
                         res_subgroup_feature_non.result.original_test_statistics.statistical_power)
         self.assertLess(res_subgroup_feature_has.result.corrected_test_statistics.statistical_power,

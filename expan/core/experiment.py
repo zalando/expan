@@ -9,7 +9,7 @@ import expan.core.early_stopping as es
 import expan.core.statistics as statx
 import expan.core.correction as correction
 from expan.core.statistical_test import *
-from expan.core.results import StatisticalTestResult, MultipleTestSuiteResult, CorrectedTestStatistics
+from expan.core.results import StatisticalTestResult, MultipleTestSuiteResult, OriginalAndCorrectedTestStatistics
 
 warnings.simplefilter('always', UserWarning)
 warnings.filterwarnings("ignore", category=FutureWarning)
@@ -164,7 +164,8 @@ class Experiment(object):
                 if test_item.result:
                     original_analysis = test_suite_result.results[test_index]
                     corrected_analysis = self.analyze_statistical_test(test_item.test, test_method, **new_worker_args)
-                    combined_result = CorrectedTestStatistics(original_analysis.result, corrected_analysis.result)
+                    combined_result = OriginalAndCorrectedTestStatistics(original_analysis.result,
+                                                                         corrected_analysis.result)
                     original_analysis.result = combined_result
 
         logger.info("Statistical test suite analysis with {} tests, testmethod {}, correction method {} "

@@ -76,8 +76,19 @@ class EarlyStoppingTestStatistics(SimpleTestStatistics):
         self.stop = stop
 
 
-class CorrectedTestStatistics(JsonSerializable):
-    """ Holds original and corrected statistics. This class should be used to hold statistics for multiple testing.
+class OriginalTestStatistics(JsonSerializable):
+    """ Holds original statistics without corrected statistics.
+    
+    :param original_test_statistics: test result without correction
+    :type  original_test_statistics: SimpleTestStatistics or EarlyStoppingTestStatistics
+    """
+    def __init__(self, original_test_statistics):
+        self.original_test_statistics = original_test_statistics
+
+
+class OriginalAndCorrectedTestStatistics(OriginalTestStatistics):
+    """ Additionally to OriginalTestStatistics holds orrected statistics. 
+    This class should be used to hold additionally statistics for multiple testing.
     original_test_statistics and corrected_test_statistics should have the same type.
     
     :param original_test_statistics: test result before correction
@@ -86,13 +97,13 @@ class CorrectedTestStatistics(JsonSerializable):
     :type  corrected_test_statistics: SimpleTestStatistics or EarlyStoppingTestStatistics
     """
     def __init__(self, original_test_statistics, corrected_test_statistics):
+        super(OriginalAndCorrectedTestStatistics, self).__init__(original_test_statistics)
         type1 = type(original_test_statistics)
         type2 = type(corrected_test_statistics)
         if type1 != type2:
             raise RuntimeError("Type mismatch for type " + str(type1) + " and " + str(type2))
         if not isinstance(original_test_statistics, BaseTestStatistics):
             raise RuntimeError("Input should be instances of BaseTestStatistics or its subclass")
-        self.original_test_statistics  = original_test_statistics
         self.corrected_test_statistics = corrected_test_statistics
 
 
@@ -103,7 +114,7 @@ class StatisticalTestResult(JsonSerializable):
     :param test: information about the statistical test
     :type  test: StatisticalTest
     :param result: result of this statistical test
-    :type  result: BaseTestStatistics or its subclasses or CorrectedTestStatistics
+    :type  result: OriginalTestStatistics or OriginalAndCorrectedTestStatistics
     """
     def __init__(self, test, result):
         self.test   = test
