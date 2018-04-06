@@ -3,7 +3,7 @@ import warnings
 
 import numpy as np
 
-from expan.core.results import CorrectedTestStatistics
+from expan.core.results import CombinedTestStatistics
 from expan.core.statistical_test import *
 from expan.core.experiment import Experiment
 from expan.core.util import generate_random_data, find_value_by_key_with_condition
@@ -175,19 +175,21 @@ class StatisticalTestSuiteTestCases(ExperimentTestCase):
         self.assertEqual(len(res.results), 1)
         simple_stat_res = res.results[0].result
 
-        self.assertAlmostEqual(simple_stat_res.delta, 0.033053, ndecimals)
-        lower_bound_ci = find_value_by_key_with_condition(simple_stat_res.confidence_interval, 'percentile', 2.5, 'value')
-        upper_bound_ci = find_value_by_key_with_condition(simple_stat_res.confidence_interval, 'percentile', 97.5, 'value')
+        self.assertAlmostEqual(simple_stat_res.original_test_statistics.delta, 0.033053, ndecimals)
+        lower_bound_ci = find_value_by_key_with_condition(simple_stat_res.original_test_statistics.confidence_interval,
+                                                          'percentile', 2.5, 'value')
+        upper_bound_ci = find_value_by_key_with_condition(simple_stat_res.original_test_statistics.confidence_interval,
+                                                          'percentile', 97.5, 'value')
         self.assertAlmostEqual(lower_bound_ci, -0.007135, ndecimals)
         self.assertAlmostEqual(upper_bound_ci, 0.073240, ndecimals)
 
-        self.assertEqual(simple_stat_res.treatment_statistics.sample_size, 6108)
-        self.assertEqual(simple_stat_res.control_statistics.sample_size,   3892)
+        self.assertEqual(simple_stat_res.original_test_statistics.treatment_statistics.sample_size, 6108)
+        self.assertEqual(simple_stat_res.original_test_statistics.control_statistics.sample_size,   3892)
 
-        self.assertAlmostEqual(simple_stat_res.treatment_statistics.mean,  0.025219, ndecimals)
-        self.assertAlmostEqual(simple_stat_res.control_statistics.mean,   -0.007833, ndecimals)
-        self.assertAlmostEqual(simple_stat_res.statistical_power, 0.36401, ndecimals)
-        self.assertAlmostEqual(simple_stat_res.statistical_power, 0.36401, ndecimals)
+        self.assertAlmostEqual(simple_stat_res.original_test_statistics.treatment_statistics.mean,  0.025219, ndecimals)
+        self.assertAlmostEqual(simple_stat_res.original_test_statistics.control_statistics.mean,   -0.007833, ndecimals)
+        self.assertAlmostEqual(simple_stat_res.original_test_statistics.statistical_power, 0.36401, ndecimals)
+        self.assertAlmostEqual(simple_stat_res.corrected_test_statistics.statistical_power, 0.36401, ndecimals)
 
     def test_one_test_in_suite_with_wrong_correction(self):
         res = self.getExperiment().analyze_statistical_test_suite(self.suite_with_one_test_correction)
@@ -206,8 +208,8 @@ class StatisticalTestSuiteTestCases(ExperimentTestCase):
 
         self.assertEqual(res_normal_same.test.kpi.name, "normal_same")
         self.assertEqual(res_derived_kpi.test.kpi.name, "derived_kpi_one")
-        self.assertTrue(isinstance(res_normal_same.result, CorrectedTestStatistics))
-        self.assertTrue(isinstance(res_derived_kpi.result, CorrectedTestStatistics))
+        self.assertTrue(isinstance(res_normal_same.result, CombinedTestStatistics))
+        self.assertTrue(isinstance(res_derived_kpi.result, CombinedTestStatistics))
 
         power_normal_same_before = res_normal_same.result.original_test_statistics.statistical_power
         power_normal_same_corrected = res_normal_same.result.corrected_test_statistics.statistical_power
@@ -227,7 +229,8 @@ class StatisticalTestSuiteTestCases(ExperimentTestCase):
 
         self.assertEqual(len(res_subgroup.test.features), 1)
         self.assertEqual(res_subgroup.test.features[0].column_value, 'feature that only has one data point')
-        self.assertIsNone(res_subgroup.result)
+        self.assertIsNone(res_subgroup.result.original_test_statistics)
+        self.assertIsNone(res_subgroup.result.corrected_test_statistics)
 
     def test_three_subgroup_in_suite(self):
         """ Two subgroups contain valid data. One subgroup contains only one entity.
@@ -244,13 +247,14 @@ class StatisticalTestSuiteTestCases(ExperimentTestCase):
         res_subgroup_feature_has = res.results[1]
         res_subgroup_feature_one = res.results[2]
 
-        self.assertTrue(isinstance(res_subgroup_feature_non.result, CorrectedTestStatistics))
-        self.assertTrue(isinstance(res_subgroup_feature_has.result, CorrectedTestStatistics))
+        self.assertTrue(isinstance(res_subgroup_feature_non.result, CombinedTestStatistics))
+        self.assertTrue(isinstance(res_subgroup_feature_has.result, CombinedTestStatistics))
         self.assertLess(res_subgroup_feature_non.result.corrected_test_statistics.statistical_power,
                         res_subgroup_feature_non.result.original_test_statistics.statistical_power)
         self.assertLess(res_subgroup_feature_has.result.corrected_test_statistics.statistical_power,
                         res_subgroup_feature_has.result.original_test_statistics.statistical_power)
-        self.assertIsNone(res_subgroup_feature_one.result)
+        self.assertIsNone(res_subgroup_feature_one.result.original_test_statistics)
+        self.assertIsNone(res_subgroup_feature_one.result.corrected_test_statistics)
 
 
 class OutlierFilteringTestCases(ExperimentTestCase):

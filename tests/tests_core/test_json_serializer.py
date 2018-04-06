@@ -81,8 +81,8 @@ class StatisticalTestCase(unittest.TestCase):
 
         statistical_test = StatisticalTest(kpi, [], variants)
 
-        test_result1 = StatisticalTestResult(statistical_test, CorrectedTestStatistics(simple_stats, simple_stats_corrected))
-        test_result2 = StatisticalTestResult(statistical_test, CorrectedTestStatistics(es_stats, es_stats_corrected))
+        test_result1 = StatisticalTestResult(statistical_test, CombinedTestStatistics(simple_stats, simple_stats_corrected))
+        test_result2 = StatisticalTestResult(statistical_test, CombinedTestStatistics(es_stats, es_stats_corrected))
         test_results = [test_result1, test_result2]
         statistical_test_results = MultipleTestSuiteResult(test_results, CorrectionMethod.BH)
 

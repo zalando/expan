@@ -9,7 +9,7 @@ import expan.core.early_stopping as es
 import expan.core.statistics as statx
 import expan.core.correction as correction
 from expan.core.statistical_test import *
-from expan.core.results import StatisticalTestResult, MultipleTestSuiteResult, CorrectedTestStatistics
+from expan.core.results import StatisticalTestResult, MultipleTestSuiteResult, CombinedTestStatistics
 
 warnings.simplefilter('always', UserWarning)
 warnings.filterwarnings("ignore", category=FutureWarning)
@@ -150,21 +150,26 @@ class Experiment(object):
         test_suite_result = MultipleTestSuiteResult([], test_suite.correction_method)
         for test in test_suite.tests:
             original_analysis = self.analyze_statistical_test(test, test_method, **worker_args)
+            combined_result = CombinedTestStatistics(original_analysis.result, original_analysis.result)
+            original_analysis.result = combined_result
+            print(original_analysis)
             test_suite_result.results.append(original_analysis)
 
         # if correction is needed, get p values, do correction on alpha, and run the same analysis for new alpha
         if requires_correction:
             original_alpha    = worker_args.get('alpha', 0.05)
-            original_p_values = [item.result.p for item in test_suite_result.results if item.result is not None]
+            original_p_values = [item.result.original_test_statistics.p for item in test_suite_result.results
+                                 if item.result.original_test_statistics is not None]
             corrected_alpha   = correction_table[test_suite.correction_method](original_alpha, original_p_values)
             new_worker_args   = copy.deepcopy(worker_args)
             new_worker_args['alpha'] = corrected_alpha
 
             for test_index, test_item in enumerate(test_suite_result.results):
-                if test_item.result:
+                if test_item.result.original_test_statistics:
                     original_analysis = test_suite_result.results[test_index]
                     corrected_analysis = self.analyze_statistical_test(test_item.test, test_method, **new_worker_args)
-                    combined_result = CorrectedTestStatistics(original_analysis.result, corrected_analysis.result)
+                    combined_result = CombinedTestStatistics(original_analysis.result.original_test_statistics,
+                                                             corrected_analysis.result)
                     original_analysis.result = combined_result
 
         logger.info("Statistical test suite analysis with {} tests, testmethod {}, correction method {} "
