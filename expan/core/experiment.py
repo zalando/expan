@@ -152,7 +152,6 @@ class Experiment(object):
             original_analysis = self.analyze_statistical_test(test, test_method, **worker_args)
             combined_result = CombinedTestStatistics(original_analysis.result, original_analysis.result)
             original_analysis.result = combined_result
-            print(original_analysis)
             test_suite_result.results.append(original_analysis)
 
         # if correction is needed, get p values, do correction on alpha, and run the same analysis for new alpha
