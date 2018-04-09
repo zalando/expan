@@ -189,7 +189,12 @@ class StatisticalTestSuiteTestCases(ExperimentTestCase):
         self.assertAlmostEqual(simple_stat_res.original_test_statistics.treatment_statistics.mean,  0.025219, ndecimals)
         self.assertAlmostEqual(simple_stat_res.original_test_statistics.control_statistics.mean,   -0.007833, ndecimals)
         self.assertAlmostEqual(simple_stat_res.original_test_statistics.statistical_power, 0.36401, ndecimals)
+
+        # corrected test statistics should be the same as original test statistics (checks some values)
+        self.assertAlmostEqual(simple_stat_res.corrected_test_statistics.delta, 0.033053, ndecimals)
         self.assertAlmostEqual(simple_stat_res.corrected_test_statistics.statistical_power, 0.36401, ndecimals)
+        self.assertEqual(simple_stat_res.corrected_test_statistics.treatment_statistics.sample_size, 6108)
+        self.assertEqual(simple_stat_res.corrected_test_statistics.control_statistics.sample_size, 3892)
 
     def test_one_test_in_suite_with_wrong_correction(self):
         res = self.getExperiment().analyze_statistical_test_suite(self.suite_with_one_test_correction)
