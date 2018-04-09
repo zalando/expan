@@ -79,10 +79,13 @@ class StatisticalTestCase(unittest.TestCase):
                                                          statistical_power,
                                                          corrected_stop)
 
-        statistical_test = StatisticalTest(kpi, [], variants)
+        mobile = FeatureFilter('device_type', 'mobile')
+        desktop = FeatureFilter('device_type', 'desktop')
+        statistical_test_mobile = StatisticalTest(kpi, [mobile], variants)
+        statistical_test_desktop = StatisticalTest(kpi, [desktop], variants)
 
-        test_result1 = StatisticalTestResult(statistical_test, CombinedTestStatistics(simple_stats, simple_stats_corrected))
-        test_result2 = StatisticalTestResult(statistical_test, CombinedTestStatistics(es_stats, es_stats_corrected))
+        test_result1 = StatisticalTestResult(statistical_test_mobile, CombinedTestStatistics(simple_stats, simple_stats_corrected))
+        test_result2 = StatisticalTestResult(statistical_test_desktop, CombinedTestStatistics(es_stats, es_stats_corrected))
         test_results = [test_result1, test_result2]
         statistical_test_results = MultipleTestSuiteResult(test_results, CorrectionMethod.BH)
 

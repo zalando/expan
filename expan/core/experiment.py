@@ -164,7 +164,7 @@ class Experiment(object):
             new_worker_args['alpha'] = corrected_alpha
 
             for test_index, test_item in enumerate(test_suite_result.results):
-                if test_item.result.original_test_statistics:
+                if test_item.result.original_test_statistics: # result can be None if not enough entities
                     original_analysis = test_suite_result.results[test_index]
                     corrected_analysis = self.analyze_statistical_test(test_item.test, test_method, **new_worker_args)
                     combined_result = CombinedTestStatistics(original_analysis.result.original_test_statistics,
