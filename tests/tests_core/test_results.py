@@ -58,9 +58,9 @@ class StatisticalTestCase(unittest.TestCase):
         self.statistical_test_result = StatisticalTestResult(self.statistical_test, self.simple_stats_corrected)
 
         test_result1 = StatisticalTestResult(self.statistical_test,
-                                             CorrectedTestStatistics(self.simple_stats, self.simple_stats_corrected))
+                                             CombinedTestStatistics(self.simple_stats, self.simple_stats_corrected))
         test_result2 = StatisticalTestResult(self.statistical_test,
-                                             CorrectedTestStatistics(self.es_stats, self.es_stats_corrected))
+                                             CombinedTestStatistics(self.es_stats, self.es_stats_corrected))
         test_results = [test_result1, test_result2]
         self.statistical_test_results = MultipleTestSuiteResult(test_results, self.correction_method)
 
@@ -77,12 +77,12 @@ class StatisticalTestCase(unittest.TestCase):
         self.assertTrue(self.es_stats.stop)
 
     def test_corrected_test_statistics_simple(self):
-        corrected_test_statistics = CorrectedTestStatistics(self.simple_stats, self.simple_stats_corrected)
+        corrected_test_statistics = CombinedTestStatistics(self.simple_stats, self.simple_stats_corrected)
         self.assertEqual(corrected_test_statistics.original_test_statistics.p, 0.04)
         self.assertEqual(corrected_test_statistics.corrected_test_statistics.p, 0.02)
 
     def test_corrected_test_statistics_early_stopping(self):
-        corrected_test_statistics = CorrectedTestStatistics(self.es_stats, self.es_stats_corrected)
+        corrected_test_statistics = CombinedTestStatistics(self.es_stats, self.es_stats_corrected)
         self.assertEqual(corrected_test_statistics.original_test_statistics.p, 0.04)
         self.assertEqual(corrected_test_statistics.corrected_test_statistics.p, 0.02)
         self.assertTrue(corrected_test_statistics.original_test_statistics.stop)
@@ -93,7 +93,7 @@ class StatisticalTestCase(unittest.TestCase):
         type2 = str(type(self.es_stats_corrected))
         error_msg = "Type mismatch for type " + type1 + " and " + type2
         with self.assertRaisesRegexp(RuntimeError, error_msg):
-            CorrectedTestStatistics(self.simple_stats, self.es_stats_corrected)
+            CombinedTestStatistics(self.simple_stats, self.es_stats_corrected)
 
     def test_statistical_test_results(self):
         self.assertEqual(self.statistical_test_result.test.kpi.name, 'revenue')

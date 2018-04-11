@@ -217,143 +217,153 @@ Following is an example of the analysis result of statistical test suite:
 
 .. code-block:: python
 
-	{
-	    "correction_method": "BH",
-	    "results": [
-	        {
-	        	"test": {
-	                "features": [],
-	                "kpi": {
-	                    "name": "revenue"
-	                },
-	                "variants": {
-	                    "control_name": "control",
-	                    "treatment_name": "treatment",
-	                    "variant_column_name": "variant"
-	                }
-	            },
-	            "result": {
-	                "corrected_test_statistics": {
-	                    "confidence_interval": [
-	                        {
-	                            "percentile": 1.0,
-	                            "value": -0.7
-	                        },
-	                        {
-	                            "percentile": 99.0,
-	                            "value": 0.7
-	                        }
-	                    ],
-	                    "control_statistics": {
-	                        "mean": 0.0,
-	                        "sample_size": 1000,
-	                        "variance": 1.0
-	                    },
-	                    "delta": 1.0,
-	                    "p": 0.02,
-	                    "statistical_power": 0.8,
-	                    "treatment_statistics": {
-	                        "mean": 1.0,
-	                        "sample_size": 1200,
-	                        "variance": 1.0
-	                    }
-	                },
-	                "original_test_statistics": {
-	                    "confidence_interval": [
-	                        {
-	                            "percentile": 2.5,
-	                            "value": 0.1
-	                        },
-	                        {
-	                            "percentile": 97.5,
-	                            "value": 1.1
-	                        }
-	                    ],
-	                    "control_statistics": {
-	                        "mean": 0.0,
-	                        "sample_size": 1000,
-	                        "variance": 1.0
-	                    },
-	                    "delta": 1.0,
-	                    "p": 0.04,
-	                    "statistical_power": 0.8,
-	                    "treatment_statistics": {
-	                        "mean": 1.0,
-	                        "sample_size": 1200,
-	                        "variance": 1.0
-	                    }
-	                }
-	            }
-	        },
-	        {
-	            "test": {
-	                "features": [],
-	                "kpi": {
-	                    "name": "revenue"
-	                },
-	                "variants": {
-	                    "control_name": "control",
-	                    "treatment_name": "treatment",
-	                    "variant_column_name": "variant"
-	                }
-	            },
-	            "result": {
-	                "corrected_test_statistics": {
-	                    "confidence_interval": [
-	                        {
-	                            "percentile": 1.0,
-	                            "value": -0.7
-	                        },
-	                        {
-	                            "percentile": 99.0,
-	                            "value": 0.7
-	                        }
-	                    ],
-	                    "control_statistics": {
-	                        "mean": 0.0,
-	                        "sample_size": 1000,
-	                        "variance": 1.0
-	                    },
-	                    "delta": 1.0,
-	                    "p": 0.02,
-	                    "statistical_power": 0.8,
-	                    "stop": false,
-	                    "treatment_statistics": {
-	                        "mean": 1.0,
-	                        "sample_size": 1200,
-	                        "variance": 1.0
-	                    }
-	                },
-	                "original_test_statistics": {
-	                    "confidence_interval": [
-	                        {
-	                            "percentile": 2.5,
-	                            "value": 0.1
-	                        },
-	                        {
-	                            "percentile": 97.5,
-	                            "value": 1.1
-	                        }
-	                    ],
-	                    "control_statistics": {
-	                        "mean": 0.0,
-	                        "sample_size": 1000,
-	                        "variance": 1.0
-	                    },
-	                    "delta": 1.0,
-	                    "p": 0.04,
-	                    "statistical_power": 0.8,
-	                    "stop": true,
-	                    "treatment_statistics": {
-	                        "mean": 1.0,
-	                        "sample_size": 1200,
-	                        "variance": 1.0
-	                    }
-	                }
-	            }
-	        }
-	    ]
-	}
+    {
+        "correction_method": "BH",
+        "results": [
+            {
+                "test": {
+                    "features": [
+                        {
+                            "column_name": "device_type",
+                            "column_value": "desktop"
+                        }
+                    ],
+                    "kpi": {
+                        "name": "revenue"
+                    },
+                    "variants": {
+                        "control_name": "control",
+                        "treatment_name": "treatment",
+                        "variant_column_name": "variant"
+                    }
+                },
+                "result": {
+                    "corrected_test_statistics": {
+                        "confidence_interval": [
+                            {
+                                "percentile": 1.0,
+                                "value": -0.7
+                            },
+                            {
+                                "percentile": 99.0,
+                                "value": 0.7
+                            }
+                        ],
+                        "control_statistics": {
+                            "mean": 0.0,
+                            "sample_size": 1000,
+                            "variance": 1.0
+                        },
+                        "delta": 1.0,
+                        "p": 0.02,
+                        "statistical_power": 0.8,
+                        "treatment_statistics": {
+                            "mean": 1.0,
+                            "sample_size": 1200,
+                            "variance": 1.0
+                        }
+                    },
+                    "original_test_statistics": {
+                        "confidence_interval": [
+                            {
+                                "percentile": 2.5,
+                                "value": 0.1
+                            },
+                            {
+                                "percentile": 97.5,
+                                "value": 1.1
+                            }
+                        ],
+                        "control_statistics": {
+                            "mean": 0.0,
+                            "sample_size": 1000,
+                            "variance": 1.0
+                        },
+                        "delta": 1.0,
+                        "p": 0.04,
+                        "statistical_power": 0.8,
+                        "treatment_statistics": {
+                            "mean": 1.0,
+                            "sample_size": 1200,
+                            "variance": 1.0
+                        }
+                    }
+                }
+            },
+            {
+                "test": {
+                    "features": [
+                        {
+                            "column_name": "device_type",
+                            "column_value": "mobile"
+                        }
+                    ],
+                    "kpi": {
+                        "name": "revenue"
+                    },
+                    "variants": {
+                        "control_name": "control",
+                        "treatment_name": "treatment",
+                        "variant_column_name": "variant"
+                    }
+                },
+                "result": {
+                    "corrected_test_statistics": {
+                        "confidence_interval": [
+                            {
+                                "percentile": 1.0,
+                                "value": -0.7
+                            },
+                            {
+                                "percentile": 99.0,
+                                "value": 0.7
+                            }
+                        ],
+                        "control_statistics": {
+                            "mean": 0.0,
+                            "sample_size": 1000,
+                            "variance": 1.0
+                        },
+                        "delta": 1.0,
+                        "p": 0.02,
+                        "statistical_power": 0.8,
+                        "stop": false,
+                        "treatment_statistics": {
+                            "mean": 1.0,
+                            "sample_size": 1200,
+                            "variance": 1.0
+                        }
+                    },
+                    "original_test_statistics": {
+                        "confidence_interval": [
+                            {
+                                "percentile": 2.5,
+                                "value": 0.1
+                            },
+                            {
+                                "percentile": 97.5,
+                                "value": 1.1
+                            }
+                        ],
+                        "control_statistics": {
+                            "mean": 0.0,
+                            "sample_size": 1000,
+                            "variance": 1.0
+                        },
+                        "delta": 1.0,
+                        "p": 0.04,
+                        "statistical_power": 0.8,
+                        "stop": true,
+                        "treatment_statistics": {
+                            "mean": 1.0,
+                            "sample_size": 1200,
+                            "variance": 1.0
+                        }
+                    }
+                }
+            }
+        ]
+    }
 
 
 That's it!

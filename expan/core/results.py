@@ -76,13 +76,14 @@ class EarlyStoppingTestStatistics(SimpleTestStatistics):
         self.stop = stop
 
 
-class CorrectedTestStatistics(JsonSerializable):
+class CombinedTestStatistics(JsonSerializable):
     """ Holds original and corrected statistics. This class should be used to hold statistics for multiple testing.
     original_test_statistics and corrected_test_statistics should have the same type.
+    In case there is no correction specified, corrected_test_statistics == original_test_statistics.
     
     :param original_test_statistics: test result before correction
     :type  original_test_statistics: SimpleTestStatistics or EarlyStoppingTestStatistics
-    :param corrected_test_statistics: test result after correction
+    :param corrected_test_statistics: test result after correction or same as original_test_statistics if no correction
     :type  corrected_test_statistics: SimpleTestStatistics or EarlyStoppingTestStatistics
     """
     def __init__(self, original_test_statistics, corrected_test_statistics):
@@ -90,8 +91,6 @@ class CorrectedTestStatistics(JsonSerializable):
         type2 = type(corrected_test_statistics)
         if type1 != type2:
             raise RuntimeError("Type mismatch for type " + str(type1) + " and " + str(type2))
-        if not isinstance(original_test_statistics, BaseTestStatistics):
-            raise RuntimeError("Input should be instances of BaseTestStatistics or its subclass")
         self.original_test_statistics  = original_test_statistics
         self.corrected_test_statistics = corrected_test_statistics
 
