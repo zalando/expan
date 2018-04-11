@@ -278,6 +278,11 @@ class StatisticalPowerTestCases(StatisticsTestCase):
 
         power = statx.compute_statistical_power(mean1, sigma, n1, mean2, sigma, n2, z_1_minus_alpha)
         self.assertAlmostEqual(power, 1-beta, float_precision)
+        
+    def test_zero_pooled_std(self):
+        with self.assertRaises(ValueError):
+            statx.compute_statistical_power_from_samples([1, 1, 1, 1],
+                    [2, 2, 2, 2])
 
 
 class PValueTestCases(StatisticsTestCase):

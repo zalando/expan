@@ -387,6 +387,9 @@ def compute_statistical_power(mean1, std1, n1, mean2, std2, n2, z_1_minus_alpha)
     """
     effect_size = mean1 - mean2
     std = pooled_std(std1, n1, std2, n2)
+    if std <= 0.0:
+        raise ValueError('Zero pooled std in compute_statistical_power')
+
     tmp = (n1 * n2 * effect_size**2) / ((n1 + n2) * std**2)
     z_beta = z_1_minus_alpha - np.sqrt(tmp)
     beta = stats.norm.cdf(z_beta)
