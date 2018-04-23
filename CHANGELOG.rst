@@ -1,6 +1,23 @@
 Change Log
 ==========
 
+`Unreleased <https://github.com/zalando/expan/tree/HEAD>`__
+-----------------------------------------------------------
+
+`Full
+Changelog <https://github.com/zalando/expan/compare/v1.0.0...HEAD>`__
+
+**Merged pull requests:**
+
+-  Fixed docstring `#211 <https://github.com/zalando/expan/pull/211>`__
+   (`daryadedik <https://github.com/daryadedik>`__)
+-  raise ValueError on zero pooled std for power calculations
+   `#210 <https://github.com/zalando/expan/pull/210>`__
+   (`gbordyugov <https://github.com/gbordyugov>`__)
+-  Changed structure for statistics without correction
+   `#209 <https://github.com/zalando/expan/pull/209>`__
+   (`daryadedik <https://github.com/daryadedik>`__)
+
 `v1.0.0 <https://github.com/zalando/expan/tree/v1.0.0>`__ (2018-03-22)
 ----------------------------------------------------------------------
 
