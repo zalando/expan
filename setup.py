@@ -9,8 +9,7 @@ def parse_requirements(filename):
     return [line for line in lineiter if line and not line.startswith("#")]
 
 try:
-	install_reqs = parse_requirements('requirements.txt')
-	requirements = install_reqs
+    requirements = parse_requirements('requirements.txt')
 except OSError:
 	requirements = []
 
