@@ -35,7 +35,7 @@ def get_data(folder_path):
                     metadata = json.load(input_json)
             elif 'data' in f:
                 data = pd.read_csv(join(folder_path, f))
-        return Experiment(data, metadata)
+        return data, metadata
 
     except AssertionError as e:
         logger.error("An error occurred when fetching data from csv file.")

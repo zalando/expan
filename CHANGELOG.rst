@@ -5,7 +5,19 @@ Change Log
 -----------------------------------------------------------
 
 `Full
-Changelog <https://github.com/zalando/expan/compare/v1.0.0...HEAD>`__
+Changelog <https://github.com/zalando/expan/compare/v1.0.1...HEAD>`__
+
+**Merged pull requests:**
+
+-  Original corrected results
+   `#212 <https://github.com/zalando/expan/pull/212>`__
+   (`daryadedik <https://github.com/daryadedik>`__)
+
+`v1.0.1 <https://github.com/zalando/expan/tree/v1.0.1>`__ (2018-04-23)
+----------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/zalando/expan/compare/v1.0.0...v1.0.1>`__
 
 **Merged pull requests:**
 

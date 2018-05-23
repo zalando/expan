@@ -13,7 +13,7 @@ class StatisticalTestCase(unittest.TestCase):
         # simple statistical test
         self.test_kpi = KPI('normal_same')
         self.test_variants = Variants('variant', 'A', 'B')
-        self.test_normal_same = StatisticalTest(self.test_kpi, [], self.test_variants)
+        self.test_normal_same = StatisticalTest(self.data, self.test_kpi, [], self.test_variants)
 
     def tearDown(self):
         pass
@@ -23,8 +23,8 @@ class StatisticalTestCase(unittest.TestCase):
         mobile = FeatureFilter('device_type', 'mobile')
         kpi = KPI('revenue')
 
-        test_revenue_overall = StatisticalTest(kpi, [], variants)
-        test_revenue_mobile = StatisticalTest(kpi, [mobile], variants)
+        test_revenue_overall = StatisticalTest(self.data, kpi, [], variants)
+        test_revenue_mobile = StatisticalTest(self.data, kpi, [mobile], variants)
 
         self.assertEqual(test_revenue_overall.kpi.name, "revenue")
         self.assertEqual(test_revenue_overall.variants.control_name, "control")
@@ -43,10 +43,10 @@ class StatisticalTestCase(unittest.TestCase):
         tablet = FeatureFilter('device_type', 'tablet')
         kpi = KPI('revenue')
 
-        test_revenue_overall = StatisticalTest(kpi, [], variants)
-        test_revenue_mobile = StatisticalTest(kpi, [mobile], variants)
-        test_revenue_desktop = StatisticalTest(kpi, [desktop], variants)
-        test_revenue_tablet = StatisticalTest(kpi, [tablet], variants)
+        test_revenue_overall = StatisticalTest(self.data, kpi, [], variants)
+        test_revenue_mobile = StatisticalTest(self.data, kpi, [mobile], variants)
+        test_revenue_desktop = StatisticalTest(self.data, kpi, [desktop], variants)
+        test_revenue_tablet = StatisticalTest(self.data, kpi, [tablet], variants)
 
         tests = [test_revenue_overall, test_revenue_mobile, test_revenue_desktop, test_revenue_tablet]
         multi_test_suite = StatisticalTestSuite(tests, CorrectionMethod.BH)

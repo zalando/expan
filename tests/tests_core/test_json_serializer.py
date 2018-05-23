@@ -3,11 +3,13 @@ import numpy as np
 
 from expan.core.results import *
 from expan.core.statistical_test import *
+from tests.tests_core.util import get_test_data
 
 
 class StatisticalTestCase(unittest.TestCase):
     def setUp(self):
         np.random.seed(41)
+        self.data = get_test_data()
 
     def tearDown(self):
         pass
@@ -22,7 +24,7 @@ class StatisticalTestCase(unittest.TestCase):
         statistical_power    = 0.8
         confidence_interval  = {2.5: 0.1, 97.5: 1.1}
 
-        statistical_test = StatisticalTest(kpi, [], variants)
+        statistical_test = StatisticalTest(self.data, kpi, [], variants)
         simple_stats = SimpleTestStatistics(control_statistics,
                                             treatment_statistics,
                                             delta,
@@ -81,8 +83,8 @@ class StatisticalTestCase(unittest.TestCase):
 
         mobile = FeatureFilter('device_type', 'mobile')
         desktop = FeatureFilter('device_type', 'desktop')
-        statistical_test_mobile = StatisticalTest(kpi, [mobile], variants)
-        statistical_test_desktop = StatisticalTest(kpi, [desktop], variants)
+        statistical_test_mobile = StatisticalTest(self.data, kpi, [mobile], variants)
+        statistical_test_desktop = StatisticalTest(self.data, kpi, [desktop], variants)
 
         test_result1 = StatisticalTestResult(statistical_test_mobile, CombinedTestStatistics(simple_stats, simple_stats_corrected))
         test_result2 = StatisticalTestResult(statistical_test_desktop, CombinedTestStatistics(es_stats, es_stats_corrected))
