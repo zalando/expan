@@ -6,6 +6,7 @@
 
 **Merged pull requests:**
 
+- Experiment data restructure [\#213](https://github.com/zalando/expan/pull/213) ([daryadedik](https://github.com/daryadedik))
 - Original corrected results [\#212](https://github.com/zalando/expan/pull/212) ([daryadedik](https://github.com/daryadedik))
 
 ## [v1.0.1](https://github.com/zalando/expan/tree/v1.0.1) (2018-04-23)

@@ -9,6 +9,9 @@ Changelog <https://github.com/zalando/expan/compare/v1.0.1...HEAD>`__
 
 **Merged pull requests:**
 
+-  Experiment data restructure
+   `#213 <https://github.com/zalando/expan/pull/213>`__
+   (`daryadedik <https://github.com/daryadedik>`__)
 -  Original corrected results
    `#212 <https://github.com/zalando/expan/pull/212>`__
    (`daryadedik <https://github.com/daryadedik>`__)
