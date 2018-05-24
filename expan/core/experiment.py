@@ -115,7 +115,7 @@ class Experiment(object):
 
         # remove data from the result test metadata
         if not include_data:
-            test.data = None
+            del test.data
         return test_result
 
 
@@ -179,7 +179,7 @@ class Experiment(object):
 
         # remove data from the results
         for test_result in test_suite_result.results:
-            test_result.test.data = None
+            del test_result.test.data
         return test_suite_result
 
 

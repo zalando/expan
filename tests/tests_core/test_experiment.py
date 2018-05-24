@@ -100,7 +100,6 @@ class StatisticalTestTestCases(ExperimentTestCase):
 
         self.assertAlmostEqual(res.result.statistical_power, 0.36401, ndecimals)
         self.assertEqual(res.test.kpi.name, 'normal_same')
-        self.assertEqual(res.test.data, None)
 
     def test_group_sequential(self):
         ndecimals = 5
@@ -122,7 +121,6 @@ class StatisticalTestTestCases(ExperimentTestCase):
         self.assertAlmostEqual(res.result.statistical_power, 0.36401, ndecimals)
         self.assertEqual(res.result.stop, False)
         self.assertEqual(res.test.kpi.name, 'normal_same')
-        self.assertEqual(res.test.data, None)
 
     def test_bayes_factor_delta(self):
         ndecimals = 5
@@ -145,7 +143,6 @@ class StatisticalTestTestCases(ExperimentTestCase):
 
         self.assertEqual(res.result.stop, True)
         self.assertEqual(res.test.kpi.name, 'normal_same')
-        self.assertEqual(res.test.data, None)
 
     def test_bayes_precision_delta(self):
         ndecimals = 5
@@ -199,7 +196,6 @@ class StatisticalTestSuiteTestCases(ExperimentTestCase):
         self.assertAlmostEqual(simple_stat_res.corrected_test_statistics.statistical_power, 0.36401, ndecimals)
         self.assertEqual(simple_stat_res.corrected_test_statistics.treatment_statistics.sample_size, 6108)
         self.assertEqual(simple_stat_res.corrected_test_statistics.control_statistics.sample_size, 3892)
-        self.assertTrue(all(result.test.data is None for result in res.results))
 
     def test_one_test_in_suite_with_wrong_correction(self):
         res = self.getExperiment().analyze_statistical_test_suite(self.suite_with_one_test_correction)

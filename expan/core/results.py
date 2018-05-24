@@ -99,7 +99,7 @@ class CombinedTestStatistics(JsonSerializable):
 class StatisticalTestResult(JsonSerializable):
     """ This class holds the results of a single statistical test.
     
-    :param test: information about the statistical test (without data)
+    :param test: information about the statistical test
     :type  test: StatisticalTest
     :param result: result of this statistical test
     :type  result: CombinedTestStatistics

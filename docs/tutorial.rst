@@ -67,7 +67,6 @@ Running an analysis is very simple:
 
 Currently ``analyze_statistical_test`` supports 4 test methods: ``fixed_horizon`` (default), ``group_sequential``, ``bayes_factor`` and ``bayes_precision``.
 All methods requires different additional parameters.
-``include_data`` is False by default, meaning the result statistical test result will not contain analysis data.
 
 If you would like to change any of the default values, just pass them as parameters to delta. For example:
 
@@ -144,7 +143,6 @@ An example of the result is shown below:
             }
         },
         "test": {
-            "data": null,
             "features": [],
             "kpi": {
                 "name": "revenue"
@@ -223,7 +221,6 @@ Following is an example of the analysis result of statistical test suite:
         "results": [
             {
                 "test": {
-                    "data": null,
                     "features": [
                         {
                             "column_name": "device_type",
@@ -294,7 +291,6 @@ Following is an example of the analysis result of statistical test suite:
             },
             {
                 "test": {
-                    "data": null,
                     "features": [
                         {
                             "column_name": "device_type",
