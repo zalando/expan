@@ -57,9 +57,6 @@ class Experiment(object):
 
         if 'entity' not in test.data.columns:
             raise KeyError("There is no 'entity' column in the data.")
-        if test.data.entity.duplicated().any():
-            raise ValueError('Entities in data should be unique.')
-
         if test.variants.variant_column_name not in test.data.columns:
             raise KeyError("There is no '{}' column in the data.".format(test.variants.variant_column_name))
         if test.variants.treatment_name not in pd.unique(test.data[test.variants.variant_column_name]):
@@ -99,6 +96,8 @@ class Experiment(object):
         if not self._is_valid_for_analysis(data_for_analysis, test):
             logger.warning("Data is not valid for the analysis!")
             return test_result
+        if data_for_analysis.entity.duplicated().any():
+            raise ValueError('Entities in data should be unique.')
 
         # get control and treatment values for the kpi
         control          = test.variants.get_variant(data_for_analysis, test.variants.control_name)[test.kpi.name]
