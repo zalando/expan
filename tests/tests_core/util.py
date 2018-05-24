@@ -48,6 +48,11 @@ def get_framingham_data(fdir, fname='framingham_heart_study_exam7.csv'):
 
 
 def get_test_data_revenue_order():
+    """ Small test data for testing with kpis revenue and number of orders.
+    
+    :return data frame containing test dataset
+    :rtype  pd.DataFrame
+    """
     test_data = np.array([['fullVisitorId', 'visitorId', 'date', 'entity', 'variant',
                            'revenue', 'orders', 'appdomain', 'device_type', 'gender'],
                            ['fv1', 'v1', '2017-10-01', 'client-1', 'variant1', 2.3, 4.5, 'AT', 'mobile', 'female'],
