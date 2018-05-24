@@ -3,13 +3,13 @@ import numpy as np
 
 from expan.core.results import *
 from expan.core.statistical_test import *
-from tests.tests_core.util import get_test_data
+from tests.tests_core.util import get_test_data_revenue_order
 
 
 class StatisticalTestCase(unittest.TestCase):
     def setUp(self):
         np.random.seed(41)
-        self.data = get_test_data()
+        self.data = get_test_data_revenue_order()
 
     def tearDown(self):
         pass
