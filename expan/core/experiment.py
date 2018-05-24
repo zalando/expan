@@ -113,7 +113,7 @@ class Experiment(object):
         test_statistics = worker(x=treatment_data, y=control_data)
         test_result.result = test_statistics
 
-        # remove data from the test
+        # remove data from the result test metadata
         if not include_data:
             test.data = None
         return test_result
@@ -166,7 +166,7 @@ class Experiment(object):
             new_worker_args['alpha'] = corrected_alpha
 
             for test_index, test_item in enumerate(test_suite_result.results):
-                if test_item.result.original_test_statistics: # result can be None if not enough entities
+                if test_item.result.original_test_statistics:  # result can be None if not enough entities
                     original_analysis = test_suite_result.results[test_index]
                     corrected_analysis = self.analyze_statistical_test(test_item.test, test_method,
                                                                        True, **new_worker_args)

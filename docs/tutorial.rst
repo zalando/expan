@@ -67,6 +67,7 @@ Running an analysis is very simple:
 
 Currently ``analyze_statistical_test`` supports 4 test methods: ``fixed_horizon`` (default), ``group_sequential``, ``bayes_factor`` and ``bayes_precision``.
 All methods requires different additional parameters.
+``include_data`` is False by default, meaning the result statistical test result will not contain analysis data.
 
 If you would like to change any of the default values, just pass them as parameters to delta. For example:
 
@@ -76,7 +77,7 @@ If you would like to change any of the default values, just pass them as paramet
 	exp.analyze_statistical_test(test, test_method='group_sequential', estimated_sample_size=1000)
 	exp.analyze_statistical_test(test, test_method='bayes_factor', distribution='normal')
 
-Here is the list of addtional parameters.
+Here is the list of additional parameters.
 You may also find the description in our :ref:`API <modindex>` page.
 
 *fixed_horizon* is the default method:

@@ -49,7 +49,7 @@ def get_framingham_data(fdir, fname='framingham_heart_study_exam7.csv'):
 
 def get_test_data_revenue_order():
     test_data = np.array([['fullVisitorId', 'visitorId', 'date', 'entity', 'variant',
-                            'revenue', 'orders', 'appdomain', 'device_type', 'gender'],
+                           'revenue', 'orders', 'appdomain', 'device_type', 'gender'],
                            ['fv1', 'v1', '2017-10-01', 'client-1', 'variant1', 2.3, 4.5, 'AT', 'mobile', 'female'],
                            ['fv1', 'v2', '2017-10-01', 'client-1', 'variant1', 1.2, 0.5, 'AT', 'desktop', 'female'],
                            ['fv1', 'v1', '2017-10-01', 'client-2', 'variant1', 2.1, 3.5, 'AT', 'mobile', 'male'],
