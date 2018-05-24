@@ -7,6 +7,8 @@ from expan.core.util import JsonSerializable
 class StatisticalTest(JsonSerializable):
     """ This class describes what has to be tested against what and represent a unit of statistical testing.
     
+    :param data: data for statistical test
+    :type  data: DataFrame
     :param kpi: the kpi to perform on
     :type  kpi: KPI or its subclass
     :param features: list of features used for subgroups
@@ -14,14 +16,17 @@ class StatisticalTest(JsonSerializable):
     :param variants: variant column name and their values
     :type  variants: Variants
     """
-    def __init__(self, kpi, features, variants):
+    def __init__(self, data, kpi, features, variants):
+        if not isinstance(data, pd.DataFrame):
+            raise ValueError("Please, provide data for the statistical test in form of a data frame.")
         if not isinstance(features, list):
             raise TypeError("Features should be a list.")
         if not all(isinstance(n, FeatureFilter) for n in features):
             raise TypeError("Some features are not of the type FeatureFilter.")
-        self.kpi       = kpi
-        self.features  = features
-        self.variants  = variants
+        self.data     = data
+        self.kpi      = kpi
+        self.features = features
+        self.variants = variants
 
 
 class KPI(JsonSerializable):

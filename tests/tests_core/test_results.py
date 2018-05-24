@@ -3,10 +3,14 @@ import numpy as np
 
 from expan.core.results import *
 from expan.core.statistical_test import *
+from expan.core.util import generate_random_data
 
 
 class StatisticalTestCase(unittest.TestCase):
     def setUp(self):
+        np.random.seed(41)
+        self.data, self.metadata = generate_random_data()
+
         np.random.seed(41)
         self.control_statistics   = SampleStatistics(1000, 0.0, 1.0)
         self.treatment_statistics = SampleStatistics(1200, 1.0, 1.0)
@@ -54,7 +58,7 @@ class StatisticalTestCase(unittest.TestCase):
         self.correction_method = CorrectionMethod.BONFERRONI
 
         kpi = KPI('revenue')
-        self.statistical_test = StatisticalTest(kpi, [], variants)
+        self.statistical_test = StatisticalTest(self.data, kpi, [], variants)
         self.statistical_test_result = StatisticalTestResult(self.statistical_test, self.simple_stats_corrected)
 
         test_result1 = StatisticalTestResult(self.statistical_test,

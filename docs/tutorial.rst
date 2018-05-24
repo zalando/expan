@@ -15,7 +15,7 @@ First, let's generate some random data for the tutorial.
 
 ``data`` is a pandas DataFrame.
 It must contain a column for entity identifier named **entity**,
-a column for variant, and one column per kpi/feature.
+a column for variant, and one column per kpi/feature. Each data is constructed per each Statistical Test.
 
 ``metadata`` is a python dict. It should contain the following keys:
 
@@ -36,11 +36,10 @@ To use ExpAn for analysis, you first need to create an ``Experiment`` object.
 .. code-block:: python
 
     from expan.core.experiment import Experiment
-    exp = Experiment(data=data, metadata=metadata)
+    exp = Experiment(metadata=metadata)
 
 This ``Experiment`` object has the following parameters:
 
-	* ``data``: A data you want to run experiment for. An example of the data structure. Described above.
 	* ``metadata``: Specifies an experiment name as the mandatory and data source as the optional fields. Described above.
 
 
@@ -55,7 +54,7 @@ Each statistical test consist of one kpi, treatment and control variant names, a
 
     kpi = KPI('normal_same')
     variants = Variants(variant_column_name='variant', control_name='B', treatment_name='A')
-    test = StatisticalTest(kpi=kpi, features=[], variants=variants)
+    test = StatisticalTest(data=data, kpi=kpi, features=[], variants=variants)
 
 
 Let's start analyzing!
@@ -77,7 +76,7 @@ If you would like to change any of the default values, just pass them as paramet
 	exp.analyze_statistical_test(test, test_method='group_sequential', estimated_sample_size=1000)
 	exp.analyze_statistical_test(test, test_method='bayes_factor', distribution='normal')
 
-Here is the list of addtional parameters.
+Here is the list of additional parameters.
 You may also find the description in our :ref:`API <modindex>` page.
 
 *fixed_horizon* is the default method:
@@ -169,7 +168,7 @@ you can use the ``FeatureFilter`` object:
 .. code-block:: python
 
     feature = FeatureFilter('feature', 'has')
-    test = StatisticalTest(kpi=kpi, features=[feature], variants=variants)
+    test = StatisticalTest(data=data, kpi=kpi, features=[feature], variants=variants)
 
 
 Statistical test suite
@@ -190,9 +189,9 @@ A ``StatisticalTestSuite`` object consists of a list of ``StatisticalTest`` and 
 	feature_2 = FeatureFilter('feature', 'non')
 	feature_3 = FeatureFilter('feature', 'feature that only has one data point')
 
-	test_subgroup1 = StatisticalTest(kpi, [feature_1], variants)
-	test_subgroup2 = StatisticalTest(kpi, [feature_2], variants)
-	test_subgroup3 = StatisticalTest(kpi, [feature_3], variants)
+	test_subgroup1 = StatisticalTest(data, kpi, [feature_1], variants)
+	test_subgroup2 = StatisticalTest(data, kpi, [feature_2], variants)
+	test_subgroup3 = StatisticalTest(data, kpi, [feature_3], variants)
 
 	tests = [test_subgroup1, test_subgroup2, test_subgroup3]
 	test_suite = StatisticalTestSuite(tests=tests, correction_method=CorrectionMethod.BH)

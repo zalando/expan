@@ -18,16 +18,13 @@ logger = logging.getLogger(__name__)
 
 class Experiment(object):
     """ Class which adds the analysis functions to experimental data. """
-    def __init__(self, data, metadata):
+    def __init__(self, metadata):
         """
         Constructor of the experiment object.
         
-        :param data: all information of the experiment data. (e.g. KPIs, variant, entity, features, etc)
-        :type  data: pd.DataFrame
         :param metadata: additional information about the experiment. (e.g. primary KPI, source, etc)
         :type  metadata: dict
         """
-        self.data         = data.convert_objects(convert_numeric=True)
         self.metadata     = metadata
         self.worker_table = {
             'fixed_horizon': statx.make_delta,
@@ -37,10 +34,10 @@ class Experiment(object):
         }
 
     def __str__(self):
-        return 'Experiment "{:s}" with {:d} entities.'.format(self.metadata['experiment'], len(self.data))
+        return 'Performing "{:s}" experiment.'.format(self.metadata['experiment'])
 
 
-    def analyze_statistical_test(self, test, test_method='fixed_horizon', **worker_args):
+    def analyze_statistical_test(self, test, test_method='fixed_horizon', include_data=False, **worker_args):
         """ Runs delta analysis on one statistical test and returns statistical results.
         
         :param test: a statistical test to run
@@ -48,6 +45,8 @@ class Experiment(object):
         :param test_method: analysis method to perform. 
                            It can be 'fixed_horizon', 'group_sequential', 'bayes_factor' or 'bayes_precision'.
         :type  test_method: str
+        :param include_data: True if test results should include data, False - if no data should be included
+        :type  include_data: bool
         :param worker_args: additional arguments for the analysis method
 
         :return: statistical result of the test
@@ -56,30 +55,27 @@ class Experiment(object):
         if not isinstance(test, StatisticalTest):
             raise TypeError("Statistical test should be of type StatisticalTest.")
 
-        if 'entity' not in self.data.columns:
+        if 'entity' not in test.data.columns:
             raise KeyError("There is no 'entity' column in the data.")
-        if self.data.entity.duplicated().any():
-            raise ValueError('Entities in data should be unique.')
-
-        if test.variants.variant_column_name not in self.data.columns:
+        if test.variants.variant_column_name not in test.data.columns:
             raise KeyError("There is no '{}' column in the data.".format(test.variants.variant_column_name))
-        if test.variants.treatment_name not in pd.unique(self.data[test.variants.variant_column_name]):
+        if test.variants.treatment_name not in pd.unique(test.data[test.variants.variant_column_name]):
             raise KeyError("There is no treatment with the name '{}' in the data.".format(test.variants.treatment_name))
-        if test.variants.control_name not in pd.unique(self.data[test.variants.variant_column_name]):
+        if test.variants.control_name not in pd.unique(test.data[test.variants.variant_column_name]):
             raise KeyError("There is no control with the name '{}' in the data.".format(test.variants.control_name))
 
         for feature in test.features:
-            if feature.column_name not in self.data.columns:
+            if feature.column_name not in test.data.columns:
                 raise KeyError("Feature name '{}' does not exist in the data.".format(feature.column_name))
 
-        if type(test.kpi) is KPI and (test.kpi.name not in self.data.columns):
+        if type(test.kpi) is KPI and (test.kpi.name not in test.data.columns):
             raise KeyError("There is no column of name '{}' in the data.".format(test.kpi.name))
         if type(test.kpi) is DerivedKPI:
-            if type(test.kpi.numerator) is not str or test.kpi.numerator not in self.data.columns:
+            if type(test.kpi.numerator) is not str or test.kpi.numerator not in test.data.columns:
                 raise KeyError("Numerator '{}' of the derived KPI does not exist in the data.".format(test.kpi.numerator))
-            if type(test.kpi.denominator) is not str or test.kpi.denominator not in self.data.columns:
+            if type(test.kpi.denominator) is not str or test.kpi.denominator not in test.data.columns:
                 raise KeyError("Denominator '{}' of the derived KPI does not exist in the data.".format(test.kpi.denominator))
-            test.kpi.make_derived_kpi(self.data)
+            test.kpi.make_derived_kpi(test.data)
 
         logger.info("One analysis with kpi '{}', control variant '{}', treatment variant '{}' and features [{}] "
                     "has just started".format(test.kpi, test.variants.control_name,
@@ -93,14 +89,15 @@ class Experiment(object):
         # create test result object with empty result first
         test_result = StatisticalTestResult(test, None)
 
-        data_for_analysis = self.data
-        # apply feature filter to data
+        data_for_analysis = test.data
         for feature in test.features:
             data_for_analysis = feature.apply_to_data(data_for_analysis)
 
         if not self._is_valid_for_analysis(data_for_analysis, test):
             logger.warning("Data is not valid for the analysis!")
             return test_result
+        if data_for_analysis.entity.duplicated().any():
+            raise ValueError('Entities in data should be unique.')
 
         # get control and treatment values for the kpi
         control          = test.variants.get_variant(data_for_analysis, test.variants.control_name)[test.kpi.name]
@@ -114,6 +111,10 @@ class Experiment(object):
         # run the test method
         test_statistics = worker(x=treatment_data, y=control_data)
         test_result.result = test_statistics
+
+        # remove data from the result test metadata
+        if not include_data:
+            del test.data
         return test_result
 
 
@@ -149,7 +150,7 @@ class Experiment(object):
         # test_suite_result hold statistical results from all statistical tests
         test_suite_result = MultipleTestSuiteResult([], test_suite.correction_method)
         for test in test_suite.tests:
-            original_analysis = self.analyze_statistical_test(test, test_method, **worker_args)
+            original_analysis = self.analyze_statistical_test(test, test_method, True, **worker_args)
             combined_result = CombinedTestStatistics(original_analysis.result, original_analysis.result)
             original_analysis.result = combined_result
             test_suite_result.results.append(original_analysis)
@@ -164,9 +165,10 @@ class Experiment(object):
             new_worker_args['alpha'] = corrected_alpha
 
             for test_index, test_item in enumerate(test_suite_result.results):
-                if test_item.result.original_test_statistics: # result can be None if not enough entities
+                if test_item.result.original_test_statistics:  # result can be None if not enough entities
                     original_analysis = test_suite_result.results[test_index]
-                    corrected_analysis = self.analyze_statistical_test(test_item.test, test_method, **new_worker_args)
+                    corrected_analysis = self.analyze_statistical_test(test_item.test, test_method,
+                                                                       True, **new_worker_args)
                     combined_result = CombinedTestStatistics(original_analysis.result.original_test_statistics,
                                                              corrected_analysis.result)
                     original_analysis.result = combined_result
@@ -174,10 +176,13 @@ class Experiment(object):
         logger.info("Statistical test suite analysis with {} tests, testmethod {}, correction method {} "
                     "has finished".format(len(test_suite.tests), test_method, test_suite.correction_method))
 
+        # remove data from the results
+        for test_result in test_suite_result.results:
+            del test_result.test.data
         return test_suite_result
 
 
-    def outlier_filter(self, kpis, percentile=99.0, threshold_type='upper'):
+    def outlier_filter(self, data, kpis, percentile=99.0, threshold_type='upper'):
         """ Method that filters out entities whose KPIs exceed the value at a given percentile.
         If any of the KPIs exceeds its threshold the entity is filtered out.
         
@@ -188,11 +193,11 @@ class Experiment(object):
         :param threshold_type: type of threshold used ('lower' or 'upper')
         :type  threshold_type: str
 
-        :return: No return value. Will filter out outliers in self.data in place.
+        :return: Will return data with filtered outliers.
         """
         # check if provided KPIs are present in the data
         for kpi in kpis:
-            if kpi not in self.data.columns:
+            if kpi not in data.columns:
                 raise KeyError(kpi + ' identifier not present in dataframe columns!')
         # check if provided percentile is valid
         if 0.0 < percentile <= 100.0 is False:
@@ -202,16 +207,16 @@ class Experiment(object):
             raise ValueError("Threshold type needs to be either 'upper' or 'lower'!")
 
         # run quantile filtering
-        flags = self._quantile_filtering(kpis=kpis, percentile=percentile, threshold_type=threshold_type)
+        flags = self._quantile_filtering(data=data, kpis=kpis, percentile=percentile, threshold_type=threshold_type)
         # log which columns were filtered and how many entities were filtered out
         self.metadata['filtered_columns'] = kpis
         self.metadata['filtered_entities_number'] = len(flags[flags == True])
         self.metadata['filtered_threshold_kind'] = threshold_type
         # throw warning if too many entities have been filtered out
-        if (len(flags[flags == True]) / float(len(self.data))) > 0.02:
+        if (len(flags[flags == True]) / float(len(data))) > 0.02:
             warnings.warn('More than 2% of entities have been filtered out, consider adjusting the percentile value.')
             logger.warning('More than 2% of entities have been filtered out, consider adjusting the percentile value.')
-        self.data = self.data[flags == False]
+        return data[flags == False]
 
 
     # ----- below are helper methods ----- #
@@ -259,7 +264,7 @@ class Experiment(object):
         return number_of_non_zeros_and_nans / np.nansum(x) * x
 
 
-    def _quantile_filtering(self, kpis, percentile, threshold_type):
+    def _quantile_filtering(self, data, kpis, percentile, threshold_type):
         """ Make the filtering based on the given quantile level. 
         Filtering is performed for each kpi independently.
         
@@ -274,8 +279,8 @@ class Experiment(object):
         :rtype: pd.Series
         """
         method_table = {'upper': lambda x: x > threshold, 'lower': lambda x: x <= threshold}
-        flags = pd.Series(data=[False]*len(self.data))
-        for column in self.data[kpis].columns:
-            threshold = np.percentile(self.data[column], percentile)
-            flags = flags | self.data[column].apply(method_table[threshold_type])
+        flags = pd.Series(data=[False]*len(data))
+        for column in data[kpis].columns:
+            threshold = np.percentile(data[column], percentile)
+            flags = flags | data[column].apply(method_table[threshold_type])
         return flags

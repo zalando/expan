@@ -17,9 +17,9 @@ class ExperimentTestCase(unittest.TestCase):
         seed so that randomized algorithms show deterministic behaviour."""
         np.random.seed(0)
         data, metadata = generate_random_data()
+
         self.data, self.metadata = data, metadata
 
-        # subgroups
         feature_has = FeatureFilter('feature', 'has')
         feature_non = FeatureFilter('feature', 'non')
         feature_one = FeatureFilter('feature', 'feature that only has one data point')
@@ -28,27 +28,29 @@ class ExperimentTestCase(unittest.TestCase):
         self.kpi = KPI('normal_same')
         self.variants = Variants('variant', 'B', 'A')
         self.nonsense_variants = Variants('variant', 'C', 'D')
-        self.test_normal_same = StatisticalTest(self.kpi, [], self.variants)
-        self.test_nonsense_variant = StatisticalTest(self.kpi, [], self.nonsense_variants)
-        self.test_normal_same_feature_non = StatisticalTest(self.kpi, [feature_non], self.variants)
-        self.test_normal_same_feature_has = StatisticalTest(self.kpi, [feature_has], self.variants)
-        self.test_normal_same_feature_one = StatisticalTest(self.kpi, [feature_one], self.variants)
+        self.test_normal_same = StatisticalTest(self.data, self.kpi, [], self.variants)
+        self.test_nonsense_variant = StatisticalTest(self.data, self.kpi, [], self.nonsense_variants)
+        self.test_normal_same_feature_non = StatisticalTest(self.data, self.kpi, [feature_non], self.variants)
+        self.test_normal_same_feature_has = StatisticalTest(self.data, self.kpi, [feature_has], self.variants)
+        self.test_normal_same_feature_one = StatisticalTest(self.data, self.kpi, [feature_one], self.variants)
 
         # statistical test with derived kpi
         self.derived_kpi = DerivedKPI('derived_kpi_one', 'normal_same', 'normal_shifted')
-        self.test_derived_kpi = StatisticalTest(self.derived_kpi, [], self.variants)
+        self.test_derived_kpi = StatisticalTest(self.data, self.derived_kpi, [], self.variants)
 
         # small dummy data frame
         data_dummy = np.array([['index', 'entity', 'variant', 'normal_same', 'normal_shifted'],
                                [0, 1, 'A', 2.0, 1.0], [1, 2, 'B', 3.0, 2.0],
                                [2, 3, 'A', 3.0, 2.0], [3, 4, 'B', 2.5, 1.0]])
-        self.data_dummy_df = pd.DataFrame(data=data_dummy[1:, 1:], columns=data_dummy[0, 1:])
+        self.data_dummy_df = pd.DataFrame(data=data_dummy[1:, 1:],
+                                          columns=data_dummy[0, 1:]).convert_objects(convert_numeric=True)
 
         data_dummy_with_nan = np.array([['index', 'entity', 'variant', 'normal_same', 'normal_shifted'],
                                [0, 1, 'A', 2.0, 1.0], [1, 2, 'B', 3.0, 2.0],
                                [2, 3, 'A', 3.0, 2.0], [3, 4, 'B', 2.5, 1.0],
                                [4, 5, 'A', 0.0, 0.0], [5, 6, 'B', None, None]])
-        self.data_dummy_df_with_nan = pd.DataFrame(data=data_dummy_with_nan[1:, 1:], columns=data_dummy_with_nan[0, 1:])
+        self.data_dummy_df_with_nan = pd.DataFrame(data=data_dummy_with_nan[1:, 1:],
+                                                   columns=data_dummy_with_nan[0, 1:]).convert_objects(convert_numeric=True)
 
         # statistical test suite
         self.suite_with_one_test = StatisticalTestSuite([self.test_normal_same])
@@ -66,14 +68,13 @@ class ExperimentTestCase(unittest.TestCase):
         pass
 
     def getExperiment(self):
-        return Experiment(self.data, self.metadata)
+        return Experiment(self.metadata)
 
 
 class ExperimentClassTestCases(ExperimentTestCase):
 
     def test_Experiment_constructor(self):
         experiment = self.getExperiment()
-        self.assertTrue(isinstance(experiment.data, pd.DataFrame))
         self.assertTrue(isinstance(experiment.metadata, dict))
 
 
@@ -239,9 +240,8 @@ class StatisticalTestSuiteTestCases(ExperimentTestCase):
 
     def test_three_subgroup_in_suite(self):
         """ Two subgroups contain valid data. One subgroup contains only one entity.
-        
-        When there is no enough data in one subgroup, which means one subgroup might contain zero 
-        or only one variant. (e.g. "browser" = "hack name"), it should ignore this subgroup and continue 
+        When there is no enough data in one subgroup, which means one subgroup might contain zero
+        or only one variant. (e.g. "browser" = "hack name"), it should ignore this subgroup and continue
         doing analysis with other subgroups.
         """
         res = self.getExperiment().analyze_statistical_test_suite(self.suite_with_three_subgroups)
@@ -268,6 +268,7 @@ class OutlierFilteringTestCases(ExperimentTestCase):
     def test_quantile_filtering_multiple_columns(self):
         exp = self.getExperiment()
         flags = exp._quantile_filtering(
+            self.data,
             kpis=[
                 'normal_same',
                 'normal_shifted',
@@ -281,7 +282,8 @@ class OutlierFilteringTestCases(ExperimentTestCase):
 
     def test_outlier_filtering_lower_threshold(self):
         exp = self.getExperiment()
-        exp.outlier_filter(
+        data = exp.outlier_filter(
+            self.data,
             kpis=[
                 'normal_same',
                 'normal_shifted',
@@ -291,27 +293,27 @@ class OutlierFilteringTestCases(ExperimentTestCase):
             percentile=0.1,
             threshold_type='lower'
         )
-        self.assertEqual(len(self.data) - len(exp.data), exp.metadata['filtered_entities_number'])
+        self.assertEqual(len(self.data) - len(data), exp.metadata['filtered_entities_number'])
 
     def test_outlier_filtering_unsupported_kpi(self):
         exp = self.getExperiment()
         with self.assertRaises(KeyError):
-            exp.outlier_filter(kpis=['revenue'])
+            exp.outlier_filter(self.data, kpis=['revenue'])
 
     def test_outlier_filtering_unsupported_percentile(self):
         exp = self.getExperiment()
         with self.assertRaises(ValueError):
-            exp.outlier_filter(kpis=['normal_same'], percentile=101.0)
+            exp.outlier_filter(self.data, kpis=['normal_same'], percentile=101.0)
 
     def test_outlier_filtering_unsupported_threshold_kind(self):
         exp = self.getExperiment()
         with self.assertRaises(ValueError):
-            exp.outlier_filter(kpis=['normal_same'], threshold_type='uppper')
+            exp.outlier_filter(self.data, kpis=['normal_same'], threshold_type='uppper')
 
     def test_outlier_filtering_high_filtering_percentage(self):
         exp = self.getExperiment()
         with warnings.catch_warnings(record=True) as w:
-            exp.outlier_filter(kpis=['normal_same'], percentile=97.9)
+            exp.outlier_filter(self.data, kpis=['normal_same'], percentile=97.9)
             self.assertEqual(len(w), 1)
             self.assertTrue(issubclass(w[-1].category, UserWarning))
 
@@ -337,25 +339,25 @@ class HelperMethodsTestCases(ExperimentTestCase):
     # Test _get_weights for derived kpis
     def test_get_weights_derived_kpi(self):
         exp = self.getExperiment()
-        self.derived_kpi.make_derived_kpi(exp.data)
-        res = exp._get_weights(exp.data, self.test_derived_kpi, 'B')
+        self.derived_kpi.make_derived_kpi(self.data)
+        res = exp._get_weights(self.data, self.test_derived_kpi, 'B')
         self.assertTrue(isinstance(res, pd.Series))
 
     # Test re-weighting trick with hardcoded data
     def test_get_weights_hardcoded_data(self):
         ndecimals = 5
-        exp = Experiment(self.data_dummy_df, self.metadata)
-        self.derived_kpi.make_derived_kpi(exp.data)
-        res = exp._get_weights(exp.data, self.test_derived_kpi, 'B')
+        exp = Experiment(self.metadata)
+        self.derived_kpi.make_derived_kpi(self.data_dummy_df)
+        res = exp._get_weights(self.data_dummy_df, self.test_derived_kpi, 'B')
         self.assertAlmostEqual(res.iloc[0], 1.33333, ndecimals)
         self.assertAlmostEqual(res.iloc[1], 0.66667, ndecimals)
 
     # Test re-weighting trick with hardcoded data with NaN values
     def test_get_weights_hardcoded_data_with_nan(self):
         ndecimals = 5
-        exp = Experiment(self.data_dummy_df_with_nan, self.metadata)
-        self.derived_kpi.make_derived_kpi(exp.data)
-        res = exp._get_weights(exp.data, self.test_derived_kpi, 'B')
+        exp = Experiment(self.metadata)
+        self.derived_kpi.make_derived_kpi(self.data_dummy_df_with_nan)
+        res = exp._get_weights(self.data_dummy_df_with_nan, self.test_derived_kpi, 'B')
         self.assertAlmostEqual(res.iloc[0], 1.33333, ndecimals)
         self.assertAlmostEqual(res.iloc[1], 0.66667, ndecimals)
 
