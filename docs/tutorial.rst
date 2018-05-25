@@ -15,7 +15,7 @@ First, let's generate some random data for the tutorial.
 
 ``data`` is a pandas DataFrame.
 It must contain a column for entity identifier named **entity**,
-a column for variant, and one column per kpi/feature. Each data is constructed per each Statistical Test.
+a column for variant, and one column per kpi/feature.
 
 ``metadata`` is a python dict. It should contain the following keys:
 
@@ -46,7 +46,8 @@ This ``Experiment`` object has the following parameters:
 Create a statistical test
 ----------------------------------
 Now we need a ``StatisticalTest`` object to represent what statistical test to run.
-Each statistical test consist of one kpi, treatment and control variant names, and the optional features.
+Each statistical test consist of a dataset, one kpi, treatment and control variant names, and the optional features.
+Dataset should contain necessary kpis, variants and features columns.
 
 .. code-block:: python
 
