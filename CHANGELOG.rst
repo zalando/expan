@@ -5,7 +5,19 @@ Change Log
 -----------------------------------------------------------
 
 `Full
-Changelog <https://github.com/zalando/expan/compare/v1.0.1...HEAD>`__
+Changelog <https://github.com/zalando/expan/compare/v1.1.0...HEAD>`__
+
+**Merged pull requests:**
+
+-  Update outlier filter on derived kpis
+   `#214 <https://github.com/zalando/expan/pull/214>`__
+   (`shansfolder <https://github.com/shansfolder>`__)
+
+`v1.1.0 <https://github.com/zalando/expan/tree/v1.1.0>`__ (2018-05-24)
+----------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/zalando/expan/compare/v1.0.1...v1.1.0>`__
 
 **Merged pull requests:**
 

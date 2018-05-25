@@ -2,7 +2,14 @@
 
 ## [Unreleased](https://github.com/zalando/expan/tree/HEAD)
 
-[Full Changelog](https://github.com/zalando/expan/compare/v1.0.1...HEAD)
+[Full Changelog](https://github.com/zalando/expan/compare/v1.1.0...HEAD)
+
+**Merged pull requests:**
+
+- Update outlier filter on derived kpis [\#214](https://github.com/zalando/expan/pull/214) ([shansfolder](https://github.com/shansfolder))
+
+## [v1.1.0](https://github.com/zalando/expan/tree/v1.1.0) (2018-05-24)
+[Full Changelog](https://github.com/zalando/expan/compare/v1.0.1...v1.1.0)
 
 **Merged pull requests:**
 
