@@ -184,10 +184,12 @@ class Experiment(object):
 
     def outlier_filter(self, data, kpis, percentile=99.0, threshold_type='upper'):
         """ Method that filters out entities whose KPIs exceed the value at a given percentile.
-        If any of the KPIs exceeds its threshold the entity is filtered out.
+        If any of the KPIs exceeds its threshold the entity is filtered out. 
+        If kpis contains derived kpi, this method will first create these columns,
+        and then perform outlier filtering on all given kpis.
         
-        :param kpis: list of KPI names
-        :type  kpis: list[str]
+        :param kpis: list of KPI instances
+        :type  kpis: list[KPI]
         :param percentile: percentile considered as filtering threshold
         :type  percentile: float
         :param threshold_type: type of threshold used ('lower' or 'upper')
@@ -197,8 +199,17 @@ class Experiment(object):
         """
         # check if provided KPIs are present in the data
         for kpi in kpis:
-            if kpi not in data.columns:
-                raise KeyError(kpi + ' identifier not present in dataframe columns!')
+            if type(kpi) is KPI and (kpi.name not in data.columns):
+                raise KeyError(kpi.name + ' identifier not present in dataframe columns in outlier filtering!')
+            if type(kpi) is DerivedKPI:
+                if type(kpi.numerator) is not str or kpi.numerator not in data.columns:
+                    raise KeyError(
+                        "Numerator '{}' of the derived KPI does not exist in the data in outlier filtering.".format(kpi.numerator))
+                if type(kpi.denominator) is not str or kpi.denominator not in data.columns:
+                    raise KeyError(
+                        "Denominator '{}' of the derived KPI does not exist in the data in outlier filtering.".format(kpi.denominator))
+                kpi.make_derived_kpi(data)
+
         # check if provided percentile is valid
         if 0.0 < percentile <= 100.0 is False:
             raise ValueError("Percentile value needs to be between 0.0 and 100.0!")
@@ -207,7 +218,10 @@ class Experiment(object):
             raise ValueError("Threshold type needs to be either 'upper' or 'lower'!")
 
         # run quantile filtering
-        flags = self._quantile_filtering(data=data, kpis=kpis, percentile=percentile, threshold_type=threshold_type)
+        flags = self._quantile_filtering(data=data,
+                                         kpis=[kpi.name for kpi in kpis],
+                                         percentile=percentile,
+                                         threshold_type=threshold_type)
         # log which columns were filtered and how many entities were filtered out
         self.metadata['filtered_columns'] = kpis
         self.metadata['filtered_entities_number'] = len(flags[flags == True])

@@ -285,10 +285,10 @@ class OutlierFilteringTestCases(ExperimentTestCase):
         data = exp.outlier_filter(
             self.data,
             kpis=[
-                'normal_same',
-                'normal_shifted',
-                'normal_shifted_by_feature',
-                'normal_unequal_variance'
+                KPI('normal_same'),
+                KPI('normal_shifted'),
+                KPI('normal_shifted_by_feature'),
+                KPI('normal_unequal_variance')
             ],
             percentile=0.1,
             threshold_type='lower'
@@ -298,24 +298,38 @@ class OutlierFilteringTestCases(ExperimentTestCase):
     def test_outlier_filtering_unsupported_kpi(self):
         exp = self.getExperiment()
         with self.assertRaises(KeyError):
-            exp.outlier_filter(self.data, kpis=['revenue'])
+            exp.outlier_filter(self.data, kpis=[KPI('revenue')])
 
     def test_outlier_filtering_unsupported_percentile(self):
         exp = self.getExperiment()
         with self.assertRaises(ValueError):
-            exp.outlier_filter(self.data, kpis=['normal_same'], percentile=101.0)
+            exp.outlier_filter(self.data, kpis=[KPI('normal_same')], percentile=101.0)
 
     def test_outlier_filtering_unsupported_threshold_kind(self):
         exp = self.getExperiment()
         with self.assertRaises(ValueError):
-            exp.outlier_filter(self.data, kpis=['normal_same'], threshold_type='uppper')
+            exp.outlier_filter(self.data, kpis=[KPI('normal_same')], threshold_type='uppper')
 
     def test_outlier_filtering_high_filtering_percentage(self):
         exp = self.getExperiment()
         with warnings.catch_warnings(record=True) as w:
-            exp.outlier_filter(self.data, kpis=['normal_same'], percentile=97.9)
+            exp.outlier_filter(self.data, kpis=[KPI('normal_same')], percentile=97.9)
             self.assertEqual(len(w), 1)
             self.assertTrue(issubclass(w[-1].category, UserWarning))
+
+    def test_outlier_filtering_derived_kpi(self):
+        exp = self.getExperiment()
+        data = exp.outlier_filter(
+            self.data,
+            kpis=[
+                KPI('normal_same'),
+                KPI('normal_shifted'),
+                DerivedKPI('derived_kpi', 'normal_same', 'normal_shifted')
+            ],
+            percentile=0.1,
+            threshold_type='lower'
+        )
+        self.assertIn('derived_kpi', data.columns)
 
 
 class HelperMethodsTestCases(ExperimentTestCase):
