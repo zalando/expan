@@ -223,7 +223,7 @@ class Experiment(object):
                                          percentile=percentile,
                                          threshold_type=threshold_type)
         # log which columns were filtered and how many entities were filtered out
-        self.metadata['filtered_columns'] = kpis
+        self.metadata['filtered_columns'] = [kpi.name for kpi in kpis]
         self.metadata['filtered_entities_number'] = len(flags[flags == True])
         self.metadata['filtered_threshold_kind'] = threshold_type
         # throw warning if too many entities have been filtered out
