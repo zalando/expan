@@ -3,6 +3,7 @@ import numpy as np
 
 from expan.core.statistical_test import *
 from expan.core.util import generate_random_data
+from tests.tests_core.util import get_two_multiple_test_suite_results
 
 
 class StatisticalTestCase(unittest.TestCase):
@@ -14,6 +15,9 @@ class StatisticalTestCase(unittest.TestCase):
         self.test_kpi = KPI('normal_same')
         self.test_variants = Variants('variant', 'A', 'B')
         self.test_normal_same = StatisticalTest(self.data, self.test_kpi, [], self.test_variants)
+
+        # two multiple test suites results for merge_with tests
+        self.multiple_test_suite_result_1, self.multiple_test_suite_result_2 = get_two_multiple_test_suite_results()
 
     def tearDown(self):
         pass
@@ -71,3 +75,17 @@ class StatisticalTestCase(unittest.TestCase):
             self.data, self.test_normal_same.variants.control_name)[self.test_normal_same.kpi.name]
         self.assertEqual(len(control), 6108)
         self.assertTrue(isinstance(control, pd.Series))
+
+    def test_merge_with_multiple_test_suite_results(self):
+        self.assertEqual(len(self.multiple_test_suite_result_1.results), 1)
+        self.assertEqual(len(self.multiple_test_suite_result_2.results), 1)
+        merged_multiple_test_suite_results = self.multiple_test_suite_result_1.merge_with(self.multiple_test_suite_result_2)
+        self.assertEqual(len(merged_multiple_test_suite_results.results), 2)
+        self.assertEqual(merged_multiple_test_suite_results.results[0].test.kpi.name, "derived_kpi_one")
+        self.assertEqual(merged_multiple_test_suite_results.results[1].test.kpi.name, "normal_same")
+
+    def test_merge_with_no_multiple_test_suite_results(self):
+        multiple_test_suite_result_2 = None
+        merged_multiple_test_suite_results = self.multiple_test_suite_result_1.merge_with(multiple_test_suite_result_2)
+        self.assertEqual(len(merged_multiple_test_suite_results.results), 1)
+        self.assertEqual(merged_multiple_test_suite_results.results[0].test.kpi.name, "normal_same")
