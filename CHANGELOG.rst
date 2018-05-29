@@ -5,7 +5,23 @@ Change Log
 -----------------------------------------------------------
 
 `Full
-Changelog <https://github.com/zalando/expan/compare/v1.1.0...HEAD>`__
+Changelog <https://github.com/zalando/expan/compare/v1.2.0...HEAD>`__
+
+**Merged pull requests:**
+
+-  Added merge\_with class method for merging two multiple test suite
+   results and tests
+   `#216 <https://github.com/zalando/expan/pull/216>`__
+   (`daryadedik <https://github.com/daryadedik>`__)
+-  List of filtered columns as filtered\_columns metadata information
+   `#215 <https://github.com/zalando/expan/pull/215>`__
+   (`daryadedik <https://github.com/daryadedik>`__)
+
+`v1.2.0 <https://github.com/zalando/expan/tree/v1.2.0>`__ (2018-05-25)
+----------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/zalando/expan/compare/v1.1.0...v1.2.0>`__
 
 **Merged pull requests:**
 
