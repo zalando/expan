@@ -120,3 +120,15 @@ class MultipleTestSuiteResult(JsonSerializable):
     def __init__(self, results, correction_method=CorrectionMethod.NONE):
         self.results = results
         self.correction_method = correction_method
+
+    def merge_with(self, multiple_test_suite_result):
+        """ Merges two multiple test suite results.
+        :param multiple_test_suite_result: multiple test suite result
+        :type  multiple_test_suite_result: MultipleTestSuiteResult
+        
+        :return merged multiple test suite results
+        :rtype  MultipleTestSuiteResult
+        """
+        if not multiple_test_suite_result:
+            return MultipleTestSuiteResult(self.results, self.correction_method)
+        return MultipleTestSuiteResult(multiple_test_suite_result.results + self.results, self.correction_method)

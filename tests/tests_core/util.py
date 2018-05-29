@@ -1,6 +1,9 @@
 import os
-import pandas as pd
 import numpy as np
+
+from expan.core.util import generate_random_data
+from expan.core.statistical_test import *
+from expan.core.experiment import Experiment
 
 
 def get_norm_temp_data(fdir, fname='normtemp.dat.txt.gz'):
@@ -45,6 +48,31 @@ def get_framingham_data(fdir, fname='framingham_heart_study_exam7.csv'):
                        index_col=0)
     data.index.name = 'metric'
     return data
+
+
+def get_two_multiple_test_suite_result():
+    """ Returns two multiple test suite results (for testing purposes of merge_with class method)
+    
+    :return two multiple test suite results
+    :rtype  MultipleTestSuiteResult, MultipleTestSuiteResult
+    """
+    data, metadata = generate_random_data()
+    exp = Experiment(metadata)
+
+    kpi = KPI('normal_same')
+    variants = Variants('variant', 'B', 'A')
+    test_normal_same = StatisticalTest(data, kpi, [], variants)
+    derived_kpi = DerivedKPI('derived_kpi_one', 'normal_same', 'normal_shifted')
+    test_derived_kpi = StatisticalTest(data, derived_kpi, [], variants)
+
+    suite_with_normal_same = StatisticalTestSuite([test_normal_same],
+                                                  CorrectionMethod.BONFERRONI)
+    suite_with_derived_kpi = StatisticalTestSuite([test_derived_kpi], CorrectionMethod.BH)
+
+    mtsr_1 = exp.analyze_statistical_test_suite(suite_with_normal_same, test_method='fixed_horizon')
+    mtsr_2 = exp.analyze_statistical_test_suite(suite_with_derived_kpi, test_method='fixed_horizon')
+
+    return mtsr_1, mtsr_2
 
 
 def get_test_data_revenue_order():
