@@ -50,7 +50,7 @@ def get_framingham_data(fdir, fname='framingham_heart_study_exam7.csv'):
     return data
 
 
-def get_two_multiple_test_suite_result():
+def get_two_multiple_test_suite_results():
     """ Returns two multiple test suite results (for testing purposes of merge_with class method)
     
     :return two multiple test suite results

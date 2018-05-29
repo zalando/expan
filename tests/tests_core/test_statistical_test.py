@@ -3,7 +3,7 @@ import numpy as np
 
 from expan.core.statistical_test import *
 from expan.core.util import generate_random_data
-from tests.tests_core.util import get_two_multiple_test_suite_result
+from tests.tests_core.util import get_two_multiple_test_suite_results
 
 
 class StatisticalTestCase(unittest.TestCase):
@@ -17,7 +17,7 @@ class StatisticalTestCase(unittest.TestCase):
         self.test_normal_same = StatisticalTest(self.data, self.test_kpi, [], self.test_variants)
 
         # two multiple test suites results for merge_with tests
-        self.multiple_test_suite_result_1, self.multiple_test_suite_result_2 = get_two_multiple_test_suite_result()
+        self.multiple_test_suite_result_1, self.multiple_test_suite_result_2 = get_two_multiple_test_suite_results()
 
     def tearDown(self):
         pass
