@@ -81,8 +81,11 @@ class StatisticalTestCase(unittest.TestCase):
         self.assertEqual(len(self.multiple_test_suite_result_2.results), 1)
         merged_multiple_test_suite_results = self.multiple_test_suite_result_1.merge_with(self.multiple_test_suite_result_2)
         self.assertEqual(len(merged_multiple_test_suite_results.results), 2)
+        self.assertEqual(merged_multiple_test_suite_results.results[0].test.kpi.name, "derived_kpi_one")
+        self.assertEqual(merged_multiple_test_suite_results.results[1].test.kpi.name, "normal_same")
 
     def test_merge_with_no_multiple_test_suite_results(self):
         multiple_test_suite_result_2 = None
         merged_multiple_test_suite_results = self.multiple_test_suite_result_1.merge_with(multiple_test_suite_result_2)
         self.assertEqual(len(merged_multiple_test_suite_results.results), 1)
+        self.assertEqual(merged_multiple_test_suite_results.results[0].test.kpi.name, "normal_same")
