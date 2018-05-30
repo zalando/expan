@@ -101,10 +101,12 @@ class Experiment(object):
 
         # get control and treatment values for the kpi
         control          = test.variants.get_variant(data_for_analysis, test.variants.control_name)[test.kpi.name]
+        logger.info("Control group size: {}".format(control.shape[0]))
         control_weight   = self._get_weights(data_for_analysis, test, test.variants.control_name)
         control_data     = control * control_weight
 
         treatment        = test.variants.get_variant(data_for_analysis, test.variants.treatment_name)[test.kpi.name]
+        logger.info("Treatment group size: {}".format(treatment.shape[0]))
         treatment_weight = self._get_weights(data_for_analysis, test, test.variants.treatment_name)
         treatment_data   = treatment * treatment_weight
 
@@ -151,6 +153,9 @@ class Experiment(object):
         test_suite_result = MultipleTestSuiteResult([], test_suite.correction_method)
         for test in test_suite.tests:
             original_analysis = self.analyze_statistical_test(test, test_method, True, **worker_args)
+            # do not include results of the test where statistical power is -1, meaning the results are not valid.
+            if original_analysis.result and original_analysis.result.statistical_power == -1:
+                original_analysis.result = None
             combined_result = CombinedTestStatistics(original_analysis.result, original_analysis.result)
             original_analysis.result = combined_result
             test_suite_result.results.append(original_analysis)
@@ -252,6 +257,7 @@ class Experiment(object):
             return False
         if len(data[data[test.variants.variant_column_name] == test.variants.treatment_name]) <= 1:
             logger.warning("Treatment group only contains 1 or 0 entities.")
+            return False
         return True
 
 
