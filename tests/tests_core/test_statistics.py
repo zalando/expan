@@ -133,6 +133,11 @@ class SampleSizeTestCases(StatisticsTestCase):
         x = ['1', '1', 'NA', '2', 'NA', '5', '8']
         self.assertEqual(statx.sample_size(x), 5)
 
+    def test__sample_size__all_nans(self):
+        """ Result of sample_size() is number of elements of numpy array minus number of NaNs. """
+        x = [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan]
+        self.assertEqual(statx.sample_size(x), 0)
+
 
 class EstimateSampleSizeTestCases(StatisticsTestCase):
     def test__estimate_sample_size__dataframe(self):
@@ -278,11 +283,10 @@ class StatisticalPowerTestCases(StatisticsTestCase):
 
         power = statx.compute_statistical_power(mean1, sigma, n1, mean2, sigma, n2, z_1_minus_alpha)
         self.assertAlmostEqual(power, 1-beta, float_precision)
-        
+
     def test_zero_pooled_std(self):
-        with self.assertRaises(ValueError):
-            statx.compute_statistical_power_from_samples([1, 1, 1, 1],
-                    [2, 2, 2, 2])
+        power = statx.compute_statistical_power_from_samples([1, 1, 1, 1], [2, 2, 2, 2])
+        self.assertEqual(power, -1)
 
 
 class PValueTestCases(StatisticsTestCase):
