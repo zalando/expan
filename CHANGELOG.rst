@@ -5,7 +5,19 @@ Change Log
 -----------------------------------------------------------
 
 `Full
-Changelog <https://github.com/zalando/expan/compare/v1.2.1...HEAD>`__
+Changelog <https://github.com/zalando/expan/compare/v1.2.2...HEAD>`__
+
+**Merged pull requests:**
+
+-  Removed deep copy of the data in statistical test construction
+   `#218 <https://github.com/zalando/expan/pull/218>`__
+   (`daryadedik <https://github.com/daryadedik>`__)
+
+`v1.2.2 <https://github.com/zalando/expan/tree/v1.2.2>`__ (2018-05-30)
+----------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/zalando/expan/compare/v1.2.1...v1.2.2>`__
 
 **Merged pull requests:**
 
