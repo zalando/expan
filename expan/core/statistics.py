@@ -389,7 +389,7 @@ def compute_statistical_power(mean1, std1, n1, mean2, std2, n2, z_1_minus_alpha)
     effect_size = mean1 - mean2
     std = pooled_std(std1, n1, std2, n2)
     if std <= 0.0:
-        logger.warning("Zero pooled std in compute_statistical_power.")
+        logger.error("Zero pooled std in compute_statistical_power.")
         return -1
 
     tmp = (n1 * n2 * effect_size**2) / ((n1 + n2) * std**2)
