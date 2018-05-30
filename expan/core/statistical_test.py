@@ -23,7 +23,7 @@ class StatisticalTest(JsonSerializable):
             raise TypeError("Features should be a list.")
         if not all(isinstance(n, FeatureFilter) for n in features):
             raise TypeError("Some features are not of the type FeatureFilter.")
-        self.data     = data.copy()
+        self.data     = data
         self.kpi      = kpi
         self.features = features
         self.variants = variants
