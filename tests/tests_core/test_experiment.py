@@ -79,7 +79,6 @@ class ExperimentTestCase(unittest.TestCase):
                                        [2, 3, 'A', None, None], [3, 4, 'B', None, None]])
         self.data_dummy_all_nan = pd.DataFrame(data=data_dummy_all_nan[1:, 1:],
                                                columns=data_dummy_all_nan[0, 1:]).convert_objects(convert_numeric=True)
-        print(self.data_dummy_all_nan)
         self.test_normal_same_nan_data = StatisticalTest(self.data_dummy_all_nan, self.kpi, [], self.variants)
         self.suite_with_one_test_with_nan_data = StatisticalTestSuite([self.test_normal_same_nan_data])
 
