@@ -252,10 +252,10 @@ class Experiment(object):
         :return True if data is valid for analysis and False if not
         :rtype: bool 
         """
-        if len(data[data[test.variants.variant_column_name] == test.variants.control_name]) <= 1:
+        if len(data[data[test.variants.variant_column_name] == test.variants.control_name].dropna()) <= 1:
             logger.warning("Control group only contains 1 or 0 entities.")
             return False
-        if len(data[data[test.variants.variant_column_name] == test.variants.treatment_name]) <= 1:
+        if len(data[data[test.variants.variant_column_name] == test.variants.treatment_name].dropna()) <= 1:
             logger.warning("Treatment group only contains 1 or 0 entities.")
             return False
         return True
