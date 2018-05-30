@@ -382,13 +382,15 @@ def compute_statistical_power(mean1, std1, n1, mean2, std2, n2, z_1_minus_alpha)
     :param z_1_minus_alpha: critical value for significance level alpha. That is, z-value for 1-alpha.
     :type  z_1_minus_alpha: float
     
-    :return: statistical power---the probability of a test to detect an effect if the effect actually exists
+    :return: statistical power---the probability of a test to detect an effect if the effect actually exists 
+                                    or -1 if std is less or equal to 0
     :rtype: float
     """
     effect_size = mean1 - mean2
     std = pooled_std(std1, n1, std2, n2)
     if std <= 0.0:
-        raise ValueError('Zero pooled std in compute_statistical_power')
+        logger.error("Zero pooled std in compute_statistical_power.")
+        return -1
 
     tmp = (n1 * n2 * effect_size**2) / ((n1 + n2) * std**2)
     z_beta = z_1_minus_alpha - np.sqrt(tmp)

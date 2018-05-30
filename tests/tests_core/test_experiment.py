@@ -63,6 +63,25 @@ class ExperimentTestCase(unittest.TestCase):
                                                                 self.test_normal_same_feature_one],
                                                                CorrectionMethod.BH)
 
+        # small dummy data frames producing zero std and -1 statistical power
+        data_dummy_zero_std = np.array([['index', 'entity', 'variant', 'normal_same', 'normal_shifted'],
+                                        [0, 1, 'A', 1.0, 1.0], [1, 2, 'B', 2.0, 2.0],
+                                        [2, 3, 'A', 1.0, 1.0], [3, 4, 'B', 2.0, 2.0]])
+        self.data_dummy_zero_std = pd.DataFrame(data=data_dummy_zero_std[1:, 1:],
+                                                columns=data_dummy_zero_std[0, 1:]).convert_objects(
+            convert_numeric=True)
+        self.test_normal_same_zero_std = StatisticalTest(self.data_dummy_zero_std, self.kpi, [], self.variants)
+        self.suite_with_one_test_zero_std = StatisticalTestSuite([self.test_normal_same_zero_std])
+
+        # small dummy data frames with all nan values
+        data_dummy_all_nan = np.array([['index', 'entity', 'variant', 'normal_same', 'normal_shifted'],
+                                       [0, 1, 'A', None, None], [1, 2, 'B', None, None],
+                                       [2, 3, 'A', None, None], [3, 4, 'B', None, None]])
+        self.data_dummy_all_nan = pd.DataFrame(data=data_dummy_all_nan[1:, 1:],
+                                               columns=data_dummy_all_nan[0, 1:]).convert_objects(convert_numeric=True)
+        self.test_normal_same_nan_data = StatisticalTest(self.data_dummy_all_nan, self.kpi, [], self.variants)
+        self.suite_with_one_test_with_nan_data = StatisticalTestSuite([self.test_normal_same_nan_data])
+
     def tearDown(self):
         """ Clean up after the test """
         pass
@@ -260,6 +279,20 @@ class StatisticalTestSuiteTestCases(ExperimentTestCase):
                         res_subgroup_feature_has.result.original_test_statistics.statistical_power)
         self.assertIsNone(res_subgroup_feature_one.result.original_test_statistics)
         self.assertIsNone(res_subgroup_feature_one.result.corrected_test_statistics)
+
+    def test_analyze_statistical_test_suite_with_zero_std(self):
+        res = self.getExperiment().analyze_statistical_test_suite(self.suite_with_one_test_zero_std)
+        self.assertEqual(res.correction_method, CorrectionMethod.NONE)
+        self.assertEqual(len(res.results), 1)
+        self.assertIsNone(res.results[0].result.original_test_statistics)
+        self.assertIsNone(res.results[0].result.corrected_test_statistics)
+
+    def test_analyze_statistical_test_with_none_data(self):
+        res = self.getExperiment().analyze_statistical_test_suite(self.suite_with_one_test_with_nan_data)
+        self.assertEqual(res.correction_method, CorrectionMethod.NONE)
+        self.assertEqual(len(res.results), 1)
+        self.assertIsNone(res.results[0].result.original_test_statistics)
+        self.assertIsNone(res.results[0].result.corrected_test_statistics)
 
 
 class OutlierFilteringTestCases(ExperimentTestCase):
