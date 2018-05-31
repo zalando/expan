@@ -5,7 +5,19 @@ Change Log
 -----------------------------------------------------------
 
 `Full
-Changelog <https://github.com/zalando/expan/compare/v1.2.2...HEAD>`__
+Changelog <https://github.com/zalando/expan/compare/v1.2.3...HEAD>`__
+
+**Merged pull requests:**
+
+-  Remove null analysis results from the analysis results files
+   `#219 <https://github.com/zalando/expan/pull/219>`__
+   (`daryadedik <https://github.com/daryadedik>`__)
+
+`v1.2.3 <https://github.com/zalando/expan/tree/v1.2.3>`__ (2018-05-30)
+----------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/zalando/expan/compare/v1.2.2...v1.2.3>`__
 
 **Merged pull requests:**
 

@@ -2,7 +2,14 @@
 
 ## [Unreleased](https://github.com/zalando/expan/tree/HEAD)
 
-[Full Changelog](https://github.com/zalando/expan/compare/v1.2.2...HEAD)
+[Full Changelog](https://github.com/zalando/expan/compare/v1.2.3...HEAD)
+
+**Merged pull requests:**
+
+- Remove null analysis results from the analysis results files [\#219](https://github.com/zalando/expan/pull/219) ([daryadedik](https://github.com/daryadedik))
+
+## [v1.2.3](https://github.com/zalando/expan/tree/v1.2.3) (2018-05-30)
+[Full Changelog](https://github.com/zalando/expan/compare/v1.2.2...v1.2.3)
 
 **Merged pull requests:**
 
