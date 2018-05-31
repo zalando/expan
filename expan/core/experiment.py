@@ -153,12 +153,13 @@ class Experiment(object):
         test_suite_result = MultipleTestSuiteResult([], test_suite.correction_method)
         for test in test_suite.tests:
             original_analysis = self.analyze_statistical_test(test, test_method, True, **worker_args)
-            # do not include results of the test where statistical power is -1, meaning the results are not valid.
-            if original_analysis.result and original_analysis.result.statistical_power == -1:
-                original_analysis.result = None
-            combined_result = CombinedTestStatistics(original_analysis.result, original_analysis.result)
-            original_analysis.result = combined_result
-            test_suite_result.results.append(original_analysis)
+            # do not include results of the test where statistical power is -1 and if the results are None
+            if original_analysis.result and original_analysis.result.statistical_power != -1:
+                combined_result = CombinedTestStatistics(original_analysis.result, original_analysis.result)
+                original_analysis.result = combined_result
+                test_suite_result.results.append(original_analysis)
+            else:
+                logger.warning("Analysis results are excluded from the result file because they contain Null values.")
 
         # if correction is needed, get p values, do correction on alpha, and run the same analysis for new alpha
         if requires_correction:

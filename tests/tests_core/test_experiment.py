@@ -249,13 +249,7 @@ class StatisticalTestSuiteTestCases(ExperimentTestCase):
     def test_one_subgroup_in_suite(self):
         res = self.getExperiment().analyze_statistical_test_suite(self.suite_with_one_subgroup)
         self.assertEqual(res.correction_method, CorrectionMethod.NONE)
-        self.assertEqual(len(res.results), 1)
-        res_subgroup = res.results[0]
-
-        self.assertEqual(len(res_subgroup.test.features), 1)
-        self.assertEqual(res_subgroup.test.features[0].column_value, 'feature that only has one data point')
-        self.assertIsNone(res_subgroup.result.original_test_statistics)
-        self.assertIsNone(res_subgroup.result.corrected_test_statistics)
+        self.assertEqual(len(res.results), 0)
 
     def test_three_subgroup_in_suite(self):
         """ Two subgroups contain valid data. One subgroup contains only one entity.
@@ -265,11 +259,10 @@ class StatisticalTestSuiteTestCases(ExperimentTestCase):
         """
         res = self.getExperiment().analyze_statistical_test_suite(self.suite_with_three_subgroups)
         self.assertEqual(res.correction_method, CorrectionMethod.BH)
-        self.assertEqual(len(res.results), 3)
+        self.assertEqual(len(res.results), 2)
 
         res_subgroup_feature_non = res.results[0]
         res_subgroup_feature_has = res.results[1]
-        res_subgroup_feature_one = res.results[2]
 
         self.assertTrue(isinstance(res_subgroup_feature_non.result, CombinedTestStatistics))
         self.assertTrue(isinstance(res_subgroup_feature_has.result, CombinedTestStatistics))
@@ -277,22 +270,16 @@ class StatisticalTestSuiteTestCases(ExperimentTestCase):
                         res_subgroup_feature_non.result.original_test_statistics.statistical_power)
         self.assertLess(res_subgroup_feature_has.result.corrected_test_statistics.statistical_power,
                         res_subgroup_feature_has.result.original_test_statistics.statistical_power)
-        self.assertIsNone(res_subgroup_feature_one.result.original_test_statistics)
-        self.assertIsNone(res_subgroup_feature_one.result.corrected_test_statistics)
 
     def test_analyze_statistical_test_suite_with_zero_std(self):
         res = self.getExperiment().analyze_statistical_test_suite(self.suite_with_one_test_zero_std)
         self.assertEqual(res.correction_method, CorrectionMethod.NONE)
-        self.assertEqual(len(res.results), 1)
-        self.assertIsNone(res.results[0].result.original_test_statistics)
-        self.assertIsNone(res.results[0].result.corrected_test_statistics)
+        self.assertEqual(len(res.results), 0)
 
     def test_analyze_statistical_test_with_none_data(self):
         res = self.getExperiment().analyze_statistical_test_suite(self.suite_with_one_test_with_nan_data)
         self.assertEqual(res.correction_method, CorrectionMethod.NONE)
-        self.assertEqual(len(res.results), 1)
-        self.assertIsNone(res.results[0].result.original_test_statistics)
-        self.assertIsNone(res.results[0].result.corrected_test_statistics)
+        self.assertEqual(len(res.results), 0)
 
 
 class OutlierFilteringTestCases(ExperimentTestCase):
