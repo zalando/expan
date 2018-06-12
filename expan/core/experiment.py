@@ -102,13 +102,15 @@ class Experiment(object):
         # get control and treatment values for the kpi
         control          = test.variants.get_variant(data_for_analysis, test.variants.control_name)[test.kpi.name]
         logger.info("Control group size: {}".format(control.shape[0]))
-        control_weight   = self._get_weights(data_for_analysis, test, test.variants.control_name)
-        control_data     = control * control_weight
+        control_denominators   = self._get_denominators(data_for_analysis, test, test.variants.control_name)
+        control_numerators   = control * control_denominators
+        control_data= control_numerators / np.mean(control_denominators)
 
         treatment        = test.variants.get_variant(data_for_analysis, test.variants.treatment_name)[test.kpi.name]
         logger.info("Treatment group size: {}".format(treatment.shape[0]))
-        treatment_weight = self._get_weights(data_for_analysis, test, test.variants.treatment_name)
-        treatment_data   = treatment * treatment_weight
+        treatment_denominators = self._get_denominators(data_for_analysis, test, test.variants.treatment_name)
+        treatment_numerators   = treatment * treatment_denominators
+        treatment_data = treatment_numerators / np.mean(treatment_denominators)
 
         # run the test method
         test_statistics = worker(x=treatment_data, y=control_data)
