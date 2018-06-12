@@ -16,10 +16,10 @@ def _delta_mean(x, y):
 
 def make_delta(assume_normal=True, alpha=0.05, min_observations=20, nruns=10000, relative=False):
     """ A closure to the delta function. """
-    return lambda x, y: delta(x, y, assume_normal, alpha, min_observations, nruns, relative)
+    return lambda x, y, x_denominators=1, y_denominators=1: delta(x, y, x_denominators, y_denominators, assume_normal, alpha, min_observations, nruns, relative)
 
 
-def delta(x, y, assume_normal=True, alpha=0.05, min_observations=20, nruns=10000, relative=False):
+def delta(x, y, x_denominators, y_denominators, assume_normal=True, alpha=0.05, min_observations=20, nruns=10000, relative=False):
     """ Calculates the difference of means between the samples in a statistical sense.
     Computation is done in form of treatment minus control, i.e. x-y.
     Note that NaNs are treated as if they do not exist in the data. 
@@ -28,6 +28,10 @@ def delta(x, y, assume_normal=True, alpha=0.05, min_observations=20, nruns=10000
     :type  x: pd.Series or array-like
     :param y: sample of the control group
     :type  y: pd.Series or array-like
+    :param x_denominators: sample of the treatment group
+    :type  x_denominators: pd.Series or array-like
+    :param y_denominators: sample of the control group
+    :type  y_denominators: pd.Series or array-like
     :param assume_normal: specifies whether normal distribution assumptions can be made
     :type  assume_normal: boolean
     :param alpha: significance level (alpha)
@@ -54,14 +58,32 @@ def delta(x, y, assume_normal=True, alpha=0.05, min_observations=20, nruns=10000
     if type(x) != type(y):
         raise TypeError('Please provide samples of the same type.')
 
+    # check x and y are 'array-like'
+    assert hasattr(x, '__len__')
+    assert hasattr(y, '__len__')
+
+    # if *_denominators are not array-like (e.g. int or float), then make them so
+    if not hasattr(x_denominators, '__len__'): x_denominators = (x*0.0)+x_denominators
+    if not hasattr(y_denominators, '__len__'): y_denominators = (y*0.0)+y_denominators
+    assert hasattr(x_denominators, '__len__')
+    assert hasattr(y_denominators, '__len__')
+
+    # lengths should match
+    assert len(x) == len(x_denominators)
+    assert len(y) == len(y_denominators)
+
     percentiles = [alpha * 100 / 2, 100 - alpha * 100 / 2]
 
     # Coercing missing values to right format
     _x = np.array(x, dtype=float)
     _y = np.array(y, dtype=float)
+    _x_denominators = np.array(x_denominators, dtype=float)
+    _y_denominators = np.array(y_denominators, dtype=float)
+    _x_ratio = _x / _x_denominators
+    _y_ratio = _y / _y_denominators
 
-    x_nan = np.isnan(_x).sum()
-    y_nan = np.isnan(_y).sum()
+    x_nan = np.isnan(_x_ratio).sum()
+    y_nan = np.isnan(_y_ratio).sum()
     if x_nan > 0:
         warnings.warn('Discarding ' + str(x_nan) + ' NaN(s) in the x array!')
         logger.warning('Discarding ' + str(x_nan) + ' NaN(s) in the x array!')
@@ -69,10 +91,11 @@ def delta(x, y, assume_normal=True, alpha=0.05, min_observations=20, nruns=10000
         warnings.warn('Discarding ' + str(y_nan) + ' NaN(s) in the y array!')
         logger.warning('Discarding ' + str(x_nan) + ' NaN(s) in the x array!')
 
-    ss_x = sample_size(_x)
-    ss_y = sample_size(_y)
+    ss_x = sample_size(_x_ratio)
+    ss_y = sample_size(_y_ratio)
 
     # Checking if enough observations are left after dropping NaNs
+    lots_of_info = None
     if min(ss_x, ss_y) < min_observations:
         # Set mean to nan
         mu = np.nan
@@ -85,16 +108,25 @@ def delta(x, y, assume_normal=True, alpha=0.05, min_observations=20, nruns=10000
         if assume_normal:
             logger.info("The distribution of two samples is assumed normal. "
                         "Performing the sample difference distribution calculation.")
-            c_i = normal_sample_difference(x=_x, y=_y, percentiles=percentiles, relative=relative)
+            lots_of_info = normal_sample_weighted_difference(x_numerators=_x, y_numerators=_y, x_denominators=_x_denominators, y_denominators = _y_denominators, percentiles=percentiles, relative=relative)
+            c_i = lots_of_info['c_i']
+            mu = lots_of_info['mean1'] - lots_of_info['mean2']
         else:
             logger.info("The distribution of two samples is not normal. Performing the bootstrap.")
-            c_i, _ = bootstrap(x=_x, y=_y, percentiles=percentiles, nruns=nruns, relative=relative)
+            c_i, _ = bootstrap(x=_x_ratio, y=_y_ratio, percentiles=percentiles, nruns=nruns, relative=relative)
 
-    treatment_statistics = SampleStatistics(ss_x, float(np.nanmean(_x)), float(np.nanvar(_x)))
-    control_statistics   = SampleStatistics(ss_y, float(np.nanmean(_y)), float(np.nanvar(_y)))
+    if lots_of_info is not None: # correct the last few lines!!
+        treatment_statistics = SampleStatistics(ss_x, lots_of_info['mean1'], lots_of_info['var1'])
+        control_statistics   = SampleStatistics(ss_y, lots_of_info['mean2'], lots_of_info['var2'])
+    else:
+        # actually, this is a bit rubbish, only applies to bootstrap and min_observations:
+        treatment_statistics = SampleStatistics(ss_x, float(np.nanmean(_x_ratio)), float(np.nanvar(_x_ratio)))
+        control_statistics   = SampleStatistics(ss_y, float(np.nanmean(_y_ratio)), float(np.nanvar(_y_ratio)))
+
     variant_statistics   = BaseTestStatistics(control_statistics, treatment_statistics)
-    p_value              = compute_p_value_from_samples(_x, _y)
-    statistical_power    = compute_statistical_power_from_samples(_x, _y, alpha)
+    p_value              = compute_p_value_from_samples(_x_ratio, _y_ratio) # TODO: wrong
+    statistical_power    = compute_statistical_power_from_samples(_x_ratio, _y_ratio, alpha) # TODO: wrong
+
 
     logger.info("Delta calculation finished!")
     return SimpleTestStatistics(variant_statistics.control_statistics,
@@ -250,7 +282,7 @@ def pooled_std(std1, n1, std2, n2):
 def normal_sample_difference(x, y, percentiles=[2.5, 97.5], relative=False):
     """ Calculates the difference distribution of two normal distributions given by their samples.
 
-    Computation is done in form of treatment minus control. 
+    Computation is done in form of treatment minus control.
     It is assumed that the standard deviations of both distributions do not differ too much.
 
     :param x: sample of a treatment group
