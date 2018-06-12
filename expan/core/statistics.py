@@ -288,6 +288,90 @@ def normal_sample_difference(x, y, percentiles=[2.5, 97.5], relative=False):
                              mean2=mean2, std2=std2, n2=n2,
                              percentiles=percentiles, relative=relative)
 
+def normal_sample_weighted_difference(x_numerators, y_numerators, x_denominators, y_denominators, percentiles=[2.5, 97.5], relative=False):
+    """ Calculates the difference distribution of two normal distributions given by their samples.
+
+    Computation is done in form of treatment minus control.
+    It is assumed that the standard deviations of both distributions do not differ too much.
+
+    :param x: sample of a treatment group
+    :type  x: pd.Series or list (array-like)
+    :param y: sample of a control group
+    :type  x: pd.Series or list (array-like)
+    :param percentiles: list of percentile values to compute
+    :type  percentiles: list
+    :param relative: If relative==True, then the values will be returned
+                     as distances below and above the mean, respectively, rather than the
+                     absolute values. In this case, the interval is mean-ret_val[0] to
+                     mean+ret_val[1]. This is more useful in many situations because it
+                     corresponds with the sem() and std() functions.
+    :type relative: bool
+
+    :return: percentiles and corresponding values
+    :rtype: dict with multiple entries:
+                confidence_interval
+                mean1
+                mean2
+                n1
+                n2
+                var1
+                var2
+    """
+
+    assert isinstance(x_numerators, np.ndarray)
+    assert isinstance(x_denominators, np.ndarray)
+    assert isinstance(y_numerators, np.ndarray)
+    assert isinstance(y_denominators, np.ndarray)
+    assert x_numerators.dtype == 'float'
+    assert x_denominators.dtype == 'float'
+    assert y_numerators.dtype == 'float'
+    assert y_denominators.dtype == 'float'
+
+    # perform the ratio
+    _x_ratio = x_numerators / x_denominators
+    _y_ratio = y_numerators / y_denominators
+
+    # find the nans (including 0/0)
+    x_nans = np.isnan(_x_ratio)
+    y_nans = np.isnan(_y_ratio)
+
+    # remove the nans
+    _x_ratio = _x_ratio[~x_nans]
+    _y_ratio = _y_ratio[~y_nans]
+    x_numerators = x_numerators[~x_nans]
+    y_numerators = y_numerators[~y_nans]
+    x_denominators = x_denominators[~x_nans]
+    y_denominators = y_denominators[~y_nans]
+
+    # check they're all the same length
+    assert 1 == len(set( map(len, [_x_ratio,x_numerators,x_denominators])))
+    assert 1 == len(set( map(len, [_y_ratio,y_numerators,y_denominators])))
+
+    # Calculate statistics
+    mean1 = np.mean(x_numerators) / np.mean(x_denominators)
+    mean2 = np.mean(y_numerators) / np.mean(y_denominators)
+    errors_1 = x_numerators - (x_denominators * mean1)
+    errors_2 = y_numerators - (y_denominators * mean2)
+    std1 = np.std(errors_1 / np.mean(x_denominators))
+    std2 = np.std(errors_2 / np.mean(y_denominators))
+    n1 = len(_x_ratio)
+    n2 = len(_y_ratio)
+
+    #print('\n',mean1-mean2,'\n')
+
+    # Push calculation to normal difference function
+    c_i = normal_difference(mean1=mean1, std1=std1, n1=n1,
+                             mean2=mean2, std2=std2, n2=n2,
+                             percentiles=percentiles, relative=relative)
+    return  {   'c_i':  c_i
+            ,   'mean1': mean1
+            ,   'mean2': mean2
+            ,   'n1': n1
+            ,   'n2': n2
+            ,   'var1': np.var(errors_1 / np.mean(x_denominators))
+            ,   'var2': np.var(errors_2 / np.mean(y_denominators))
+            }
+
 
 def normal_difference(mean1, std1, n1, mean2, std2, n2, percentiles=[2.5, 97.5], relative=False):
     """ Calculates the difference distribution of two normal distributions.
