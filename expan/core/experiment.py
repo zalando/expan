@@ -113,7 +113,7 @@ class Experiment(object):
         treatment_data = treatment_numerators / np.mean(treatment_denominators)
 
         # run the test method
-        test_statistics = worker(x=treatment_data, y=control_data)
+        test_statistics = worker(x=treatment_numerators, y=control_numerators, x_denominators = treatment_denominators, y_denominators = control_denominators)
         test_result.result = test_statistics
 
         # remove data from the result test metadata
