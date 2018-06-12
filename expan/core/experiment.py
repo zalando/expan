@@ -284,6 +284,12 @@ class Experiment(object):
         number_of_non_zeros_and_nans = len(x) - number_of_zeros_and_nans
         return number_of_non_zeros_and_nans / np.nansum(x) * x
 
+    def _get_denominators(self, data, test, variant_name):
+        if type(test.kpi) is not DerivedKPI:
+            return 1.0
+
+        x = test.variants.get_variant(data, variant_name)[test.kpi.denominator]
+        return x
 
     def _quantile_filtering(self, data, kpis, percentile, threshold_type):
         """ Make the filtering based on the given quantile level. 
