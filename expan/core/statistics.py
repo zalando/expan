@@ -124,7 +124,10 @@ def delta(x, y, x_denominators, y_denominators, assume_normal=True, alpha=0.05, 
         control_statistics   = SampleStatistics(ss_y, float(np.nanmean(_y_ratio)), float(np.nanvar(_y_ratio)))
 
     variant_statistics   = BaseTestStatistics(control_statistics, treatment_statistics)
-    p_value              = compute_p_value_from_samples(_x_ratio, _y_ratio) # TODO: wrong
+    if lots_of_info is not None:
+        p_value              = lots_of_info['p_value']
+    else:
+        p_value              = compute_p_value_from_samples(_x_ratio, _y_ratio)
     statistical_power    = compute_statistical_power_from_samples(_x_ratio, _y_ratio, alpha) # TODO: wrong
 
 
@@ -395,6 +398,7 @@ def normal_sample_weighted_difference(x_numerators, y_numerators, x_denominators
     c_i = normal_difference(mean1=mean1, std1=std1, n1=n1,
                              mean2=mean2, std2=std2, n2=n2,
                              percentiles=percentiles, relative=relative)
+    p_value = compute_p_value(mean1, std1, n1, mean2, std2, n2)
     return  {   'c_i':  c_i
             ,   'mean1': mean1
             ,   'mean2': mean2
@@ -402,6 +406,7 @@ def normal_sample_weighted_difference(x_numerators, y_numerators, x_denominators
             ,   'n2': n2
             ,   'var1': np.var(errors_1 / np.mean(x_denominators))
             ,   'var2': np.var(errors_2 / np.mean(y_denominators))
+            ,   'p_value': p_value
             }
 
 
