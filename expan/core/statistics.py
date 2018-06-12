@@ -450,6 +450,9 @@ def compute_p_value(mean1, std1, n1, mean2, std2, n2):
     std       = pooled_std(std1, n1, std2, n2)
     st_error  = std * np.sqrt(1. / n1 + 1. / n2)
     d_free    = n1 + n2 - 2
-    t         = mean_diff / st_error
+    if st_error == 0.0:
+        t         = np.sign(mean_diff) * 1000
+    else:
+        t         = mean_diff / st_error
     p         = stats.t.cdf(-abs(t), df=d_free) * 2
     return p
