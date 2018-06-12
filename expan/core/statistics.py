@@ -81,6 +81,8 @@ def delta(x, y, x_denominators=1, y_denominators=1, assume_normal=True, alpha=0.
     _y_denominators = np.array(y_denominators, dtype=float)
     _x_ratio = _x / _x_denominators
     _y_ratio = _y / _y_denominators
+    _x_strange = _x / np.nanmean(_x_denominators)
+    _y_strange = _y / np.nanmean(_y_denominators)
 
     x_nan = np.isnan(_x_ratio).sum()
     y_nan = np.isnan(_y_ratio).sum()
@@ -113,22 +115,22 @@ def delta(x, y, x_denominators=1, y_denominators=1, assume_normal=True, alpha=0.
             mu = lots_of_info['mean1'] - lots_of_info['mean2']
         else:
             logger.info("The distribution of two samples is not normal. Performing the bootstrap.")
-            c_i, _ = bootstrap(x=_x_ratio, y=_y_ratio, percentiles=percentiles, nruns=nruns, relative=relative)
+            c_i, _ = bootstrap(x=_x_strange, y=_y_strange, percentiles=percentiles, nruns=nruns, relative=relative)
 
     if lots_of_info is not None: # correct the last few lines!!
         treatment_statistics = SampleStatistics(ss_x, lots_of_info['mean1'], lots_of_info['var1'])
         control_statistics   = SampleStatistics(ss_y, lots_of_info['mean2'], lots_of_info['var2'])
     else:
         # actually, this is a bit rubbish, only applies to bootstrap and min_observations:
-        treatment_statistics = SampleStatistics(ss_x, float(np.nanmean(_x_ratio)), float(np.nanvar(_x_ratio)))
-        control_statistics   = SampleStatistics(ss_y, float(np.nanmean(_y_ratio)), float(np.nanvar(_y_ratio)))
+        treatment_statistics = SampleStatistics(ss_x, float(np.nanmean(_x_strange)), float(np.nanvar(_x_strange)))
+        control_statistics   = SampleStatistics(ss_y, float(np.nanmean(_y_strange)), float(np.nanvar(_y_strange)))
 
     variant_statistics   = BaseTestStatistics(control_statistics, treatment_statistics)
     if lots_of_info is not None:
         p_value              = lots_of_info['p_value']
     else:
-        p_value              = compute_p_value_from_samples(_x_ratio, _y_ratio)
-    statistical_power    = compute_statistical_power_from_samples(_x_ratio, _y_ratio, alpha) # TODO: wrong
+        p_value              = compute_p_value_from_samples(_x_strange, _y_strange)
+    statistical_power    = compute_statistical_power_from_samples(_x_strange, _y_strange, alpha) # TODO: wrong
 
 
     logger.info("Delta calculation finished!")
