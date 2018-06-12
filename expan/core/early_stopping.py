@@ -38,7 +38,14 @@ def obrien_fleming(information_fraction, alpha=0.05):
 
 def make_group_sequential(spending_function='obrien_fleming', estimated_sample_size=None, alpha=0.05, cap=8):
     """ A closure to the group_sequential function. """
-    return lambda x, y: group_sequential(x, y, spending_function, estimated_sample_size, alpha, cap)
+    def go(x, y, x_denominators=1, y_denominators=1):
+
+        # these next too lines are wrong, but they are bug-compatible with v0.6.13 !
+        x = x / np.mean(x_denominators)
+        y = y / np.mean(y_denominators)
+
+        return group_sequential(x, y, spending_function, estimated_sample_size, alpha, cap)
+    return go
 
 
 def group_sequential(x, y, spending_function='obrien_fleming', estimated_sample_size=None, alpha=0.05, cap=8):
@@ -234,7 +241,9 @@ def _bayes_sampling(x, y, distribution='normal', num_iters=25000, inference="sam
 
 def make_bayes_factor(distribution='normal', num_iters=25000, inference='sampling'):
     """ Closure method for the bayes_factor"""
-    def f(x, y):
+    def f(x, y, x_denominators = 1, y_denominators = 1):
+        x = x / np.mean(x_denominators)
+        y = y / np.mean(x_denominators)
         return bayes_factor(x, y, distribution, num_iters, inference)
     return f
 
@@ -293,7 +302,9 @@ def bayes_factor(x, y, distribution='normal', num_iters=25000, inference='sampli
 
 def make_bayes_precision(distribution='normal', posterior_width=0.08, num_iters=25000, inference='sampling'):
     """ Closure method for the bayes_precision"""
-    def f(x, y):
+    def f(x, y, x_denominators = 1, y_denominators = 1):
+        x = x / np.mean(x_denominators)
+        y = y / np.mean(x_denominators)
         return bayes_precision(x, y, distribution, posterior_width, num_iters, inference)
     return f
 
