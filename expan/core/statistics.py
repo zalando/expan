@@ -19,7 +19,7 @@ def make_delta(assume_normal=True, alpha=0.05, min_observations=20, nruns=10000,
     return lambda x, y, x_denominators=1, y_denominators=1: delta(x, y, x_denominators, y_denominators, assume_normal, alpha, min_observations, nruns, relative)
 
 
-def delta(x, y, x_denominators, y_denominators, assume_normal=True, alpha=0.05, min_observations=20, nruns=10000, relative=False):
+def delta(x, y, x_denominators=1, y_denominators=1, assume_normal=True, alpha=0.05, min_observations=20, nruns=10000, relative=False):
     """ Calculates the difference of means between the samples in a statistical sense.
     Computation is done in form of treatment minus control, i.e. x-y.
     Note that NaNs are treated as if they do not exist in the data. 
