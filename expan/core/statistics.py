@@ -97,7 +97,7 @@ def delta(x, y, x_denominators=1, y_denominators=1, assume_normal=True, alpha=0.
     ss_y = sample_size(_y_ratio)
 
     # Checking if enough observations are left after dropping NaNs
-    lots_of_info = None
+    partial_simple_test_stats = None
     if min(ss_x, ss_y) < min_observations:
         # Set mean to nan
         mu = np.nan
@@ -110,24 +110,24 @@ def delta(x, y, x_denominators=1, y_denominators=1, assume_normal=True, alpha=0.
         if assume_normal:
             logger.info("The distribution of two samples is assumed normal. "
                         "Performing the sample difference distribution calculation.")
-            lots_of_info = normal_sample_weighted_difference(x_numerators=_x, y_numerators=_y, x_denominators=_x_denominators, y_denominators = _y_denominators, percentiles=percentiles, relative=relative)
-            c_i = lots_of_info['c_i']
-            mu = lots_of_info['mean1'] - lots_of_info['mean2']
+            partial_simple_test_stats = normal_sample_weighted_difference(x_numerators=_x, y_numerators=_y, x_denominators=_x_denominators, y_denominators = _y_denominators, percentiles=percentiles, relative=relative)
+            c_i = partial_simple_test_stats['c_i']
+            mu = partial_simple_test_stats['mean1'] - partial_simple_test_stats['mean2']
         else:
             logger.info("The distribution of two samples is not normal. Performing the bootstrap.")
             c_i, _ = bootstrap(x=_x_strange, y=_y_strange, percentiles=percentiles, nruns=nruns, relative=relative)
 
-    if lots_of_info is not None: # correct the last few lines!!
-        treatment_statistics = SampleStatistics(ss_x, lots_of_info['mean1'], lots_of_info['var1'])
-        control_statistics   = SampleStatistics(ss_y, lots_of_info['mean2'], lots_of_info['var2'])
+    if partial_simple_test_stats is not None: # correct the last few lines!!
+        treatment_statistics = SampleStatistics(ss_x, partial_simple_test_stats['mean1'], partial_simple_test_stats['var1'])
+        control_statistics   = SampleStatistics(ss_y, partial_simple_test_stats['mean2'], partial_simple_test_stats['var2'])
     else:
         # actually, this is a bit rubbish, only applies to bootstrap and min_observations:
         treatment_statistics = SampleStatistics(ss_x, float(np.nanmean(_x_strange)), float(np.nanvar(_x_strange)))
         control_statistics   = SampleStatistics(ss_y, float(np.nanmean(_y_strange)), float(np.nanvar(_y_strange)))
 
     variant_statistics   = BaseTestStatistics(control_statistics, treatment_statistics)
-    if lots_of_info is not None:
-        p_value              = lots_of_info['p_value']
+    if partial_simple_test_stats is not None:
+        p_value              = partial_simple_test_stats['p_value']
     else:
         p_value              = compute_p_value_from_samples(_x_strange, _y_strange)
     statistical_power    = compute_statistical_power_from_samples(_x_strange, _y_strange, alpha) # TODO: wrong
