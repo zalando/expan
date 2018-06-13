@@ -105,3 +105,39 @@ def test_derived_fixed_horizon_almost_x_ratio_diff_from_y_ratio():
                                 np.array([2,1,3]),
                                 np.array([1,4,6]),
                                 )
+
+def test_using_lots_of_AA_tests():
+    n = 1000
+
+    rng = np.random.RandomState()
+    rng.seed(1337)
+
+    # somewhat arbitirary data here for the numerators and the denominators:
+    revs = 1+np.arange(n)
+    sess = 2+np.arange(n)
+
+    worker = worker_table['fixed_horizon'](min_observations=0)
+
+    assignments = (np.arange(n) % 2 == 0) # 50/50
+
+    all_ps = []
+    for i in range(1000):
+        rng.shuffle(assignments) # randomly reassign everybody
+
+        # extract the 'controls':
+        x_num = revs[ assignments]
+        x_den = sess[ assignments]
+        # extract the 'treatments':
+        y_num = revs[~assignments]
+        y_den = sess[~assignments]
+        # call the 'fixed_horizon' worker:
+        res = worker(x_num,y_num,
+                x_den, y_den,
+                #np.mean(x_den), np.mean(y_den), # using means would replicated the old (wrong) behaviour
+                )
+        all_ps.append(res.p)
+
+    # The 'all_ps' should be approximately uniform between zero and one
+    assert 0.08 < np.percentile(all_ps,10) < 0.12
+    assert 0.48 < np.percentile(all_ps,50) < 0.52
+    assert 0.88 < np.percentile(all_ps,90) < 0.92
