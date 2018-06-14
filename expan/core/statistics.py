@@ -389,8 +389,8 @@ def normal_sample_weighted_difference(x_numerators, y_numerators, x_denominators
     mean2 = np.mean(y_numerators) / np.mean(y_denominators)
     errors_1 = x_numerators - (x_denominators * mean1)
     errors_2 = y_numerators - (y_denominators * mean2)
-    std1 = np.std(errors_1 / np.mean(x_denominators))
-    std2 = np.std(errors_2 / np.mean(y_denominators))
+    std1 = np.std(errors_1 / np.mean(x_denominators), ddof=1)
+    std2 = np.std(errors_2 / np.mean(y_denominators), ddof=1)
     n1 = len(_x_ratio)
     n2 = len(_y_ratio)
 
@@ -406,8 +406,8 @@ def normal_sample_weighted_difference(x_numerators, y_numerators, x_denominators
             ,   'mean2': mean2
             ,   'n1': n1
             ,   'n2': n2
-            ,   'var1': np.var(errors_1 / np.mean(x_denominators))
-            ,   'var2': np.var(errors_2 / np.mean(y_denominators))
+            ,   'var1': np.var(errors_1 / np.mean(x_denominators), ddof=1)
+            ,   'var2': np.var(errors_2 / np.mean(y_denominators), ddof=1)
             ,   'p_value': p_value
             }
 

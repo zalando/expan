@@ -52,8 +52,9 @@ def very_compact_test(  expected_results,
     assert tup == tuple_approx(*expected_results)
 
 def test_derived_fixed_horizon_equalweights():
-    very_compact_test(          (-1.0,0.207999999,0.322771,None,(3.0,3,0.6666666)
-                                ,(2.0,3,0.66666666),((2.5,-2.8509634),(97.5,0.8509634))),
+    very_compact_test(          (   -1.0,0.2878641347266908,0.322771,None,
+                                    (3.0,3,1.0),(2.0,3,1.0),
+                                    ((2.5,-3.266957935527524),(97.5,1.2669579355275231))),
                                 'fixed_horizon',
                                 [], {'min_observations':0},
                                 np.array([1,2,3]),
@@ -63,8 +64,9 @@ def test_derived_fixed_horizon_equalweights():
                                 )
 
 def test_derived_fixed_horizon_equalweights_not_1():
-    very_compact_test(          (-1.0,0.207999999,0.322771,None,(3.0,3,0.6666666)
-                                ,(2.0,3,0.66666666),((2.5,-2.8509634),(97.5,0.8509634))),
+    very_compact_test(          (   -1.0,0.2878641347266908,0.322771,None,
+                                    (3.0,3,1.0),(2.0,3,1.0),
+                                    ((2.5,-3.266957935527524),(97.5,1.2669579355275231))),
                                 'fixed_horizon',
                                 [], {'min_observations':0},
                                 np.array([1,2,3]),
