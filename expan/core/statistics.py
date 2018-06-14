@@ -306,24 +306,18 @@ def normal_sample_difference(x, y, percentiles=[2.5, 97.5], relative=False):
     :return: percentiles and corresponding values
     :rtype: dict
     """
-    # Coerce data to right format
+
+    # coerce to an array
     _x = np.array(x, dtype=float)
-    _x = _x[~np.isnan(_x)]
     _y = np.array(y, dtype=float)
-    _y = _y[~np.isnan(_y)]
-
-    # Calculate statistics
-    mean1 = np.mean(_x)
-    mean2 = np.mean(_y)
-    std1 = np.std(_x)
-    std2 = np.std(_y)
-    n1 = len(_x)
-    n2 = len(_y)
-
-    # Push calculation to normal difference function
-    return normal_difference(mean1=mean1, std1=std1, n1=n1,
-                             mean2=mean2, std2=std2, n2=n2,
-                             percentiles=percentiles, relative=relative)
+    # set denominators to 1.0
+    _x_denominators = np.array([1.0] * len(_x), dtype=float)
+    _y_denominators = np.array([1.0] * len(_y), dtype=float)
+    assert (_x_denominators == _x*0.0 + 1.0).all()
+    assert (_y_denominators == _y*0.0 + 1.0).all()
+    partial_simple_test_stats = normal_sample_weighted_difference(_x, _y, _x_denominators, _y_denominators, percentiles, relative)
+    c_i = partial_simple_test_stats['c_i']
+    return c_i
 
 def normal_sample_weighted_difference(x_numerators, y_numerators, x_denominators, y_denominators, percentiles=[2.5, 97.5], relative=False):
     """ Calculates the difference distribution of two normal distributions given by their samples.

@@ -263,9 +263,9 @@ class NormalSampleDifferenceTestCases(StatisticsTestCase):
         # Computation of normal sample difference
         result1 = statx.normal_sample_difference(sample1, sample2)
         # Checking if lower percentile of result1 is correct
-        self.assertAlmostEqual(result1[2.5], -0.53770569567692295)
+        self.assertAlmostEqual(result1[2.5], -0.53963938185557114)
         # Checking if upper percentile of result1 is correct
-        self.assertAlmostEqual(result1[97.5], -0.040755842784587965)
+        self.assertAlmostEqual(result1[97.5], -0.038822156605939739)
 
 
 class StatisticalPowerTestCases(StatisticsTestCase):
