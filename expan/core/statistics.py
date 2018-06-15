@@ -322,15 +322,23 @@ def normal_sample_difference(x, y, percentiles=[2.5, 97.5], relative=False):
     return c_i
 
 def normal_sample_weighted_difference(x_numerators, y_numerators, x_denominators, y_denominators, percentiles=[2.5, 97.5], relative=False):
-    """ Calculates the difference distribution of two normal distributions given by their samples.
+    """ Calculates the difference distribution of two distributions given by their samples.
 
-    Computation is done in form of treatment minus control.
+    Computation is done in form of treatment(**x**) minus control(**y**).
     It is assumed that the standard deviations of both distributions do not differ too much.
 
-    :param x: sample of a treatment group
-    :type  x: pd.Series or list (array-like)
-    :param y: sample of a control group
-    :type  x: pd.Series or list (array-like)
+    The estimate of the mean difference is :math:`\\frac{mean(x_{numerators})}{mean(x_{denominators})}-\\frac{mean(y_{numerators})}{mean(y_{denominators})}`.
+    For non-derived KPIs, the denominators will be exactly `1`, and hence this will simplify to :math:`mean(x_{numerators})-mean(y_{numerators})`.
+    For details on the variance calcuation, see the Glossary.
+
+    :param x_numerators: sample of a treatment group
+    :type  x_numerators: pd.Series or list (array-like)
+    :param y_numerators: sample of a control group
+    :type  y_numerators: pd.Series or list (array-like)
+    :param x_denominators: sample of a treatment group
+    :type  x_denominators: pd.Series or list (array-like), or simply 1 as an int/float if a non-derived KPI
+    :param y_denominators: sample of a control group
+    :type  y_denominators: pd.Series or list (array-like), or simply 1 as an int/float if a non-derived KPI
     :param percentiles: list of percentile values to compute
     :type  percentiles: list
     :param relative: If relative==True, then the values will be returned
@@ -342,13 +350,14 @@ def normal_sample_weighted_difference(x_numerators, y_numerators, x_denominators
 
     :return: percentiles and corresponding values
     :rtype: dict with multiple entries:
-                confidence_interval
-                mean1
-                mean2
-                n1
-                n2
-                var1
-                var2
+
+              * **c_i**:        confidence_interval
+              * **mean1**:      :math:`\\frac{mean(x_{numerators})}{mean(x_{denominators})}`
+              * **mean2**:      :math:`\\frac{mean(y_{numerators})}{mean(y_{denominators})}`
+              * **n1**:         sample size of **x**, after discarding NaNs
+              * **n2**:         sample size of **y**, after discarding NaNs
+              * **var1**:       :math:`var\\left(\\frac{x_{numerators}[i] - mean1 \\cdot x_{denominators}[i]}{mean(x_{denominators})}\\right)`
+              * **var2**:       :math:`var\\left(\\frac{y_{numerators}[i] - mean2 \\cdot y_{denominators}[i]}{mean(y_{denominators})}\\right)`
     """
 
     assert isinstance(x_numerators, np.ndarray)
