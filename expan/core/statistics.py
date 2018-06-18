@@ -403,6 +403,10 @@ def normal_sample_weighted_difference(x_numerators, y_numerators, x_denominators
     assert 1 == len(set( map(len, [_x_ratio,x_numerators,x_denominators])))
     assert 1 == len(set( map(len, [_y_ratio,y_numerators,y_denominators])))
 
+    # Make sure all NaNs have been removed
+    for one_array in [_x_ratio, _y_ratio, x_numerators, y_numerators, x_denominators, y_denominators]:
+        assert not np.isnan(one_array).any()
+
     # Calculate statistics
     mean1 = np.mean(x_numerators) / np.mean(x_denominators)
     mean2 = np.mean(y_numerators) / np.mean(y_denominators)
