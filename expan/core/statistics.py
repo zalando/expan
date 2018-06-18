@@ -1,3 +1,5 @@
+from __future__ import division # so that, under Python 2.*, integer division results in real numbers
+
 import warnings
 import logging
 
@@ -62,9 +64,22 @@ def delta(x, y, x_denominators=1, y_denominators=1, assume_normal=True, alpha=0.
     assert hasattr(x, '__len__')
     assert hasattr(y, '__len__')
 
-    # if *_denominators are not array-like (e.g. int or float), then make them so
-    if not hasattr(x_denominators, '__len__'): x_denominators = (x*0.0)+x_denominators
-    if not hasattr(y_denominators, '__len__'): y_denominators = (y*0.0)+y_denominators
+    # If the denominators are scalars, these lines will do nothing. But if they
+    # are vectors, this line will add a NaN to the numerator for each zero or
+    # NaN in the denominator:
+
+    x = x / x_denominators * x_denominators
+    y = y / y_denominators * y_denominators
+
+    # Next, any NaNs in the numerator must be 'copied' to the denominator.
+    # The next line will also convert the denominators to 'array-likes' if
+    # they are not already:
+    x_denominators = x_denominators+(x*0.0)
+    y_denominators = y_denominators+(y*0.0)
+
+    assert (np.isnan(x) == np.isnan(x_denominators)).all()
+    assert (np.isnan(y) == np.isnan(y_denominators)).all()
+
     assert hasattr(x_denominators, '__len__')
     assert hasattr(y_denominators, '__len__')
 
