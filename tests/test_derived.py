@@ -143,3 +143,61 @@ def test_using_lots_of_AA_tests():
     assert 0.08 < np.percentile(all_ps,10) < 0.12
     assert 0.48 < np.percentile(all_ps,50) < 0.52
     assert 0.88 < np.percentile(all_ps,90) < 0.92
+
+def test_using_lots_of_AA_tests_ratio__always_1__withZeros():
+    # This is an important test. Any entity with zero in the denominator should
+    # be removed. There are some datapoint with non-zero numerator and zero
+    # denominator.
+
+    # This test inserts many zeros into the denominator, and then checks the
+    # sample size to ensure they have been removed
+    n = 1000
+
+    rng = np.random.RandomState()
+    rng.seed(1337)
+
+    # somewhat arbitirary data here for the numerators and the denominators:
+    revs = 1.0+np.arange(n)
+    sess = 2.0+np.arange(n)
+    sess[np.arange(n) % 2 == 1] = 0
+
+    worker = worker_table['fixed_horizon'](min_observations=0)
+
+    assignments = (np.arange(n) % 2 == 0) # 50/50
+
+    all_ps = []
+    all_sampsize1 = []
+    all_sampsize2 = []
+    for i in range(1000):
+        rng.shuffle(assignments) # randomly reassign everybody
+
+        # extract the 'controls':
+        x_num = revs[ assignments]
+        x_den = sess[ assignments]
+        # extract the 'treatments':
+        y_num = revs[~assignments]
+        y_den = sess[~assignments]
+        # call the 'fixed_horizon' worker:
+        res = worker(x_num,y_num,
+                x_den, y_den,
+                #np.mean(x_den), np.mean(y_den), # using means would replicated the old (wrong) behaviour
+                )
+        all_ps.append(res.p)
+        all_sampsize1.append(res.treatment_statistics.sample_size)
+        all_sampsize2.append(res.  control_statistics.sample_size)
+
+    # the sample sizes should be approximatley n/4. Half the observations have
+    # denominator == 0, and they are split (roughly) equally between
+    # treatment and control.
+    # n=1000 in this, hence we expect about 250:
+    assert 230 < np.percentile(all_sampsize1,10) < 270
+    assert 230 < np.percentile(all_sampsize1,50) < 270
+    assert 230 < np.percentile(all_sampsize1,90) < 270
+    assert 230 < np.percentile(all_sampsize2,10) < 270
+    assert 230 < np.percentile(all_sampsize2,50) < 270
+    assert 230 < np.percentile(all_sampsize2,90) < 270
+
+    # The 'all_ps' should be approximately uniform between zero and one
+    assert 0.08 < np.percentile(all_ps,10) < 0.12
+    assert 0.48 < np.percentile(all_ps,50) < 0.52
+    assert 0.88 < np.percentile(all_ps,90) < 0.92

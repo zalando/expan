@@ -64,10 +64,9 @@ def delta(x, y, x_denominators=1, y_denominators=1, assume_normal=True, alpha=0.
     assert hasattr(x, '__len__')
     assert hasattr(y, '__len__')
 
-    # If the denominators are scalars, these lines will do nothing. But if they
-    # are vectors, this line will add a NaN to the numerator for each zero or
-    # NaN in the denominator:
-
+    # If the denominators are scalars, these next two lines will do nothing.
+    # But if they are vectors, this line will add a NaN to the numerator for
+    # each zero or NaN in the denominator:
     x = x / x_denominators * x_denominators
     y = y / y_denominators * y_denominators
 
