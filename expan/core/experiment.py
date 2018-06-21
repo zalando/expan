@@ -85,7 +85,7 @@ class Experiment(object):
         # create test result object with empty result first
         test_result = StatisticalTestResult(test, None)
 
-        data_for_analysis = test.data
+        data_for_analysis = test.data.dropna()
         for feature in test.features:
             data_for_analysis = feature.apply_to_data(data_for_analysis)
 
