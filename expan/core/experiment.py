@@ -250,10 +250,10 @@ class Experiment(object):
         :rtype: bool 
         """
         column_name = test.variants.variant_column_name
-        if len(data.loc[data[column_name] == test.variants.control_name, column_name].dropna()) <= 1:
+        if len(data.loc[data[column_name] == test.variants.control_name, column_name]) <= 1:
             logger.warning("Control group only contains 1 or 0 entities.")
             return False
-        if len(data.loc[data[column_name] == test.variants.treatment_name, column_name].dropna()) <= 1:
+        if len(data.loc[data[column_name] == test.variants.treatment_name, column_name]) <= 1:
             logger.warning("Treatment group only contains 1 or 0 entities.")
             return False
         return True
