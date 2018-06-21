@@ -14,12 +14,12 @@ def _delta_mean(x, y):
     return np.nanmean(x) - np.nanmean(y)
 
 
-def make_delta(assume_normal=True, alpha=0.05, min_observations=20, nruns=10000, relative=False):
+def make_delta(assume_normal=True, alpha=0.05, nruns=10000, relative=False):
     """ A closure to the delta function. """
-    return lambda x, y: delta(x, y, assume_normal, alpha, min_observations, nruns, relative)
+    return lambda x, y: delta(x, y, assume_normal, alpha, nruns, relative)
 
 
-def delta(x, y, assume_normal=True, alpha=0.05, min_observations=20, nruns=10000, relative=False):
+def delta(x, y, assume_normal=True, alpha=0.05, nruns=10000, relative=False):
     """ Calculates the difference of means between the samples in a statistical sense.
     Computation is done in form of treatment minus control, i.e. x-y.
     Note that NaNs are treated as if they do not exist in the data. 
@@ -32,8 +32,6 @@ def delta(x, y, assume_normal=True, alpha=0.05, min_observations=20, nruns=10000
     :type  assume_normal: boolean
     :param alpha: significance level (alpha)
     :type  alpha: float
-    :param min_observations: minimum number of observations needed
-    :type  min_observations: int
     :param nruns: only used if assume normal is false
     :type  nruns: int
     :param relative: if relative==True, then the values will be returned
@@ -72,23 +70,16 @@ def delta(x, y, assume_normal=True, alpha=0.05, min_observations=20, nruns=10000
     ss_x = sample_size(_x)
     ss_y = sample_size(_y)
 
-    # Checking if enough observations are left after dropping NaNs
-    if min(ss_x, ss_y) < min_observations:
-        # Set mean to nan
-        mu = np.nan
-        # Create nan dictionary
-        c_i = dict(list(zip(percentiles, np.empty(len(percentiles)) * np.nan)))
+    # Computing the mean
+    mu = _delta_mean(_x, _y)
+    # Computing the confidence intervals
+    if assume_normal:
+        logger.info("The distribution of two samples is assumed normal. "
+                    "Performing the sample difference distribution calculation.")
+        c_i = normal_sample_difference(x=_x, y=_y, percentiles=percentiles, relative=relative)
     else:
-        # Computing the mean
-        mu = _delta_mean(_x, _y)
-        # Computing the confidence intervals
-        if assume_normal:
-            logger.info("The distribution of two samples is assumed normal. "
-                        "Performing the sample difference distribution calculation.")
-            c_i = normal_sample_difference(x=_x, y=_y, percentiles=percentiles, relative=relative)
-        else:
-            logger.info("The distribution of two samples is not normal. Performing the bootstrap.")
-            c_i, _ = bootstrap(x=_x, y=_y, percentiles=percentiles, nruns=nruns, relative=relative)
+        logger.info("The distribution of two samples is not normal. Performing the bootstrap.")
+        c_i, _ = bootstrap(x=_x, y=_y, percentiles=percentiles, nruns=nruns, relative=relative)
 
     treatment_statistics = SampleStatistics(ss_x, float(np.nanmean(_x)), float(np.nanvar(_x)))
     control_statistics   = SampleStatistics(ss_y, float(np.nanmean(_y)), float(np.nanvar(_y)))
@@ -390,7 +381,7 @@ def compute_statistical_power(mean1, std1, n1, mean2, std2, n2, z_1_minus_alpha)
     effect_size = mean1 - mean2
     std = pooled_std(std1, n1, std2, n2)
     if std <= 0.0:
-        logger.error("Zero pooled std in compute_statistical_power.")
+        logger.warning("Zero pooled std in compute_statistical_power.")
         return -1
 
     tmp = (n1 * n2 * effect_size**2) / ((n1 + n2) * std**2)

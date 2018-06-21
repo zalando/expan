@@ -68,8 +68,7 @@ class ExperimentTestCase(unittest.TestCase):
                                         [0, 1, 'A', 1.0, 1.0], [1, 2, 'B', 2.0, 2.0],
                                         [2, 3, 'A', 1.0, 1.0], [3, 4, 'B', 2.0, 2.0]])
         self.data_dummy_zero_std = pd.DataFrame(data=data_dummy_zero_std[1:, 1:],
-                                                columns=data_dummy_zero_std[0, 1:]).convert_objects(
-            convert_numeric=True)
+                                                columns=data_dummy_zero_std[0, 1:]).convert_objects(convert_numeric=True)
         self.test_normal_same_zero_std = StatisticalTest(self.data_dummy_zero_std, self.kpi, [], self.variants)
         self.suite_with_one_test_zero_std = StatisticalTestSuite([self.test_normal_same_zero_std])
 

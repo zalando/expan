@@ -37,7 +37,7 @@ class Experiment(object):
         return 'Performing "{:s}" experiment.'.format(self.metadata['experiment'])
 
 
-    def analyze_statistical_test(self, test, test_method='fixed_horizon', include_data=False, **worker_args):
+    def analyze_statistical_test(self, test, test_method='fixed_horizon', include_data=False, min_observations=20, **worker_args):
         """ Runs delta analysis on one statistical test and returns statistical results.
         
         :param test: a statistical test to run
@@ -47,6 +47,8 @@ class Experiment(object):
         :type  test_method: str
         :param include_data: True if test results should include data, False - if no data should be included
         :type  include_data: bool
+        :param min_observations: minimum number of observations needed
+        :type  min_observations: int
         :param worker_args: additional arguments for the analysis method
 
         :return: statistical result of the test
@@ -59,10 +61,6 @@ class Experiment(object):
             raise KeyError("There is no 'entity' column in the data.")
         if test.variants.variant_column_name not in test.data.columns:
             raise KeyError("There is no '{}' column in the data.".format(test.variants.variant_column_name))
-        if test.variants.treatment_name not in pd.unique(test.data[test.variants.variant_column_name]):
-            raise KeyError("There is no treatment with the name '{}' in the data.".format(test.variants.treatment_name))
-        if test.variants.control_name not in pd.unique(test.data[test.variants.variant_column_name]):
-            raise KeyError("There is no control with the name '{}' in the data.".format(test.variants.control_name))
 
         for feature in test.features:
             if feature.column_name not in test.data.columns:
@@ -110,9 +108,15 @@ class Experiment(object):
         treatment_weight = self._get_weights(data_for_analysis, test, test.variants.treatment_name)
         treatment_data   = treatment * treatment_weight
 
-        # run the test method
-        test_statistics = worker(x=treatment_data, y=control_data)
-        test_result.result = test_statistics
+        n_x = statx.sample_size(np.array(treatment_data, dtype=float))
+        n_y = statx.sample_size(np.array(control_data, dtype=float))
+        if min(n_x, n_y) < min_observations:
+            logger.warning("Not enough data after dropping NaNs")
+            test_result.result = None
+        else:
+            # run the test method
+            test_statistics = worker(x=treatment_data, y=control_data)
+            test_result.result = test_statistics
 
         # remove data from the result test metadata
         if not include_data:
@@ -253,12 +257,14 @@ class Experiment(object):
         :return True if data is valid for analysis and False if not
         :rtype: bool 
         """
-        if len(data[data[test.variants.variant_column_name] == test.variants.control_name].dropna()) <= 1:
+        column_name = test.variants.variant_column_name
+        if len(data.loc[data[column_name] == test.variants.control_name, column_name]) <= 1:
             logger.warning("Control group only contains 1 or 0 entities.")
             return False
-        if len(data[data[test.variants.variant_column_name] == test.variants.treatment_name].dropna()) <= 1:
+        if len(data.loc[data[column_name] == test.variants.treatment_name, column_name]) <= 1:
             logger.warning("Treatment group only contains 1 or 0 entities.")
             return False
+
         return True
 
 
