@@ -59,10 +59,6 @@ class Experiment(object):
             raise KeyError("There is no 'entity' column in the data.")
         if test.variants.variant_column_name not in test.data.columns:
             raise KeyError("There is no '{}' column in the data.".format(test.variants.variant_column_name))
-        if test.variants.treatment_name not in pd.unique(test.data[test.variants.variant_column_name]):
-            raise KeyError("There is no treatment with the name '{}' in the data.".format(test.variants.treatment_name))
-        if test.variants.control_name not in pd.unique(test.data[test.variants.variant_column_name]):
-            raise KeyError("There is no control with the name '{}' in the data.".format(test.variants.control_name))
 
         for feature in test.features:
             if feature.column_name not in test.data.columns:
