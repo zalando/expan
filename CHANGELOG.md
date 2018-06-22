@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/zalando/expan/tree/HEAD)
 
-[Full Changelog](https://github.com/zalando/expan/compare/v1.2.3...HEAD)
+[Full Changelog](https://github.com/zalando/expan/compare/v1.2.4...HEAD)
+
+**Merged pull requests:**
+
+- Counting bugfix and save memory [\#224](https://github.com/zalando/expan/pull/224) ([aaron-mcdaid-zalando](https://github.com/aaron-mcdaid-zalando))
+- Fix for the possibility that both variances are zero [\#221](https://github.com/zalando/expan/pull/221) ([aaron-mcdaid-zalando](https://github.com/aaron-mcdaid-zalando))
+
+## [v1.2.4](https://github.com/zalando/expan/tree/v1.2.4) (2018-05-31)
+[Full Changelog](https://github.com/zalando/expan/compare/v1.2.3...v1.2.4)
 
 **Merged pull requests:**
 
