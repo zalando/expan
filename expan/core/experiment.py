@@ -153,8 +153,8 @@ class Experiment(object):
         test_suite_result = MultipleTestSuiteResult([], test_suite.correction_method)
         for test in test_suite.tests:
             original_analysis = self.analyze_statistical_test(test, test_method, True, **worker_args)
-            # do not include results of the test where statistical power is -1 and if the results are None
-            if original_analysis.result and original_analysis.result.statistical_power != -1:
+            # If the statistical power is -1 *or* if the results are None, then we don't include the analysis
+            if original_analysis.result is not None and original_analysis.result.statistical_power != -1:
                 combined_result = CombinedTestStatistics(original_analysis.result, original_analysis.result)
                 original_analysis.result = combined_result
                 test_suite_result.results.append(original_analysis)
