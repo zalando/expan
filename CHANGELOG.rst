@@ -1,11 +1,11 @@
 Change Log
 ==========
 
-`Unreleased <https://github.com/zalando/expan/tree/HEAD>`__
------------------------------------------------------------
+`v1.2.5 <https://github.com/zalando/expan/tree/v1.2.5>`__ (2018-06-22)
+----------------------------------------------------------------------
 
 `Full
-Changelog <https://github.com/zalando/expan/compare/v1.2.4...HEAD>`__
+Changelog <https://github.com/zalando/expan/compare/v1.2.4...v1.2.5>`__
 
 **Merged pull requests:**
 
