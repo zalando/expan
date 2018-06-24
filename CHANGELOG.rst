@@ -1,11 +1,26 @@
 Change Log
 ==========
 
-`Unreleased <https://github.com/zalando/expan/tree/HEAD>`__
------------------------------------------------------------
+`v1.2.5 <https://github.com/zalando/expan/tree/v1.2.5>`__ (2018-06-22)
+----------------------------------------------------------------------
 
 `Full
-Changelog <https://github.com/zalando/expan/compare/v1.2.3...HEAD>`__
+Changelog <https://github.com/zalando/expan/compare/v1.2.4...v1.2.5>`__
+
+**Merged pull requests:**
+
+-  Counting bugfix and save memory
+   `#224 <https://github.com/zalando/expan/pull/224>`__
+   (`aaron-mcdaid-zalando <https://github.com/aaron-mcdaid-zalando>`__)
+-  Fix for the possibility that both variances are zero
+   `#221 <https://github.com/zalando/expan/pull/221>`__
+   (`aaron-mcdaid-zalando <https://github.com/aaron-mcdaid-zalando>`__)
+
+`v1.2.4 <https://github.com/zalando/expan/tree/v1.2.4>`__ (2018-05-31)
+----------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/zalando/expan/compare/v1.2.3...v1.2.4>`__
 
 **Merged pull requests:**
 

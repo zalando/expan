@@ -532,10 +532,15 @@ def compute_statistical_power(mean1, std1, n1, mean2, std2, n2, z_1_minus_alpha)
                                     or -1 if std is less or equal to 0
     :rtype: float
     """
+
+    # First, check we have enough data for a t-test:
+    if min(n1,n2) < 1 or max(n1,n2) < 2:
+        return -1
+
     effect_size = mean1 - mean2
     std = pooled_std(std1, n1, std2, n2)
     if std <= 0.0:
-        logger.error("Zero pooled std in compute_statistical_power.")
+        logger.warning("Zero pooled std in compute_statistical_power.")
         return -1
 
     tmp = (n1 * n2 * effect_size**2) / ((n1 + n2) * std**2)
@@ -592,6 +597,11 @@ def compute_p_value(mean1, std1, n1, mean2, std2, n2):
     :return: two-tailed p-value 
     :rtype: float
     """
+
+    # First, check if we have enough data to do a t-test
+    if min(n1,n2) < 1 or max(n1,n2) < 2:
+        return np.nan
+
     mean_diff = mean1 - mean2
     std       = pooled_std(std1, n1, std2, n2)
     st_error  = std * np.sqrt(1. / n1 + 1. / n2)

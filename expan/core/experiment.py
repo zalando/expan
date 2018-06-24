@@ -59,10 +59,6 @@ class Experiment(object):
             raise KeyError("There is no 'entity' column in the data.")
         if test.variants.variant_column_name not in test.data.columns:
             raise KeyError("There is no '{}' column in the data.".format(test.variants.variant_column_name))
-        if test.variants.treatment_name not in pd.unique(test.data[test.variants.variant_column_name]):
-            raise KeyError("There is no treatment with the name '{}' in the data.".format(test.variants.treatment_name))
-        if test.variants.control_name not in pd.unique(test.data[test.variants.variant_column_name]):
-            raise KeyError("There is no control with the name '{}' in the data.".format(test.variants.control_name))
 
         for feature in test.features:
             if feature.column_name not in test.data.columns:
@@ -155,8 +151,8 @@ class Experiment(object):
         test_suite_result = MultipleTestSuiteResult([], test_suite.correction_method)
         for test in test_suite.tests:
             original_analysis = self.analyze_statistical_test(test, test_method, True, **worker_args)
-            # do not include results of the test where statistical power is -1 and if the results are None
-            if original_analysis.result and original_analysis.result.statistical_power != -1:
+            # If the statistical power is -1 *or* if the results are None, then we don't include the analysis
+            if original_analysis.result is not None and original_analysis.result.statistical_power != -1:
                 combined_result = CombinedTestStatistics(original_analysis.result, original_analysis.result)
                 original_analysis.result = combined_result
                 test_suite_result.results.append(original_analysis)
@@ -255,11 +251,13 @@ class Experiment(object):
         :return True if data is valid for analysis and False if not
         :rtype: bool 
         """
-        if len(data[data[test.variants.variant_column_name] == test.variants.control_name].dropna()) <= 1:
-            logger.warning("Control group only contains 1 or 0 entities.")
+        count_controls   = sum(data[test.variants.variant_column_name] == test.variants.control_name)
+        count_treatments = sum(data[test.variants.variant_column_name] == test.variants.treatment_name)
+        if count_controls <= 1:
+            logger.warning("Control group only contains {} entities.".format(count_controls))
             return False
-        if len(data[data[test.variants.variant_column_name] == test.variants.treatment_name].dropna()) <= 1:
-            logger.warning("Treatment group only contains 1 or 0 entities.")
+        if count_treatments <= 1:
+            logger.warning("Treatment group only contains {} entities.".format(count_treatments))
             return False
         return True
 
