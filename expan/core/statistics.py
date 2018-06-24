@@ -64,27 +64,35 @@ def delta(x, y, x_denominators=1, y_denominators=1, assume_normal=True, alpha=0.
     assert hasattr(x, '__len__')
     assert hasattr(y, '__len__')
 
-    # If the denominators are scalars, these next two lines will do nothing.
-    # But if they are vectors, this line will add a NaN to the numerator for
+    # If either denominator is a scalar, convert it to a
+    # list of identical entries:
+    if not hasattr(x_denominators, '__len__'):
+        x_denominators = [x_denominators] * len(x)
+    if not hasattr(y_denominators, '__len__'):
+        y_denominators = [y_denominators] * len(y)
+
+    # lengths should match
+    assert len(x) == len(x_denominators)
+    assert len(y) == len(y_denominators)
+
+    # Must be numpy arrays of floats (otherwise .isnan won't work)
+    x = np.array(x, dtype=float)
+    y = np.array(y, dtype=float)
+    x_denominators = np.array(x_denominators, dtype=float)
+    y_denominators = np.array(y_denominators, dtype=float)
+
+    # Add a NaN to the numerator for
     # each zero or NaN in the denominator:
     x = x / x_denominators * x_denominators
     y = y / y_denominators * y_denominators
 
     # Next, any NaNs in the numerator must be 'copied' to the denominator.
-    # The next line will also convert the denominators to 'array-likes' if
-    # they are not already:
     x_denominators = x_denominators+(x*0.0)
     y_denominators = y_denominators+(y*0.0)
 
+    # confirm the numerators have the same 'nan-ness' as their denominators
     assert (np.isnan(x) == np.isnan(x_denominators)).all()
     assert (np.isnan(y) == np.isnan(y_denominators)).all()
-
-    assert hasattr(x_denominators, '__len__')
-    assert hasattr(y_denominators, '__len__')
-
-    # lengths should match
-    assert len(x) == len(x_denominators)
-    assert len(y) == len(y_denominators)
 
     percentiles = [alpha * 100 / 2, 100 - alpha * 100 / 2]
 
