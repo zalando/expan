@@ -105,6 +105,12 @@ def delta(x, y, x_denominators=1, y_denominators=1, assume_normal=True, alpha=0.
     _x_strange = _x / np.nanmean(_x_denominators)
     _y_strange = _y / np.nanmean(_y_denominators)
 
+    # Four variables no longer used in this function, let's delete them for simplicity
+    del x
+    del y
+    del x_denominators
+    del y_denominators
+
     x_nan = np.isnan(_x_ratio).sum()
     y_nan = np.isnan(_y_ratio).sum()
     if x_nan > 0:
