@@ -96,11 +96,10 @@ def delta(x, y, x_denominators=1, y_denominators=1, assume_normal=True, alpha=0.
 
     percentiles = [alpha * 100 / 2, 100 - alpha * 100 / 2]
 
-    # Coercing missing values to right format
-    _x = np.array(x, dtype=float)
-    _y = np.array(y, dtype=float)
-    _x_denominators = np.array(x_denominators, dtype=float)
-    _y_denominators = np.array(y_denominators, dtype=float)
+    _x = x
+    _y = y
+    _x_denominators = x_denominators
+    _y_denominators = y_denominators
     _x_ratio = _x / _x_denominators
     _y_ratio = _y / _y_denominators
     _x_strange = _x / np.nanmean(_x_denominators)
