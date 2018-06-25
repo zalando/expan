@@ -34,9 +34,18 @@ Equivalently, we can use the ratio of the means:
 
     \overline{CR} = \mbox{estimated conversion rate} = \frac{ \sum_{i=1}^n o_i }{ \sum_{i=1}^n s_i } = \frac{ \frac1{n} \sum_{i=1}^n o_i }{ \frac1{n} \sum_{i=1}^n s_i } = \frac{\bar{o}}{\bar{s}}
 
+As a side comment, you might be tempted to compute the ratio for each individual, :math:`\frac{o_i}{s_i}`,
+and compute the mean of those ratios, :math:`\overline{\left(\frac{o}{s}\right)_i}`.
+The problem with this is that it's an estimator with low accuracy; more formally, its variance is large.
+Intuitively, we want to compute a mean by giving greater weight to ratios which have more sessions;
+this is how we derive the formula for :math:`\overline{CR}` above.
+
 To calculate the variance of this estimate, and therefore apply a t-test, we need to compute the variance of this
 estimator. If we used the same data again, but randomly reassigned every user to a group (treatment or control),
 and recomputed :math:`\overline{CR}` many times, how would this estimate vary?
+
+We model that the :math:`s_i` are given (i.e. non-random), and the :math:`o_i` are random variables
+whose distribution is a function of :math:`s_i`.
 
 For each user, the "error" (think linear regression) is:
 
@@ -63,6 +72,15 @@ a pooled variance calculation as usual for a t-test.
 See the test named ``test_using_lots_of_AA_tests()`` within ``expan/tests/test_derived.py``
 for a demonstration of how this method gives a uniform p-value under the null;
 this confirms that the correct error rate is maintained.
+
+Finally, this method doesn't suffer from the problem described in
+`this blog post <https://towardsdatascience.com/the-second-ghost-of-experimentation-the-fallacy-of-session-based-metrics-fb65006d30ff>`_.
+In our notation, :math:`o_i` is the sum of the orders for all session for user :math:`i`.
+The method criticized in that blog post is to compute the variance estimate across every session, i.e. ignoring :math:`o_i` and instead using
+the per-session orders individually.
+That is problematic because it ignores the fact that the sessions for a given user may be correlated with each other.
+Our approach is different and follows the linear regression procedure closely,
+and therefore is more robust to these issues.
 
 Early stopping
 ------------------------------------
