@@ -214,6 +214,7 @@ def test_using_lots_of_AA_tests_ratio__always_1__withZeros():
 
 def test_using_lots_of_AB_tests_with_FALSE_null():
     n = TOTAL_SAMPLE_SIZE_FOR_AA_TESTS
+    BETA = 1.0005
 
     # In this test we add a small difference in effect between
     # treatment in order to confirm that the pvalues are
@@ -243,7 +244,7 @@ def test_using_lots_of_AB_tests_with_FALSE_null():
         x_num = revs[ assignments]
         x_den = sess[ assignments]
         # extract the 'treatments':
-        y_num = revs[~assignments] * 1.0005
+        y_num = revs[~assignments] * BETA
         y_den = sess[~assignments]
         # call the 'fixed_horizon' worker:
         res = worker(x_num,y_num,
@@ -252,7 +253,9 @@ def test_using_lots_of_AB_tests_with_FALSE_null():
                 )
         all_ps.append(res.p)
 
-    # The 'all_ps' should be approximately uniform between zero and one
+    # Finally, because this test has a small effect (BETA!=0), we
+    # expect the p values to be smaller than U(0,1)
+    # i.e.  P(p<\alpha)  is much greater than  \alpha
     assert 0.0001 < np.percentile(all_ps,10) < 0.001
     assert 0.005 < np.percentile(all_ps,50) < 0.02
     assert 0.20 < np.percentile(all_ps,90) < 0.30
