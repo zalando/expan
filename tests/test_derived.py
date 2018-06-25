@@ -3,6 +3,7 @@ import expan.core.statistics as statx
 from expan.core.experiment import Experiment
 
 import pytest
+import unittest
 
 import numpy as np
 
@@ -108,13 +109,18 @@ def test_derived_fixed_horizon_almost_x_ratio_diff_from_y_ratio():
                                 np.array([1,4,6]),
                                 )
 
+NUMBER_OF_SIMULATED_AA_TESTS_TO_RUN = 1000 # Takes a second or two to do 1000
+TOTAL_SAMPLE_SIZE_FOR_AA_TESTS = 500
+
 def test_using_lots_of_AA_tests():
-    n = 1000
+    n = TOTAL_SAMPLE_SIZE_FOR_AA_TESTS
 
     rng = np.random.RandomState()
     rng.seed(1337)
 
-    # somewhat arbitirary data here for the numerators and the denominators:
+    # Arbitrary data here for the numerators and the denominators. Feel
+    # free to change it. This is just a lazy way to give every user
+    # a slightly different ratio.
     revs = 1+np.arange(n)
     sess = 2+np.arange(n)
 
@@ -122,8 +128,11 @@ def test_using_lots_of_AA_tests():
 
     assignments = (np.arange(n) % 2 == 0) # 50/50
 
+    assert len(assignments) == len(revs)
+    assert len(assignments) == len(sess)
+
     all_ps = []
-    for i in range(1000):
+    for i in range(NUMBER_OF_SIMULATED_AA_TESTS_TO_RUN):
         rng.shuffle(assignments) # randomly reassign everybody
 
         # extract the 'controls':
@@ -140,9 +149,9 @@ def test_using_lots_of_AA_tests():
         all_ps.append(res.p)
 
     # The 'all_ps' should be approximately uniform between zero and one
-    assert 0.08 < np.percentile(all_ps,10) < 0.12
-    assert 0.48 < np.percentile(all_ps,50) < 0.52
-    assert 0.88 < np.percentile(all_ps,90) < 0.92
+    assert 0.07 < np.percentile(all_ps,10) < 0.13
+    assert 0.47 < np.percentile(all_ps,50) < 0.53
+    assert 0.87 < np.percentile(all_ps,90) < 0.93
 
 def test_using_lots_of_AA_tests_ratio__always_1__withZeros():
     # This is an important test. Any entity with zero in the denominator should
@@ -150,16 +159,18 @@ def test_using_lots_of_AA_tests_ratio__always_1__withZeros():
     # denominator.
 
     # This test inserts many zeros into the denominator, and then checks the
-    # sample size to ensure they have been removed
+    # sample size to ensure they have been removed. Also, this
+    # of course checks that the pvalues are uniformly distributed
+    # as this is the main thing to check.
     n = 1000
 
     rng = np.random.RandomState()
     rng.seed(1337)
 
-    # somewhat arbitirary data here for the numerators and the denominators:
+    # somewhat arbitrary data here for the numerators and the denominators:
     revs = 1.0+np.arange(n)
     sess = 2.0+np.arange(n)
-    sess[np.arange(n) % 2 == 1] = 0
+    sess[np.arange(n) % 2 == 1] = 0 # force half the observations to have zero denominator
 
     worker = worker_table['fixed_horizon'](min_observations=0)
 
@@ -168,7 +179,7 @@ def test_using_lots_of_AA_tests_ratio__always_1__withZeros():
     all_ps = []
     all_sampsize1 = []
     all_sampsize2 = []
-    for i in range(1000):
+    for i in range(NUMBER_OF_SIMULATED_AA_TESTS_TO_RUN):
         rng.shuffle(assignments) # randomly reassign everybody
 
         # extract the 'controls':
@@ -189,13 +200,12 @@ def test_using_lots_of_AA_tests_ratio__always_1__withZeros():
     # the sample sizes should be approximatley n/4. Half the observations have
     # denominator == 0, and they are split (roughly) equally between
     # treatment and control.
-    # n=1000 in this, hence we expect about 250:
-    assert 230 < np.percentile(all_sampsize1,10) < 270
-    assert 230 < np.percentile(all_sampsize1,50) < 270
-    assert 230 < np.percentile(all_sampsize1,90) < 270
-    assert 230 < np.percentile(all_sampsize2,10) < 270
-    assert 230 < np.percentile(all_sampsize2,50) < 270
-    assert 230 < np.percentile(all_sampsize2,90) < 270
+    assert n*0.23 < np.percentile(all_sampsize1,10) < n*0.27
+    assert n*0.23 < np.percentile(all_sampsize1,50) < n*0.27
+    assert n*0.23 < np.percentile(all_sampsize1,90) < n*0.27
+    assert n*0.23 < np.percentile(all_sampsize2,10) < n*0.27
+    assert n*0.23 < np.percentile(all_sampsize2,50) < n*0.27
+    assert n*0.23 < np.percentile(all_sampsize2,90) < n*0.27
 
     # The 'all_ps' should be approximately uniform between zero and one
     assert 0.08 < np.percentile(all_ps,10) < 0.12
