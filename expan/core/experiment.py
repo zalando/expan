@@ -100,13 +100,11 @@ class Experiment(object):
         logger.info("Control group size: {}".format(control.shape[0]))
         control_denominators   = self._get_denominators(data_for_analysis, test, test.variants.control_name)
         control_numerators   = control * control_denominators
-        control_data= control_numerators / np.mean(control_denominators)
 
         treatment        = test.variants.get_variant(data_for_analysis, test.variants.treatment_name)[test.kpi.name]
         logger.info("Treatment group size: {}".format(treatment.shape[0]))
         treatment_denominators = self._get_denominators(data_for_analysis, test, test.variants.treatment_name)
         treatment_numerators   = treatment * treatment_denominators
-        treatment_data = treatment_numerators / np.mean(treatment_denominators)
 
         # run the test method
         test_statistics = worker(x=treatment_numerators, y=control_numerators, x_denominators = treatment_denominators, y_denominators = control_denominators)
@@ -261,28 +259,6 @@ class Experiment(object):
             return False
         return True
 
-
-    def _get_weights(self, data, test, variant_name):
-        """ Perform the re-weighting trick on the selected derived kpi
-        See http://expan.readthedocs.io/en/latest/glossary.html#per-entity-ratio-vs-ratio-of-totals
-        
-        :param data: data subset by derived kpi and variant, for which the re-weighting trick should be done
-        :type  data: pd.DataFrame
-        :param test: statistical test, provides the derived kpi denominator for the re-weighting trick
-        :type  test: StatisticalTest
-        :param variant_name: variant name for data subset by kpi and variant
-        :type  variant_name: str
-        
-        :return returns re-weighted kpi values of type pd.Series
-        :rtype: pd.Series
-        """
-        if type(test.kpi) is not DerivedKPI:
-            return 1.0
-
-        x = test.variants.get_variant(data, variant_name)[test.kpi.denominator]
-        number_of_zeros_and_nans     = sum(x == 0) + np.isnan(x).sum()
-        number_of_non_zeros_and_nans = len(x) - number_of_zeros_and_nans
-        return number_of_non_zeros_and_nans / np.nansum(x) * x
 
     def _get_denominators(self, data, test, variant_name):
         if type(test.kpi) is not DerivedKPI:

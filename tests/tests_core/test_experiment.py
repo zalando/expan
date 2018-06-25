@@ -364,37 +364,6 @@ class HelperMethodsTestCases(ExperimentTestCase):
         is_not_valid = exp._is_valid_for_analysis(self.data, self.test_nonsense_variant)
         self.assertFalse(is_not_valid)
 
-    # Test _get_weights
-    def test_get_weights(self):
-        exp = self.getExperiment()
-        res = exp._get_weights(self.data, self.test_normal_same, 'B')
-        self.assertEqual(res, 1.0)
-
-    # Test _get_weights for derived kpis
-    def test_get_weights_derived_kpi(self):
-        exp = self.getExperiment()
-        self.derived_kpi.make_derived_kpi(self.data)
-        res = exp._get_weights(self.data, self.test_derived_kpi, 'B')
-        self.assertTrue(isinstance(res, pd.Series))
-
-    # Test re-weighting trick with hardcoded data
-    def test_get_weights_hardcoded_data(self):
-        ndecimals = 5
-        exp = Experiment(self.metadata)
-        self.derived_kpi.make_derived_kpi(self.data_dummy_df)
-        res = exp._get_weights(self.data_dummy_df, self.test_derived_kpi, 'B')
-        self.assertAlmostEqual(res.iloc[0], 1.33333, ndecimals)
-        self.assertAlmostEqual(res.iloc[1], 0.66667, ndecimals)
-
-    # Test re-weighting trick with hardcoded data with NaN values
-    def test_get_weights_hardcoded_data_with_nan(self):
-        ndecimals = 5
-        exp = Experiment(self.metadata)
-        self.derived_kpi.make_derived_kpi(self.data_dummy_df_with_nan)
-        res = exp._get_weights(self.data_dummy_df_with_nan, self.test_derived_kpi, 'B')
-        self.assertAlmostEqual(res.iloc[0], 1.33333, ndecimals)
-        self.assertAlmostEqual(res.iloc[1], 0.66667, ndecimals)
-
 
 if __name__ == '__main__':
     unittest.main()
