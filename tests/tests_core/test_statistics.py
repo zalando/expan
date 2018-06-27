@@ -46,9 +46,9 @@ class DeltaTestCases(StatisticsTestCase):
         value975 = find_value_by_key_with_condition(res.confidence_interval, 'percentile', 97.5, 'value')
 
         # Checking if lower percentile has right value
-        self.assertAlmostEqual(value025, -0.53770569567692295)
+        self.assertAlmostEqual(value025, -0.53963938185557114)
         # Checking if uper percentile has right value
-        self.assertAlmostEqual(value975, -0.040755842784587965)
+        self.assertAlmostEqual(value975, -0.038822156605939739)
         # Checking if sample size 1 is correct
         self.assertEqual(res.treatment_statistics.sample_size, 65)
         # Checking if sample size 2 is correct
@@ -63,8 +63,8 @@ class DeltaTestCases(StatisticsTestCase):
         value025 = find_value_by_key_with_condition(res.confidence_interval, 'percentile', 2.5, 'value')
         value975 = find_value_by_key_with_condition(res.confidence_interval, 'percentile', 97.5, 'value')
 
-        self.assertAlmostEqual(value025, -0.53770569567692295)
-        self.assertAlmostEqual(value975, -0.040755842784587965)
+        self.assertAlmostEqual(value025, -0.53963938185557114)
+        self.assertAlmostEqual(value975, -0.038822156605939739)
 
     def test__delta__nan_handling(self):
         """ Test correct handling of nans. (ignored). """
@@ -94,9 +94,9 @@ class DeltaTestCases(StatisticsTestCase):
         value975 = find_value_by_key_with_condition(res.confidence_interval, 'percentile', 97.5, 'value')
 
         # Checking if lower percentile has right value
-        self.assertAlmostEqual(value025, -0.53770569567692295)
+        self.assertAlmostEqual(value025, -0.53963938185557114)
         # Checking if uper percentile has right value
-        self.assertAlmostEqual(value975, -0.040755842784587965)
+        self.assertAlmostEqual(value975, -0.038822156605939739)
         # Checking if sample size 1 is correct
         self.assertEqual(res.treatment_statistics.sample_size, 65)
         # Checking if sample size 2 is correct
@@ -263,9 +263,9 @@ class NormalSampleDifferenceTestCases(StatisticsTestCase):
         # Computation of normal sample difference
         result1 = statx.normal_sample_difference(sample1, sample2)
         # Checking if lower percentile of result1 is correct
-        self.assertAlmostEqual(result1[2.5], -0.53770569567692295)
+        self.assertAlmostEqual(result1[2.5], -0.53963938185557114)
         # Checking if upper percentile of result1 is correct
-        self.assertAlmostEqual(result1[97.5], -0.040755842784587965)
+        self.assertAlmostEqual(result1[97.5], -0.038822156605939739)
 
 
 class StatisticalPowerTestCases(StatisticsTestCase):

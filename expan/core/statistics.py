@@ -1,3 +1,5 @@
+from __future__ import division # so that, under Python 2.*, integer division results in real numbers
+
 import warnings
 import logging
 
@@ -16,10 +18,12 @@ def _delta_mean(x, y):
 
 def make_delta(assume_normal=True, alpha=0.05, min_observations=20, nruns=10000, relative=False):
     """ A closure to the delta function. """
-    return lambda x, y: delta(x, y, assume_normal, alpha, min_observations, nruns, relative)
+    def go(x, y, x_denominators=1, y_denominators=1):
+        return delta(x, y, x_denominators, y_denominators, assume_normal, alpha, min_observations, nruns, relative)
+    return go
 
 
-def delta(x, y, assume_normal=True, alpha=0.05, min_observations=20, nruns=10000, relative=False):
+def delta(x, y, x_denominators=1, y_denominators=1, assume_normal=True, alpha=0.05, min_observations=20, nruns=10000, relative=False):
     """ Calculates the difference of means between the samples in a statistical sense.
     Computation is done in form of treatment minus control, i.e. x-y.
     Note that NaNs are treated as if they do not exist in the data. 
@@ -28,6 +32,10 @@ def delta(x, y, assume_normal=True, alpha=0.05, min_observations=20, nruns=10000
     :type  x: pd.Series or array-like
     :param y: sample of the control group
     :type  y: pd.Series or array-like
+    :param x_denominators: sample of the treatment group
+    :type  x_denominators: pd.Series or array-like
+    :param y_denominators: sample of the control group
+    :type  y_denominators: pd.Series or array-like
     :param assume_normal: specifies whether normal distribution assumptions can be made
     :type  assume_normal: boolean
     :param alpha: significance level (alpha)
@@ -54,14 +62,59 @@ def delta(x, y, assume_normal=True, alpha=0.05, min_observations=20, nruns=10000
     if type(x) != type(y):
         raise TypeError('Please provide samples of the same type.')
 
+    # check x and y are 'array-like'
+    assert hasattr(x, '__len__')
+    assert hasattr(y, '__len__')
+
+    # If either denominator is a scalar, convert it to a
+    # list of identical entries:
+    if not hasattr(x_denominators, '__len__'):
+        x_denominators = [x_denominators] * len(x)
+    if not hasattr(y_denominators, '__len__'):
+        y_denominators = [y_denominators] * len(y)
+
+    # lengths should match
+    assert len(x) == len(x_denominators)
+    assert len(y) == len(y_denominators)
+
+    # Must be numpy arrays of floats (otherwise .isnan won't work)
+    x = np.array(x, dtype=float)
+    y = np.array(y, dtype=float)
+    x_denominators = np.array(x_denominators, dtype=float)
+    y_denominators = np.array(y_denominators, dtype=float)
+
+    # Add a NaN to the numerator for
+    # each zero or NaN in the denominator:
+    x = x / x_denominators * x_denominators
+    y = y / y_denominators * y_denominators
+
+    # Next, any NaNs in the numerator must be 'copied' to the denominator.
+    x_denominators = x_denominators+(x*0.0)
+    y_denominators = y_denominators+(y*0.0)
+
+    # confirm the numerators have the same 'nan-ness' as their denominators
+    assert (np.isnan(x) == np.isnan(x_denominators)).all()
+    assert (np.isnan(y) == np.isnan(y_denominators)).all()
+
     percentiles = [alpha * 100 / 2, 100 - alpha * 100 / 2]
 
-    # Coercing missing values to right format
-    _x = np.array(x, dtype=float)
-    _y = np.array(y, dtype=float)
+    _x = x
+    _y = y
+    _x_denominators = x_denominators
+    _y_denominators = y_denominators
+    _x_ratio = _x / _x_denominators
+    _y_ratio = _y / _y_denominators
+    _x_strange = _x / np.nanmean(_x_denominators)
+    _y_strange = _y / np.nanmean(_y_denominators)
 
-    x_nan = np.isnan(_x).sum()
-    y_nan = np.isnan(_y).sum()
+    # Four variables no longer used in this function, let's delete them for simplicity
+    del x
+    del y
+    del x_denominators
+    del y_denominators
+
+    x_nan = np.isnan(_x_ratio).sum()
+    y_nan = np.isnan(_y_ratio).sum()
     if x_nan > 0:
         warnings.warn('Discarding ' + str(x_nan) + ' NaN(s) in the x array!')
         logger.warning('Discarding ' + str(x_nan) + ' NaN(s) in the x array!')
@@ -69,10 +122,11 @@ def delta(x, y, assume_normal=True, alpha=0.05, min_observations=20, nruns=10000
         warnings.warn('Discarding ' + str(y_nan) + ' NaN(s) in the y array!')
         logger.warning('Discarding ' + str(x_nan) + ' NaN(s) in the x array!')
 
-    ss_x = sample_size(_x)
-    ss_y = sample_size(_y)
+    ss_x = sample_size(_x_ratio)
+    ss_y = sample_size(_y_ratio)
 
     # Checking if enough observations are left after dropping NaNs
+    partial_simple_test_stats = None
     if min(ss_x, ss_y) < min_observations:
         # Set mean to nan
         mu = np.nan
@@ -85,16 +139,28 @@ def delta(x, y, assume_normal=True, alpha=0.05, min_observations=20, nruns=10000
         if assume_normal:
             logger.info("The distribution of two samples is assumed normal. "
                         "Performing the sample difference distribution calculation.")
-            c_i = normal_sample_difference(x=_x, y=_y, percentiles=percentiles, relative=relative)
+            partial_simple_test_stats = normal_sample_weighted_difference(x_numerators=_x, y_numerators=_y, x_denominators=_x_denominators, y_denominators = _y_denominators, percentiles=percentiles, relative=relative)
+            c_i = partial_simple_test_stats['c_i']
+            mu = partial_simple_test_stats['mean1'] - partial_simple_test_stats['mean2']
         else:
             logger.info("The distribution of two samples is not normal. Performing the bootstrap.")
-            c_i, _ = bootstrap(x=_x, y=_y, percentiles=percentiles, nruns=nruns, relative=relative)
+            c_i, _ = bootstrap(x=_x_strange, y=_y_strange, percentiles=percentiles, nruns=nruns, relative=relative)
 
-    treatment_statistics = SampleStatistics(ss_x, float(np.nanmean(_x)), float(np.nanvar(_x)))
-    control_statistics   = SampleStatistics(ss_y, float(np.nanmean(_y)), float(np.nanvar(_y)))
+    if partial_simple_test_stats is not None: # correct the last few lines!!
+        treatment_statistics = SampleStatistics(ss_x, partial_simple_test_stats['mean1'], partial_simple_test_stats['var1'])
+        control_statistics   = SampleStatistics(ss_y, partial_simple_test_stats['mean2'], partial_simple_test_stats['var2'])
+    else:
+        # actually, this is a bit rubbish, only applies to bootstrap and min_observations:
+        treatment_statistics = SampleStatistics(ss_x, float(np.nanmean(_x_strange)), float(np.nanvar(_x_strange)))
+        control_statistics   = SampleStatistics(ss_y, float(np.nanmean(_y_strange)), float(np.nanvar(_y_strange)))
+
     variant_statistics   = BaseTestStatistics(control_statistics, treatment_statistics)
-    p_value              = compute_p_value_from_samples(_x, _y)
-    statistical_power    = compute_statistical_power_from_samples(_x, _y, alpha)
+    if partial_simple_test_stats is not None:
+        p_value              = partial_simple_test_stats['p_value']
+    else:
+        p_value              = compute_p_value_from_samples(_x_strange, _y_strange)
+    statistical_power    = compute_statistical_power_from_samples(_x_strange, _y_strange, alpha) # TODO: wrong
+
 
     logger.info("Delta calculation finished!")
     return SimpleTestStatistics(variant_statistics.control_statistics,
@@ -240,6 +306,7 @@ def pooled_std(std1, n1, std2, n2):
     :return: pooled standard deviation
     :type: float
     """
+
     if (std1 ** 2) >   2.0*(std2 ** 2) or \
        (std1 ** 2) <   0.5*(std2 ** 2):
         warnings.warn('Sample variances differ too much to assume that population variances are equal.')
@@ -251,7 +318,7 @@ def pooled_std(std1, n1, std2, n2):
 def normal_sample_difference(x, y, percentiles=[2.5, 97.5], relative=False):
     """ Calculates the difference distribution of two normal distributions given by their samples.
 
-    Computation is done in form of treatment minus control. 
+    Computation is done in form of treatment minus control.
     It is assumed that the standard deviations of both distributions do not differ too much.
 
     :param x: sample of a treatment group
@@ -270,24 +337,117 @@ def normal_sample_difference(x, y, percentiles=[2.5, 97.5], relative=False):
     :return: percentiles and corresponding values
     :rtype: dict
     """
-    # Coerce data to right format
+
+    # coerce to an array
     _x = np.array(x, dtype=float)
-    _x = _x[~np.isnan(_x)]
     _y = np.array(y, dtype=float)
-    _y = _y[~np.isnan(_y)]
+    # set denominators to 1.0
+    _x_denominators = np.array([1.0] * len(_x), dtype=float)
+    _y_denominators = np.array([1.0] * len(_y), dtype=float)
+    assert (_x_denominators == _x*0.0 + 1.0).all()
+    assert (_y_denominators == _y*0.0 + 1.0).all()
+    partial_simple_test_stats = normal_sample_weighted_difference(_x, _y, _x_denominators, _y_denominators, percentiles, relative)
+    c_i = partial_simple_test_stats['c_i']
+    return c_i
+
+def normal_sample_weighted_difference(x_numerators, y_numerators, x_denominators, y_denominators, percentiles=[2.5, 97.5], relative=False):
+    """ Calculates the difference distribution of two distributions given by their samples.
+
+    Computation is done in form of treatment(**x**) minus control(**y**).
+    It is assumed that the standard deviations of both distributions do not differ too much.
+
+    The estimate of the mean difference is :math:`\\frac{mean(x_{numerators})}{mean(x_{denominators})}-\\frac{mean(y_{numerators})}{mean(y_{denominators})}`.
+    For non-derived KPIs, the denominators will be exactly `1`, and hence this will simplify to :math:`mean(x_{numerators})-mean(y_{numerators})`.
+    For details on the variance calcuation, see the Glossary.
+
+    :param x_numerators: sample of a treatment group
+    :type  x_numerators: pd.Series or list (array-like)
+    :param y_numerators: sample of a control group
+    :type  y_numerators: pd.Series or list (array-like)
+    :param x_denominators: sample of a treatment group
+    :type  x_denominators: pd.Series or list (array-like), or simply 1 as an int/float if a non-derived KPI
+    :param y_denominators: sample of a control group
+    :type  y_denominators: pd.Series or list (array-like), or simply 1 as an int/float if a non-derived KPI
+    :param percentiles: list of percentile values to compute
+    :type  percentiles: list
+    :param relative: If relative==True, then the values will be returned
+                     as distances below and above the mean, respectively, rather than the
+                     absolute values. In this case, the interval is mean-ret_val[0] to
+                     mean+ret_val[1]. This is more useful in many situations because it
+                     corresponds with the sem() and std() functions.
+    :type relative: bool
+
+    :return: percentiles and corresponding values
+    :rtype: dict with multiple entries:
+
+              * **c_i**:        confidence_interval
+              * **mean1**:      :math:`\\frac{mean(x_{numerators})}{mean(x_{denominators})}`
+              * **mean2**:      :math:`\\frac{mean(y_{numerators})}{mean(y_{denominators})}`
+              * **n1**:         sample size of **x**, after discarding NaNs
+              * **n2**:         sample size of **y**, after discarding NaNs
+              * **var1**:       :math:`var\\left(\\frac{x_{numerators}[i] - mean1 \\cdot x_{denominators}[i]}{mean(x_{denominators})}\\right)`
+              * **var2**:       :math:`var\\left(\\frac{y_{numerators}[i] - mean2 \\cdot y_{denominators}[i]}{mean(y_{denominators})}\\right)`
+    """
+
+    assert isinstance(x_numerators, np.ndarray)
+    assert isinstance(x_denominators, np.ndarray)
+    assert isinstance(y_numerators, np.ndarray)
+    assert isinstance(y_denominators, np.ndarray)
+    assert x_numerators.dtype == 'float'
+    assert x_denominators.dtype == 'float'
+    assert y_numerators.dtype == 'float'
+    assert y_denominators.dtype == 'float'
+
+    # perform the ratio
+    _x_ratio = x_numerators / x_denominators
+    _y_ratio = y_numerators / y_denominators
+
+    # find the nans (including 0/0)
+    x_nans = np.isnan(_x_ratio)
+    y_nans = np.isnan(_y_ratio)
+
+    # remove the nans
+    _x_ratio = _x_ratio[~x_nans]
+    _y_ratio = _y_ratio[~y_nans]
+    x_numerators = x_numerators[~x_nans]
+    y_numerators = y_numerators[~y_nans]
+    x_denominators = x_denominators[~x_nans]
+    y_denominators = y_denominators[~y_nans]
+
+    # check they're all the same length
+    assert 1 == len(set( map(len, [_x_ratio,x_numerators,x_denominators])))
+    assert 1 == len(set( map(len, [_y_ratio,y_numerators,y_denominators])))
+
+    # Make sure all NaNs have been removed
+    for one_array in [_x_ratio, _y_ratio, x_numerators, y_numerators, x_denominators, y_denominators]:
+        assert not np.isnan(one_array).any()
 
     # Calculate statistics
-    mean1 = np.mean(_x)
-    mean2 = np.mean(_y)
-    std1 = np.std(_x)
-    std2 = np.std(_y)
-    n1 = len(_x)
-    n2 = len(_y)
+    mean1 = np.mean(x_numerators) / np.mean(x_denominators)
+    mean2 = np.mean(y_numerators) / np.mean(y_denominators)
+    errors_1 = x_numerators - (x_denominators * mean1)
+    errors_2 = y_numerators - (y_denominators * mean2)
+    std1 = np.std(errors_1 / np.mean(x_denominators), ddof=1)
+    std2 = np.std(errors_2 / np.mean(y_denominators), ddof=1)
+    n1 = len(_x_ratio)
+    n2 = len(_y_ratio)
+
+    #print('\n',mean1-mean2,'\n')
 
     # Push calculation to normal difference function
-    return normal_difference(mean1=mean1, std1=std1, n1=n1,
+    c_i = normal_difference(mean1=mean1, std1=std1, n1=n1,
                              mean2=mean2, std2=std2, n2=n2,
                              percentiles=percentiles, relative=relative)
+    p_value = compute_p_value(mean1, std1, n1, mean2, std2, n2)
+    return  {   'c_i':  c_i
+            ,   'mean1': mean1
+            ,   'mean2': mean2
+            ,   'n1': n1
+            ,   'n2': n2
+            ,   'var1': np.var(errors_1 / np.mean(x_denominators), ddof=1)
+            ,   'var2': np.var(errors_2 / np.mean(y_denominators), ddof=1)
+            ,   'p_value': p_value
+            }
 
 
 def normal_difference(mean1, std1, n1, mean2, std2, n2, percentiles=[2.5, 97.5], relative=False):
@@ -461,6 +621,9 @@ def compute_p_value(mean1, std1, n1, mean2, std2, n2):
     std       = pooled_std(std1, n1, std2, n2)
     st_error  = std * np.sqrt(1. / n1 + 1. / n2)
     d_free    = n1 + n2 - 2
-    t         = mean_diff / st_error
+    if st_error == 0.0:
+        t         = np.sign(mean_diff) * 1000
+    else:
+        t         = mean_diff / st_error
     p         = stats.t.cdf(-abs(t), df=d_free) * 2
     return p

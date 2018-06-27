@@ -98,16 +98,16 @@ class Experiment(object):
         # get control and treatment values for the kpi
         control          = test.variants.get_variant(data_for_analysis, test.variants.control_name)[test.kpi.name]
         logger.info("Control group size: {}".format(control.shape[0]))
-        control_weight   = self._get_weights(data_for_analysis, test, test.variants.control_name)
-        control_data     = control * control_weight
+        control_denominators   = self._get_denominators(data_for_analysis, test, test.variants.control_name)
+        control_numerators   = control * control_denominators
 
         treatment        = test.variants.get_variant(data_for_analysis, test.variants.treatment_name)[test.kpi.name]
         logger.info("Treatment group size: {}".format(treatment.shape[0]))
-        treatment_weight = self._get_weights(data_for_analysis, test, test.variants.treatment_name)
-        treatment_data   = treatment * treatment_weight
+        treatment_denominators = self._get_denominators(data_for_analysis, test, test.variants.treatment_name)
+        treatment_numerators   = treatment * treatment_denominators
 
         # run the test method
-        test_statistics = worker(x=treatment_data, y=control_data)
+        test_statistics = worker(x=treatment_numerators, y=control_numerators, x_denominators = treatment_denominators, y_denominators = control_denominators)
         test_result.result = test_statistics
 
         # remove data from the result test metadata
@@ -260,28 +260,12 @@ class Experiment(object):
         return True
 
 
-    def _get_weights(self, data, test, variant_name):
-        """ Perform the re-weighting trick on the selected derived kpi
-        See http://expan.readthedocs.io/en/latest/glossary.html#per-entity-ratio-vs-ratio-of-totals
-        
-        :param data: data subset by derived kpi and variant, for which the re-weighting trick should be done
-        :type  data: pd.DataFrame
-        :param test: statistical test, provides the derived kpi denominator for the re-weighting trick
-        :type  test: StatisticalTest
-        :param variant_name: variant name for data subset by kpi and variant
-        :type  variant_name: str
-        
-        :return returns re-weighted kpi values of type pd.Series
-        :rtype: pd.Series
-        """
+    def _get_denominators(self, data, test, variant_name):
         if type(test.kpi) is not DerivedKPI:
             return 1.0
 
         x = test.variants.get_variant(data, variant_name)[test.kpi.denominator]
-        number_of_zeros_and_nans     = sum(x == 0) + np.isnan(x).sum()
-        number_of_non_zeros_and_nans = len(x) - number_of_zeros_and_nans
-        return number_of_non_zeros_and_nans / np.nansum(x) * x
-
+        return x
 
     def _quantile_filtering(self, data, kpis, percentile, threshold_type):
         """ Make the filtering based on the given quantile level. 
