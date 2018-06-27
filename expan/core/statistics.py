@@ -18,7 +18,9 @@ def _delta_mean(x, y):
 
 def make_delta(assume_normal=True, alpha=0.05, min_observations=20, nruns=10000, relative=False):
     """ A closure to the delta function. """
-    return lambda x, y, x_denominators=1, y_denominators=1: delta(x, y, x_denominators, y_denominators, assume_normal, alpha, min_observations, nruns, relative)
+    def go(x, y, x_denominators=1, y_denominators=1):
+        return delta(x, y, x_denominators, y_denominators, assume_normal, alpha, min_observations, nruns, relative)
+    return go
 
 
 def delta(x, y, x_denominators=1, y_denominators=1, assume_normal=True, alpha=0.05, min_observations=20, nruns=10000, relative=False):
