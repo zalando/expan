@@ -268,6 +268,12 @@ class Experiment(object):
         return x
 
     def _quantile_filtering(self, data, kpis, percentile, threshold_type):
+        # initialize 'flags' to a boolean Series (false) with the correct index.
+        # By using the correct index, we remove the annoying warnings.
+        flags = data.index.to_series() != data.index.to_series()
+
+        from sys import float_info
+
         """ Make the filtering based on the given quantile level. 
         Filtering is performed for each kpi independently.
         
@@ -282,8 +288,10 @@ class Experiment(object):
         :rtype: pd.Series
         """
         method_table = {'upper': lambda x: x > threshold, 'lower': lambda x: x <= threshold}
-        flags = pd.Series(data=[False]*len(data))
+        na_replacement={'upper': -float_info.max        , 'lower':  float_info.max}
+
+
         for column in data[kpis].columns:
-            threshold = np.percentile(data[column], percentile)
+            threshold = np.percentile(data[column].fillna(na_replacement[threshold_type]), percentile)
             flags = flags | data[column].apply(method_table[threshold_type])
         return flags
