@@ -1,3 +1,4 @@
+from __future__ import division
 from expan.core.experiment import Experiment
 import pandas as pd
 import numpy as np
