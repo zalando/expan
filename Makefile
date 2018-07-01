@@ -63,7 +63,7 @@ coverage:
 docs:
 	rm -f docs/expan.rst
 	rm -f docs/modules.rst
-	github_changelog_generator -u zalando -p expan
+	github_changelog_generator -u zalando -p expan --future-release `git describe --tags`
 	pandoc --from=markdown --to=rst --output=CHANGELOG.rst CHANGELOG.md
 	sphinx-apidoc -o docs/ expan
 	$(MAKE) -C docs clean
