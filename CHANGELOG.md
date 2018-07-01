@@ -1,5 +1,13 @@
 # Change Log
 
+## [v1.3.1](https://github.com/zalando/expan/tree/v1.3.1) (2018-07-01)
+[Full Changelog](https://github.com/zalando/expan/compare/v1.2.5...v1.3.1)
+
+**Merged pull requests:**
+
+- Ensure that outlier detection works if there is NaN in the data [\#225](https://github.com/zalando/expan/pull/225) ([aaron-mcdaid-zalando](https://github.com/aaron-mcdaid-zalando))
+- More powerful derived kpis [\#222](https://github.com/zalando/expan/pull/222) ([aaron-mcdaid-zalando](https://github.com/aaron-mcdaid-zalando))
+
 ## [v1.2.5](https://github.com/zalando/expan/tree/v1.2.5) (2018-06-22)
 [Full Changelog](https://github.com/zalando/expan/compare/v1.2.4...v1.2.5)
 
