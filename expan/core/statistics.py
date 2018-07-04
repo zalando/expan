@@ -655,7 +655,7 @@ def chi_square(x, y, min_counts=5):
 
     observed_counts = pd.DataFrame([treat_counts, control_counts]).fillna(0)
 
-    # Ensure at least a frequency of 5 at every location in observed_ct, otherwise drop the category
+    # Ensure at least a frequency of 5 at every location in observed_counts, otherwise drop the category
     # see http://docs.scipy.org/doc/scipy-0.16.1/reference/generated/scipy.stats.chisquare.html
 
     observed_freqs = observed_counts[observed_counts >= min_counts].dropna(axis=1)
