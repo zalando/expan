@@ -660,7 +660,7 @@ def chi_square(x, y, min_counts=5):
 
     observed_freqs = observed_counts[observed_counts >= min_counts].dropna(axis=1)
 
-    # Calculate expected counts for chi-square homogeneity test
+    # Calculate expected counts for the chi-square test
     # expected_freqs = group_totals*category_totals/total_count
 
     total_count = observed_freqs.sum().sum()
