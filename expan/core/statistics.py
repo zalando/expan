@@ -549,7 +549,7 @@ def compute_statistical_power(mean1, std1, n1, mean2, std2, n2, z_1_minus_alpha)
     """
 
     # First, check we have enough data for a t-test:
-    if min(n1,n2) < 1 or max(n1,n2) < 2:
+    if min(n1, n2) < 1 or max(n1, n2) < 2:
         return -1
 
     effect_size = mean1 - mean2
@@ -614,16 +614,72 @@ def compute_p_value(mean1, std1, n1, mean2, std2, n2):
     """
 
     # First, check if we have enough data to do a t-test
-    if min(n1,n2) < 1 or max(n1,n2) < 2:
+    if min(n1, n2) < 1 or max(n1, n2) < 2:
         return np.nan
 
     mean_diff = mean1 - mean2
-    std       = pooled_std(std1, n1, std2, n2)
-    st_error  = std * np.sqrt(1. / n1 + 1. / n2)
-    d_free    = n1 + n2 - 2
+    std = pooled_std(std1, n1, std2, n2)
+    st_error = std * np.sqrt(1. / n1 + 1. / n2)
+    d_free = n1 + n2 - 2
     if st_error == 0.0:
-        t         = np.sign(mean_diff) * 1000
+        t = np.sign(mean_diff) * 1000
     else:
-        t         = mean_diff / st_error
-    p         = stats.t.cdf(-abs(t), df=d_free) * 2
+        t = mean_diff / st_error
+    p = stats.t.cdf(-abs(t), df=d_free) * 2
     return p
+
+
+def chi_square(x, y, min_counts=5):
+    """ Computes chi-square p-value and chi-square test statistics on samples x and y.
+    
+    :param x: sample of the treatment group
+    :type  x: pd.Series or array-like
+    :param y: sample of the control group
+    :type  x: pd.Series or array-like
+    :param min_counts: minimum number of observed and expected frequencies (should be at least 5)
+    :type  min_counts: int
+    :return: p-value, chi_square_val
+    :rtype: float, float
+    """
+    if x is None or y is None:
+        raise ValueError("Control or treatment samples are empty.")
+
+    if not len(x) or not len(y):
+        return np.nan
+
+    _x = pd.Series(x)
+    _y = pd.Series(y)
+
+    treat_counts   = _x.value_counts()
+    control_counts = _y.value_counts()
+
+    observed_counts = pd.DataFrame([treat_counts, control_counts]).fillna(0)
+
+    # Ensure at least a frequency of 5 at every location in observed_ct, otherwise drop the category
+    # see http://docs.scipy.org/doc/scipy-0.16.1/reference/generated/scipy.stats.chisquare.html
+
+    observed_freqs = observed_counts[observed_counts >= min_counts].dropna(axis=1)
+
+    # Calculate expected counts for chi-square homogeneity test
+    # expected_freqs = group_totals*category_totals/total_count
+
+    total_count = observed_freqs.sum().sum()
+    category_totals = observed_freqs.sum(axis=0)
+    expected_freqs = np.outer(category_totals, observed_freqs.sum(axis=1) / total_count).T
+
+    # The actual degrees of freedom for the test are dof=(num_categories-1)
+    # however the chi-square() function assumes dof=k-1, with
+    # k = num_variants*num_categories
+    # see http://docs.scipy.org/doc/scipy-0.16.1/reference/generated/scipy.stats.chisquare.html
+    # Therefore, we have to correct using
+    # ddof=(2*num_categories-1) - num_categories-1
+    # Calculate the chi-square statistic and p-value
+    es = expected_freqs.shape
+
+    delta_dof = (es[0] * es[1] - 1) - (es[0] - 1) * (es[1] - 1)
+
+    chi_square_val, p_val = stats.chisquare(f_obs=observed_freqs,
+                                            f_exp=expected_freqs,
+                                            ddof=delta_dof,
+                                            axis=None)
+    return p_val, chi_square_val

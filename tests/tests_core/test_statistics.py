@@ -306,5 +306,63 @@ class PValueTestCases(StatisticsTestCase):
         self.assertAlmostEqual(p, expected_p, float_precision)
 
 
+class ChiSquareTestCases(StatisticsTestCase):
+    def test_chi_square(self):
+        a = ['A'] * 16 + ['B'] * 18 + ['C'] * 16 + ['D'] * 14 + ['E'] * 12 + ['F'] * 12
+        b = ['A'] * 16 + ['B'] * 16 + ['C'] * 16 + ['D'] * 16 + ['E'] * 16 + ['F'] * 8
+        self.assertAlmostEqual(0.89852623940266074, statx.chi_square(a, b)[0])
+
+    def test__chi_square__computation_different_data_from_statistics_book(self):
+        """ Check if p-value is correct for test data from statistics book Fahrmeir et al. (2007) pp. 463. """
+        a = ['nein'] * 139 + ['gut'] * 348 + ['mittel'] * 213
+        b = ['nein'] * 135 + ['gut'] * 46 + ['mittel'] * 119
+        p, chisq = statx.chi_square(a, b)
+        self.assertAlmostEqual(116.851, chisq, delta=0.001)
+        self.assertAlmostEqual(0.0, p, delta=0.00000000001)
+
+    def test__chi_square__computation_different_data_from_open_statistics_book(self):
+        """ Check if p-value is correct for test data from open statistics book 3rd ed pp. 299. 
+            (https://www.openintro.org/stat/textbook.php) """
+        a = ['current'] * 3511 + ['test1'] * 1749 + ['test2'] * 1818
+        b = ['current'] * 1489 + ['test1'] * 751 + ['test2'] * 682
+        p, chisq = statx.chi_square(a, b)
+        self.assertAlmostEqual(6.120, chisq, delta=0.001)
+        self.assertAlmostEqual(0.0469, p, delta=0.0001)
+
+    def test__chi_square__computation_one_bin_not_present(self):
+        """ Check if p-value is correct for test data from pandas manual page."""
+        a = ['A'] * 16 + ['B'] * 18 + ['C'] * 16 + ['D'] * 14 + ['E'] * 12 + ['F'] * 12
+        b = ['A'] * 16 + ['B'] * 16 + ['C'] * 16 + ['D'] * 16 + ['E'] * 16 + ['F'] * 8
+        # a is shortened
+        self.assertAlmostEqual(0.94879980715092971, statx.chi_square(a[0:-12], b)[0])
+        # b is shortened
+        self.assertAlmostEqual(0.94879980715092971, statx.chi_square(a, b[0:-8])[0])
+
+    def test__chi_square__computation_symmetric(self):
+        """ Check if p-value is roughly symmetric. """
+        a = ['A'] * 16 + ['B'] * 18 + ['C'] * 16 + ['D'] * 14 + ['E'] * 12 + ['F'] * 12
+        b = ['A'] * 16 + ['B'] * 16 + ['C'] * 16 + ['D'] * 16 + ['E'] * 16 + ['F'] * 8
+        # a is shortened
+        self.assertAlmostEqual(statx.chi_square(a, b), statx.chi_square(b, a))
+        # b is shortened
+        aa = statx.chi_square(b[0:(-8)], a)
+        bb = statx.chi_square(a, b[0:(-8)])
+        self.assertAlmostEqual(aa[0], bb[0])  # p-value
+        self.assertAlmostEqual(aa[1], bb[1])  # chi-square value
+
+    def test__chi_square__not_providing_data_fails(self):
+        """ Value error raised when not providing data. """
+        # Check if error is raised for None data
+        with self.assertRaises(ValueError):
+            statx.chi_square(self.samples.temperature, None)
+        # Check if error is raised for None data
+        with self.assertRaises(ValueError):
+            statx.chi_square(None, self.samples.temperature)
+
+    def test__chi_square__computation_same_data(self):
+        """ Check if p-value is 1.0 for same data entered twice. """
+        self.assertEqual(1.0, statx.chi_square(self.samples.temperature, self.samples.temperature)[0])
+
 if __name__ == '__main__':
     unittest.main()
+
