@@ -119,3 +119,27 @@ With multiple correction of :math:`25` experiments your adjusted percentiles cha
 
 We understand that the Bonferroni correction may be very conservative and the correction comes at the cost of increasing the probability of producing type II errors (false negatives),
 that's why we plan to make updates for supporting more clever correction methods like Benjamini-Hochberg or Benjamini-Krieger-Yekutieli, which will come soon.
+
+Chi-square test (Goodness of Fit Test).
+------------------------------------
+In ExpAn we have the possibility to conduct chi-square goodness of fit test.
+The test is applied when you have one categorical variable from a single population.
+It is used to determine whether sample data are consistent with a hypothesized distribution.
+
+This test, in our case, is used to check the variant split based on the claimed percentage.
+For example, we want 50% of the users to be exposed to control variant (for example, green checkout button)
+and 50% of the users to be exposed to treatment variant (for example, yellow checkout button).
+We conduct a random assignment of variants and would like to check whether the random assignment did the right job and
+we've got the correct split of the variants. We would also like to know whether the variant split consistent with the specified
+percentage after the outlier filtering as well.
+
+The Ho is: the data are consistent with a specified distribution (or the variant split corresponds to the expected percentage)
+The Ha is: the data are not consistent with a specified distribution (or the variant split do not correspond to the expected percentage)
+Typically, the null hypothesis (Ho) specifies the proportion of observations at each level of the categorical variable.
+The alternative hypothesis (Ha) is that at least one of the specified proportions is not true.
+
+We use 0.05 significance level as the default one.
+We compute p-value - the probability of observing a sample statistics as extreme as the test statistic - and compare it to the significance level.
+We reject the null hypothesis when the p-value is less than the significance level.
+
+We can use this test to check the correct split for the subgroups as well.
