@@ -43,12 +43,16 @@ To make a release and **deploy to PyPI**, please follow these steps (we highly s
 
 The flow would then look like follows:
 
-1. :code:`bumpversion (patch|minor)`
-2. :code:`make docs`
-3. :code:`git add CHANGELOG.*`
-4. :code:`git commit -m "update changelog"`
-5. :code:`git push`
-6. :code:`git push --tags`
+1. :code:`bumpversion patch` or :code:`bumpversion minor`
+2. :code:`git describe --tags`, and note this tag name. We will need to edit this tag later.
+3. :code:`make docs`, which will extend the changelog by reading information from github.com/zalando/expan .
+4. :code:`git add CHANGELOG.*`
+5. :code:`git commit --amend --no-edit`
+6. :code:`git show`. Carefully review this commit before proceeding. Ensure the changelog is updated with the expected text, in particular a fully up-to-date version number.
+7. :code:`git tag -d {TAGNAME}`, where :code:`{TAGNAME}` is the tag name from step 2.
+8. :code:`git tag    {TAGNAME}` to recreate the tag in the correct place.
+9. :code:`git push`
+10. :code:`git push --tags`
 
 You can then check if the triggered Travis CI job is tagged (the name should be eg. 'v1.2.3' instead of 'master').
 
