@@ -267,6 +267,7 @@ class Experiment(object):
         x = test.variants.get_variant(data, variant_name)[test.kpi.denominator]
         return x
 
+
     def _quantile_filtering(self, data, kpis, percentile, threshold_type):
         # initialize 'flags' to a boolean Series (false) with the correct index.
         # By using the correct index, we remove the annoying warnings.
@@ -287,11 +288,59 @@ class Experiment(object):
         :return: boolean values indicating whether the row should be filtered
         :rtype: pd.Series
         """
-        method_table = {'upper': lambda x: x > threshold, 'lower': lambda x: x <= threshold}
-        na_replacement={'upper': -float_info.max        , 'lower':  float_info.max}
-
+        method_table   = {'upper': lambda x: x > threshold, 'lower': lambda x: x <= threshold}
+        na_replacement = {'upper': -float_info.max,         'lower':  float_info.max}
 
         for column in data[kpis].columns:
             threshold = np.percentile(data[column].fillna(na_replacement[threshold_type]), percentile)
             flags = flags | data[column].apply(method_table[threshold_type])
         return flags
+
+
+    def variant_split_is_consistent_with_expected_distribution(self, variant_column, weights, min_counts=5, alpha=0.05):
+        """ Tests the consistency of variant split with the hypothesized distribution.
+        
+        :param variant_column: variant column from the input data frame
+        :param weights: list of weights/split percentage per each variant
+        :param min_counts: minimum number of observed and expected frequencies (should be at least 5), see 
+                            http://docs.scipy.org/doc/scipy-0.16.1/reference/generated/scipy.stats.chisquare.html
+        :param alpha: significance level, 0.05 by default
+        :return: True(if split is consistent with the given split) or
+                 False(if split is not consistent with the given split)
+        :rtype:  Boolean, float, float
+        """
+        if not variant_column or len(variant_column) == 0:
+            logger.warning("Variant split check was cancelled since input variant column is empty or doesn't exist")
+            return None
+        if len(weights) <= 1:
+            logger.warning("Please provide weight for more than pne variant. Variant split check is unsuccessful.")
+            return None
+
+        # Count number of observations per each variant
+        variant_column = pd.Series(variant_column).fillna(0)
+        variants_counts = variant_column.value_counts()
+        observed_counts = pd.DataFrame(variants_counts, columns=['observed']).fillna(0)
+        # Ensure at least a frequency of 5 at every location in observed_counts, otherwise drop the category
+        # see http://docs.scipy.org/doc/scipy-0.16.1/reference/generated/scipy.stats.chisquare.html
+        observed_freqs = observed_counts[observed_counts >= min_counts].dropna(axis=0)
+
+        # If all categories were dropped we can't conduct the test.
+        if observed_freqs.empty:
+            logger.warning("All variants have frequencies less than 5. Chi-square test is not applicable.")
+            return None
+
+        observed_freqs.index.name = 'value'
+
+        # Calculate expected counts given corresponding weights
+        total_count = observed_freqs.sum().sum()
+        expected_freqs = pd.DataFrame(weights)
+
+        # Join all values in one data frame, so that each observed category counts correspond to the correct expected
+        # count defined by the corresponding weight or split percentage.
+        all_freqs = expected_freqs.join(observed_freqs, on='value')
+        all_freqs.loc[:, 'weight'] *= total_count
+
+        # Compute chi-square and p-value statistics
+        chi_square_val, p_val = statx.compute_chi_square(all_freqs['observed'], all_freqs['weight'])
+
+        return p_val >= alpha, p_val, chi_square_val

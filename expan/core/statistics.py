@@ -629,57 +629,18 @@ def compute_p_value(mean1, std1, n1, mean2, std2, n2):
     return p
 
 
-def chi_square(x, y, min_counts=5):
-    """ Computes chi-square p-value and chi-square test statistics on samples x and y.
+def compute_chi_square(observed_freqs, expected_freqs, ddof=0):
+    """ Compute chi-square statistics and p-values given observed and expected frequencies and degrees of freedom. 
+
+    :param observed_freqs: observed frequencies 
+    :type  observed_freqs: pd.Series or array-like
+    :param expected_freqs: expected frequencies
+    :type  expected_freqs: pd.Series or array-like
+    :param ddof: delta degrees of freedom, 0 by default
+    :type  ddof: int
     
-    :param x: sample of the treatment group
-    :type  x: pd.Series or array-like
-    :param y: sample of the control group
-    :type  x: pd.Series or array-like
-    :param min_counts: minimum number of observed and expected frequencies (should be at least 5)
-    :type  min_counts: int
-    :return: p-value, chi_square_val
-    :rtype: float, float
+    :return: chi-square statistics and p-value
+    :rtype:  float, float
     """
-    if x is None or y is None:
-        raise ValueError("Control or treatment samples are empty.")
-
-    if not len(x) or not len(y):
-        return np.nan
-
-    _x = pd.Series(x)
-    _y = pd.Series(y)
-
-    treat_counts   = _x.value_counts()
-    control_counts = _y.value_counts()
-
-    observed_counts = pd.DataFrame([treat_counts, control_counts]).fillna(0)
-
-    # Ensure at least a frequency of 5 at every location in observed_counts, otherwise drop the category
-    # see http://docs.scipy.org/doc/scipy-0.16.1/reference/generated/scipy.stats.chisquare.html
-
-    observed_freqs = observed_counts[observed_counts >= min_counts].dropna(axis=1)
-
-    # Calculate expected counts for the chi-square test
-    # expected_freqs = group_totals*category_totals/total_count
-
-    total_count = observed_freqs.sum().sum()
-    category_totals = observed_freqs.sum(axis=0)
-    expected_freqs = np.outer(category_totals, observed_freqs.sum(axis=1) / total_count).T
-
-    # The actual degrees of freedom for the test are dof=(num_categories-1)
-    # however the chi-square() function assumes dof=k-1, with
-    # k = num_variants*num_categories
-    # see http://docs.scipy.org/doc/scipy-0.16.1/reference/generated/scipy.stats.chisquare.html
-    # Therefore, we have to correct using
-    # ddof=(2*num_categories-1) - num_categories-1
-    # Calculate the chi-square statistic and p-value
-    es = expected_freqs.shape
-
-    delta_dof = (es[0] * es[1] - 1) - (es[0] - 1) * (es[1] - 1)
-
-    chi_square_val, p_val = stats.chisquare(f_obs=observed_freqs,
-                                            f_exp=expected_freqs,
-                                            ddof=delta_dof,
-                                            axis=None)
-    return p_val, chi_square_val
+    chi_square_val, p_val = stats.chisquare(f_obs=observed_freqs, f_exp=expected_freqs, ddof=ddof, axis=None)
+    return chi_square_val, p_val
