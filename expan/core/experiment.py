@@ -2,7 +2,6 @@ import logging
 import warnings
 
 import numpy as np
-import pandas as pd
 import copy
 
 import expan.core.early_stopping as es
@@ -311,29 +310,25 @@ class Experiment(object):
         :rtype:  Boolean, float, float
         """
         if not variant_column:
-            logger.warning("Variant split check was cancelled since input variant column is empty or doesn't exist.")
-            return None
+            raise ValueError("Variant split check was cancelled since input variant column is empty or doesn't exist.")
         if not weights:
-            logger.warning("Variant split check was cancelled since input weights are empty or doesn't exist.")
-            return None
+            raise ValueError("Variant split check was cancelled since input weights are empty or doesn't exist.")
         if len(weights) <= 1 or len(variant_column) <= 1:
-            logger.warning("Variant split check was cancelled since input weights or the number if categories "
-                           "is less than 2.")
-            return None
+            raise ValueError("Variant split check was cancelled since input weights or the number if categories "
+                             "is less than 2.")
 
         # Count number of observations per each variant
-        variant_column = pd.Series(variant_column).fillna(0)
+        variant_column = pd.Series(variant_column).dropna(axis=0)
         variants_counts = variant_column.value_counts()
-        observed_counts = pd.DataFrame(variants_counts, columns=['observed']).fillna(0)
+        observed_counts = pd.DataFrame(variants_counts, columns=['observed'])
         # Ensure at least a frequency of 5 at every location in observed_counts, otherwise drop the category
         # see http://docs.scipy.org/doc/scipy-0.16.1/reference/generated/scipy.stats.chisquare.html
-        observed_freqs = observed_counts[observed_counts >= min_counts].dropna(axis=0)
+        observed_freqs = observed_counts[observed_counts >= min_counts]
 
         # If all categories were dropped or if there are less than 2 categories left we can't conduct the test.
         if observed_freqs.empty or len(observed_freqs) < 2:
-            logger.warning("Category frequencies are empty or number of categories is less than 2. "
-                           "Chi-square test is not applicable.")
-            return None
+            raise ValueError("Category frequencies are empty or number of categories is less than 2. "
+                             "Chi-square test is not applicable.")
 
         observed_freqs.index.name = 'value'
 
@@ -348,8 +343,7 @@ class Experiment(object):
 
         # If after dropping there are less then two categories we can't conduct the test.
         if len(all_freqs) <= 1:
-            logger.warning("Provide weights for at least two categories. Chi-square test is not applicable.")
-            return None
+            raise ValueError("Provide weights for at least two categories. Chi-square test is not applicable.")
 
         # Compute chi-square and p-value statistics
         chi_square_val, p_val = statx.chi_square(all_freqs['observed'], all_freqs['weight'])

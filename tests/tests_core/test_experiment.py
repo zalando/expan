@@ -388,42 +388,50 @@ class OutlierFilteringTestCases(ExperimentTestCase):
         self.assertAlmostEqual(result[1], 1.0)
         self.assertEqual(result[2], 0.0)
 
+    def test_variant_split_is_consistent_with_expected_distribution_NaN_data(self):
+        exp = self.getExperiment()
+        data = ['A'] * 17 + [np.nan] * 17
+        weights = [{'value': 'A', 'weight': 0.5},
+                   {'value': 'B', 'weight': 0.5}]
+        with self.assertRaises(ValueError):
+            exp.variant_split_is_consistent_with_expected_distribution(data, weights)
+
     def test_variant_split_is_consistent_with_expected_distribution_counts_less_5(self):
         exp = self.getExperiment()
         data = ['A'] * 17 + ['B'] * 2 + ['C'] * 3
         weights = [{'value': 'A', 'weight': 0.33},
                    {'value': 'B', 'weight': 0.33},
                    {'value': 'B', 'weight': 0.33}]
-        result = exp.variant_split_is_consistent_with_expected_distribution(data, weights)
-        self.assertEqual(result, None)
+        with self.assertRaises(ValueError):
+            exp.variant_split_is_consistent_with_expected_distribution(data, weights)
 
     def test_variant_split_is_consistent_with_expected_distribution_one_category(self):
         exp = self.getExperiment()
         data = ['A'] * 16
         weights = [{'value': 'A', 'weight': 0.5}]
-        result = exp.variant_split_is_consistent_with_expected_distribution(data, weights)
-        self.assertEqual(result, None)
+        with self.assertRaises(ValueError):
+            exp.variant_split_is_consistent_with_expected_distribution(data, weights)
 
     def test_variant_split_is_consistent_with_expected_distribution_empty_weights(self):
         exp = self.getExperiment()
         data = ['A'] * 16
         weights = []
-        result = exp.variant_split_is_consistent_with_expected_distribution(data, weights)
-        self.assertEqual(result, None)
+        with self.assertRaises(ValueError):
+            exp.variant_split_is_consistent_with_expected_distribution(data, weights)
 
     def test_variant_split_is_consistent_with_expected_distribution_no_categories(self):
         exp = self.getExperiment()
         data = []
         weights = [{'value': 'A', 'weight': 0.5}]
-        result = exp.variant_split_is_consistent_with_expected_distribution(data, weights)
-        self.assertEqual(result, None)
+        with self.assertRaises(ValueError):
+            exp.variant_split_is_consistent_with_expected_distribution(data, weights)
 
     def test_variant_split_is_consistent_with_expected_distribution_insufficient_weights(self):
         exp = self.getExperiment()
         data = ['A'] * 16 + ['B'] * 15
         weights = [{'value': 'A', 'weight': 0.5}]
-        result = exp.variant_split_is_consistent_with_expected_distribution(data, weights)
-        self.assertEqual(result, None)
+        with self.assertRaises(ValueError):
+            exp.variant_split_is_consistent_with_expected_distribution(data, weights)
 
 
 class HelperMethodsTestCases(ExperimentTestCase):
