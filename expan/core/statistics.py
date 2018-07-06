@@ -629,7 +629,7 @@ def compute_p_value(mean1, std1, n1, mean2, std2, n2):
     return p
 
 
-def compute_chi_square(observed_freqs, expected_freqs, ddof=0):
+def chi_square(observed_freqs, expected_freqs, ddof=0):
     """ Compute chi-square statistics and p-values given observed and expected frequencies and degrees of freedom. 
 
     :param observed_freqs: observed frequencies 

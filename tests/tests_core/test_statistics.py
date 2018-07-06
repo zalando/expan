@@ -305,6 +305,6 @@ class PValueTestCases(StatisticsTestCase):
         p = statx.compute_p_value(mean1, sigma, n1, mean2, sigma, n2)
         self.assertAlmostEqual(p, expected_p, float_precision)
 
+
 if __name__ == '__main__':
     unittest.main()
-
