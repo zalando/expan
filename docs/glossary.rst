@@ -118,7 +118,7 @@ There are three options for the correction method:
 
 * **CorrectionMethod.BONFERRONI**- strict `Bonferroni correction <https://en.wikipedia.org/wiki/Bonferroni_correction>`_ which controls the `family-wise error rate <https://en.wikipedia.org/wiki/Family-wise_error_rate>`_.
 
-* **CorrectionMethod.BH** - correction by Benjamini-Hochberg: less string and more powerful correction method which decreases the `false discovery rate <https://en.wikipedia.org/wiki/False_discovery_rate>`_.
+* **CorrectionMethod.BH** - correction by Benjamini-Hochberg: less strict and more powerful correction method which decreases the `false discovery rate <https://en.wikipedia.org/wiki/False_discovery_rate>`_.
 
 * **CorrectionMethod.NONE** - no correction is used. Even this option is available in ExpAn we strongly recommend to do not neglect the importance of correction for multiple testing and always correct for multiple testing using Benjamini-Hochberg correction, as a default one (as currently set up in ExpAn).
 
