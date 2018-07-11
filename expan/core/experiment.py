@@ -300,8 +300,8 @@ class Experiment(object):
         """ Tests the consistency of variant split with the hypothesized distribution.
         
         :param variant_column: variant column from the input data frame
-        :param weights: list of dicts with weights/split percentage per each variant 
-                        ([{'value':<variant>,'weight':<weight>}, ...])
+        :param weights: dict with variant names as keys, weights as values
+                        ({<variant_name>:<weight>, ...}
         :param min_counts: minimum number of observed and expected frequencies (should be at least 5), see 
                             http://docs.scipy.org/doc/scipy-0.16.1/reference/generated/scipy.stats.chisquare.html
         :param alpha: significance level, 0.05 by default
@@ -330,16 +330,15 @@ class Experiment(object):
             raise ValueError("Category frequencies are empty or number of categories is less than 2. "
                              "Chi-square test is not applicable.")
 
-        observed_freqs.index.name = 'value'
-
         # Calculate expected counts given corresponding weights
         total_count = observed_freqs.sum().sum()
-        expected_freqs = pd.DataFrame(weights)
+        expected_freqs = pd.DataFrame.from_dict(weights, orient='index')
+        expected_freqs.columns = ['weight']
+        expected_freqs *= total_count
 
         # Join all values in one data frame, so that each observed category count corresponds to the correct expected
         # count defined by the corresponding weight or split percentage.
-        all_freqs = expected_freqs.join(observed_freqs, on='value').dropna(axis=0)
-        all_freqs.loc[:, 'weight'] *= total_count
+        all_freqs = expected_freqs.join(observed_freqs).dropna(axis=0)
 
         # If after dropping there are less then two categories we can't conduct the test.
         if len(all_freqs) <= 1:
