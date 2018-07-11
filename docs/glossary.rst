@@ -113,9 +113,21 @@ With :math:`20` tests being considered, we have a :math:`64\%` chance of observi
 Methods for dealing with multiple testing frequently call for adjusting :math:`\alpha` in some way, so that the probability of observing at least one significant result due to chance
 remains below your desired significance level.
 
-ExpAn allows you to correct :math:`\alpha` by setting ``multi_test_correction`` flag to True. It uses the simplest, but quite conservative Bonferroni correction method.
-The Bonferroni correction sets the significance cut-off at :math:`\frac{\alpha}{n}` where :math:`n` is the number of tests.
-With multiple correction of :math:`25` experiments your adjusted percentiles change from :math:`[2.5, 97.5]` to :math:`[0.1, 99.9]`.
+ExpAn allows you to control the correction method for your set of statistical tests (statistical test suite) yourself.
+There are three options for the correction method:
 
-We understand that the Bonferroni correction may be very conservative and the correction comes at the cost of increasing the probability of producing type II errors (false negatives),
-that's why we plan to make updates for supporting more clever correction methods like Benjamini-Hochberg or Benjamini-Krieger-Yekutieli, which will come soon.
+* **CorrectionMethod.BONFERRONI**- strict `Bonferroni correction <https://en.wikipedia.org/wiki/Bonferroni_correction>`_ which controls the `family-wise error rate <https://en.wikipedia.org/wiki/Family-wise_error_rate>`_.
+
+* **CorrectionMethod.BH** - correction by Benjamini-Hochberg: less strict and more powerful correction method which decreases the `false discovery rate <https://en.wikipedia.org/wiki/False_discovery_rate>`_.
+
+* **CorrectionMethod.NONE** - no correction is used. Even this option is available in ExpAn we strongly recommend to do not neglect the importance of correction for multiple testing and always correct for multiple testing using Benjamini-Hochberg correction, as a default one (as currently set up in ExpAn).
+
+Correction is performed per each statistical test suite, but you can use the correction methods separately
+by calling ``benjamini_hochberg(false_discovery_rate, original_p_values)`` or
+``bonferroni(false_positive_rate, original_p_values)`` providing corresponding p-values for the correction.
+
+Read more about each correction method:
+
+* `Benjamini-Hochberg <https://en.wikipedia.org/wiki/False_discovery_rate#Benjamini%E2%80%93Hochberg_procedure>`_ or original paper "Hochberg, Y., and A. C. Tamhane. Multiple Comparison Procedures."
+
+* `Bonferroni <https://en.wikipedia.org/wiki/Bonferroni_correction>`_
