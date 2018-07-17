@@ -13,7 +13,7 @@ It provides interface for running different analysis.
 Functionalities in this module includes **bootstrap**, **delta**,
 **pooled standard deviation**, **power analysis**, etc.
 
-``core.early_stpping`` provides early stopping algorithms.
+``core.early_stopping`` provides early stopping algorithms.
 It supports **group sequential**, **Bayes factor** and **Bayes precision**.
 
 ``core.correction`` implements methods for multiple testing correction.
@@ -24,7 +24,7 @@ You will need the data structure in this module to run an experiment.
 ``core.results`` holds structures of analysis result.
 This will be the running structure of an experiment.
 
-``core.utils`` contains supplied common functions used by other modules
+``core.util`` contains supplied common functions used by other modules
 such as **generate random data** and **drop nan values**, among many others.
 
 ``core.version`` constructs versioning of the package.
