@@ -1,3 +1,5 @@
+from __future__ import division # so that, under Python 2.*, integer division results in real numbers
+
 import unittest
 import warnings
 
@@ -7,7 +9,6 @@ from expan.core.results import CombinedTestStatistics
 from expan.core.statistical_test import *
 from expan.core.experiment import Experiment
 from expan.core.util import generate_random_data, find_value_by_key_with_condition
-from tests.tests_core.util import get_test_data_revenue_order
 
 
 class ExperimentTestCase(unittest.TestCase):
@@ -359,7 +360,7 @@ class OutlierFilteringTestCases(ExperimentTestCase):
         result = exp.chi_square_test_result_and_statistics(data, weights)
         self.assertEqual(result[0], True)
         self.assertAlmostEqual(result[1], 0.8087921354109989)
-        self.assertEqual(result[2], 1.6)
+        self.assertAlmostEqual(result[2], 1.6)
 
     def test_chi_square_test_result_and_statistics_different_weights(self):
         exp = self.getExperiment()
@@ -368,7 +369,7 @@ class OutlierFilteringTestCases(ExperimentTestCase):
         result = exp.chi_square_test_result_and_statistics(data, weights)
         self.assertEqual(result[0], False)
         self.assertAlmostEqual(result[1], 9.064563321754584e-07)
-        self.assertEqual(result[2], 33.585)
+        self.assertAlmostEqual(result[2], 33.585)
 
     def test_chi_square_test_result_and_statistics_2_categories(self):
         exp = self.getExperiment()
@@ -377,7 +378,7 @@ class OutlierFilteringTestCases(ExperimentTestCase):
         result = exp.chi_square_test_result_and_statistics(data, weights)
         self.assertEqual(result[0], True)
         self.assertAlmostEqual(result[1], 1.0)
-        self.assertEqual(result[2], 0.0)
+        self.assertAlmostEqual(result[2], 0.0)
 
     def test_chi_square_test_result_and_statistics_NaN_data(self):
         exp = self.getExperiment()
