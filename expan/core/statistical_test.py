@@ -3,6 +3,7 @@ from enum import Enum
 import pandas as pd
 from expan.core.util import JsonSerializable
 
+from copy import deepcopy
 
 class StatisticalTest(JsonSerializable):
     """ This class describes what has to be tested against what and represent a unit of statistical testing.
@@ -27,6 +28,22 @@ class StatisticalTest(JsonSerializable):
         self.kpi      = kpi
         self.features = features
         self.variants = variants
+    def __deepcopy__(self, forward_me_to_recursive_deepcopy):
+        # This provides a custom 'deepcopy' for this type. See
+        # https://docs.python.org/3/library/copy.html#copy.deepcopy for more.
+
+        # We should not 'deepcopy' the pandas Dataframe. The dataframe is
+        # essentially immutable for the purposes of this.
+        # We'll 'deepcopy' everything else though.
+
+        # TODO: Maybe nothing should be 'deepcopy'-ed here?
+
+        return StatisticalTest(
+                self.data, # deliberately not copied
+                deepcopy(self.kpi, forward_me_to_recursive_deepcopy),
+                deepcopy(self.features, forward_me_to_recursive_deepcopy),
+                deepcopy(self.variants, forward_me_to_recursive_deepcopy),
+                )
 
 
 class KPI(JsonSerializable):

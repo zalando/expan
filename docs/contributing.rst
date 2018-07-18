@@ -32,7 +32,7 @@ See also the much simpler github flow
 Release
 =================
 
-To make a release and **deploy to PyPI**, please follow these steps (we highly suggest to leave the realse to admins of ExpAn):
+To make a release and **deploy to PyPI**, please follow these steps (we highly suggest to leave the release to admins of ExpAn):
 
 - assuming you have a master branch that is up to date, create a pull request from your feature branch to master (a travis job will be started for the pull request)
 - once the pull request is approved, merge it (another travis job will be started because a push to master happened)
@@ -127,5 +127,3 @@ A **build** with unit tests is triggered either
 A release to PyPI will be triggered if a new tag is pushed to **master**.
 
 If you wish to skip triggering a CI task (for example when you change documentation), please include ``[ci skip]`` in your commit message.
-
-
