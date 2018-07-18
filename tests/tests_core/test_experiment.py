@@ -352,74 +352,74 @@ class OutlierFilteringTestCases(ExperimentTestCase):
         )
         self.assertIn('derived_kpi', data.columns)
 
-    def test_variant_split_is_consistent_with_expected_distribution_same_weights(self):
+    def test_chi_square_test_result_and_statistics_same_weights(self):
         exp = self.getExperiment()
         data = ['A'] * 23 + ['B'] * 18 + ['C'] * 17 + ['D'] * 19 + ['E'] * 23
         weights = {'A':  0.2, 'B':  0.2, 'C':  0.2, 'D':  0.2, 'E':  0.2}
-        result = exp.variant_split_is_consistent_with_expected_distribution(data, weights)
+        result = exp.chi_square_test_result_and_statistics(data, weights)
         self.assertEqual(result[0], True)
         self.assertAlmostEqual(result[1], 0.8087921354109989)
         self.assertEqual(result[2], 1.6)
 
-    def test_variant_split_is_consistent_with_expected_distribution_different_weights(self):
+    def test_chi_square_test_result_and_statistics_different_weights(self):
         exp = self.getExperiment()
         data = ['A'] * 23 + ['B'] * 18 + ['C'] * 17 + ['D'] * 19 + ['E'] * 23
         weights = {'A':  0.25, 'B':  0.15, 'C':  0.10, 'D':  0.40, 'E':  0.10}
-        result = exp.variant_split_is_consistent_with_expected_distribution(data, weights)
+        result = exp.chi_square_test_result_and_statistics(data, weights)
         self.assertEqual(result[0], False)
         self.assertAlmostEqual(result[1], 9.064563321754584e-07)
         self.assertEqual(result[2], 33.585)
 
-    def test_variant_split_is_consistent_with_expected_distribution_2_categories(self):
+    def test_chi_square_test_result_and_statistics_2_categories(self):
         exp = self.getExperiment()
         data = ['A'] * 17 + ['B'] * 17
         weights = {'A': 0.5, 'B': 0.5}
-        result = exp.variant_split_is_consistent_with_expected_distribution(data, weights)
+        result = exp.chi_square_test_result_and_statistics(data, weights)
         self.assertEqual(result[0], True)
         self.assertAlmostEqual(result[1], 1.0)
         self.assertEqual(result[2], 0.0)
 
-    def test_variant_split_is_consistent_with_expected_distribution_NaN_data(self):
+    def test_chi_square_test_result_and_statistics_NaN_data(self):
         exp = self.getExperiment()
         data = ['A'] * 17 + [np.nan] * 17
         weights = {'A': 0.5, 'B': 0.5}
         with self.assertRaises(ValueError):
-            exp.variant_split_is_consistent_with_expected_distribution(data, weights)
+            exp.chi_square_test_result_and_statistics(data, weights)
 
-    def test_variant_split_is_consistent_with_expected_distribution_counts_less_5(self):
+    def test_chi_square_test_result_and_statistics_counts_less_5(self):
         exp = self.getExperiment()
         data = ['A'] * 17 + ['B'] * 2 + ['C'] * 3
         weights = {'A': 0.33, 'B': 0.33, 'C': 0.33}
         with self.assertRaises(ValueError):
-            exp.variant_split_is_consistent_with_expected_distribution(data, weights)
+            exp.chi_square_test_result_and_statistics(data, weights)
 
-    def test_variant_split_is_consistent_with_expected_distribution_one_category(self):
+    def test_chi_square_test_result_and_statistics_one_category(self):
         exp = self.getExperiment()
         data = ['A'] * 16
         weights = {'A': 0.5}
         with self.assertRaises(ValueError):
-            exp.variant_split_is_consistent_with_expected_distribution(data, weights)
+            exp.chi_square_test_result_and_statistics(data, weights)
 
-    def test_variant_split_is_consistent_with_expected_distribution_empty_weights(self):
+    def test_chi_square_test_result_and_statistics_empty_weights(self):
         exp = self.getExperiment()
         data = ['A'] * 16
         weights = {}
         with self.assertRaises(ValueError):
-            exp.variant_split_is_consistent_with_expected_distribution(data, weights)
+            exp.chi_square_test_result_and_statistics(data, weights)
 
-    def test_variant_split_is_consistent_with_expected_distribution_no_categories(self):
+    def test_chi_square_test_result_and_statistics_no_categories(self):
         exp = self.getExperiment()
         data = []
         weights = {'A': 0.5}
         with self.assertRaises(ValueError):
-            exp.variant_split_is_consistent_with_expected_distribution(data, weights)
+            exp.chi_square_test_result_and_statistics(data, weights)
 
-    def test_variant_split_is_consistent_with_expected_distribution_insufficient_weights(self):
+    def test_chi_square_test_result_and_statistics_insufficient_weights(self):
         exp = self.getExperiment()
         data = ['A'] * 16 + ['B'] * 15
         weights = {'A': 0.5}
         with self.assertRaises(ValueError):
-            exp.variant_split_is_consistent_with_expected_distribution(data, weights)
+            exp.chi_square_test_result_and_statistics(data, weights)
 
 
 class HelperMethodsTestCases(ExperimentTestCase):

@@ -296,7 +296,7 @@ class Experiment(object):
         return flags
 
 
-    def variant_split_is_consistent_with_expected_distribution(self, variant_column, weights, min_counts=5, alpha=0.05):
+    def chi_square_test_result_and_statistics(self, variant_column, weights, min_counts=5, alpha=0.05):
         """ Tests the consistency of variant split with the hypothesized distribution.
         
         :param variant_column: variant column from the input data frame
