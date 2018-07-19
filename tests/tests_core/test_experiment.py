@@ -422,6 +422,19 @@ class OutlierFilteringTestCases(ExperimentTestCase):
         with self.assertRaises(ValueError):
             exp.chi_square_test_result_and_statistics(data, weights)
 
+    def test_chi_square_test_result_and_statistics_None_inputs(self):
+        exp = self.getExperiment()
+        data = None
+        weights = None
+        with self.assertRaises(ValueError):
+            exp.chi_square_test_result_and_statistics(data, weights)
+
+    def test_chi_square_test_result_and_statistics_empty_inputs(self):
+        exp = self.getExperiment()
+        data = []
+        weights = {}
+        with self.assertRaises(ValueError):
+            exp.chi_square_test_result_and_statistics(data, weights)
 
 class HelperMethodsTestCases(ExperimentTestCase):
     """ Test other helper methods. """

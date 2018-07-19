@@ -323,12 +323,11 @@ class Experiment(object):
         observed_counts = pd.DataFrame(variants_counts, columns=['observed'])
         # Ensure at least a frequency of 5 at every location in observed_counts, otherwise drop the category
         # see http://docs.scipy.org/doc/scipy-0.16.1/reference/generated/scipy.stats.chisquare.html
-        observed_freqs = observed_counts[observed_counts >= min_counts]
+        observed_freqs = observed_counts[observed_counts >= min_counts].dropna(axis=0)
 
-        # If all categories were dropped or if there are less than 2 categories left we can't conduct the test.
-        if observed_freqs.empty or len(observed_freqs) < 2:
-            raise ValueError("Category frequencies are empty or number of categories is less than 2. "
-                             "Chi-square test is not applicable.")
+        # If there are less than 2 categories left after dropping counts less than 5 we can't conduct the test.
+        if len(observed_freqs) < 2:
+            raise ValueError("If the number of categories is less than 2 Chi-square test is not applicable.")
 
         # Calculate expected counts given corresponding weights
         total_count = observed_freqs.sum().sum()
@@ -336,15 +335,7 @@ class Experiment(object):
         expected_freqs.columns = ['weight']
         expected_freqs *= total_count
 
-        # Join all values in one data frame, so that each observed category count corresponds to the correct expected
-        # count defined by the corresponding weight or split percentage.
-        all_freqs = expected_freqs.join(observed_freqs).dropna(axis=0)
-
-        # If after dropping there are less then two categories we can't conduct the test.
-        if len(all_freqs) <= 1:
-            raise ValueError("Provide weights for at least two categories. Chi-square test is not applicable.")
-
         # Compute chi-square and p-value statistics
-        chi_square_val, p_val = statx.chi_square(all_freqs['observed'], all_freqs['weight'])
+        chi_square_val, p_val = statx.chi_square(observed_freqs.sort_index(), expected_freqs.sort_index())
 
         return p_val >= alpha, p_val, chi_square_val
