@@ -1,7 +1,20 @@
 # Change Log
 
+## [v1.3.2](https://github.com/zalando/expan/tree/v1.3.2) (2018-07-23)
+[Full Changelog](https://github.com/zalando/expan/compare/v1.3.1...v1.3.2)
+
+**Merged pull requests:**
+
+- Fix minor typos [\#231](https://github.com/zalando/expan/pull/231) ([sdia](https://github.com/sdia))
+- custom deepcopy\(\) method for 'StatisticalTest', to save some memory [\#230](https://github.com/zalando/expan/pull/230) ([aaron-mcdaid-zalando](https://github.com/aaron-mcdaid-zalando))
+- Updated old multiple correction documentation [\#229](https://github.com/zalando/expan/pull/229) ([daryadedik](https://github.com/daryadedik))
+- contributing.rst: Improve the release procedure to ensure that the up… [\#226](https://github.com/zalando/expan/pull/226) ([aaron-mcdaid-zalando](https://github.com/aaron-mcdaid-zalando))
+
 ## [v1.3.1](https://github.com/zalando/expan/tree/v1.3.1) (2018-07-01)
-[Full Changelog](https://github.com/zalando/expan/compare/v1.2.5...v1.3.1)
+[Full Changelog](https://github.com/zalando/expan/compare/v1.2.6...v1.3.1)
+
+## [v1.2.6](https://github.com/zalando/expan/tree/v1.2.6) (2018-07-01)
+[Full Changelog](https://github.com/zalando/expan/compare/v1.2.5...v1.2.6)
 
 **Merged pull requests:**
 
