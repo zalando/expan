@@ -172,11 +172,10 @@ We can use this test to check the correct split for the subgroups as well.
 
 * Multiple testing problem for chi-square testing
 
-Since chi-square testing is also a hypothesis testing, you need to keep in mind that
-multiple chi-square testing brings the problem of increasing of false positives rate
-described in the previous section. Let say, you want to test your split rate 5 times with 0.05 alpha. For 5 tests
-your alpha is no longer 0.05, but :math:`1 - (1 - 0.05)^{5} \approx 0.23`
-Correction for multiple chi-square testing is also needed.
-As a possible solution, run several chi-square tests and collect p-values. Correct p-values with one of our correction
-methods (CorrectionMethod.BONFERRONI, CorrectionMethod.BH) to get new correction alpha value, and make a decision
-about correctness of variant split using new significance level.
+Since chi-square testing is also a hypothesis testing, you need to keep in mind that multiple chi-square testing brings
+the problem of increasing of false positives rate described in the previous section.
+Let say, you want to test the correctness of your variants split 5 times at different times with 0.05 alpha.
+For 5 tests your alpha is no longer 0.05, but :math:`1 - (1 - 0.05)^{5} \approx 0.23`. Correction for multiple chi-square testing is needed here.
+In this case, you can run several chi-square tests and collect p-values, сorrect p-values with one of our correction
+methods (CorrectionMethod.BONFERRONI, CorrectionMethod.BH) to get new corrected alpha, and make a decision
+about correctness of the variants splits using that new alpha.
