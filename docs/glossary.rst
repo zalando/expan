@@ -133,11 +133,12 @@ Read more about each correction method:
 * `Bonferroni <https://en.wikipedia.org/wiki/Bonferroni_correction>`_
 
 
-Chi-square test (Goodness of Fit Test).
+Chi-square test (Multinomial Goodness of Fit Test).
 ------------------------------------
-In ExpAn we have the possibility to conduct chi-square goodness of fit test.
+In ExpAn we have the possibility to conduct multinomial goodness of fit test (chi-square test).
 The test is applied when you have one categorical variable from a single population.
-It is used to determine whether sample data are consistent with a hypothesized distribution.
+It is used to determine whether sample data are consistent with a hypothesized distribution
+(allocation of traffic or split percentage).
 
 This test, in our case, is used to check the variant split based on the claimed percentage.
 For example, we want 50% of the users to be exposed to control variant (for example, green checkout button)
@@ -151,8 +152,31 @@ The Ha is: the data are not consistent with a specified distribution (or the var
 Typically, the null hypothesis (Ho) specifies the proportion of observations at each level of the categorical variable.
 The alternative hypothesis (Ha) is that at least one of the specified proportions is not true.
 
+Multinomial goodness of fit test is described with one intuitive formula:
+
+.. math::
+
+    {\chi}^2_{K-1} = \sum_{i=1}^{K} \frac{(O_i - E_i)^2}{E_i}
+
+
+Here :math:`O` denotes the observed number of users buckets in bucket :math:`i`, and :math:`E` denotes the expected
+number of users bucketed in each bucket. :math:`K` - overall number of buckets. The statistics capture how much each bucket deviates from the expected value,
+and the summation captures the overall deviation.
+`Source <https://blog.twitter.com/engineering/en_us/a/2015/detecting-and-avoiding-bucket-imbalance-in-ab-tests.html>`_
+
 We use 0.05 significance level as the default one.
 We compute p-value - the probability of observing a sample statistics as extreme as the test statistic - and compare it to the significance level.
 We reject the null hypothesis when the p-value is less than the significance level.
 
 We can use this test to check the correct split for the subgroups as well.
+
+* Multiple testing problem for chi-square testing
+
+Since chi-square testing is also a hypothesis testing, you need to keep in mind that
+multiple chi-square testing brings the problem of increasing of false positives rate
+described in the previous section. Let say, you want to test your split rate 5 times with 0.05 alpha. For 5 tests
+your alpha is no longer 0.05, but :math:`1 - (1 - 0.05)^{5} \approx 0.23`
+Correction for multiple chi-square testing is also needed.
+As a possible solution, run several chi-square tests and collect p-values. Correct p-values with one of our correction
+methods (CorrectionMethod.BONFERRONI, CorrectionMethod.BH) to get new correction alpha value, and make a decision
+about correctness of variant split using new significance level.
