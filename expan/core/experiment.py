@@ -331,7 +331,7 @@ class Experiment(object):
 
         # Calculate expected counts given corresponding weights,
         # weights are filtered out of categories which were dropped before.
-        total_count = observed_freqs.sum().sum()
+        total_count = observed_freqs.sum()
         weights = {k: v for (k, v) in weights.items() if k in observed_freqs.index.values}
         expected_freqs = pd.Series(weights)
         expected_freqs *= total_count
