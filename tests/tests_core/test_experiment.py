@@ -1,3 +1,5 @@
+from __future__ import division # so that, under Python 2.*, integer division results in real numbers
+
 import unittest
 import warnings
 
@@ -351,6 +353,97 @@ class OutlierFilteringTestCases(ExperimentTestCase):
         )
         self.assertIn('derived_kpi', data.columns)
 
+    def test_chi_square_test_result_and_statistics_same_weights(self):
+        exp = self.getExperiment()
+        data = ['A'] * 23 + ['B'] * 18 + ['C'] * 17 + ['D'] * 19 + ['E'] * 23
+        weights = {'A':  0.2, 'B':  0.2, 'C':  0.2, 'D':  0.2, 'E':  0.2}
+        result = exp.chi_square_test_result_and_statistics(data, weights)
+        self.assertEqual(result[0], True)
+        self.assertAlmostEqual(result[1], 0.8087921354109989)
+        self.assertAlmostEqual(result[2], 1.6)
+
+    def test_chi_square_test_result_and_statistics_different_weights(self):
+        exp = self.getExperiment()
+        data = ['A'] * 23 + ['B'] * 18 + ['C'] * 17 + ['D'] * 19 + ['E'] * 23
+        weights = {'A':  0.25, 'B':  0.15, 'C':  0.10, 'D':  0.40, 'E':  0.10}
+        result = exp.chi_square_test_result_and_statistics(data, weights)
+        self.assertEqual(result[0], False)
+        self.assertAlmostEqual(result[1], 9.064563321754584e-07)
+        self.assertAlmostEqual(result[2], 33.585)
+
+    def test_chi_square_test_result_and_statistics_2_categories(self):
+        exp = self.getExperiment()
+        data = ['A'] * 17 + ['B'] * 17
+        weights = {'A': 0.5, 'B': 0.5}
+        result = exp.chi_square_test_result_and_statistics(data, weights)
+        self.assertEqual(result[0], True)
+        self.assertAlmostEqual(result[1], 1.0)
+        self.assertAlmostEqual(result[2], 0.0)
+
+    def test_chi_square_test_result_and_statistics_NaN_data(self):
+        exp = self.getExperiment()
+        data = ['A'] * 17 + [np.nan] * 17
+        weights = {'A': 0.5, 'B': 0.5}
+        with self.assertRaises(ValueError):
+            exp.chi_square_test_result_and_statistics(data, weights)
+
+    def test_chi_square_test_result_and_statistics_counts_less_5_1_category(self):
+        exp = self.getExperiment()
+        data = ['A'] * 17 + ['B'] * 2 + ['C'] * 3
+        weights = {'A': 0.33, 'B': 0.33, 'C': 0.33}
+        with self.assertRaises(ValueError):
+            exp.chi_square_test_result_and_statistics(data, weights)
+
+    def test_chi_square_test_result_and_statistics_counts_less_5_2_categories(self):
+        exp = self.getExperiment()
+        data = ['A'] * 17 + ['B'] * 15 + ['C'] * 3
+        weights = {'A': 0.33, 'B': 0.33, 'C': 0.33}
+        result = exp.chi_square_test_result_and_statistics(data, weights)
+        self.assertEqual(result[0], False)
+        self.assertAlmostEqual(result[1], 0.0160787417516)
+        self.assertAlmostEqual(result[2], 5.794242424242423)
+
+    def test_chi_square_test_result_and_statistics_one_category(self):
+        exp = self.getExperiment()
+        data = ['A'] * 16
+        weights = {'A': 0.5}
+        with self.assertRaises(ValueError):
+            exp.chi_square_test_result_and_statistics(data, weights)
+
+    def test_chi_square_test_result_and_statistics_empty_weights(self):
+        exp = self.getExperiment()
+        data = ['A'] * 16
+        weights = {}
+        with self.assertRaises(ValueError):
+            exp.chi_square_test_result_and_statistics(data, weights)
+
+    def test_chi_square_test_result_and_statistics_no_categories(self):
+        exp = self.getExperiment()
+        data = []
+        weights = {'A': 0.5}
+        with self.assertRaises(ValueError):
+            exp.chi_square_test_result_and_statistics(data, weights)
+
+    def test_chi_square_test_result_and_statistics_insufficient_weights(self):
+        exp = self.getExperiment()
+        data = ['A'] * 16 + ['B'] * 15
+        weights = {'A': 0.5}
+        with self.assertRaises(ValueError):
+            exp.chi_square_test_result_and_statistics(data, weights)
+
+    def test_chi_square_test_result_and_statistics_None_inputs(self):
+        exp = self.getExperiment()
+        data = None
+        weights = None
+        with self.assertRaises(ValueError):
+            exp.chi_square_test_result_and_statistics(data, weights)
+
+    def test_chi_square_test_result_and_statistics_empty_inputs(self):
+        exp = self.getExperiment()
+        data = []
+        weights = {}
+        with self.assertRaises(ValueError):
+            exp.chi_square_test_result_and_statistics(data, weights)
 
 class HelperMethodsTestCases(ExperimentTestCase):
     """ Test other helper methods. """
