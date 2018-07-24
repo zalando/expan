@@ -387,12 +387,21 @@ class OutlierFilteringTestCases(ExperimentTestCase):
         with self.assertRaises(ValueError):
             exp.chi_square_test_result_and_statistics(data, weights)
 
-    def test_chi_square_test_result_and_statistics_counts_less_5(self):
+    def test_chi_square_test_result_and_statistics_counts_less_5_1_category(self):
         exp = self.getExperiment()
         data = ['A'] * 17 + ['B'] * 2 + ['C'] * 3
         weights = {'A': 0.33, 'B': 0.33, 'C': 0.33}
         with self.assertRaises(ValueError):
             exp.chi_square_test_result_and_statistics(data, weights)
+
+    def test_chi_square_test_result_and_statistics_counts_less_5_2_categories(self):
+        exp = self.getExperiment()
+        data = ['A'] * 17 + ['B'] * 15 + ['C'] * 3
+        weights = {'A': 0.33, 'B': 0.33, 'C': 0.33}
+        result = exp.chi_square_test_result_and_statistics(data, weights)
+        self.assertEqual(result[0], False)
+        self.assertAlmostEqual(result[1], 0.0160787417516)
+        self.assertAlmostEqual(result[2], 5.794242424242423)
 
     def test_chi_square_test_result_and_statistics_one_category(self):
         exp = self.getExperiment()

@@ -320,10 +320,10 @@ class Experiment(object):
         # Count number of observations per each variant
         variant_column = pd.Series(variant_column).dropna(axis=0)
         variants_counts = variant_column.value_counts()
-        observed_counts = pd.DataFrame(variants_counts, columns=['observed'])
+
         # Ensure at least a frequency of 5 at every location in observed_counts, otherwise drop the category
         # see http://docs.scipy.org/doc/scipy-0.16.1/reference/generated/scipy.stats.chisquare.html
-        observed_freqs = observed_counts[observed_counts >= min_counts].dropna(axis=0)
+        observed_freqs = variants_counts[variants_counts >= min_counts]
 
         # If there are less than 2 categories left after dropping counts less than 5 we can't conduct the test.
         if len(observed_freqs) < 2:
@@ -331,8 +331,8 @@ class Experiment(object):
 
         # Calculate expected counts given corresponding weights
         total_count = observed_freqs.sum().sum()
-        expected_freqs = pd.DataFrame.from_dict(weights, orient='index')
-        expected_freqs.columns = ['weight']
+        weights = {k: v for (k, v) in weights.items() if k in observed_freqs.index.values}
+        expected_freqs = pd.Series(weights)
         expected_freqs *= total_count
 
         # Compute chi-square and p-value statistics
