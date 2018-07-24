@@ -309,9 +309,9 @@ class Experiment(object):
                  False(if split is not consistent with the given split)
         :rtype:  Boolean, float, float
         """
-        if not variant_column:
+        if not hasattr(variant_column, '__len__'):
             raise ValueError("Variant split check was cancelled since input variant column is empty or doesn't exist.")
-        if not weights:
+        if not hasattr(weights, '__len__'):
             raise ValueError("Variant split check was cancelled since input weights are empty or doesn't exist.")
         if len(weights) <= 1 or len(variant_column) <= 1:
             raise ValueError("Variant split check was cancelled since input weights or the number if categories "
