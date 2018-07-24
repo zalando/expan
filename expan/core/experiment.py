@@ -329,7 +329,8 @@ class Experiment(object):
         if len(observed_freqs) < 2:
             raise ValueError("If the number of categories is less than 2 Chi-square test is not applicable.")
 
-        # Calculate expected counts given corresponding weights
+        # Calculate expected counts given corresponding weights,
+        # weights are filtered out of categories which were dropped before.
         total_count = observed_freqs.sum().sum()
         weights = {k: v for (k, v) in weights.items() if k in observed_freqs.index.values}
         expected_freqs = pd.Series(weights)
