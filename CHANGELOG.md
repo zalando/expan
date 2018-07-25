@@ -1,5 +1,12 @@
 # Change Log
 
+## [v1.3.3](https://github.com/zalando/expan/tree/v1.3.3) (2018-07-25)
+[Full Changelog](https://github.com/zalando/expan/compare/v1.3.2...v1.3.3)
+
+**Merged pull requests:**
+
+- Chi-squared test for the variant split check [\#228](https://github.com/zalando/expan/pull/228) ([daryadedik](https://github.com/daryadedik))
+
 ## [v1.3.2](https://github.com/zalando/expan/tree/v1.3.2) (2018-07-23)
 [Full Changelog](https://github.com/zalando/expan/compare/v1.3.1...v1.3.2)
 
