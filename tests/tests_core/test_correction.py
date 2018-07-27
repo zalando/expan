@@ -1,5 +1,5 @@
 import unittest
-from expan.core.correction import *
+from expan.core.correction import benjamini_hochberg, bonferroni
 
 
 class CorrectionTestCase(unittest.TestCase):
@@ -28,6 +28,10 @@ class CorrectionTestCase(unittest.TestCase):
         corrected_alpha = benjamini_hochberg(false_discovery_rate, original_p_values)
         self.assertAlmostEqual(corrected_alpha, 0.05)
 
+    def test_benjamini_hochberg_empty(self):
+        with self.assertRaises(ValueError):
+            _ = benjamini_hochberg(0.5, [])
+
     def test_bonferroni(self):
         false_discovery_rate = 0.05
         original_p_values = [0.1, 0.03, 0.02, 0.03]
@@ -41,3 +45,7 @@ class CorrectionTestCase(unittest.TestCase):
 
         corrected_alpha = bonferroni(false_discovery_rate, original_p_values)
         self.assertAlmostEqual(corrected_alpha, 0.05)
+
+    def test_bonferroni_empty(self):
+        with self.assertRaises(ValueError):
+            _ = benjamini_hochberg(0.5, [])
