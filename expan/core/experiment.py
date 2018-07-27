@@ -321,10 +321,12 @@ class Experiment(object):
         variant_column = pd.Series(variant_column).dropna(axis=0)
         variants_counts = variant_column.value_counts()
 
-        # Ensure at least a frequency of 5 at every location in observed_counts, otherwise drop the category
-        # see http://docs.scipy.org/doc/scipy-0.16.1/reference/generated/scipy.stats.chisquare.html
-        observed_freqs = variants_counts[variants_counts >= min_counts]
+        # Ensure at least a frequency of 5 at every location in observed_counts.
+        # It's recommended to not conduct test if frequencies in each category is less than 5
+        if len(variants_counts[variants_counts < min_counts]) >= 1:
+            raise ValueError("Chi-square test is not valid for small expected or observed frequencies.")
 
+        observed_freqs = variants_counts
         # If there are less than 2 categories left after dropping counts less than 5 we can't conduct the test.
         if len(observed_freqs) < 2:
             raise ValueError("If the number of categories is less than 2 Chi-square test is not applicable.")
@@ -336,7 +338,8 @@ class Experiment(object):
         expected_freqs = pd.Series(weights)
         expected_freqs *= total_count
 
-        # Compute chi-square and p-value statistics
-        chi_square_val, p_val = statx.chi_square(observed_freqs.sort_index(), expected_freqs.sort_index())
+        #     chi-square and p-value statistics
+        chi_square_val, p_val = statx.chi_square(observed_freqs.sort_index(), expected_freqs.sort_index(),
+                                                 len(observed_freqs)-1)
 
         return p_val >= alpha, p_val, chi_square_val

@@ -139,7 +139,10 @@ def delta(x, y, x_denominators=1, y_denominators=1, assume_normal=True, alpha=0.
         if assume_normal:
             logger.info("The distribution of two samples is assumed normal. "
                         "Performing the sample difference distribution calculation.")
-            partial_simple_test_stats = normal_sample_weighted_difference(x_numerators=_x, y_numerators=_y, x_denominators=_x_denominators, y_denominators = _y_denominators, percentiles=percentiles, relative=relative)
+            partial_simple_test_stats = normal_sample_weighted_difference(x_numerators=_x, y_numerators=_y,
+                                                                          x_denominators=_x_denominators,
+                                                                          y_denominators=_y_denominators,
+                                                                          percentiles=percentiles, relative=relative)
             c_i = partial_simple_test_stats['c_i']
             mu = partial_simple_test_stats['mean1'] - partial_simple_test_stats['mean2']
         else:
@@ -154,13 +157,12 @@ def delta(x, y, x_denominators=1, y_denominators=1, assume_normal=True, alpha=0.
         treatment_statistics = SampleStatistics(ss_x, float(np.nanmean(_x_strange)), float(np.nanvar(_x_strange)))
         control_statistics   = SampleStatistics(ss_y, float(np.nanmean(_y_strange)), float(np.nanvar(_y_strange)))
 
-    variant_statistics   = BaseTestStatistics(control_statistics, treatment_statistics)
+    variant_statistics = BaseTestStatistics(control_statistics, treatment_statistics)
     if partial_simple_test_stats is not None:
-        p_value              = partial_simple_test_stats['p_value']
+        p_value = partial_simple_test_stats['p_value']
     else:
-        p_value              = compute_p_value_from_samples(_x_strange, _y_strange)
-    statistical_power    = compute_statistical_power_from_samples(_x_strange, _y_strange, alpha) # TODO: wrong
-
+        p_value = compute_p_value_from_samples(_x_strange, _y_strange)
+    statistical_power = compute_statistical_power_from_samples(_x_strange, _y_strange, alpha) # TODO: wrong
 
     logger.info("Delta calculation finished!")
     return SimpleTestStatistics(variant_statistics.control_statistics,
@@ -629,18 +631,20 @@ def compute_p_value(mean1, std1, n1, mean2, std2, n2):
     return p
 
 
-def chi_square(observed_freqs, expected_freqs, ddof=0):
+def chi_square(observed_freqs, expected_freqs, dof):
     """ Compute chi-square statistics and p-values given observed and expected frequencies and degrees of freedom. 
 
     :param observed_freqs: observed frequencies 
     :type  observed_freqs: pd.Series or array-like
     :param expected_freqs: expected frequencies
     :type  expected_freqs: pd.Series or array-like
-    :param ddof: delta degrees of freedom, 0 by default
-    :type  ddof: int
+    :param dof: delta degrees of freedom, 0 by default
+    :type  dof: int
     
     :return: chi-square statistics and p-value
     :rtype:  float, float
     """
-    chi_square_val, p_val = stats.chisquare(f_obs=observed_freqs, f_exp=expected_freqs, ddof=ddof, axis=None)
+    chi_square_val = sum([(o - e)**2 / float(e) for o, e in zip(observed_freqs, expected_freqs)])
+    p_val = 1 - stats.chi2.cdf(chi_square_val, dof)
+
     return chi_square_val, p_val
