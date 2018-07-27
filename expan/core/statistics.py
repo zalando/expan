@@ -638,7 +638,7 @@ def chi_square(observed_freqs, expected_freqs, dof):
     :type  observed_freqs: pd.Series or array-like
     :param expected_freqs: expected frequencies
     :type  expected_freqs: pd.Series or array-like
-    :param dof: delta degrees of freedom, 0 by default
+    :param dof: delta degrees of freedom: number of categories/buckets - 1
     :type  dof: int
     
     :return: chi-square statistics and p-value
