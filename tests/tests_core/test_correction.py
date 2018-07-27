@@ -48,4 +48,4 @@ class CorrectionTestCase(unittest.TestCase):
 
     def test_bonferroni_empty(self):
         with self.assertRaises(ValueError):
-            _ = benjamini_hochberg(0.5, [])
+            _ = bonferroni(0.5, [])
