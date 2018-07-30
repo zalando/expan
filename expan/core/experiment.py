@@ -337,7 +337,7 @@ class Experiment(object):
         expected_freqs = pd.Series(weights)
         expected_freqs *= total_count
 
-        #     chi-square and p-value statistics
+        # Compute chi-square and p-value statistics
         chi_square_val, p_val = statx.chi_square(observed_freqs.sort_index(), expected_freqs.sort_index())
 
         return p_val >= alpha, p_val, chi_square_val
