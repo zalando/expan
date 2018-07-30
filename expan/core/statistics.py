@@ -631,20 +631,19 @@ def compute_p_value(mean1, std1, n1, mean2, std2, n2):
     return p
 
 
-def chi_square(observed_freqs, expected_freqs, dof):
+def chi_square(observed_freqs, expected_freqs, ddof=0):
     """ Compute chi-square statistics and p-values given observed and expected frequencies and degrees of freedom. 
 
     :param observed_freqs: observed frequencies 
     :type  observed_freqs: pd.Series or array-like
     :param expected_freqs: expected frequencies
     :type  expected_freqs: pd.Series or array-like
-    :param dof: delta degrees of freedom: number of categories/buckets - 1
-    :type  dof: int
+    :param ddof: delta degrees of freedom, 0 by default
+    :type  ddof: int
     
     :return: chi-square statistics and p-value
     :rtype:  float, float
     """
-    chi_square_val = sum([(o - e)**2 / float(e) for o, e in zip(observed_freqs, expected_freqs)])
-    p_val = 1 - stats.chi2.cdf(chi_square_val, dof)
+    chi_square_val, p_val = stats.chisquare(f_obs=observed_freqs, f_exp=expected_freqs, ddof=ddof, axis=None)
 
     return chi_square_val, p_val
