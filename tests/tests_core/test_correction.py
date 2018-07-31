@@ -29,7 +29,7 @@ class CorrectionTestCase(unittest.TestCase):
         self.assertAlmostEqual(corrected_alpha, 0.05)
 
     def test_benjamini_hochberg_empty(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(AssertionError):
             _ = benjamini_hochberg(0.5, [])
 
     def test_bonferroni(self):
@@ -47,5 +47,5 @@ class CorrectionTestCase(unittest.TestCase):
         self.assertAlmostEqual(corrected_alpha, 0.05)
 
     def test_bonferroni_empty(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(AssertionError):
             _ = bonferroni(0.5, [])

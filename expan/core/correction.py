@@ -12,8 +12,7 @@ def benjamini_hochberg(false_discovery_rate, original_p_values):
     :return: new critical value (i.e. the corrected alpha)
     :rtype: float
     """
-    if not original_p_values:
-        raise ValueError("empty array of p values to analyse")
+    assert original_p_values, "empty array of p values to analyse"
 
     p_values_sorted = np.sort(np.asarray(original_p_values))
     number_tests = len(original_p_values)
@@ -33,7 +32,6 @@ def bonferroni(false_positive_rate, original_p_values):
     :return: new critical value (i.e. the corrected alpha)
     :rtype: float
     """
-    if not original_p_values:
-        raise ValueError("empty array of p values to analyse")
+    assert original_p_values, "empty array of p values to analyse"
 
     return false_positive_rate / len(original_p_values)
