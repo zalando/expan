@@ -226,6 +226,10 @@ class Experiment(object):
         # log which columns were filtered and how many entities were filtered out
         self.metadata['filtered_columns'] = [kpi.name for kpi in kpis]
         self.metadata['filtered_entities_number'] = len(flags[flags == True])
+
+        filtered = [item[1] for item in list(zip(flags, data['variant'])) if item[0] == True]
+        self.metadata['filtered_entities_per_variant'] = dict((val, filtered.count(val)) for val in set(filtered))
+
         self.metadata['filtered_threshold_kind'] = threshold_type
         # throw warning if too many entities have been filtered out
         if (len(flags[flags == True]) / float(len(data))) > 0.02:

@@ -301,6 +301,10 @@ class OutlierFilteringTestCases(ExperimentTestCase):
             threshold_type='upper'
         )
         self.assertEqual(len(flags[flags==True]), 386)
+        filtered = [item[1] for item in list(zip(flags, self.data['variant'])) if item[0] == True]
+        filtered_dict = dict((val, filtered.count(val)) for val in set(filtered))
+        self.assertEqual(filtered_dict['A'], 88)
+        self.assertEqual(filtered_dict['B'], 298)
 
     def test_outlier_filtering_lower_threshold(self):
         exp = self.getExperiment()
@@ -316,6 +320,8 @@ class OutlierFilteringTestCases(ExperimentTestCase):
             threshold_type='lower'
         )
         self.assertEqual(len(self.data) - len(data), exp.metadata['filtered_entities_number'])
+        self.assertEqual(exp.metadata['filtered_entities_per_variant']['A'], 22)
+        self.assertEqual(exp.metadata['filtered_entities_per_variant']['B'], 18)
 
     def test_outlier_filtering_unsupported_kpi(self):
         exp = self.getExperiment()
