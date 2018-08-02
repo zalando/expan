@@ -226,6 +226,10 @@ class Experiment(object):
         # log which columns were filtered and how many entities were filtered out
         self.metadata['filtered_columns'] = [kpi.name for kpi in kpis]
         self.metadata['filtered_entities_number'] = len(flags[flags == True])
+
+        filtered = [item[1] for item in list(zip(flags, data['variant'])) if item[0] == True]
+        self.metadata['filtered_entities_per_variant'] = dict((val, filtered.count(val)) for val in set(filtered))
+
         self.metadata['filtered_threshold_kind'] = threshold_type
         # throw warning if too many entities have been filtered out
         if (len(flags[flags == True]) / float(len(data))) > 0.02:
@@ -319,11 +323,12 @@ class Experiment(object):
 
         # Count number of observations per each variant
         variant_column = pd.Series(variant_column).dropna(axis=0)
-        variants_counts = variant_column.value_counts()
+        observed_freqs = variant_column.value_counts()
 
-        # Ensure at least a frequency of 5 at every location in observed_counts, otherwise drop the category
-        # see http://docs.scipy.org/doc/scipy-0.16.1/reference/generated/scipy.stats.chisquare.html
-        observed_freqs = variants_counts[variants_counts >= min_counts]
+        # Ensure at least a frequency of min_counts at every location in observed_counts.
+        # It's recommended to not conduct test if frequencies in each category is less than min_counts
+        if len(observed_freqs[observed_freqs < min_counts]) >= 1:
+            raise ValueError("Chi-square test is not valid for small expected or observed frequencies.")
 
         # If there are less than 2 categories left after dropping counts less than 5 we can't conduct the test.
         if len(observed_freqs) < 2:

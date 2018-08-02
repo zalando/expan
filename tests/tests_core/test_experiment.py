@@ -301,6 +301,10 @@ class OutlierFilteringTestCases(ExperimentTestCase):
             threshold_type='upper'
         )
         self.assertEqual(len(flags[flags==True]), 386)
+        filtered = [item[1] for item in list(zip(flags, self.data['variant'])) if item[0] == True]
+        filtered_dict = dict((val, filtered.count(val)) for val in set(filtered))
+        self.assertEqual(filtered_dict['A'], 88)
+        self.assertEqual(filtered_dict['B'], 298)
 
     def test_outlier_filtering_lower_threshold(self):
         exp = self.getExperiment()
@@ -316,6 +320,8 @@ class OutlierFilteringTestCases(ExperimentTestCase):
             threshold_type='lower'
         )
         self.assertEqual(len(self.data) - len(data), exp.metadata['filtered_entities_number'])
+        self.assertEqual(exp.metadata['filtered_entities_per_variant']['A'], 22)
+        self.assertEqual(exp.metadata['filtered_entities_per_variant']['B'], 18)
 
     def test_outlier_filtering_unsupported_kpi(self):
         exp = self.getExperiment()
@@ -387,21 +393,19 @@ class OutlierFilteringTestCases(ExperimentTestCase):
         with self.assertRaises(ValueError):
             exp.chi_square_test_result_and_statistics(data, weights)
 
-    def test_chi_square_test_result_and_statistics_counts_less_5_1_category(self):
+    def test_chi_square_test_result_and_statistics_counts_less_5_2_categories(self):
         exp = self.getExperiment()
         data = ['A'] * 17 + ['B'] * 2 + ['C'] * 3
         weights = {'A': 0.33, 'B': 0.33, 'C': 0.33}
         with self.assertRaises(ValueError):
             exp.chi_square_test_result_and_statistics(data, weights)
 
-    def test_chi_square_test_result_and_statistics_counts_less_5_2_categories(self):
+    def test_chi_square_test_result_and_statistics_counts_less_5_1_category(self):
         exp = self.getExperiment()
-        data = ['A'] * 17 + ['B'] * 15 + ['C'] * 3
+        data = ['A'] * 8 + ['B'] * 2 + ['C'] * 14
         weights = {'A': 0.33, 'B': 0.33, 'C': 0.33}
-        result = exp.chi_square_test_result_and_statistics(data, weights)
-        self.assertEqual(result[0], False)
-        self.assertAlmostEqual(result[1], 0.0160787417516)
-        self.assertAlmostEqual(result[2], 5.794242424242423)
+        with self.assertRaises(ValueError):
+            exp.chi_square_test_result_and_statistics(data, weights)
 
     def test_chi_square_test_result_and_statistics_one_category(self):
         exp = self.getExperiment()
