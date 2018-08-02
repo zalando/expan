@@ -1,6 +1,14 @@
 # Change Log
 
-## [v1.3.3](https://github.com/zalando/expan/tree/v1.3.3) (2018-07-25)
+## [v1.3.5](https://github.com/zalando/expan/tree/v1.3.5) (2018-08-02)
+[Full Changelog](https://github.com/zalando/expan/compare/v1.3.3...v1.3.5)
+
+**Merged pull requests:**
+
+- Re-wrote chi-square, removed dropping buckets. [\#234](https://github.com/zalando/expan/pull/234) ([daryadedik](https://github.com/daryadedik))
+- check if there are no p values to correct [\#233](https://github.com/zalando/expan/pull/233) ([gbordyugov](https://github.com/gbordyugov))
+
+## [v1.3.3](https://github.com/zalando/expan/tree/v1.3.3) (2018-07-26)
 [Full Changelog](https://github.com/zalando/expan/compare/v1.3.2...v1.3.3)
 
 **Merged pull requests:**
