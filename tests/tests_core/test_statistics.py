@@ -199,15 +199,6 @@ class BootstrapTestCases(StatisticsTestCase):
 
 
 class PooledStdTestCases(StatisticsTestCase):
-    def test__pooled_std__variances_differ_too_much_error(self):
-        """ Warning raised when variances differ too much. """
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('always')
-            statx.pooled_std(0.25, 4, 0.5, 4)
-            self.assertEqual(len(w), 1)
-            self.assertTrue(issubclass(w[-1].category, UserWarning))
-            self.assertTrue('variances differ' in str(w[-1].message))
-
     def test__pooled_std__computation(self):
         """ Result of pooled_std() equals expected result. """
         # Define subset of data for test
