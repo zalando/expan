@@ -77,8 +77,8 @@ class ExperimentTestCase(unittest.TestCase):
 
         # small dummy data frames with all nan values
         data_dummy_all_nan = np.array([['index', 'entity', 'variant', 'normal_same', 'normal_shifted'],
-                                       [0, 1, 'A', None, None], [1, 2, 'B', None, None],
-                                       [2, 3, 'A', None, None], [3, 4, 'B', None, None]])
+                                       [0, 1, 'A', np.nan, np.nan], [1, 2, 'B', np.nan, np.nan],
+                                       [2, 3, 'A', np.nan, np.nan], [3, 4, 'B', np.nan, np.nan]])
         self.data_dummy_all_nan = pd.DataFrame(data=data_dummy_all_nan[1:, 1:],
                                                columns=data_dummy_all_nan[0, 1:]).convert_objects(convert_numeric=True)
         self.test_normal_same_nan_data = StatisticalTest(self.data_dummy_all_nan, self.kpi, [], self.variants)
@@ -278,7 +278,7 @@ class StatisticalTestSuiteTestCases(ExperimentTestCase):
         self.assertEqual(res.correction_method, CorrectionMethod.NONE)
         self.assertEqual(len(res.results), 0)
 
-    def test_analyze_statistical_test_with_none_data(self):
+    def test_analyze_statistical_test_with_nan_data(self):
         res = self.getExperiment().analyze_statistical_test_suite(self.suite_with_one_test_with_nan_data)
         self.assertEqual(res.correction_method, CorrectionMethod.NONE)
         self.assertEqual(len(res.results), 0)
