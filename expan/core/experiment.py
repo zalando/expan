@@ -99,11 +99,13 @@ class Experiment(object):
 
         # get control and treatment values for the kpi
         control          = test.variants.get_variant(data_for_analysis, test.variants.control_name)[test.kpi.name]
+        control          = np.array (control, dtype=np.float64)
         logger.info("Control group size: {}".format(control.shape[0]))
         control_denominators   = self._get_denominators(data_for_analysis, test, test.variants.control_name)
         control_numerators   = control * control_denominators
 
         treatment        = test.variants.get_variant(data_for_analysis, test.variants.treatment_name)[test.kpi.name]
+        treatment        = np.array (treatment, dtype=np.float64)
         logger.info("Treatment group size: {}".format(treatment.shape[0]))
         treatment_denominators = self._get_denominators(data_for_analysis, test, test.variants.treatment_name)
         treatment_numerators   = treatment * treatment_denominators
@@ -273,10 +275,10 @@ class Experiment(object):
 
     def _get_denominators(self, data, test, variant_name):
         if type(test.kpi) is not DerivedKPI:
-            return 1.0
+            return np.float64(1.0)
 
         x = test.variants.get_variant(data, variant_name)[test.kpi.denominator]
-        return x
+        return np.array(x, dtype=np.float64)
 
 
     def _quantile_filtering(self, data, kpis, percentile, threshold_type):
