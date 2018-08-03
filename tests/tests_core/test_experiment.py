@@ -76,11 +76,12 @@ class ExperimentTestCase(unittest.TestCase):
         self.suite_with_one_test_zero_std = StatisticalTestSuite([self.test_normal_same_zero_std])
 
         # small dummy data frames with all nan values
-        data_dummy_all_nan = np.array([['index', 'entity', 'variant', 'normal_same', 'normal_shifted'],
-                                       [0, 1, 'A', np.nan, np.nan], [1, 2, 'B', np.nan, np.nan],
-                                       [2, 3, 'A', np.nan, np.nan], [3, 4, 'B', np.nan, np.nan]])
-        self.data_dummy_all_nan = pd.DataFrame(data=data_dummy_all_nan[1:, 1:],
-                                               columns=data_dummy_all_nan[0, 1:]).convert_objects(convert_numeric=True)
+        self.data_dummy_all_nan = pd.DataFrame({
+                        'entity' : [1,2,3,4],
+                        'variant' : ['A','B','C','D'],
+                        'normal_same' : [np.nan] * 4,
+                        'normal_shifted' : [np.nan] * 4,
+                            })
         self.test_normal_same_nan_data = StatisticalTest(self.data_dummy_all_nan, self.kpi, [], self.variants)
         self.suite_with_one_test_with_nan_data = StatisticalTestSuite([self.test_normal_same_nan_data])
 
