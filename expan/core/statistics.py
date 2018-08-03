@@ -115,12 +115,6 @@ def delta(x, y, x_denominators=1, y_denominators=1, assume_normal=True, alpha=0.
 
     x_nan = np.isnan(_x_ratio).sum()
     y_nan = np.isnan(_y_ratio).sum()
-    if x_nan > 0:
-        warnings.warn('Discarding ' + str(x_nan) + ' NaN(s) in the x array!')
-        logger.warning('Discarding ' + str(x_nan) + ' NaN(s) in the x array!')
-    if y_nan > 0:
-        warnings.warn('Discarding ' + str(y_nan) + ' NaN(s) in the y array!')
-        logger.warning('Discarding ' + str(x_nan) + ' NaN(s) in the x array!')
 
     ss_x = sample_size(_x_ratio)
     ss_y = sample_size(_y_ratio)
@@ -137,8 +131,6 @@ def delta(x, y, x_denominators=1, y_denominators=1, assume_normal=True, alpha=0.
         mu = _delta_mean(_x, _y)
         # Computing the confidence intervals
         if assume_normal:
-            logger.info("The distribution of two samples is assumed normal. "
-                        "Performing the sample difference distribution calculation.")
             partial_simple_test_stats = normal_sample_weighted_difference(x_numerators=_x, y_numerators=_y,
                                                                           x_denominators=_x_denominators,
                                                                           y_denominators=_y_denominators,
@@ -164,7 +156,6 @@ def delta(x, y, x_denominators=1, y_denominators=1, assume_normal=True, alpha=0.
         p_value = compute_p_value_from_samples(_x_strange, _y_strange)
     statistical_power = compute_statistical_power_from_samples(_x_strange, _y_strange, alpha) # TODO: wrong
 
-    logger.info("Delta calculation finished!")
     return SimpleTestStatistics(variant_statistics.control_statistics,
                                 variant_statistics.treatment_statistics,
                                 float(mu), c_i, p_value, statistical_power)
@@ -308,11 +299,6 @@ def pooled_std(std1, n1, std2, n2):
     :return: pooled standard deviation
     :type: float
     """
-
-    if (std1 ** 2) >   2.0*(std2 ** 2) or \
-       (std1 ** 2) <   0.5*(std2 ** 2):
-        warnings.warn('Sample variances differ too much to assume that population variances are equal.')
-        logger.warning('Sample variances differ too much to assume that population variances are equal.')
 
     return np.sqrt(((n1 - 1) * std1 ** 2 + (n2 - 1) * std2 ** 2) / (n1 + n2 - 2))
 

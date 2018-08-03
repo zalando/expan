@@ -72,11 +72,6 @@ class Experiment(object):
                 raise KeyError("Denominator '{}' of the derived KPI does not exist in the data.".format(test.kpi.denominator))
             test.kpi.make_derived_kpi(test.data)
 
-        logger.info("One analysis with kpi '{}', control variant '{}', treatment variant '{}' and features [{}] "
-                    "has just started".format(test.kpi, test.variants.control_name,
-                                              test.variants.treatment_name,
-                                              [(feature.column_name, feature.column_value) for feature in test.features]))
-
         if test_method not in self.worker_table:
             raise NotImplementedError("Test method '{}' is not implemented.".format(test_method))
         worker = self.worker_table[test_method](**worker_args)
@@ -96,12 +91,10 @@ class Experiment(object):
 
         # get control and treatment values for the kpi
         control          = test.variants.get_variant(data_for_analysis, test.variants.control_name)[test.kpi.name]
-        logger.info("Control group size: {}".format(control.shape[0]))
         control_denominators   = self._get_denominators(data_for_analysis, test, test.variants.control_name)
         control_numerators   = control * control_denominators
 
         treatment        = test.variants.get_variant(data_for_analysis, test.variants.treatment_name)[test.kpi.name]
-        logger.info("Treatment group size: {}".format(treatment.shape[0]))
         treatment_denominators = self._get_denominators(data_for_analysis, test, test.variants.treatment_name)
         treatment_numerators   = treatment * treatment_denominators
 
