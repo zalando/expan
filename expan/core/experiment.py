@@ -89,6 +89,9 @@ class Experiment(object):
             data_for_analysis = feature.apply_to_data(data_for_analysis)
 
         if not self._is_valid_for_analysis(data_for_analysis, test):
+            # Note that this does not check that there are enough
+            # non-NaN and non=Inf datapoints. See below for a check
+            # of that:
             logger.warning("Data is not valid for the analysis!")
             return test_result
         if data_for_analysis.entity.duplicated().any():
@@ -104,6 +107,11 @@ class Experiment(object):
         logger.info("Treatment group size: {}".format(treatment.shape[0]))
         treatment_denominators = self._get_denominators(data_for_analysis, test, test.variants.treatment_name)
         treatment_numerators   = treatment * treatment_denominators
+
+        number_of_finite_controls   = np.sum(np.isfinite( control_numerators   / control_denominators   ))
+        number_of_finite_treatments = np.sum(np.isfinite( treatment_numerators / treatment_denominators ))
+
+        if number_of_finite_controls < 2 or number_of_finite_treatments < 2: return test_result
 
         # run the test method
         test_statistics = worker(x=treatment_numerators, y=control_numerators, x_denominators = treatment_denominators, y_denominators = control_denominators)
