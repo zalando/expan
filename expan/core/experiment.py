@@ -99,13 +99,11 @@ class Experiment(object):
 
         # get control and treatment values for the kpi
         control          = test.variants.get_variant(data_for_analysis, test.variants.control_name)[test.kpi.name]
-        control          = np.array (control, dtype=np.float64)
         logger.info("Control group size: {}".format(control.shape[0]))
         control_denominators   = self._get_denominators(data_for_analysis, test, test.variants.control_name)
         control_numerators   = control * control_denominators
 
         treatment        = test.variants.get_variant(data_for_analysis, test.variants.treatment_name)[test.kpi.name]
-        treatment        = np.array (treatment, dtype=np.float64)
         logger.info("Treatment group size: {}".format(treatment.shape[0]))
         treatment_denominators = self._get_denominators(data_for_analysis, test, test.variants.treatment_name)
         treatment_numerators   = treatment * treatment_denominators
