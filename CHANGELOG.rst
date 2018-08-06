@@ -1,6 +1,19 @@
 Change Log
 ==========
 
+`v1.3.6 <https://github.com/zalando/expan/tree/v1.3.6>`__ (2018-08-06)
+----------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/zalando/expan/compare/v1.3.5...v1.3.6>`__
+
+**Merged pull requests:**
+
+-  If the number of \*finite\* samples is too small, then the data isn't
+   valid for analysis
+   `#236 <https://github.com/zalando/expan/pull/236>`__
+   (`aaron-mcdaid-zalando <https://github.com/aaron-mcdaid-zalando>`__)
+
 `v1.3.5 <https://github.com/zalando/expan/tree/v1.3.5>`__ (2018-08-02)
 ----------------------------------------------------------------------
 

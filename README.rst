@@ -45,7 +45,7 @@ imported and used from within other projects and from the command line.
 Documentation
 =============
 
-The latest stable version is 1.3.5. Please check out our `tutorial and documentation <http://expan.readthedocs.io/>`__.
+The latest stable version is 1.3.6. Please check out our `tutorial and documentation <http://expan.readthedocs.io/>`__.
 
 Installation
 ============
