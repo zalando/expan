@@ -10,7 +10,6 @@ import expan.core.correction as correction
 from expan.core.statistical_test import *
 from expan.core.results import StatisticalTestResult, MultipleTestSuiteResult, CombinedTestStatistics
 
-warnings.simplefilter('always', UserWarning)
 warnings.filterwarnings("ignore", category=FutureWarning)
 logger = logging.getLogger(__name__)
 
