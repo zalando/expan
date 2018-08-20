@@ -113,15 +113,6 @@ def delta(x, y, x_denominators=1, y_denominators=1, assume_normal=True, alpha=0.
     del x_denominators
     del y_denominators
 
-    x_nan = np.isnan(_x_ratio).sum()
-    y_nan = np.isnan(_y_ratio).sum()
-    if x_nan > 0:
-        warnings.warn('Discarding ' + str(x_nan) + ' NaN(s) in the x array!')
-        logger.warning('Discarding ' + str(x_nan) + ' NaN(s) in the x array!')
-    if y_nan > 0:
-        warnings.warn('Discarding ' + str(y_nan) + ' NaN(s) in the y array!')
-        logger.warning('Discarding ' + str(x_nan) + ' NaN(s) in the x array!')
-
     ss_x = sample_size(_x_ratio)
     ss_y = sample_size(_y_ratio)
 
