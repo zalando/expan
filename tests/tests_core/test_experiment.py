@@ -368,6 +368,13 @@ class OutlierFilteringTestCases(ExperimentTestCase):
         self.assertEqual(result[0], True)
         self.assertAlmostEqual(result[1], 0.8087921354109989)
         self.assertAlmostEqual(result[2], 1.6)
+        self.assertEqual(result[3]['A'], 23)
+        self.assertEqual(result[3]['B'], 18)
+        self.assertEqual(result[3]['C'], 17)
+        self.assertEqual(result[3]['D'], 19)
+        self.assertEqual(result[3]['E'], 23)
+
+        self.assertTrue(all([val == 20 for val in result[4]]))
 
     def test_chi_square_test_result_and_statistics_different_weights(self):
         exp = self.getExperiment()
@@ -377,6 +384,8 @@ class OutlierFilteringTestCases(ExperimentTestCase):
         self.assertEqual(result[0], False)
         self.assertAlmostEqual(result[1], 9.064563321754584e-07)
         self.assertAlmostEqual(result[2], 33.585)
+        self.assertEqual(len(result[3]), 5)
+        self.assertEqual(len(result[4]), 5)
 
     def test_chi_square_test_result_and_statistics_2_categories(self):
         exp = self.getExperiment()
@@ -386,6 +395,10 @@ class OutlierFilteringTestCases(ExperimentTestCase):
         self.assertEqual(result[0], True)
         self.assertAlmostEqual(result[1], 1.0)
         self.assertAlmostEqual(result[2], 0.0)
+        self.assertAlmostEqual(result[3]['A'], 17)
+        self.assertAlmostEqual(result[4]['A'], 17)
+        self.assertAlmostEqual(result[3]['B'], 17)
+        self.assertAlmostEqual(result[4]['B'], 17)
 
     def test_chi_square_test_result_and_statistics_NaN_data(self):
         exp = self.getExperiment()
