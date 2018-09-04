@@ -318,7 +318,7 @@ class Experiment(object):
         :param alpha: significance level, 0.05 by default
         :return: True(if split is consistent with the given split) or
                  False(if split is not consistent with the given split)
-        :rtype:  Boolean, float, float
+        :rtype:  Boolean, float, float, pd.Series, pd.Series
         """
         if not hasattr(variant_column, '__len__'):
             raise ValueError("Variant split check was cancelled since input variant column is empty or doesn't exist.")
@@ -351,4 +351,4 @@ class Experiment(object):
         # Compute chi-square and p-value statistics
         chi_square_val, p_val = statx.chi_square(observed_freqs.sort_index(), expected_freqs.sort_index())
 
-        return p_val >= alpha, p_val, chi_square_val
+        return p_val >= alpha, p_val, chi_square_val, observed_freqs, expected_freqs
