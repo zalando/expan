@@ -395,10 +395,10 @@ class OutlierFilteringTestCases(ExperimentTestCase):
         self.assertEqual(result[0], True)
         self.assertAlmostEqual(result[1], 1.0)
         self.assertAlmostEqual(result[2], 0.0)
-        self.assertAlmostEqual(result[3]['A'], 17)
-        self.assertAlmostEqual(result[4]['A'], 17)
-        self.assertAlmostEqual(result[3]['B'], 17)
-        self.assertAlmostEqual(result[4]['B'], 17)
+        self.assertEqual(result[3]['A'], 17)
+        self.assertEqual(result[4]['A'], 17)
+        self.assertEqual(result[3]['B'], 17)
+        self.assertEqual(result[4]['B'], 17)
 
     def test_chi_square_test_result_and_statistics_NaN_data(self):
         exp = self.getExperiment()
