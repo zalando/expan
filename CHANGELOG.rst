@@ -1,6 +1,24 @@
 Change Log
 ==========
 
+`v1.3.7 <https://github.com/zalando/expan/tree/v1.3.7>`__ (2018-09-04)
+----------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/zalando/expan/compare/v1.3.6...v1.3.7>`__
+
+**Merged pull requests:**
+
+-  Added observed and expected frequencies to chi-square statistics
+   `#239 <https://github.com/zalando/expan/pull/239>`__
+   (`daryadedik <https://github.com/daryadedik>`__)
+-  Stop warning about NaNs
+   `#238 <https://github.com/zalando/expan/pull/238>`__
+   (`aaron-mcdaid-zalando <https://github.com/aaron-mcdaid-zalando>`__)
+-  stop overriding the warning level
+   `#237 <https://github.com/zalando/expan/pull/237>`__
+   (`aaron-mcdaid-zalando <https://github.com/aaron-mcdaid-zalando>`__)
+
 `v1.3.6 <https://github.com/zalando/expan/tree/v1.3.6>`__ (2018-08-06)
 ----------------------------------------------------------------------
 
