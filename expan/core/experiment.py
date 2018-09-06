@@ -306,49 +306,40 @@ class Experiment(object):
             flags = flags | data[column].apply(method_table[threshold_type])
         return flags
 
+    def run_goodness_of_fit_test(self, observed_freqs, expected_freqs, alpha=0.01, min_counts=5):
+        """ Checks the validity of observed and expected counts and runs chi-square test for goodness of fit.
 
-    def chi_square_test_result_and_statistics(self, variant_column, weights, min_counts=5, alpha=0.05):
-        """ Tests the consistency of variant split with the hypothesized distribution.
-        
-        :param variant_column: variant column from the input data frame
-        :param weights: dict with variant names as keys, weights as values
-                        ({<variant_name>:<weight>, ...}
-        :param min_counts: minimum number of observed and expected frequencies (should be at least 5), see 
-                            http://docs.scipy.org/doc/scipy-0.16.1/reference/generated/scipy.stats.chisquare.html
-        :param alpha: significance level, 0.05 by default
-        :return: True(if split is consistent with the given split) or
-                 False(if split is not consistent with the given split)
-        :rtype:  Boolean, float, float, pd.Series, pd.Series
+        :param observed_freqs: observed frequencies
+        :type  observed_freqs: pd.Series
+        :param expected_freqs: expected frequencies
+        :type  expected_freqs: pd.Series
+        :param alpha: significance level
+        :type  alpha: float
+        :param min_counts: minimum number of observations to run chi-square test
+        :type  min_counts: int
+        :return split_is_correct: False is split is biased and True if split is correct
+        :rtype: bool
         """
-        if not hasattr(variant_column, '__len__'):
-            raise ValueError("Variant split check was cancelled since input variant column is empty or doesn't exist.")
-        if not hasattr(weights, '__len__'):
-            raise ValueError("Variant split check was cancelled since input weights are empty or doesn't exist.")
-        if len(weights) <= 1 or len(variant_column) <= 1:
-            raise ValueError("Variant split check was cancelled since input weights or the number if categories "
-                             "is less than 2.")
 
-        # Count number of observations per each variant
-        variant_column = pd.Series(variant_column).dropna(axis=0)
-        observed_freqs = variant_column.value_counts()
+        if not hasattr(observed_freqs, '__len__'):
+            raise ValueError("Variant split check was cancelled since input observed frequencies are empty "
+                             "or doesn't exist.")
+        if not hasattr(expected_freqs, '__len__'):
+            raise ValueError("Variant split check was cancelled since input expected frequencies are empty "
+                             "or doesn't exist.")
+        if len(expected_freqs) < 2 or len(observed_freqs) < 2:
+            raise ValueError("Variant split check was cancelled since input observed or expected frequencies "
+                             "is less than 2.")
 
         # Ensure at least a frequency of min_counts at every location in observed_counts.
         # It's recommended to not conduct test if frequencies in each category is less than min_counts
-        if len(observed_freqs[observed_freqs < min_counts]) >= 1:
-            raise ValueError("Chi-square test is not valid for small expected or observed frequencies.")
+        valid_observed_freqs = observed_freqs[observed_freqs > min_counts]
+        valid_expected_freqs = expected_freqs.filter(valid_observed_freqs.keys())
 
-        # If there are less than 2 categories left after dropping counts less than 5 we can't conduct the test.
-        if len(observed_freqs) < 2:
-            raise ValueError("If the number of categories is less than 2 Chi-square test is not applicable.")
-
-        # Calculate expected counts given corresponding weights,
-        # weights are filtered out of categories which were dropped before.
-        total_count = observed_freqs.sum()
-        weights = {k: v for (k, v) in weights.items() if k in observed_freqs.index.values}
-        expected_freqs = pd.Series(weights)
-        expected_freqs *= total_count
-
-        # Compute chi-square and p-value statistics
-        chi_square_val, p_val = statx.chi_square(observed_freqs.sort_index(), expected_freqs.sort_index())
-
-        return p_val >= alpha, p_val, chi_square_val, observed_freqs, expected_freqs
+        if len(valid_observed_freqs) == len(valid_expected_freqs) and len(valid_observed_freqs) >= 2:
+            _, p_value = statx.chi_square(valid_observed_freqs.sort_index(), valid_expected_freqs.sort_index())
+            split_is_unbiased = p_value >= alpha
+        else:
+            raise ValueError("Variant split check was cancelled since input observed or expected frequencies "
+                             "is less than 2.")
+        return split_is_unbiased
