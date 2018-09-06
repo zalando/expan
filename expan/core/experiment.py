@@ -327,9 +327,6 @@ class Experiment(object):
         if not hasattr(expected_freqs, '__len__'):
             raise ValueError("Variant split check was cancelled since input expected frequencies are empty "
                              "or doesn't exist.")
-        if len(expected_freqs) < 2 or len(observed_freqs) < 2:
-            raise ValueError("Variant split check was cancelled since input observed or expected frequencies "
-                             "is less than 2.")
 
         # Ensure at least a frequency of min_counts at every location in observed_counts.
         # It's recommended to not conduct test if frequencies in each category is less than min_counts
