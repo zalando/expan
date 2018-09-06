@@ -317,7 +317,7 @@ class Experiment(object):
         :type  alpha: float
         :param min_counts: minimum number of observations to run chi-square test
         :type  min_counts: int
-        :return split_is_correct: False is split is biased and True if split is correct
+        :return split_is_unbiased: False is split is biased and True if split is correct
         :rtype: bool
         """
 
