@@ -632,7 +632,7 @@ def chi_square(observed_freqs, expected_freqs, ddof=0):
     :param ddof: delta degrees of freedom, 0 by default
     :type  ddof: int
     
-    :return: chi-square statistics, p-value and chi-square test result
+    :return: chi-square statistics and p-value
     :rtype:  float, float
     """
     chi_square_val, p_val = stats.chisquare(f_obs=observed_freqs, f_exp=expected_freqs, ddof=ddof, axis=None)
