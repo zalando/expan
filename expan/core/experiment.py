@@ -339,4 +339,4 @@ class Experiment(object):
         else:
             raise ValueError("Variant split check was cancelled since input observed or expected frequencies "
                              "is less than 2.")
-        return split_is_unbiased
+        return split_is_unbiased, p_value

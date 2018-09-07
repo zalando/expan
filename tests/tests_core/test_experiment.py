@@ -365,21 +365,24 @@ class OutlierFilteringTestCases(ExperimentTestCase):
         observed_freqs = pd.Series([230, 190, 190, 190, 230], ['A', 'B', 'C', 'D', 'E'])
         expected_freqs = pd.Series([206, 206, 206, 206, 206], ['A', 'B', 'C', 'D', 'E'])
         result = exp.run_goodness_of_fit_test(observed_freqs, expected_freqs)
-        self.assertEqual(result, True)
+        self.assertEqual(result[0], True)
+        self.assertAlmostEqual(result[1], 0.05357161207695437)
 
     def test_run_goodness_of_fit_test_false(self):
         exp = self.getExperiment()
         observed_freqs = pd.Series([230, 180, 170, 190, 230], ['A', 'B', 'C', 'D', 'E'])
         expected_freqs = pd.Series([250, 150, 100, 400, 100], ['A', 'B', 'C', 'D', 'E'])
         result = exp.run_goodness_of_fit_test(observed_freqs, expected_freqs)
-        self.assertEqual(result, False)
+        self.assertEqual(result[0], False)
+        self.assertAlmostEqual(result[1], 1.5123889771594655e-147)
 
     def test_run_goodness_of_fit_test_2_variants(self):
         exp = self.getExperiment()
         observed_freqs = pd.Series([170, 170], ['A', 'B'])
         expected_freqs = pd.Series([170, 170], ['A', 'B'])
         result = exp.run_goodness_of_fit_test(observed_freqs, expected_freqs)
-        self.assertEqual(result, True)
+        self.assertEqual(result[0], True)
+        self.assertAlmostEqual(result[1], 1.0)
 
     def test_run_goodness_of_fit_test_NaN_data(self):
         exp = self.getExperiment()
@@ -400,7 +403,8 @@ class OutlierFilteringTestCases(ExperimentTestCase):
         observed_freqs = pd.Series([180, 184, 2], ['A', 'B', 'C'])
         expected_freqs = pd.Series([122, 122, 122], ['A', 'B', 'C'])
         result = exp.run_goodness_of_fit_test(observed_freqs, expected_freqs)
-        self.assertEqual(result, False)
+        self.assertEqual(result[0], False)
+        self.assertAlmostEqual(result[1], 1.5123889771594655e-14)
 
     def test_test_run_goodness_of_fit_test_one_variant(self):
         exp = self.getExperiment()
