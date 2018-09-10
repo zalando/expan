@@ -1,5 +1,12 @@
 # Change Log
 
+## [v1.3.9](https://github.com/zalando/expan/tree/v1.3.9) (2018-09-10)
+[Full Changelog](https://github.com/zalando/expan/compare/v1.3.7...v1.3.9)
+
+**Merged pull requests:**
+
+- Changed chi-square test, removed frequencies computation [\#240](https://github.com/zalando/expan/pull/240) ([daryadedik](https://github.com/daryadedik))
+
 ## [v1.3.7](https://github.com/zalando/expan/tree/v1.3.7) (2018-09-04)
 [Full Changelog](https://github.com/zalando/expan/compare/v1.3.6...v1.3.7)
 
