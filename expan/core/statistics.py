@@ -5,7 +5,7 @@ import logging
 
 import numpy as np
 import pandas as pd
-from scipy import stats
+import scipy
 from expan.core.results import BaseTestStatistics, SampleStatistics, SimpleTestStatistics
 
 logger = logging.getLogger(__name__)
@@ -210,7 +210,7 @@ def estimate_sample_size(x, mde, r, alpha=0.05, beta=0.2):
     if r <= 0:
         raise ValueError("Variant split ratio needs to be higher than 0.")
 
-    ppf = stats.norm.ppf
+    ppf = scipy.stats.norm.ppf
     c1 = (ppf(1.0 - alpha/2.0) - ppf(beta))**2
     c2 = (1.0 + r) * c1 * (1.0 + 1.0 / r)
     return c2 * x.var() / (mde * x.mean())**2
@@ -485,9 +485,9 @@ def normal_difference(mean1, std1, n1, mean2, std2, n2, percentiles=[2.5, 97.5],
 
     # Mapping percentiles via standard error
     if relative:
-        return dict([(round(p, 5), stats.t.ppf(p / 100.0, df=d_free) * st_error) for p in percentiles])
+        return dict([(round(p, 5), scipy.stats.t.ppf(p / 100.0, df=d_free) * st_error) for p in percentiles])
     else:
-        return dict([(round(p, 5), mean + stats.t.ppf(p / 100.0, df=d_free) * st_error) for p in percentiles])
+        return dict([(round(p, 5), mean + scipy.stats.t.ppf(p / 100.0, df=d_free) * st_error) for p in percentiles])
 
 
 def compute_statistical_power_from_samples(x, y, alpha=0.05):
@@ -503,7 +503,7 @@ def compute_statistical_power_from_samples(x, y, alpha=0.05):
     :return: statistical power---the probability of a test to detect an effect if the effect actually exists
     :rtype: float
     """
-    z_1_minus_alpha = stats.norm.ppf(1 - alpha/2.)
+    z_1_minus_alpha = scipy.stats.norm.ppf(1 - alpha/2.)
     _x = np.array(x, dtype=float)
     _x = _x[~np.isnan(_x)]
     _y = np.array(y, dtype=float)
@@ -553,7 +553,7 @@ def compute_statistical_power(mean1, std1, n1, mean2, std2, n2, z_1_minus_alpha)
 
     tmp = (n1 * n2 * effect_size**2) / ((n1 + n2) * std**2)
     z_beta = z_1_minus_alpha - np.sqrt(tmp)
-    beta = stats.norm.cdf(z_beta)
+    beta = scipy.stats.norm.cdf(z_beta)
     power = 1 - beta
     return power
 
@@ -618,7 +618,7 @@ def compute_p_value(mean1, std1, n1, mean2, std2, n2):
         t = np.sign(mean_diff) * 1000
     else:
         t = mean_diff / st_error
-    p = stats.t.cdf(-abs(t), df=d_free) * 2
+    p = scipy.stats.t.cdf(-abs(t), df=d_free) * 2
     return p
 
 
@@ -635,6 +635,6 @@ def chi_square(observed_freqs, expected_freqs, ddof=0):
     :return: chi-square statistics and p-value
     :rtype:  float, float
     """
-    chi_square_val, p_val = stats.chisquare(f_obs=observed_freqs, f_exp=expected_freqs, ddof=ddof, axis=None)
+    chi_square_val, p_val = scipy.stats.chisquare(f_obs=observed_freqs, f_exp=expected_freqs, ddof=ddof, axis=None)
 
     return chi_square_val, p_val

@@ -321,12 +321,10 @@ class Experiment(object):
         :rtype: bool
         """
 
-        if not hasattr(observed_freqs, '__len__'):
-            raise ValueError("Variant split check was cancelled since input observed frequencies are empty "
-                             "or doesn't exist.")
-        if not hasattr(expected_freqs, '__len__'):
-            raise ValueError("Variant split check was cancelled since input expected frequencies are empty "
-                             "or doesn't exist.")
+        if not isinstance(observed_freqs, pd.Series) or not isinstance(expected_freqs, pd.Series):
+            raise ValueError("Observed and expected frequencies should be of type Series.")
+        if observed_freqs.empty or expected_freqs.empty:
+            raise ValueError("Variant split check was cancelled since expected or observed frequencies are empty.")
 
         # Ensure at least a frequency of min_counts at every location in observed_counts.
         # It's recommended to not conduct test if frequencies in each category is less than min_counts
@@ -337,6 +335,6 @@ class Experiment(object):
             _, p_value = statx.chi_square(valid_observed_freqs.sort_index(), valid_expected_freqs.sort_index())
             split_is_unbiased = p_value >= alpha
         else:
-            raise ValueError("Variant split check was cancelled since input observed or expected frequencies "
-                             "is less than 2.")
+            raise ValueError("Variant split check was cancelled since observed or expected frequencies "
+                             "are less than 2.")
         return split_is_unbiased, p_value
