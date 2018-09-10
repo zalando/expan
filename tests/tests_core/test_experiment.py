@@ -360,108 +360,115 @@ class OutlierFilteringTestCases(ExperimentTestCase):
         )
         self.assertIn('derived_kpi', data.columns)
 
-    def test_chi_square_test_result_and_statistics_same_weights(self):
+    def test_run_goodness_of_fit_test_true(self):
         exp = self.getExperiment()
-        data = ['A'] * 23 + ['B'] * 18 + ['C'] * 17 + ['D'] * 19 + ['E'] * 23
-        weights = {'A':  0.2, 'B':  0.2, 'C':  0.2, 'D':  0.2, 'E':  0.2}
-        result = exp.chi_square_test_result_and_statistics(data, weights)
+        observed_freqs = pd.Series([230, 190, 190, 190, 230], ['A', 'B', 'C', 'D', 'E'])
+        expected_freqs = pd.Series([206, 206, 206, 206, 206], ['A', 'B', 'C', 'D', 'E'])
+        result = exp.run_goodness_of_fit_test(observed_freqs, expected_freqs)
         self.assertEqual(result[0], True)
-        self.assertAlmostEqual(result[1], 0.8087921354109989)
-        self.assertAlmostEqual(result[2], 1.6)
-        self.assertEqual(result[3]['A'], 23)
-        self.assertEqual(result[3]['B'], 18)
-        self.assertEqual(result[3]['C'], 17)
-        self.assertEqual(result[3]['D'], 19)
-        self.assertEqual(result[3]['E'], 23)
+        self.assertAlmostEqual(result[1], 0.05357161207695437)
 
-        self.assertTrue(all([val == 20 for val in result[4]]))
-
-    def test_chi_square_test_result_and_statistics_different_weights(self):
+    def test_run_goodness_of_fit_test_false(self):
         exp = self.getExperiment()
-        data = ['A'] * 23 + ['B'] * 18 + ['C'] * 17 + ['D'] * 19 + ['E'] * 23
-        weights = {'A':  0.25, 'B':  0.15, 'C':  0.10, 'D':  0.40, 'E':  0.10}
-        result = exp.chi_square_test_result_and_statistics(data, weights)
+        observed_freqs = pd.Series([230, 180, 170, 190, 230], ['A', 'B', 'C', 'D', 'E'])
+        expected_freqs = pd.Series([250, 150, 100, 400, 100], ['A', 'B', 'C', 'D', 'E'])
+        result = exp.run_goodness_of_fit_test(observed_freqs, expected_freqs)
         self.assertEqual(result[0], False)
-        self.assertAlmostEqual(result[1], 9.064563321754584e-07)
-        self.assertAlmostEqual(result[2], 33.585)
-        self.assertEqual(len(result[3]), 5)
-        self.assertEqual(len(result[4]), 5)
+        self.assertAlmostEqual(result[1], 1.5123889771594655e-147)
 
-    def test_chi_square_test_result_and_statistics_2_categories(self):
+    def test_run_goodness_of_fit_test_2_variants(self):
         exp = self.getExperiment()
-        data = ['A'] * 17 + ['B'] * 17
-        weights = {'A': 0.5, 'B': 0.5}
-        result = exp.chi_square_test_result_and_statistics(data, weights)
+        observed_freqs = pd.Series([170, 170], ['A', 'B'])
+        expected_freqs = pd.Series([170, 170], ['A', 'B'])
+        result = exp.run_goodness_of_fit_test(observed_freqs, expected_freqs)
         self.assertEqual(result[0], True)
         self.assertAlmostEqual(result[1], 1.0)
-        self.assertAlmostEqual(result[2], 0.0)
-        self.assertEqual(result[3]['A'], 17)
-        self.assertEqual(result[4]['A'], 17)
-        self.assertEqual(result[3]['B'], 17)
-        self.assertEqual(result[4]['B'], 17)
 
-    def test_chi_square_test_result_and_statistics_NaN_data(self):
+    def test_run_goodness_of_fit_test_NaN_data(self):
         exp = self.getExperiment()
-        data = ['A'] * 17 + [np.nan] * 17
-        weights = {'A': 0.5, 'B': 0.5}
-        with self.assertRaises(ValueError):
-            exp.chi_square_test_result_and_statistics(data, weights)
+        observed_freqs = pd.Series([170, 170], ['A', np.nan])
+        expected_freqs = pd.Series([170, 170], ['A', 'B'])
+        with self.assertRaisesRegexp(ValueError, "Variant split check was cancelled since observed "
+                                                 "or expected frequencies are less than 2."):
+            exp.run_goodness_of_fit_test(observed_freqs, expected_freqs)
 
-    def test_chi_square_test_result_and_statistics_counts_less_5_2_categories(self):
+    def test_run_goodness_of_fit_test_1_variant_after_filter(self):
         exp = self.getExperiment()
-        data = ['A'] * 17 + ['B'] * 2 + ['C'] * 3
-        weights = {'A': 0.33, 'B': 0.33, 'C': 0.33}
-        with self.assertRaises(ValueError):
-            exp.chi_square_test_result_and_statistics(data, weights)
+        observed_freqs = pd.Series([180, 1, 2], ['A', 'B', 'C'])
+        expected_freqs = pd.Series([170, 61, 61], ['A', 'B', 'C'])
+        with self.assertRaisesRegexp(ValueError, "Variant split check was cancelled since observed "
+                                                 "or expected frequencies are less than 2."):
+            exp.run_goodness_of_fit_test(observed_freqs, expected_freqs)
 
-    def test_chi_square_test_result_and_statistics_counts_less_5_1_category(self):
+    def test_test_run_goodness_of_fit_test_2_variants_after_filter(self):
         exp = self.getExperiment()
-        data = ['A'] * 8 + ['B'] * 2 + ['C'] * 14
-        weights = {'A': 0.33, 'B': 0.33, 'C': 0.33}
-        with self.assertRaises(ValueError):
-            exp.chi_square_test_result_and_statistics(data, weights)
+        observed_freqs = pd.Series([180, 184, 2], ['A', 'B', 'C'])
+        expected_freqs = pd.Series([122, 122, 122], ['A', 'B', 'C'])
+        result = exp.run_goodness_of_fit_test(observed_freqs, expected_freqs)
+        self.assertEqual(result[0], False)
+        self.assertAlmostEqual(result[1], 1.5123889771594655e-14)
 
-    def test_chi_square_test_result_and_statistics_one_category(self):
+    def test_test_run_goodness_of_fit_test_one_valid_variant(self):
         exp = self.getExperiment()
-        data = ['A'] * 16
-        weights = {'A': 0.5}
-        with self.assertRaises(ValueError):
-            exp.chi_square_test_result_and_statistics(data, weights)
+        observed_freqs = pd.Series([170, 170], ['A', 'C'])
+        expected_freqs = pd.Series([170, 170], ['A', 'B'])
+        with self.assertRaisesRegexp(ValueError, "Variant split check was cancelled since observed "
+                                                 "or expected frequencies are less than 2."):
+            exp.run_goodness_of_fit_test(observed_freqs, expected_freqs)
 
-    def test_chi_square_test_result_and_statistics_empty_weights(self):
+    def test_test_run_goodness_of_fit_test_one_variant(self):
         exp = self.getExperiment()
-        data = ['A'] * 16
-        weights = {}
-        with self.assertRaises(ValueError):
-            exp.chi_square_test_result_and_statistics(data, weights)
+        observed_freqs = pd.Series([180], ['A'])
+        expected_freqs = pd.Series([170], ['A'])
+        with self.assertRaisesRegexp(ValueError, "Variant split check was cancelled since observed "
+                                                 "or expected frequencies are less than 2."):
+            exp.run_goodness_of_fit_test(observed_freqs, expected_freqs)
 
-    def test_chi_square_test_result_and_statistics_no_categories(self):
+    def test_test_run_goodness_of_fit_test_no_expected_freqs(self):
         exp = self.getExperiment()
-        data = []
-        weights = {'A': 0.5}
-        with self.assertRaises(ValueError):
-            exp.chi_square_test_result_and_statistics(data, weights)
+        observed_freqs = pd.Series([180], ['A'])
+        expected_freqs = pd.Series([], [])
+        with self.assertRaisesRegexp(ValueError, "Variant split check was cancelled since expected "
+                                                 "or observed frequencies are empty."):
+            exp.run_goodness_of_fit_test(observed_freqs, expected_freqs)
 
-    def test_chi_square_test_result_and_statistics_insufficient_weights(self):
+    def test_test_run_goodness_of_fit_test_unequal_expected_observed_freqs(self):
         exp = self.getExperiment()
-        data = ['A'] * 16 + ['B'] * 15
-        weights = {'A': 0.5}
-        with self.assertRaises(ValueError):
-            exp.chi_square_test_result_and_statistics(data, weights)
+        observed_freqs = pd.Series([180, 170], ['A', 'B'])
+        expected_freqs = pd.Series([180], ['A'])
+        with self.assertRaisesRegexp(ValueError, "Variant split check was cancelled since observed "
+                                                 "or expected frequencies are less than 2."):
+            exp.run_goodness_of_fit_test(observed_freqs, expected_freqs)
 
-    def test_chi_square_test_result_and_statistics_None_inputs(self):
+    def test_test_run_goodness_of_fit_test_None_freqs(self):
         exp = self.getExperiment()
-        data = None
-        weights = None
-        with self.assertRaises(ValueError):
-            exp.chi_square_test_result_and_statistics(data, weights)
+        observed_freqs = None
+        expected_freqs = None
+        with self.assertRaisesRegexp(ValueError, "Observed and expected frequencies should be of type Series."):
+            exp.run_goodness_of_fit_test(observed_freqs, expected_freqs)
 
-    def test_chi_square_test_result_and_statistics_empty_inputs(self):
+    def test_test_run_goodness_of_fit_test_empty_input(self):
         exp = self.getExperiment()
-        data = []
-        weights = {}
-        with self.assertRaises(ValueError):
-            exp.chi_square_test_result_and_statistics(data, weights)
+        observed_freqs = pd.Series()
+        expected_freqs = pd.Series()
+        with self.assertRaisesRegexp(ValueError, "Variant split check was cancelled since expected "
+                                                 "or observed frequencies are empty."):
+            exp.run_goodness_of_fit_test(observed_freqs, expected_freqs)
+
+    def test_test_run_goodness_of_fit_test_incorrect_input_1(self):
+        exp = self.getExperiment()
+        observed_freqs = {'A': 45, 'B': 35}
+        expected_freqs = {'A': 45, 'B': 35}
+        with self.assertRaisesRegexp(ValueError, "Observed and expected frequencies should be of type Series."):
+            exp.run_goodness_of_fit_test(observed_freqs, expected_freqs)
+
+    def test_test_run_goodness_of_fit_test_incorrect_input_2(self):
+        exp = self.getExperiment()
+        observed_freqs = {'A': 45, 'B': 35}
+        expected_freqs = ['A', 'B', 'C']
+        with self.assertRaisesRegexp(ValueError, "Observed and expected frequencies should be of type Series."):
+            exp.run_goodness_of_fit_test(observed_freqs, expected_freqs)
+
 
 class HelperMethodsTestCases(ExperimentTestCase):
     """ Test other helper methods. """
