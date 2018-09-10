@@ -9,7 +9,6 @@ from expan.core.results import CombinedTestStatistics
 from expan.core.statistical_test import *
 from expan.core.experiment import Experiment
 from expan.core.util import generate_random_data, find_value_by_key_with_condition
-from logging import getLogger
 
 
 class ExperimentTestCase(unittest.TestCase):
