@@ -9,6 +9,7 @@ from expan.core.results import CombinedTestStatistics
 from expan.core.statistical_test import *
 from expan.core.experiment import Experiment
 from expan.core.util import generate_random_data, find_value_by_key_with_condition
+from logging import getLogger
 
 
 class ExperimentTestCase(unittest.TestCase):
@@ -388,14 +389,16 @@ class OutlierFilteringTestCases(ExperimentTestCase):
         exp = self.getExperiment()
         observed_freqs = pd.Series([170, 170], ['A', np.nan])
         expected_freqs = pd.Series([170, 170], ['A', 'B'])
-        with self.assertRaises(ValueError):
+        with self.assertRaisesRegexp(ValueError, "Variant split check was cancelled since observed "
+                                                 "or expected frequencies are less than 2."):
             exp.run_goodness_of_fit_test(observed_freqs, expected_freqs)
 
     def test_run_goodness_of_fit_test_1_variant_after_filter(self):
         exp = self.getExperiment()
         observed_freqs = pd.Series([180, 1, 2], ['A', 'B', 'C'])
         expected_freqs = pd.Series([170, 61, 61], ['A', 'B', 'C'])
-        with self.assertRaises(ValueError):
+        with self.assertRaisesRegexp(ValueError, "Variant split check was cancelled since observed "
+                                                 "or expected frequencies are less than 2."):
             exp.run_goodness_of_fit_test(observed_freqs, expected_freqs)
 
     def test_test_run_goodness_of_fit_test_2_variants_after_filter(self):
@@ -406,40 +409,67 @@ class OutlierFilteringTestCases(ExperimentTestCase):
         self.assertEqual(result[0], False)
         self.assertAlmostEqual(result[1], 1.5123889771594655e-14)
 
+    def test_test_run_goodness_of_fit_test_one_valid_variant(self):
+        exp = self.getExperiment()
+        observed_freqs = pd.Series([170, 170], ['A', 'C'])
+        expected_freqs = pd.Series([170, 170], ['A', 'B'])
+        with self.assertRaisesRegexp(ValueError, "Variant split check was cancelled since observed "
+                                                 "or expected frequencies are less than 2."):
+            exp.run_goodness_of_fit_test(observed_freqs, expected_freqs)
+
     def test_test_run_goodness_of_fit_test_one_variant(self):
         exp = self.getExperiment()
         observed_freqs = pd.Series([180], ['A'])
         expected_freqs = pd.Series([170], ['A'])
-        with self.assertRaises(ValueError):
+        with self.assertRaisesRegexp(ValueError, "Variant split check was cancelled since observed "
+                                                 "or expected frequencies are less than 2."):
             exp.run_goodness_of_fit_test(observed_freqs, expected_freqs)
 
     def test_test_run_goodness_of_fit_test_no_expected_freqs(self):
         exp = self.getExperiment()
         observed_freqs = pd.Series([180], ['A'])
         expected_freqs = pd.Series([], [])
-        with self.assertRaises(ValueError):
+        with self.assertRaisesRegexp(ValueError, "Variant split check was cancelled since expected "
+                                                 "or observed frequencies are empty."):
             exp.run_goodness_of_fit_test(observed_freqs, expected_freqs)
 
     def test_test_run_goodness_of_fit_test_unequal_expected_observed_freqs(self):
         exp = self.getExperiment()
         observed_freqs = pd.Series([180, 170], ['A', 'B'])
         expected_freqs = pd.Series([180], ['A'])
-        with self.assertRaises(ValueError):
+        with self.assertRaisesRegexp(ValueError, "Variant split check was cancelled since observed "
+                                                 "or expected frequencies are less than 2."):
             exp.run_goodness_of_fit_test(observed_freqs, expected_freqs)
 
     def test_test_run_goodness_of_fit_test_None_freqs(self):
         exp = self.getExperiment()
         observed_freqs = None
         expected_freqs = None
-        with self.assertRaises(ValueError):
+        with self.assertRaisesRegexp(ValueError, "Observed and expected frequencies should be of type Series."):
             exp.run_goodness_of_fit_test(observed_freqs, expected_freqs)
 
-    def test_test_run_goodness_of_fit_test_incorrect_input_(self):
+    def test_test_run_goodness_of_fit_test_empty_input(self):
         exp = self.getExperiment()
         observed_freqs = pd.Series()
         expected_freqs = pd.Series()
-        with self.assertRaises(ValueError):
+        with self.assertRaisesRegexp(ValueError, "Variant split check was cancelled since expected "
+                                                 "or observed frequencies are empty."):
             exp.run_goodness_of_fit_test(observed_freqs, expected_freqs)
+
+    def test_test_run_goodness_of_fit_test_incorrect_input_1(self):
+        exp = self.getExperiment()
+        observed_freqs = {'A': 45, 'B': 35}
+        expected_freqs = {'A': 45, 'B': 35}
+        with self.assertRaisesRegexp(ValueError, "Observed and expected frequencies should be of type Series."):
+            exp.run_goodness_of_fit_test(observed_freqs, expected_freqs)
+
+    def test_test_run_goodness_of_fit_test_incorrect_input_2(self):
+        exp = self.getExperiment()
+        observed_freqs = {'A': 45, 'B': 35}
+        expected_freqs = ['A', 'B', 'C']
+        with self.assertRaisesRegexp(ValueError, "Observed and expected frequencies should be of type Series."):
+            exp.run_goodness_of_fit_test(observed_freqs, expected_freqs)
+
 
 class HelperMethodsTestCases(ExperimentTestCase):
     """ Test other helper methods. """
