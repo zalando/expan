@@ -318,7 +318,8 @@ class Experiment(object):
         :param min_counts: minimum number of observations to run chi-square test
         :type  min_counts: int
         :return split_is_unbiased: False is split is biased and True if split is correct
-        :rtype: bool
+                p_value: corresponding chi-square p-value
+        :rtype: bool, float
         """
 
         if not isinstance(observed_freqs, pd.Series) or not isinstance(expected_freqs, pd.Series):
