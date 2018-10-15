@@ -19,6 +19,10 @@ class StatisticalTest(JsonSerializable):
     :type  variants: Variants
     """
     def __init__(self, data, kpi, features, variants):
+        # sometimes we want to postpone the actual creation of the
+        # dataframe
+        if callable(data):
+            data = data()
         if not isinstance(data, pd.DataFrame):
             raise ValueError("Please, provide data for the statistical test in form of a data frame.")
         if not isinstance(features, list):
