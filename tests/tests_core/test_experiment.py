@@ -8,6 +8,7 @@ import numpy as np
 from expan.core.results import CombinedTestStatistics
 from expan.core.statistical_test import *
 from expan.core.experiment import Experiment
+import expan.core.early_stopping as es
 from expan.core.util import generate_random_data, find_value_by_key_with_condition
 
 
@@ -129,10 +130,10 @@ class StatisticalTestTestCases(ExperimentTestCase):
 
         self.assertAlmostEqual(res.result.delta, 0.033053, ndecimals)
 
-        lower_bound_ci = find_value_by_key_with_condition(res.result.confidence_interval, 'percentile', 2.5, 'value')
-        upper_bound_ci = find_value_by_key_with_condition(res.result.confidence_interval, 'percentile', 97.5, 'value')
-        self.assertAlmostEqual(lower_bound_ci, -0.007135, ndecimals)
-        self.assertAlmostEqual(upper_bound_ci, 0.073240, ndecimals)
+        lower_bound_ci = find_value_by_key_with_condition(res.result.confidence_interval, 'percentile', 2.5/es.OBRIEN_FLEMING_DIVISION_FACTOR, 'value', 1e-5)
+        upper_bound_ci = find_value_by_key_with_condition(res.result.confidence_interval, 'percentile', 100-2.5/es.OBRIEN_FLEMING_DIVISION_FACTOR, 'value', 1e-5)
+        self.assertAlmostEqual(lower_bound_ci, -0.0383319, ndecimals)
+        self.assertAlmostEqual(upper_bound_ci, 0.104437, ndecimals)
 
         self.assertEqual(res.result.treatment_statistics.sample_size, 6108)
         self.assertEqual(res.result.control_statistics.sample_size, 3892)
