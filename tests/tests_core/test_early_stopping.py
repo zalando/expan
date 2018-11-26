@@ -60,8 +60,8 @@ class GroupSequentialTestCases(EarlyStoppingTestCase):
         self.assertAlmostEqual(res.control_statistics.variance,    0.9373337542827797)
 
         self.assertAlmostEqual(res.delta, -0.15887364780635896)
-        value025 = find_value_by_key_with_condition(res.confidence_interval, 'percentile', .025, 'value', 1e-5)
-        value975 = find_value_by_key_with_condition(res.confidence_interval, 'percentile', 99.975, 'value', 1e-5)
+        value025 = find_value_by_key_with_condition(res.confidence_interval, 'percentile', 2.5/es.OBRIEN_FLEMING_DIVISION_FACTOR, 'value', 1e-5)
+        value975 = find_value_by_key_with_condition(res.confidence_interval, 'percentile', 100-2.5/es.OBRIEN_FLEMING_DIVISION_FACTOR, 'value', 1e-5)
         np.testing.assert_almost_equal(value025, -0.31130760395377599, decimal=5)
         np.testing.assert_almost_equal(value975, -0.0064396916589367081, decimal=5)
 
