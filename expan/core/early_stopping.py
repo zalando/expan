@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 cache_sampling_results = False
 sampling_results = {}  # memorized sampling results
 
+OBRIEN_FLEMING_DIVISION_FACTOR = 100
 
 def obrien_fleming(information_fraction, alpha=0.05):
     """ Calculate an approximation of the O'Brien-Fleming alpha spending function.
@@ -34,7 +35,7 @@ def obrien_fleming(information_fraction, alpha=0.05):
     :rtype:  float
     """
 
-    alpha = alpha/100
+    alpha = alpha/OBRIEN_FLEMING_DIVISION_FACTOR
     """
     The following tests needed to be adjusted to take account of this correction:
     - tests/tests_core/test_early_stopping.py::
