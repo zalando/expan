@@ -75,10 +75,10 @@ class GroupSequentialTestCases(EarlyStoppingTestCase):
         """
         res = es.group_sequential(self.rand_s1, self.rand_s2, estimated_sample_size=100)
 
-        value025 = find_value_by_key_with_condition(res.confidence_interval, 'percentile', 2.5, 'value')
-        value975 = find_value_by_key_with_condition(res.confidence_interval, 'percentile', 97.5, 'value')
-        np.testing.assert_almost_equal (value025, -0.24461812530841959, decimal=5)
-        np.testing.assert_almost_equal (value975, -0.07312917030429833, decimal=5)
+        value025 = find_value_by_key_with_condition(res.confidence_interval, 'percentile', 2.5/es.OBRIEN_FLEMING_DIVISION_FACTOR, 'value', tol=1e-5)
+        value975 = find_value_by_key_with_condition(res.confidence_interval, 'percentile', 100-2.5/es.OBRIEN_FLEMING_DIVISION_FACTOR, 'value', tol=1e-5)
+        np.testing.assert_almost_equal (value025, -0.31130760395377599, decimal=5)
+        np.testing.assert_almost_equal (value975, -0.00643969165893670, decimal=5)
 
 
 class BayesFactorTestCases(EarlyStoppingTestCase):
