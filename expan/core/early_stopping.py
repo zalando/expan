@@ -33,6 +33,8 @@ def obrien_fleming(information_fraction, alpha=0.05):
     :return: redistributed alpha value at the time point with the given information fraction
     :rtype:  float
     """
+
+    alpha = alpha/100
     return (1 - norm.cdf(norm.ppf(1 - alpha / 2) / np.sqrt(information_fraction))) * 2
 
 
