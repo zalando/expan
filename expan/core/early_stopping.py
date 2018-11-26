@@ -42,6 +42,7 @@ def obrien_fleming(information_fraction, alpha=0.05):
             GroupSequentialTestCases::
                     test_obrien_fleming
                     test_group_sequential
+                    test_group_sequential_actual_size_larger_than_estimated
     - tests_core/test_experiment.py::
             StatisticalTestTestCases::
             test_group_sequential
