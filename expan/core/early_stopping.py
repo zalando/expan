@@ -35,6 +35,13 @@ def obrien_fleming(information_fraction, alpha=0.05):
     """
 
     alpha = alpha/100
+    """
+    The following tests needed to be adjusted to take account of this correction:
+    - tests/tests_core/test_early_stopping.py::
+            GroupSequentialTestCases::
+                    test_obrien_fleming
+                    test_group_sequential
+    """
     return (1 - norm.cdf(norm.ppf(1 - alpha / 2) / np.sqrt(information_fraction))) * 2
 
 
