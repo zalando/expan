@@ -41,8 +41,9 @@ class StatisticalTest(JsonSerializable):
         :rtype pandas.DataFrame
         """
         if not self.data_for_analysis:
+            self.data_for_analysis = self.data
             for feature in self.features:
-                self.data_for_analysis = feature.apply_to_data(data_for_analysis)
+                self.data_for_analysis = feature.apply_to_data(self.data_for_analysis)
         return self.data_for_analysis
     
     def is_valid_for_analysis(self):
