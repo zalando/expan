@@ -29,6 +29,19 @@ class StatisticalTest(JsonSerializable):
         self.kpi      = kpi
         self.features = features
         self.variants = variants
+        self.data_for_analysis = None
+
+    def get_data_for_analysis():
+        """ Filter out rows from original dataframe which don't have requested features.
+    
+        :return filtered dataframe applicable for this StatisticalTest
+        :rtype pandas.DataFrame
+        """
+        if not self.data_for_analysis:
+            for feature in self.features:
+                self.data_for_analysis = feature.apply_to_data(data_for_analysis)
+        return self.data_for_analysis
+        
 
     def __deepcopy__(self, forward_me_to_recursive_deepcopy):
         # This provides a custom 'deepcopy' for this type. See

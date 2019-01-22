@@ -83,9 +83,7 @@ class Experiment(object):
         # create test result object with empty result first
         test_result = StatisticalTestResult(test, None)
 
-        data_for_analysis = test.data
-        for feature in test.features:
-            data_for_analysis = feature.apply_to_data(data_for_analysis)
+        data_for_analysis = test.get_data_for_analysis()
 
         if not self._is_valid_for_analysis(data_for_analysis, test):
             # Note that this does not check that there are enough
