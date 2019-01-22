@@ -85,7 +85,7 @@ class Experiment(object):
 
         data_for_analysis = test.get_data_for_analysis()
 
-        if not self._is_valid_for_analysis(data_for_analysis, test):
+        if not test.is_valid_for_analysis():
             # Note that this does not check that there are enough
             # non-NaN and non=Inf datapoints. See below for a check
             # of that:
@@ -244,29 +244,6 @@ class Experiment(object):
 
 
     # ----- below are helper methods ----- #
-    def _is_valid_for_analysis(self, data, test):
-        """ Check whether the quality of data is good enough to perform analysis. Invalid cases can be:
-        1. there is no data
-        2. the data does not contain all the variants to perform analysis
-        
-        :param data: data frame for which a check for validity will be made
-        :type  data: DataFrame
-        :param test: a statistical test for control name and treatment name
-        :type  test: StatisticalTest
-        
-        :return True if data is valid for analysis and False if not
-        :rtype: bool 
-        """
-        count_controls   = sum(data[test.variants.variant_column_name] == test.variants.control_name)
-        count_treatments = sum(data[test.variants.variant_column_name] == test.variants.treatment_name)
-        if count_controls <= 1:
-            logger.warning("Control group only contains {} entities.".format(count_controls))
-            return False
-        if count_treatments <= 1:
-            logger.warning("Treatment group only contains {} entities.".format(count_treatments))
-            return False
-        return True
-
 
     def _get_denominators(self, data, test, variant_name):
         if type(test.kpi) is not DerivedKPI:

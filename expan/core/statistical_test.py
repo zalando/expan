@@ -31,7 +31,7 @@ class StatisticalTest(JsonSerializable):
         self.variants = variants
         self.data_for_analysis = None
 
-    def get_data_for_analysis():
+    def get_data_for_analysis(self):
         """ Filter out rows from original dataframe which don't have requested features.
     
         :return filtered dataframe applicable for this StatisticalTest
@@ -41,6 +41,26 @@ class StatisticalTest(JsonSerializable):
             for feature in self.features:
                 self.data_for_analysis = feature.apply_to_data(data_for_analysis)
         return self.data_for_analysis
+    
+    def is_valid_for_analysis(self):
+        """ Check whether the quality of data is good enough to perform analysis. Invalid cases can be:
+        1. there is no data
+        2. the data does not contain all the variants to perform analysis
+        
+        :return True if data is valid for analysis and False if not
+        :rtype: bool 
+        """
+        data = self.get_data_for_analysis()
+        count_controls   = sum(data[self.variants.variant_column_name] == self.variants.control_name)
+        count_treatments = sum(data[self.variants.variant_column_name] == self.variants.treatment_name)
+        if count_controls <= 1:
+            logger.warning("Control group only contains {} entities.".format(count_controls))
+            return False
+        if count_treatments <= 1:
+            logger.warning("Treatment group only contains {} entities.".format(count_treatments))
+            return False
+        return True
+
         
 
     def __deepcopy__(self, forward_me_to_recursive_deepcopy):
