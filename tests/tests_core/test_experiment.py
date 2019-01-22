@@ -475,11 +475,10 @@ class HelperMethodsTestCases(ExperimentTestCase):
 
     # Test is_valid_for_analysis
     def test_is_valid_for_analysis(self):
-        exp = self.getExperiment()
-        is_valid = exp._is_valid_for_analysis(self.data, self.test_normal_same)
+        is_valid = self.test_normal_same.is_valid_for_analysis()
         self.assertTrue(is_valid)
 
-        is_not_valid = exp._is_valid_for_analysis(self.data, self.test_nonsense_variant)
+        is_not_valid = self.test_nonsense_variant.is_valid_for_analysis()
         self.assertFalse(is_not_valid)
 
 

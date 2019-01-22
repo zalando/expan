@@ -40,7 +40,7 @@ class StatisticalTest(JsonSerializable):
         :return filtered dataframe applicable for this StatisticalTest
         :rtype pandas.DataFrame
         """
-        if not self.data_for_analysis:
+        if self.data_for_analysis is None:
             self.data_for_analysis = self.data
             for feature in self.features:
                 self.data_for_analysis = feature.apply_to_data(self.data_for_analysis)
