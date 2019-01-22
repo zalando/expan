@@ -94,16 +94,12 @@ class Experiment(object):
         if data_for_analysis.entity.duplicated().any():
             raise ValueError('Entities in data should be unique.')
 
+        
         # get control and treatment values for the kpi
-        control          = test.variants.get_variant(data_for_analysis, test.variants.control_name)[test.kpi.name]
-        logger.info("Control group size: {}".format(control.shape[0]))
-        control_denominators   = self._get_denominators(data_for_analysis, test, test.variants.control_name)
-        control_numerators   = control * control_denominators
+        [(control_numerators, control_denominators), (treatment_numerators, treatment_denominators)] = test.split_data_on_control_and_treatment()
+        logger.info("Control group size: {}".format(control_numerators.shape[0]))
 
-        treatment        = test.variants.get_variant(data_for_analysis, test.variants.treatment_name)[test.kpi.name]
-        logger.info("Treatment group size: {}".format(treatment.shape[0]))
-        treatment_denominators = self._get_denominators(data_for_analysis, test, test.variants.treatment_name)
-        treatment_numerators   = treatment * treatment_denominators
+        logger.info("Treatment group size: {}".format(treatment_numerators.shape[0]))
 
         number_of_finite_controls   = np.sum(np.isfinite( control_numerators   / control_denominators   ))
         number_of_finite_treatments = np.sum(np.isfinite( treatment_numerators / treatment_denominators ))
@@ -244,14 +240,6 @@ class Experiment(object):
 
 
     # ----- below are helper methods ----- #
-
-    def _get_denominators(self, data, test, variant_name):
-        if type(test.kpi) is not DerivedKPI:
-            return np.float64(1.0)
-
-        x = test.variants.get_variant(data, variant_name)[test.kpi.denominator]
-        return np.array(x, dtype=np.float64)
-
 
     def _quantile_filtering(self, data, kpis, percentile, threshold_type):
         # initialize 'flags' to a boolean Series (false) with the correct index.

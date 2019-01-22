@@ -5,6 +5,7 @@ import pandas as pd
 from expan.core.util import JsonSerializable
 
 from copy import deepcopy
+import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -65,6 +66,15 @@ class StatisticalTest(JsonSerializable):
             return False
         return True
 
+    def split_data_on_control_and_treatment(self):
+        data = self.get_data_for_analysis()
+        controldf   = self.variants.get_control_variant(data)
+        treatmentdf = self.variants.get_treatment_variant(data)
+
+        (control_numerator, control_denominator) = self.kpi.get_numerator_and_denominator(controldf)
+        (treatment_numerator, treatment_denominator) = self.kpi.get_numerator_and_denominator(treatmentdf)
+
+        return [(control_numerator, control_denominator), (treatment_numerator, treatment_denominator)]
         
 
     def __deepcopy__(self, forward_me_to_recursive_deepcopy):
@@ -93,6 +103,21 @@ class KPI(JsonSerializable):
     def __init__(self, name):
         self.name = name
 
+    def get_numerator_and_denominator(self, data):
+        """Select two columns from a dataset.
+        First corresponds to a numerator of a kpi.
+        Second corresponds to a denominator of a kpi. In case of a direct KPI - np.float64(1.0)
+        
+        :param data: dataframe to extract kpi columns from
+        :type  data: pandas.DataFrame
+
+        :return: (numerator, denominator) tuple
+        :rtype: (pandas.DataFrame, pandas.DataFrame)
+        """
+        numerator = data[self.name]
+        denominator = np.float64(1.0)
+        return (numerator, denominator)
+
 
 class DerivedKPI(KPI):
     """ This class represents a derived KPI which is a ratio of two columns. 
@@ -114,6 +139,21 @@ class DerivedKPI(KPI):
         """ Create the derived kpi column if it is not yet created. """
         if self.name not in data.columns:
             data.loc[:, self.name] = (data[self.numerator]/data[self.denominator]).astype("float64")
+    
+    def get_numerator_and_denominator(self, data):
+        """Select two columns from a dataset.
+        First corresponds to a numerator of a kpi.
+        Second corresponds to a denominator of a kpi. 
+        
+        :param data: dataframe to extract kpi columns from
+        :type  data: pandas.DataFrame
+
+        :return: (numerator, denominator) tuple
+        :rtype: (pandas.DataFrame, pandas.DataFrame)
+        """
+        numerator = data[self.numerator]
+        denominator = data[self.denominator]
+        return (numerator, denominator)
 
 
 class CorrectionMethod(Enum):
@@ -179,3 +219,26 @@ class Variants(JsonSerializable):
         if not isinstance(result, pd.DataFrame):
             result = pd.DataFrame([result])
         return result
+
+    def get_control_variant(self, data):
+        """Filter rows in dataframe which belong only to a control variant
+
+        :param data: incoming dataframe to filter
+        :type  data: pandas.DataFrame
+
+        :return: subset of rows which correspond only to a control variant
+        :rtype: pandas.DataFrame
+        """
+        return self.get_variant(data, self.control_name)
+        
+    def get_treatment_variant(self, data):
+        """Filter rows in dataframe which belong only to a treatment variant
+
+        :param data: incoming dataframe to filter
+        :type  data: pandas.DataFrame
+
+        :return: subset of rows which correspond only to a control variant
+        :rtype: pandas.DataFrame
+        """
+        return self.get_variant(data, self.treatment_name)
+        
