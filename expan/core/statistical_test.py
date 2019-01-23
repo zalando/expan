@@ -7,6 +7,13 @@ from expan.core.util import JsonSerializable
 from copy import deepcopy
 import numpy as np
 
+from expan.core.correction import CorrectionMethod
+
+import expan.core.early_stopping as es
+import expan.core.statistics as statx
+
+from expan.core.results import StatisticalTestResult
+
 logger = logging.getLogger(__name__)
 
 
@@ -34,6 +41,12 @@ class StatisticalTest(JsonSerializable):
         self.features = features
         self.variants = variants
         self.data_for_analysis = None
+        self.worker_table = {
+            'fixed_horizon': statx.make_delta,
+            'group_sequential': es.make_group_sequential,
+            'bayes_factor': es.make_bayes_factor,
+            'bayes_precision': es.make_bayes_precision
+        }
 
     def get_data_for_analysis(self):
         """ Filter out rows from original dataframe which don't have requested features.
@@ -75,7 +88,63 @@ class StatisticalTest(JsonSerializable):
         (treatment_numerator, treatment_denominator) = self.kpi.get_numerator_and_denominator(treatmentdf)
 
         return [(control_numerator, control_denominator), (treatment_numerator, treatment_denominator)]
+
+    def is_applicable_to_data(self):
+        if 'entity' not in self.data.columns:
+            raise KeyError("There is no 'entity' column in the data.")
+        self.variants.exists_in_data(self.data)
+        [f.exists_in_data(self.data) for f in self.features]
+        self.kpi.exists_in_data(self.data)
+
+    def do_analysis(self, test_method, include_data, **worker_args):
+        self.is_applicable_to_data() #will throw otherwise
         
+        self.kpi.make_derived_kpi(self.data)
+        logger.info("One analysis with kpi '{}', control variant '{}', treatment variant '{}' and features [{}] "
+                    "has just started".format(self.kpi, self.variants.control_name,
+                                              self.variants.treatment_name,
+                                              [(feature.column_name, feature.column_value) for feature in self.features]))
+        
+        if test_method not in self.worker_table:
+            raise NotImplementedError("Test method '{}' is not implemented.".format(test_method))
+        worker = self.worker_table[test_method](**worker_args)
+        
+        # create test result object with empty result first
+        test_result = StatisticalTestResult(self, None)
+
+        data_for_analysis = self.get_data_for_analysis()
+
+        if not self.is_valid_for_analysis():
+            # Note that this does not check that there are enough
+            # non-NaN and non=Inf datapoints. See below for a check
+            # of that:
+            logger.warning("Data is not valid for the analysis!")
+            return test_result
+        if data_for_analysis.entity.duplicated().any():
+            raise ValueError('Entities in data should be unique.')
+
+        
+        # get control and treatment values for the kpi
+        [(control_numerators, control_denominators), (treatment_numerators, treatment_denominators)] = self.split_data_on_control_and_treatment()
+        logger.info("Control group size: {}".format(control_numerators.shape[0]))
+
+        logger.info("Treatment group size: {}".format(treatment_numerators.shape[0]))
+
+        number_of_finite_controls   = np.sum(np.isfinite( control_numerators   / control_denominators   ))
+        number_of_finite_treatments = np.sum(np.isfinite( treatment_numerators / treatment_denominators ))
+
+        if number_of_finite_controls < 2 or number_of_finite_treatments < 2: return test_result
+
+        # run the test method
+        test_statistics = worker(x=treatment_numerators, y=control_numerators, x_denominators = treatment_denominators, y_denominators = control_denominators)
+        test_result.result = test_statistics
+
+        # remove data from the result test metadata
+        if not include_data:
+            del self.data
+        return test_result
+
+
 
     def __deepcopy__(self, forward_me_to_recursive_deepcopy):
         # This provides a custom 'deepcopy' for this type. See
@@ -118,6 +187,15 @@ class KPI(JsonSerializable):
         denominator = np.float64(1.0)
         return (numerator, denominator)
 
+    def exists_in_data(self, data):
+        if self.name not in data.columns:
+            raise KeyError("There is no column of name '{}' in the data.".format(self.name))
+        return True
+    
+    def make_derived_kpi(self, data):
+        """ Do nothing for direct KPI """
+        pass
+
 
 class DerivedKPI(KPI):
     """ This class represents a derived KPI which is a ratio of two columns. 
@@ -154,13 +232,13 @@ class DerivedKPI(KPI):
         numerator = data[self.numerator]
         denominator = data[self.denominator]
         return (numerator, denominator)
-
-
-class CorrectionMethod(Enum):
-    """ Correction methods."""
-    NONE       = 1   # no correction
-    BONFERRONI = 2   # Bonferroni correction. Used to correct false positive rate.
-    BH         = 3   # Benjamini-Hochberg procedure. Used to correct false discovery rate.
+    
+    def exists_in_data(self, data):
+        if type(self.numerator) is not str or self.numerator not in data.columns:
+            raise KeyError("Numerator '{}' of the derived KPI does not exist in the data.".format(self.numerator))
+        if type(self.denominator) is not str or self.denominator not in data.columns:
+            raise KeyError("Denominator '{}' of the derived KPI does not exist in the data.".format(self.denominator))
+        return True
 
 
 class StatisticalTestSuite(JsonSerializable):
@@ -197,6 +275,10 @@ class FeatureFilter(JsonSerializable):
 
     def apply_to_data(self, data):
         return data[data[self.column_name] == self.column_value]
+
+    def exists_in_data(self, data):
+        if self.column_name not in data.columns:
+            raise KeyError("Feature name '{}' does not exist in the data.".format(self.column_name))
 
 
 class Variants(JsonSerializable):
@@ -241,4 +323,11 @@ class Variants(JsonSerializable):
         :rtype: pandas.DataFrame
         """
         return self.get_variant(data, self.treatment_name)
+
+    def exists_in_data(self, data):
+        if self.variant_column_name not in data.columns:
+            raise KeyError("There is no '{}' column in the data.".format(self.variant_column_name))
+
+        return True
+        
         

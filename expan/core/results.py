@@ -1,4 +1,4 @@
-from expan.core.statistical_test import CorrectionMethod
+from expan.core.correction import CorrectionMethod
 from expan.core.util import JsonSerializable
 
 

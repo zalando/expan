@@ -53,67 +53,7 @@ class Experiment(object):
         if not isinstance(test, StatisticalTest):
             raise TypeError("Statistical test should be of type StatisticalTest.")
 
-        if 'entity' not in test.data.columns:
-            raise KeyError("There is no 'entity' column in the data.")
-        if test.variants.variant_column_name not in test.data.columns:
-            raise KeyError("There is no '{}' column in the data.".format(test.variants.variant_column_name))
-
-        for feature in test.features:
-            if feature.column_name not in test.data.columns:
-                raise KeyError("Feature name '{}' does not exist in the data.".format(feature.column_name))
-
-        if type(test.kpi) is KPI and (test.kpi.name not in test.data.columns):
-            raise KeyError("There is no column of name '{}' in the data.".format(test.kpi.name))
-        if type(test.kpi) is DerivedKPI:
-            if type(test.kpi.numerator) is not str or test.kpi.numerator not in test.data.columns:
-                raise KeyError("Numerator '{}' of the derived KPI does not exist in the data.".format(test.kpi.numerator))
-            if type(test.kpi.denominator) is not str or test.kpi.denominator not in test.data.columns:
-                raise KeyError("Denominator '{}' of the derived KPI does not exist in the data.".format(test.kpi.denominator))
-            test.kpi.make_derived_kpi(test.data)
-
-        logger.info("One analysis with kpi '{}', control variant '{}', treatment variant '{}' and features [{}] "
-                    "has just started".format(test.kpi, test.variants.control_name,
-                                              test.variants.treatment_name,
-                                              [(feature.column_name, feature.column_value) for feature in test.features]))
-
-        if test_method not in self.worker_table:
-            raise NotImplementedError("Test method '{}' is not implemented.".format(test_method))
-        worker = self.worker_table[test_method](**worker_args)
-
-        # create test result object with empty result first
-        test_result = StatisticalTestResult(test, None)
-
-        data_for_analysis = test.get_data_for_analysis()
-
-        if not test.is_valid_for_analysis():
-            # Note that this does not check that there are enough
-            # non-NaN and non=Inf datapoints. See below for a check
-            # of that:
-            logger.warning("Data is not valid for the analysis!")
-            return test_result
-        if data_for_analysis.entity.duplicated().any():
-            raise ValueError('Entities in data should be unique.')
-
-        
-        # get control and treatment values for the kpi
-        [(control_numerators, control_denominators), (treatment_numerators, treatment_denominators)] = test.split_data_on_control_and_treatment()
-        logger.info("Control group size: {}".format(control_numerators.shape[0]))
-
-        logger.info("Treatment group size: {}".format(treatment_numerators.shape[0]))
-
-        number_of_finite_controls   = np.sum(np.isfinite( control_numerators   / control_denominators   ))
-        number_of_finite_treatments = np.sum(np.isfinite( treatment_numerators / treatment_denominators ))
-
-        if number_of_finite_controls < 2 or number_of_finite_treatments < 2: return test_result
-
-        # run the test method
-        test_statistics = worker(x=treatment_numerators, y=control_numerators, x_denominators = treatment_denominators, y_denominators = control_denominators)
-        test_result.result = test_statistics
-
-        # remove data from the result test metadata
-        if not include_data:
-            del test.data
-        return test_result
+        return test.do_analysis(test_method, include_data, **worker_args)
 
 
     def analyze_statistical_test_suite(self, test_suite, test_method='fixed_horizon', **worker_args):
