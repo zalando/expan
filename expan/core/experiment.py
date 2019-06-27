@@ -222,8 +222,9 @@ class Experiment(object):
         if 0.0 < percentile <= 100.0 is False:
             raise ValueError("Percentile value needs to be between 0.0 and 100.0!")
         # check if provided filtering kind is valid
-        if threshold_type not in ['upper', 'lower']:
-            raise ValueError("Threshold type needs to be either 'upper' or 'lower'!")
+        admittable_thresholds = set(['upper', 'lower', 'both'])
+        if threshold_type not in admittable_thresholds:
+            raise ValueError("Threshold type needs to be either 'upper', 'lower', or 'both'.")
 
         # run quantile filtering
         flags = self._quantile_filtering(data=data,
@@ -292,18 +293,48 @@ class Experiment(object):
         :type  kpis: list[str]
         :param percentile: percentile considered as filtering threshold
         :type  percentile: float
-        :param threshold_type: type of threshold used ('lower' or 'upper')
+        :param threshold_type: type of threshold used ('upper', 'lower', or 'two-sided')
         :type  threshold_type: str
 
         :return: boolean values indicating whether the row should be filtered
         :rtype: pd.Series
         """
-        method_table   = {'upper': lambda x: x > threshold, 'lower': lambda x: x <= threshold}
-        na_replacement = {'upper': -float_info.max,         'lower':  float_info.max}
 
-        for column in data[kpis].columns:
-            threshold = np.percentile(data[column].fillna(na_replacement[threshold_type]), percentile)
-            flags = flags | data[column].apply(method_table[threshold_type])
+        def find_smallest(data, quantile):
+            rest = 1.0 - quantile
+            threshold = data.quantile(rest)
+            return data.apply(lambda x: x < threshold)
+
+        def find_largest(data, quantile):
+            threshold = data.quantile(quantile)
+            return data.apply(lambda x: x > threshold)
+
+        def find_smallest_and_largest(data, quantile):
+            rest = 1.0 - quantile
+            quantiles = [rest/2.0, 1.0 - rest/2.0]
+            thresholds = list(data.quantile(quantiles))
+            return data.apply(lambda x: x < thresholds[0] or x > thresholds[1])
+
+        quantile = float(percentile)/100.0
+
+        for col in data[kpis].columns:
+            column = data[col]
+            min, max = column.min(), column.max()
+
+            # if max > 0.0 and min < 0.0:
+            #     flags = flags | find_smallest_and_largest(column, quantile)
+            # elif max > 0.0:
+            #     flags = flags | find_largest(column, quantile)
+            # elif min < 0.0:
+            #     flags = flags | find_smallest(column, quantile)
+
+            # if threshold_type == 'two_sided':
+            #     flags = flags | find_smallest_and_largest(column, quantile)
+            # elif threshold_type == 'upper':
+            #     flags = flags | find_largest(column, quantile)
+            # else: # threshold_type == 'lower'
+            #     flags = flags | find_smallest(column, quantile)
+            flags = flags | find_largest(column, quantile)
         return flags
 
     def run_goodness_of_fit_test(self, observed_freqs, expected_freqs, alpha=0.01, min_counts=5):
