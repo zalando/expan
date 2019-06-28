@@ -3,7 +3,7 @@ from expan.core.experiment import Experiment
 import pandas as pd
 import numpy as np
 
-def test_quantile_filtering():
+def test_quantile_filtering_upper():
     exp = Experiment({})
     data = np.array([0,0,1,2]) / np.array([0,0,1,1])
     df = pd.DataFrame.from_dict({'earnings' : data})
@@ -11,5 +11,20 @@ def test_quantile_filtering():
     flags = exp._quantile_filtering(df, ['earnings'], 90, 'upper')
     assert flags.tolist() == [False, False, False, True]
 
+
+def test_quantile_filtering_lower():
+    exp = Experiment({})
+    data = np.array([0,0,1,2]) / np.array([0,0,1,1])
+    df = pd.DataFrame.from_dict({'earnings' : data})
+
     flags = exp._quantile_filtering(df, ['earnings'], 10, 'lower')
     assert flags.tolist() == [False, False, True, False]
+
+
+def test_quantile_filtering_two_sided():
+    exp = Experiment({})
+    df = pd.DataFrame.from_dict({'earnings' : range(10)})
+
+    flags = exp._quantile_filtering(df, ['earnings'], 80.0, 'two-sided')
+    results = flags.tolist()
+    assert results == [True] + [False]*8 + [True]

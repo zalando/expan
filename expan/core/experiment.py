@@ -222,9 +222,9 @@ class Experiment(object):
         if 0.0 < percentile <= 100.0 is False:
             raise ValueError("Percentile value needs to be between 0.0 and 100.0!")
         # check if provided filtering kind is valid
-        admittable_thresholds = set(['upper', 'lower', 'both'])
+        admittable_thresholds = set(['upper', 'lower', 'two-sided'])
         if threshold_type not in admittable_thresholds:
-            raise ValueError("Threshold type needs to be either 'upper', 'lower', or 'both'.")
+            raise ValueError("Threshold type needs to be either 'upper', 'lower', or 'two-sided'.")
 
         # run quantile filtering
         flags = self._quantile_filtering(data=data,
@@ -310,31 +310,28 @@ class Experiment(object):
             return data.apply(lambda x: x > threshold)
 
         def find_smallest_and_largest(data, quantile):
+            print(data)
             rest = 1.0 - quantile
             quantiles = [rest/2.0, 1.0 - rest/2.0]
+            print(quantiles)
             thresholds = list(data.quantile(quantiles))
+            print(thresholds)
             return data.apply(lambda x: x < thresholds[0] or x > thresholds[1])
 
         quantile = float(percentile)/100.0
 
         for col in data[kpis].columns:
-            column = data[col]
-            min, max = column.min(), column.max()
-
-            # if max > 0.0 and min < 0.0:
-            #     flags = flags | find_smallest_and_largest(column, quantile)
-            # elif max > 0.0:
-            #     flags = flags | find_largest(column, quantile)
-            # elif min < 0.0:
-            #     flags = flags | find_smallest(column, quantile)
+            column = data[col].copy()
+            column.replace([np.inf, -np.inf], np.nan)
 
             if threshold_type == 'upper':
                 flags = flags | find_largest(column, quantile)
             elif threshold_type == 'lower':
                 flags = flags | find_smallest(column, quantile)
-            else: # threshold_type == 'two_sided':
+            elif threshold_type == 'two-sided':
                 flags = flags | find_smallest_and_largest(column, quantile)
-            # flags = flags | find_largest(column, quantile)
+            else:
+                raise ValueError("Unknown outlier filtering method '%s'."%(threshold_type,))
         return flags
 
     def run_goodness_of_fit_test(self, observed_freqs, expected_freqs, alpha=0.01, min_counts=5):
