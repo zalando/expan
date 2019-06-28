@@ -301,7 +301,6 @@ class Experiment(object):
         """
 
         def find_smallest(data, quantile):
-            rest = 1.0 - quantile
             threshold = data.quantile(quantile)
             return data.apply(lambda x: x < threshold)
 
