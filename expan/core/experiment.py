@@ -302,7 +302,7 @@ class Experiment(object):
 
         def find_smallest(data, quantile):
             rest = 1.0 - quantile
-            threshold = data.quantile(rest)
+            threshold = data.quantile(quantile)
             return data.apply(lambda x: x < threshold)
 
         def find_largest(data, quantile):
@@ -328,13 +328,13 @@ class Experiment(object):
             # elif min < 0.0:
             #     flags = flags | find_smallest(column, quantile)
 
-            # if threshold_type == 'two_sided':
-            #     flags = flags | find_smallest_and_largest(column, quantile)
-            # elif threshold_type == 'upper':
-            #     flags = flags | find_largest(column, quantile)
-            # else: # threshold_type == 'lower'
-            #     flags = flags | find_smallest(column, quantile)
-            flags = flags | find_largest(column, quantile)
+            if threshold_type == 'upper':
+                flags = flags | find_largest(column, quantile)
+            elif threshold_type == 'lower':
+                flags = flags | find_smallest(column, quantile)
+            else: # threshold_type == 'two_sided':
+                flags = flags | find_smallest_and_largest(column, quantile)
+            # flags = flags | find_largest(column, quantile)
         return flags
 
     def run_goodness_of_fit_test(self, observed_freqs, expected_freqs, alpha=0.01, min_counts=5):

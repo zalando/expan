@@ -5,7 +5,8 @@ import numpy as np
 
 def test_quantile_filtering():
     exp = Experiment({})
-    df = pd.DataFrame.from_dict({   'earnings' : np.array([0,0,1,2]) / np.array([0,0,1,1]) })
+    data = np.array([0,0,1,2]) / np.array([0,0,1,1])
+    df = pd.DataFrame.from_dict({'earnings' : data})
 
     flags = exp._quantile_filtering(df, ['earnings'], 90, 'upper')
     assert flags.tolist() == [False, False, False, True]
