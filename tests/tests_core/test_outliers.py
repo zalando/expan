@@ -1,7 +1,28 @@
 from __future__ import division
-from expan.core.experiment import Experiment
+from expan.core.experiment import Experiment, _choose_threshold_type
 import pandas as pd
 import numpy as np
+
+
+def test_choose_threshold_type_upper():
+    data = np.array([1, 2, 3])
+    assert _choose_threshold_type(data) == 'upper'
+
+
+def test_choose_threshold_type_upper_zero():
+    data = np.array([0, 1, 2, 3])
+    assert _choose_threshold_type(data) == 'upper'
+
+
+def test_choose_threshold_type_lower():
+    data = np.array([-3, -2, -1])
+    assert _choose_threshold_type(data) == 'lower'
+
+
+def test_choose_threshold_type_lower_zero():
+    data = np.array([-3, -2, -1, 0])
+    assert _choose_threshold_type(data) == 'lower'
+
 
 def test_quantile_filtering_upper_old():
     exp = Experiment({})

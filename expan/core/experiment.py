@@ -301,14 +301,17 @@ class Experiment(object):
         """
 
         def find_smallest(data, quantile):
+            """ Return indices of data points smaller than given quantile."""
             threshold = data.quantile(quantile)
             return data.apply(lambda x: x < threshold)
 
         def find_largest(data, quantile):
+            """ Return indices of data points larger than given quantile."""
             threshold = data.quantile(quantile)
             return data.apply(lambda x: x > threshold)
 
         def find_smallest_and_largest(data, quantile):
+            """ Return indices of data points outside of the given quantile."""
             rest = 1.0 - quantile
             quantiles = [rest/2.0, 1.0 - rest/2.0]
             thresholds = list(data.quantile(quantiles))
@@ -365,3 +368,14 @@ class Experiment(object):
             raise ValueError("Variant split check was cancelled since observed or expected frequencies "
                              "are less than 2.")
         return split_is_unbiased, p_value
+
+def _choose_threshold_type(data):
+    """ Heuristics used to decide what filtering method to use."""
+    min, max = data.min(), data.max()
+
+    if min < 0.0 and max > 0.0:
+        return 'two-sided'
+    elif max > 0.0:
+        return 'upper'
+    elif min < 0.0:
+        return 'lower'
