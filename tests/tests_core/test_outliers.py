@@ -23,7 +23,7 @@ def test_quantile_filtering_lower_old():
 
 def test_quantile_filtering_upper():
     exp = Experiment({})
-    data = np.array([0.0]*2 + range(10)) / np.array([0.0]*2 + [1.0]*10)
+    data = np.array([0.0]*2 + list(range(10))) / np.array([0.0]*2 + [1.0]*10)
     df = pd.DataFrame.from_dict({'earnings' : data})
 
     flags = exp._quantile_filtering(df, ['earnings'], 90, 'upper')
@@ -32,7 +32,7 @@ def test_quantile_filtering_upper():
 
 def test_quantile_filtering_lower():
     exp = Experiment({})
-    data = np.array([0.0]*2 + range(10)) / np.array([0.0]*2 + [1.0]*10)
+    data = np.array([0.0]*2 + list(range(10))) / np.array([0.0]*2 + [1.0]*10)
     df = pd.DataFrame.from_dict({'earnings' : data})
 
     flags = exp._quantile_filtering(df, ['earnings'], 50, 'lower')
@@ -42,7 +42,7 @@ def test_quantile_filtering_lower():
 
 def test_quantile_filtering_two_sided():
     exp = Experiment({})
-    df = pd.DataFrame.from_dict({'earnings' : range(10)})
+    df = pd.DataFrame.from_dict({'earnings' : listrange(10))})
 
     flags = exp._quantile_filtering(df, ['earnings'], 80.0, 'two-sided')
     results = flags.tolist()
