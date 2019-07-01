@@ -190,7 +190,7 @@ class Experiment(object):
         return test_suite_result
 
 
-    def outlier_filter(self, data, kpis, percentile=99.0, threshold_type='upper'):
+    def outlier_filter(self, data, kpis, thresholds=None):
         """ Method that filters out entities whose KPIs exceed the value at a given percentile.
         If any of the KPIs exceeds its threshold the entity is filtered out. 
         If kpis contains derived kpi, this method will first create these columns,
@@ -200,8 +200,8 @@ class Experiment(object):
         :type  kpis: list[KPI]
         :param percentile: percentile considered as filtering threshold
         :type  percentile: float
-        :param threshold_type: type of threshold used ('lower' or 'upper')
-        :type  threshold_type: str
+        :param thresholds: dict of thresholds mapping KPI names to (type, percentile) tuples
+        :type  threshold_type: dict
 
         :return: Will return data with filtered outliers.
         """
@@ -218,19 +218,24 @@ class Experiment(object):
                         "Denominator '{}' of the derived KPI does not exist in the data in outlier filtering.".format(kpi.denominator))
                 kpi.make_derived_kpi(data)
 
-        # check if provided percentile is valid
-        if 0.0 < percentile <= 100.0 is False:
-            raise ValueError("Percentile value needs to be between 0.0 and 100.0!")
-        # check if provided filtering kind is valid
         admittable_thresholds = set(['upper', 'lower', 'two-sided'])
-        if threshold_type not in admittable_thresholds:
-            raise ValueError("Threshold type needs to be either 'upper', 'lower', or 'two-sided'.")
+
+        thresholds = thresholds or {}
+        for kpi in thresholds:
+            threshold_type, percentile = thresholds[kpi]
+
+            # check if provided filtering kind is valid
+            if threshold_type not in admittable_thresholds:
+                raise ValueError("Threshold type needs to be either 'upper', 'lower', or 'two-sided'.")
+
+            # check if provided percentile is valid
+            if 0.0 < percentile <= 100.0 is False:
+                raise ValueError("Percentile value needs to be between 0.0 and 100.0!")
 
         # run quantile filtering
         flags = self._quantile_filtering(data=data,
                                          kpis=[kpi.name for kpi in kpis],
-                                         percentile=percentile,
-                                         threshold_type=threshold_type)
+                                         thresholds=thresholds)
         # log which columns were filtered and how many entities were filtered out
         self.metadata['filtered_columns'] = [kpi.name for kpi in kpis]
         self.metadata['filtered_entities_number'] = len(flags[flags == True])
@@ -279,7 +284,7 @@ class Experiment(object):
         return np.array(x, dtype=np.float64)
 
 
-    def _quantile_filtering(self, data, kpis, percentile, threshold_type):
+    def _quantile_filtering(self, data, kpis, thresholds):
         # initialize 'flags' to a boolean Series (false) with the correct index.
         # By using the correct index, we remove the annoying warnings.
         flags = data.index.to_series() != data.index.to_series()
@@ -317,8 +322,6 @@ class Experiment(object):
             thresholds = list(data.quantile(quantiles))
             return data.apply(lambda x: x < thresholds[0] or x > thresholds[1])
 
-        quantile = float(percentile)/100.0
-
         method_table = {'upper': find_largest,
                         'lower': find_smallest,
                         'two-sided': find_smallest_and_largest}
@@ -326,6 +329,13 @@ class Experiment(object):
         for col in data[kpis].columns:
             column = data[col].copy()
             column.replace([np.inf, -np.inf], np.nan)
+
+            quantile = 0.99
+            threshold_type = _choose_threshold_type(column)
+
+            if col in thresholds:
+                threshold_type, quantile = thresholds[col]
+                quantile = quantile/100.0
 
             if threshold_type not in method_table:
                 raise ValueError("Unknown outlier filtering method '%s'."%(threshold_type,))
