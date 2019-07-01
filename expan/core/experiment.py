@@ -377,8 +377,9 @@ class Experiment(object):
 
 def _choose_threshold_type(data):
     """ Heuristics used to decide what filtering method to use."""
-    assert data.min, "data should have min method"
-    assert data.max, "data should have max method"
+    assert data,     'data should be non-empty'
+    assert data.min, 'data should have min method'
+    assert data.max, 'data should have max method'
     min, max = data.min(), data.max()
 
     if min < 0.0 and max > 0.0:
