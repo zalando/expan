@@ -326,12 +326,12 @@ class Experiment(object):
             column = data[col].copy()
             column.replace([np.inf, -np.inf], np.nan)
 
-            quantile = 0.99
-            threshold_type = _choose_threshold_type(column)
-
             if col in thresholds:
                 threshold_type, quantile = thresholds[col]
                 quantile = quantile/100.0
+            else:
+                quantile = 0.99
+                threshold_type = _choose_threshold_type(column)
 
             if threshold_type not in method_table:
                 raise ValueError("Unknown outlier filtering method '%s'."%(threshold_type,))
