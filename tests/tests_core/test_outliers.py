@@ -24,6 +24,11 @@ def test_choose_threshold_type_lower_zero():
     assert _choose_threshold_type(data) == 'lower'
 
 
+def test_choose_threshold_type_two_sided():
+    data = np.array([-3, -2, -1, 0, 1, 2, 3])
+    assert _choose_threshold_type(data) == 'two-sided'
+
+
 def test_quantile_filtering_upper_old():
     exp = Experiment({})
     data = np.array([0,0,1,2]) / np.array([0,0,1,1])
