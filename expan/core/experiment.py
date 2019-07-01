@@ -198,10 +198,8 @@ class Experiment(object):
         
         :param kpis: list of KPI instances
         :type  kpis: list[KPI]
-        :param percentile: percentile considered as filtering threshold
-        :type  percentile: float
         :param thresholds: dict of thresholds mapping KPI names to (type, percentile) tuples
-        :type  threshold_type: dict
+        :type  thresholds: dict
 
         :return: Will return data with filtered outliers.
         """
@@ -296,10 +294,8 @@ class Experiment(object):
         
         :param kpis: the kpis to perform filtering
         :type  kpis: list[str]
-        :param percentile: percentile considered as filtering threshold
-        :type  percentile: float
-        :param threshold_type: type of threshold used ('upper', 'lower', or 'two-sided')
-        :type  threshold_type: str
+        :param thresholds: dict of thresholds mapping KPI names to (type, percentile) tuples
+        :type  thresholds: dict
 
         :return: boolean values indicating whether the row should be filtered
         :rtype: pd.Series
