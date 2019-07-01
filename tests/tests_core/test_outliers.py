@@ -42,7 +42,7 @@ def test_quantile_filtering_lower():
 
 def test_quantile_filtering_two_sided():
     exp = Experiment({})
-    df = pd.DataFrame.from_dict({'earnings' : listrange(10))})
+    df = pd.DataFrame.from_dict({'earnings' : list(range(10))})
 
     flags = exp._quantile_filtering(df, ['earnings'], 80.0, 'two-sided')
     results = flags.tolist()
