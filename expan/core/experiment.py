@@ -219,7 +219,7 @@ class Experiment(object):
         admittable_thresholds = set(['upper', 'lower', 'two-sided'])
 
         thresholds = thresholds or {}
-        for kpi in thresholds:
+        for kpi in thresholds.keys():
             threshold_type, percentile = thresholds[kpi]
 
             # check if provided filtering kind is valid
