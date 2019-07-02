@@ -308,6 +308,14 @@ class OutlierFilteringTestCases(ExperimentTestCase):
         self.assertEqual(filtered_dict['A'], 88)
         self.assertEqual(filtered_dict['B'], 298)
 
+    def test_outlier_filtering_automatic(self):
+        exp = self.getExperiment()
+        data = exp.outlier_filter(
+            self.data,
+            kpis = [KPI(kpi) for kpi in self.kpi_names]
+        )
+        self.assertEqual(len(self.data) - len(data), exp.metadata['filtered_entities_number'])
+
     def test_outlier_filtering_lower_threshold(self):
         exp = self.getExperiment()
         data = exp.outlier_filter(
@@ -318,16 +326,6 @@ class OutlierFilteringTestCases(ExperimentTestCase):
         self.assertEqual(len(self.data) - len(data), exp.metadata['filtered_entities_number'])
         self.assertEqual(exp.metadata['filtered_entities_per_variant']['A'], 22)
         self.assertEqual(exp.metadata['filtered_entities_per_variant']['B'], 18)
-
-    def test_outlier_filtering_automatic(self):
-        exp = self.getExperiment()
-        data = exp.outlier_filter(
-            self.data,
-            kpis = [KPI(kpi) for kpi in self.kpi_names]
-        )
-        self.assertEqual(len(self.data) - len(data), exp.metadata['filtered_entities_number'])
-        self.assertEqual(exp.metadata['filtered_entities_per_variant']['A'], 161)
-        self.assertEqual(exp.metadata['filtered_entities_per_variant']['B'], 228)
 
     def test_outlier_filtering_unsupported_kpi(self):
         exp = self.getExperiment()
