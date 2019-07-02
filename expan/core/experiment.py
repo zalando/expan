@@ -241,7 +241,7 @@ class Experiment(object):
         filtered = [item[1] for item in list(zip(flags, data['variant'])) if item[0] == True]
         self.metadata['filtered_entities_per_variant'] = dict((val, filtered.count(val)) for val in set(filtered))
 
-        self.metadata['filtered_threshold_kind'] = threshold_type
+        self.metadata['filtered_threshold_kind'] = 'various'
         # throw warning if too many entities have been filtered out
         if (len(flags[flags == True]) / float(len(data))) > 0.02:
             warnings.warn('More than 2% of entities have been filtered out, consider adjusting the percentile value.')
@@ -377,9 +377,9 @@ class Experiment(object):
 
 def _choose_threshold_type(data):
     """ Heuristics used to decide what filtering method to use."""
-    assert data,     'data should be non-empty'
-    assert data.min, 'data should have min method'
-    assert data.max, 'data should have max method'
+    assert len(data), 'data should be non-empty'
+    assert data.min,  'data should have min method'
+    assert data.max,  'data should have max method'
     min, max = data.min(), data.max()
 
     if min < 0.0 and max > 0.0:
