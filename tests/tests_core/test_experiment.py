@@ -312,9 +312,10 @@ class OutlierFilteringTestCases(ExperimentTestCase):
         exp = self.getExperiment()
         data = exp.outlier_filter(
             self.data,
-            kpis = [KPI(kpi) for kpi in self.kpi_names]
+            kpis = [KPI(kpi) for kpi in self.kpi_names],
         )
         self.assertEqual(len(self.data) - len(data), exp.metadata['filtered_entities_number'])
+        self.assertEqual(exp.metadata['filtered_entities_number'], 389)
 
     def test_outlier_filtering_lower_threshold(self):
         exp = self.getExperiment()
