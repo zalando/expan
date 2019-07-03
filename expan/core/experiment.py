@@ -327,7 +327,7 @@ class Experiment(object):
                 of data."""
             rest = 1.0 - quantile
 
-            neg_threshold = data[data <= 0.0].quantile(rest/2.0)
+            neg_threshold = data[data <  0.0].quantile(rest/2.0)
             pos_threshold = data[data >= 0.0].quantile(1.0 - rest/2.0)
 
             return data.apply(lambda x: x < neg_threshold or x > pos_threshold)
