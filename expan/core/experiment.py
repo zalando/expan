@@ -389,4 +389,5 @@ def _choose_threshold_type(data):
     elif min < 0.0:
         return 'lower'
     else:
-        raise ValueError("Both min and max of data are zero.")
+        # it doesn't really matter since in this case min == max == 0.0
+        return 'two-sided'
