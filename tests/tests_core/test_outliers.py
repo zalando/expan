@@ -5,27 +5,27 @@ import numpy as np
 
 
 def test_choose_threshold_type_upper():
-    data = np.array([1, 2, 3])
+    data = np.array([1, 2, 3, np.nan])
     assert _choose_threshold_type(data) == 'upper'
 
 
 def test_choose_threshold_type_upper_zero():
-    data = np.array([0, 1, 2, 3])
+    data = np.array([0, 1, 2, 3, np.nan])
     assert _choose_threshold_type(data) == 'upper'
 
 
 def test_choose_threshold_type_lower():
-    data = np.array([-3, -2, -1])
+    data = np.array([-3, -2, -1, np.nan])
     assert _choose_threshold_type(data) == 'lower'
 
 
 def test_choose_threshold_type_lower_zero():
-    data = np.array([-3, -2, -1, 0])
+    data = np.array([-3, -2, -1, 0, np.nan])
     assert _choose_threshold_type(data) == 'lower'
 
 
 def test_choose_threshold_type_two_sided():
-    data = np.array([-3, -2, -1, 0, 1, 2, 3])
+    data = np.array([-3, -2, -1, 0, 1, 2, 3, np.nan])
     assert _choose_threshold_type(data) == 'two-sided'
 
 

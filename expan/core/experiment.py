@@ -2,6 +2,7 @@ import logging
 import warnings
 
 import numpy as np
+import pandas as pd
 import copy
 
 import expan.core.early_stopping as es
@@ -14,6 +15,7 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 logger = logging.getLogger(__name__)
 
 DEFAULT_OUTLIER_QUANTILE = 0.99
+
 class Experiment(object):
     """ Class which adds the analysis functions to experimental data. """
     def __init__(self, metadata):
@@ -391,9 +393,8 @@ class Experiment(object):
 def _choose_threshold_type(data):
     """ Heuristics used to decide what filtering method to use."""
     assert len(data), 'data should be non-empty'
-    assert data.min,  'data should have min method'
-    assert data.max,  'data should have max method'
-    min, max = data.min(), data.max()
+    data = pd.Series(data)
+    min, max = data.min(skipna=True), data.max(skipna=True)
 
     if min < 0.0 and max > 0.0:
         return 'two-sided'
