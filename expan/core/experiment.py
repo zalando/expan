@@ -327,8 +327,8 @@ class Experiment(object):
             column.replace([np.inf, -np.inf], np.nan)
 
             if col in thresholds:
-                threshold_type, quantile = thresholds[col]
-                quantile = quantile/100.0
+                threshold_type, percentile = thresholds[col]
+                quantile = percentile/100.0
             else:
                 quantile = DEFAULT_OUTLIER_QUANTILE
                 threshold_type = _choose_threshold_type(column)
