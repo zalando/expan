@@ -13,7 +13,7 @@ from expan.core.results import StatisticalTestResult, MultipleTestSuiteResult, C
 warnings.filterwarnings("ignore", category=FutureWarning)
 logger = logging.getLogger(__name__)
 
-
+DEFAULT_OUTLIER_QUANTILE = 0.99
 class Experiment(object):
     """ Class which adds the analysis functions to experimental data. """
     def __init__(self, metadata):
@@ -330,7 +330,7 @@ class Experiment(object):
                 threshold_type, quantile = thresholds[col]
                 quantile = quantile/100.0
             else:
-                quantile = 0.99
+                quantile = DEFAULT_OUTLIER_QUANTILE
                 threshold_type = _choose_threshold_type(column)
 
             if threshold_type not in method_table:
