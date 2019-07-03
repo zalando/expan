@@ -73,3 +73,13 @@ def test_quantile_filtering_two_sided():
     flags = exp._quantile_filtering(df, ['earnings'], {'earnings': ('two-sided', 80.0)})
     results = flags.tolist()
     assert results == [True] + [False]*8 + [True]
+
+def test_quantile_filtering_two_sided_asym():
+    exp = Experiment({})
+    data = list(range(-8,0)) + list(range(16))
+    df = pd.DataFrame.from_dict({'earnings' : data})
+
+    flags = exp._quantile_filtering(df, ['earnings'],
+                                    {'earnings': ('two-sided-asym', 50.0)})
+    results = flags.tolist()
+    assert results == [True]*2 + [False]*18 + [True]*4

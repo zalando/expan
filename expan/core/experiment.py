@@ -216,7 +216,8 @@ class Experiment(object):
                         "Denominator '{}' of the derived KPI does not exist in the data in outlier filtering.".format(kpi.denominator))
                 kpi.make_derived_kpi(data)
 
-        admittable_thresholds = set(['upper', 'lower', 'two-sided'])
+        admittable_thresholds = set(['upper', 'lower', 'two-sided',
+                                     'two-sided-asym'])
 
         thresholds = thresholds or {}
         for kpi in thresholds.keys():
@@ -318,9 +319,21 @@ class Experiment(object):
             thresholds = list(data.quantile(quantiles))
             return data.apply(lambda x: x < thresholds[0] or x > thresholds[1])
 
+        def find_smallest_and_largest_asym(data, quantile):
+            """ Return boolen vector of data to remove such that quantile/2
+                is kept in both non-negative and non-positive subsets
+                of data."""
+            rest = 1.0 - quantile
+
+            neg_threshold = data[data <= 0.0].quantile(rest/2.0)
+            pos_threshold = data[data >= 0.0].quantile(1.0 - rest/2.0)
+
+            return data.apply(lambda x: x < neg_threshold or x > pos_threshold)
+
         method_table = {'upper': find_largest,
                         'lower': find_smallest,
-                        'two-sided': find_smallest_and_largest}
+                        'two-sided': find_smallest_and_largest,
+                        'two-sided-asym': find_smallest_and_largest_asym}
 
         for col in data[kpis].columns:
             column = data[col].copy()
