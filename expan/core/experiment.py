@@ -2,6 +2,7 @@ import logging
 import warnings
 
 import numpy as np
+import pandas as pd
 import copy
 
 import expan.core.early_stopping as es
@@ -13,6 +14,7 @@ from expan.core.results import StatisticalTestResult, MultipleTestSuiteResult, C
 warnings.filterwarnings("ignore", category=FutureWarning)
 logger = logging.getLogger(__name__)
 
+DEFAULT_OUTLIER_QUANTILE = 0.99
 
 class Experiment(object):
     """ Class which adds the analysis functions to experimental data. """
@@ -190,7 +192,7 @@ class Experiment(object):
         return test_suite_result
 
 
-    def outlier_filter(self, data, kpis, percentile=99.0, threshold_type='upper'):
+    def outlier_filter(self, data, kpis, thresholds=None):
         """ Method that filters out entities whose KPIs exceed the value at a given percentile.
         If any of the KPIs exceeds its threshold the entity is filtered out. 
         If kpis contains derived kpi, this method will first create these columns,
@@ -198,10 +200,8 @@ class Experiment(object):
         
         :param kpis: list of KPI instances
         :type  kpis: list[KPI]
-        :param percentile: percentile considered as filtering threshold
-        :type  percentile: float
-        :param threshold_type: type of threshold used ('lower' or 'upper')
-        :type  threshold_type: str
+        :param thresholds: dict of thresholds mapping KPI names to (type, percentile) tuples
+        :type  thresholds: dict
 
         :return: Will return data with filtered outliers.
         """
@@ -218,18 +218,25 @@ class Experiment(object):
                         "Denominator '{}' of the derived KPI does not exist in the data in outlier filtering.".format(kpi.denominator))
                 kpi.make_derived_kpi(data)
 
-        # check if provided percentile is valid
-        if 0.0 < percentile <= 100.0 is False:
-            raise ValueError("Percentile value needs to be between 0.0 and 100.0!")
-        # check if provided filtering kind is valid
-        if threshold_type not in ['upper', 'lower']:
-            raise ValueError("Threshold type needs to be either 'upper' or 'lower'!")
+        admittable_thresholds = set(['upper', 'lower', 'two-sided',
+                                     'two-sided-asym'])
+
+        thresholds = thresholds or {}
+        for kpi in thresholds.keys():
+            threshold_type, percentile = thresholds[kpi]
+
+            # check if provided filtering kind is valid
+            if threshold_type not in admittable_thresholds:
+                raise ValueError("Threshold type needs to be either 'upper', 'lower', or 'two-sided'.")
+
+            # check if provided percentile is valid
+            if 0.0 < percentile <= 100.0 is False:
+                raise ValueError("Percentile value needs to be between 0.0 and 100.0!")
 
         # run quantile filtering
         flags = self._quantile_filtering(data=data,
                                          kpis=[kpi.name for kpi in kpis],
-                                         percentile=percentile,
-                                         threshold_type=threshold_type)
+                                         thresholds=thresholds)
         # log which columns were filtered and how many entities were filtered out
         self.metadata['filtered_columns'] = [kpi.name for kpi in kpis]
         self.metadata['filtered_entities_number'] = len(flags[flags == True])
@@ -237,7 +244,7 @@ class Experiment(object):
         filtered = [item[1] for item in list(zip(flags, data['variant'])) if item[0] == True]
         self.metadata['filtered_entities_per_variant'] = dict((val, filtered.count(val)) for val in set(filtered))
 
-        self.metadata['filtered_threshold_kind'] = threshold_type
+        self.metadata['filtered_threshold_kind'] = 'various'
         # throw warning if too many entities have been filtered out
         if (len(flags[flags == True]) / float(len(data))) > 0.02:
             warnings.warn('More than 2% of entities have been filtered out, consider adjusting the percentile value.')
@@ -278,7 +285,7 @@ class Experiment(object):
         return np.array(x, dtype=np.float64)
 
 
-    def _quantile_filtering(self, data, kpis, percentile, threshold_type):
+    def _quantile_filtering(self, data, kpis, thresholds):
         # initialize 'flags' to a boolean Series (false) with the correct index.
         # By using the correct index, we remove the annoying warnings.
         flags = data.index.to_series() != data.index.to_series()
@@ -290,20 +297,63 @@ class Experiment(object):
         
         :param kpis: the kpis to perform filtering
         :type  kpis: list[str]
-        :param percentile: percentile considered as filtering threshold
-        :type  percentile: float
-        :param threshold_type: type of threshold used ('lower' or 'upper')
-        :type  threshold_type: str
+        :param thresholds: dict of thresholds mapping KPI names to (type, percentile) tuples
+        :type  thresholds: dict
 
         :return: boolean values indicating whether the row should be filtered
         :rtype: pd.Series
         """
-        method_table   = {'upper': lambda x: x > threshold, 'lower': lambda x: x <= threshold}
-        na_replacement = {'upper': -float_info.max,         'lower':  float_info.max}
 
-        for column in data[kpis].columns:
-            threshold = np.percentile(data[column].fillna(na_replacement[threshold_type]), percentile)
-            flags = flags | data[column].apply(method_table[threshold_type])
+        def find_smallest(data, quantile):
+            """ Return boolean vector of data points smaller than given quantile."""
+            threshold = data.quantile(quantile)
+            return data.apply(lambda x: x < threshold)
+
+        def find_largest(data, quantile):
+            """ Return boolean vector of data points larger than given quantile."""
+            threshold = data.quantile(quantile)
+            return data.apply(lambda x: x > threshold)
+
+        def find_smallest_and_largest(data, quantile):
+            """ Return boolean vector of data points outside of the given quantile."""
+            rest = 1.0 - quantile
+            quantiles = [rest/2.0, 1.0 - rest/2.0]
+            thresholds = list(data.quantile(quantiles))
+            return data.apply(lambda x: x < thresholds[0] or x > thresholds[1])
+
+        def find_smallest_and_largest_asym(data, quantile):
+            """ Return boolen vector of data to remove such that quantile/2
+                is kept in both non-negative and non-positive subsets
+                of data."""
+            rest = 1.0 - quantile
+
+            neg_threshold = data[data <  0.0].quantile(rest/2.0)
+            pos_threshold = data[data >= 0.0].quantile(1.0 - rest/2.0)
+
+            return data.apply(lambda x: x < neg_threshold or x > pos_threshold)
+
+        method_table = {'upper': find_largest,
+                        'lower': find_smallest,
+                        'two-sided': find_smallest_and_largest,
+                        'two-sided-asym': find_smallest_and_largest_asym}
+
+        for col in data[kpis].columns:
+            column = data[col].copy()
+            column.replace([np.inf, -np.inf], np.nan)
+
+            if col in thresholds:
+                threshold_type, percentile = thresholds[col]
+                quantile = percentile/100.0
+            else:
+                quantile = DEFAULT_OUTLIER_QUANTILE
+                threshold_type = _choose_threshold_type(column)
+
+            if threshold_type not in method_table:
+                raise ValueError("Unknown outlier filtering method '%s'."%(threshold_type,))
+            else:
+                method = method_table[threshold_type]
+                flags = flags | method(column, quantile)
+
         return flags
 
     def run_goodness_of_fit_test(self, observed_freqs, expected_freqs, alpha=0.01, min_counts=5):
@@ -339,3 +389,19 @@ class Experiment(object):
             raise ValueError("Variant split check was cancelled since observed or expected frequencies "
                              "are less than 2.")
         return split_is_unbiased, p_value
+
+def _choose_threshold_type(data):
+    """ Heuristics used to decide what filtering method to use."""
+    assert len(data), 'data should be non-empty'
+    data = pd.Series(data)
+    min, max = data.min(skipna=True), data.max(skipna=True)
+
+    if min < 0.0 and max > 0.0:
+        return 'two-sided'
+    elif max > 0.0:
+        return 'upper'
+    elif min < 0.0:
+        return 'lower'
+    else:
+        # it doesn't really matter since in this case min == max == 0.0
+        return 'two-sided'
