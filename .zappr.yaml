@@ -1,5 +1,5 @@
-X-Zalando-Type: tools
 X-Zalando-Team: octopus
+X-Zalando-Type: code
 
 approvals:
   minimum: 2
