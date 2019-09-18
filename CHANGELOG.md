@@ -1,7 +1,23 @@
 # Change Log
 
+## [v1.4.0](https://github.com/zalando/expan/tree/v1.4.0) (2019-07-05)
+[Full Changelog](https://github.com/zalando/expan/compare/v1.3.9...v1.4.0)
+
+**Closed issues:**
+
+- Why features are iterated in a for loop? [\#243](https://github.com/zalando/expan/issues/243)
+
+**Merged pull requests:**
+
+- Two-sided outlier filtering mode [\#249](https://github.com/zalando/expan/pull/249) ([gbordyugov](https://github.com/gbordyugov))
+- Create .zappr.yaml [\#248](https://github.com/zalando/expan/pull/248) ([perploug](https://github.com/perploug))
+- Correct documentation [\#245](https://github.com/zalando/expan/pull/245) ([shansfolder](https://github.com/shansfolder))
+
 ## [v1.3.9](https://github.com/zalando/expan/tree/v1.3.9) (2018-09-10)
-[Full Changelog](https://github.com/zalando/expan/compare/v1.3.7...v1.3.9)
+[Full Changelog](https://github.com/zalando/expan/compare/v1.3.8...v1.3.9)
+
+## [v1.3.8](https://github.com/zalando/expan/tree/v1.3.8) (2018-09-10)
+[Full Changelog](https://github.com/zalando/expan/compare/v1.3.7...v1.3.8)
 
 **Merged pull requests:**
 

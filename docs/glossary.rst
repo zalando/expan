@@ -12,9 +12,10 @@ Assumptions used in analysis
   * Variance in treatment and control is identical
   * Mean of delta is normally distributed
 
-2. Welch t-test
+2. Equal or unequal sample sizes, equal variance t-test
 
   * Mean of means is t-distributed (or normally distributed)
+  * Variance of two distributions are same (so the variance of two groups of sample should be similar)
 
 3. In general
 

@@ -1,11 +1,40 @@
 Change Log
 ==========
 
+`v1.4.0 <https://github.com/zalando/expan/tree/v1.4.0>`__ (2019-07-05)
+----------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/zalando/expan/compare/v1.3.9...v1.4.0>`__
+
+**Closed issues:**
+
+-  Why features are iterated in a for loop?
+   `#243 <https://github.com/zalando/expan/issues/243>`__
+
+**Merged pull requests:**
+
+-  Two-sided outlier filtering mode
+   `#249 <https://github.com/zalando/expan/pull/249>`__
+   (`gbordyugov <https://github.com/gbordyugov>`__)
+-  Create .zappr.yaml
+   `#248 <https://github.com/zalando/expan/pull/248>`__
+   (`perploug <https://github.com/perploug>`__)
+-  Correct documentation
+   `#245 <https://github.com/zalando/expan/pull/245>`__
+   (`shansfolder <https://github.com/shansfolder>`__)
+
 `v1.3.9 <https://github.com/zalando/expan/tree/v1.3.9>`__ (2018-09-10)
 ----------------------------------------------------------------------
 
 `Full
-Changelog <https://github.com/zalando/expan/compare/v1.3.7...v1.3.9>`__
+Changelog <https://github.com/zalando/expan/compare/v1.3.8...v1.3.9>`__
+
+`v1.3.8 <https://github.com/zalando/expan/tree/v1.3.8>`__ (2018-09-10)
+----------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/zalando/expan/compare/v1.3.7...v1.3.8>`__
 
 **Merged pull requests:**
 
@@ -39,7 +68,7 @@ Changelog <https://github.com/zalando/expan/compare/v1.3.5...v1.3.6>`__
 
 **Merged pull requests:**
 
--  If the number of \*finite\* samples is too small, then the data isn't
+-  If the number of \*finite\* samples is too small, then the data isn’t
    valid for analysis
    `#236 <https://github.com/zalando/expan/pull/236>`__
    (`aaron-mcdaid-zalando <https://github.com/aaron-mcdaid-zalando>`__)
@@ -81,7 +110,7 @@ Changelog <https://github.com/zalando/expan/compare/v1.3.1...v1.3.2>`__
 
 -  Fix minor typos `#231 <https://github.com/zalando/expan/pull/231>`__
    (`sdia <https://github.com/sdia>`__)
--  custom deepcopy() method for 'StatisticalTest', to save some memory
+-  custom deepcopy() method for ‘StatisticalTest’, to save some memory
    `#230 <https://github.com/zalando/expan/pull/230>`__
    (`aaron-mcdaid-zalando <https://github.com/aaron-mcdaid-zalando>`__)
 -  Updated old multiple correction documentation
@@ -171,11 +200,11 @@ Changelog <https://github.com/zalando/expan/compare/v1.2.0...v1.2.1>`__
 
 **Merged pull requests:**
 
--  Added merge\_with class method for merging two multiple test suite
+-  Added merge_with class method for merging two multiple test suite
    results and tests
    `#216 <https://github.com/zalando/expan/pull/216>`__
    (`daryadedik <https://github.com/daryadedik>`__)
--  List of filtered columns as filtered\_columns metadata information
+-  List of filtered columns as filtered_columns metadata information
    `#215 <https://github.com/zalando/expan/pull/215>`__
    (`daryadedik <https://github.com/daryadedik>`__)
 
@@ -360,7 +389,7 @@ Changelog <https://github.com/zalando/expan/compare/v0.6.6...v0.6.7>`__
 -  Increase version to 0.6.7
    `#181 <https://github.com/zalando/expan/pull/181>`__
    (`shansfolder <https://github.com/shansfolder>`__)
--  fixed last command in "Deploying to PyPI" part of contributing.rst
+-  fixed last command in “Deploying to PyPI” part of contributing.rst
    `#180 <https://github.com/zalando/expan/pull/180>`__
    (`mkolarek <https://github.com/mkolarek>`__)
 -  Extended multiple correction for group sequential, added doc for
@@ -380,7 +409,7 @@ Changelog <https://github.com/zalando/expan/compare/v0.6.5...v0.6.6>`__
 **Closed issues:**
 
 -  Infinitely large confidence intervals produced by
-   group\_sequential\_delta()
+   group_sequential_delta()
    `#172 <https://github.com/zalando/expan/issues/172>`__
 
 **Merged pull requests:**
@@ -388,8 +417,8 @@ Changelog <https://github.com/zalando/expan/compare/v0.6.5...v0.6.6>`__
 -  Merging dev to master for new release
    `#175 <https://github.com/zalando/expan/pull/175>`__
    (`mkolarek <https://github.com/mkolarek>`__)
--  AXO-35 implemented estimate\_sample\_size() for estimating sample
-   size … `#174 <https://github.com/zalando/expan/pull/174>`__
+-  AXO-35 implemented estimate_sample_size() for estimating sample size
+   … `#174 <https://github.com/zalando/expan/pull/174>`__
    (`mkolarek <https://github.com/mkolarek>`__)
 -  Fix two-sided alpha value in power analysis
    `#173 <https://github.com/zalando/expan/pull/173>`__
@@ -515,9 +544,9 @@ Changelog <https://github.com/zalando/expan/compare/v0.6.0...v0.6.1>`__
 
 **Closed issues:**
 
--  Results.to\_json() implementation not flexible
+-  Results.to_json() implementation not flexible
    `#65 <https://github.com/zalando/expan/issues/65>`__
--  Results.to\_json() doesn't support trend() results
+-  Results.to_json() doesn’t support trend() results
    `#64 <https://github.com/zalando/expan/issues/64>`__
 
 **Merged pull requests:**
@@ -528,7 +557,7 @@ Changelog <https://github.com/zalando/expan/compare/v0.6.0...v0.6.1>`__
 -  Fix delta/alpha model para inconsistency
    `#144 <https://github.com/zalando/expan/pull/144>`__
    (`shansfolder <https://github.com/shansfolder>`__)
--  Small improvement on default type of report\_kpi\_names
+-  Small improvement on default type of report_kpi_names
    `#140 <https://github.com/zalando/expan/pull/140>`__
    (`shansfolder <https://github.com/shansfolder>`__)
 -  slightly different json structure for results
@@ -548,7 +577,7 @@ Changelog <https://github.com/zalando/expan/compare/v0.5.3...v0.6.0>`__
 
 -  Improve binning performance
    `#135 <https://github.com/zalando/expan/issues/135>`__
--  Missing unit tests for to\_json() on early stopping algos
+-  Missing unit tests for to_json() on early stopping algos
    `#128 <https://github.com/zalando/expan/issues/128>`__
 
 **Merged pull requests:**
@@ -565,7 +594,7 @@ Changelog <https://github.com/zalando/expan/compare/v0.5.3...v0.6.0>`__
 -  Added try-finally block for the compulsory clean-up of .pkl compiled
    models `#130 <https://github.com/zalando/expan/pull/130>`__
    (`daryadedik <https://github.com/daryadedik>`__)
--  OCTO-1837 fixed to\_json()
+-  OCTO-1837 fixed to_json()
    `#129 <https://github.com/zalando/expan/pull/129>`__
    (`gbordyugov <https://github.com/gbordyugov>`__)
 
@@ -586,7 +615,7 @@ Changelog <https://github.com/zalando/expan/compare/v0.5.2...v0.5.3>`__
    `#119 <https://github.com/zalando/expan/issues/119>`__
 -  Weighted KPIs is only implemented in regular delta
    `#114 <https://github.com/zalando/expan/issues/114>`__
--  Percentiles value is lost during computing group\_sequential\_delta
+-  Percentiles value is lost during computing group_sequential_delta
    `#108 <https://github.com/zalando/expan/issues/108>`__
 
 **Closed issues:**
@@ -609,8 +638,7 @@ Changelog <https://github.com/zalando/expan/compare/v0.5.2...v0.5.3>`__
    `#124 <https://github.com/zalando/expan/pull/124>`__
    (`shansfolder <https://github.com/shansfolder>`__)
 -  OCTO-1748: Make number of iterations as a method argument in
-   \_bayes\_sampling
-   `#123 <https://github.com/zalando/expan/pull/123>`__
+   \_bayes_sampling `#123 <https://github.com/zalando/expan/pull/123>`__
    (`daryadedik <https://github.com/daryadedik>`__)
 -  OCTO-1615 Use Python builtin logging instead of our own debugging.py
    `#122 <https://github.com/zalando/expan/pull/122>`__
@@ -644,7 +672,7 @@ Changelog <https://github.com/zalando/expan/compare/v0.5.1...v0.5.2>`__
 
 **Merged pull requests:**
 
--  OCTO-1502 support \*\*kwargs for four delta functions
+-  OCTO-1502 support \**kwargs for four delta functions
    `#111 <https://github.com/zalando/expan/pull/111>`__
    (`shansfolder <https://github.com/shansfolder>`__)
 -  new version 0.5.1
@@ -659,19 +687,18 @@ Changelog <https://github.com/zalando/expan/compare/v0.5.0...v0.5.1>`__
 
 **Implemented enhancements:**
 
--  Derived KPIs are passed to Experiment.fixed\_horizon\_delta() but
-   never used in there
-   `#96 <https://github.com/zalando/expan/issues/96>`__
+-  Derived KPIs are passed to Experiment.fixed_horizon_delta() but never
+   used in there `#96 <https://github.com/zalando/expan/issues/96>`__
 
 **Merged pull requests:**
 
 -  updated CONTRIBUTING.rst with deployment flow
    `#106 <https://github.com/zalando/expan/pull/106>`__
    (`mkolarek <https://github.com/mkolarek>`__)
--  OCTO-1501: bugfix in Results.to\_json()
+-  OCTO-1501: bugfix in Results.to_json()
    `#105 <https://github.com/zalando/expan/pull/105>`__
    (`gbordyugov <https://github.com/gbordyugov>`__)
--  OCTO-1502 removed variant\_subset parameter...
+-  OCTO-1502 removed variant_subset parameter…
    `#104 <https://github.com/zalando/expan/pull/104>`__
    (`gbordyugov <https://github.com/gbordyugov>`__)
 -  OCTO-1540 cleanup handling of derived kpis
@@ -708,7 +735,7 @@ Changelog <https://github.com/zalando/expan/compare/v0.4.5...v0.5.0>`__
 
 **Closed issues:**
 
--  Results.to\_json() => TypeError: Object of type 'UserWarning' is not
+-  Results.to_json() => TypeError: Object of type ‘UserWarning’ is not
    JSON serializable
    `#77 <https://github.com/zalando/expan/issues/77>`__
 -  Rethink Results structure
@@ -716,10 +743,10 @@ Changelog <https://github.com/zalando/expan/compare/v0.4.5...v0.5.0>`__
 
 **Merged pull requests:**
 
--  new dataframe tree traverser in to\_json()
+-  new dataframe tree traverser in to_json()
    `#92 <https://github.com/zalando/expan/pull/92>`__
    (`gbordyugov <https://github.com/gbordyugov>`__)
--  updated requirements.txt to have 'greater than' dependencies instead
+-  updated requirements.txt to have ‘greater than’ dependencies instead
    … `#89 <https://github.com/zalando/expan/pull/89>`__
    (`mkolarek <https://github.com/mkolarek>`__)
 -  pip version requirement
@@ -738,7 +765,7 @@ Changelog <https://github.com/zalando/expan/compare/v0.4.5...v0.5.0>`__
 -  a couple of minor cleanups
    `#79 <https://github.com/zalando/expan/pull/79>`__
    (`gbordyugov <https://github.com/gbordyugov>`__)
--  Merge to\_json() changes
+-  Merge to_json() changes
    `#75 <https://github.com/zalando/expan/pull/75>`__
    (`mkolarek <https://github.com/mkolarek>`__)
 -  Feature/early stopping
@@ -761,7 +788,7 @@ Changelog <https://github.com/zalando/expan/compare/v0.4.4...v0.4.5>`__
 -  Feature/results and to json refactor
    `#74 <https://github.com/zalando/expan/pull/74>`__
    (`mkolarek <https://github.com/mkolarek>`__)
--  Merge to\_json() and prob\_uplift\_over\_zero changes
+-  Merge to_json() and prob_uplift_over_zero changes
    `#72 <https://github.com/zalando/expan/pull/72>`__
    (`mkolarek <https://github.com/mkolarek>`__)
 -  regex fix, see https://github.com/zalando/expan/issues/58
@@ -776,9 +803,9 @@ Changelog <https://github.com/zalando/expan/compare/v0.4.3...v0.4.4>`__
 
 **Implemented enhancements:**
 
--  Add argument assume\_normal and treatment\_cost to
-   calculate\_prob\_uplift\_over\_zero() and
-   prob\_uplift\_over\_zero\_single\_metric()
+-  Add argument assume_normal and treatment_cost to
+   calculate_prob_uplift_over_zero() and
+   prob_uplift_over_zero_single_metric()
    `#26 <https://github.com/zalando/expan/issues/26>`__
 -  host intro slides (from the ipython notebook) somewhere for public
    viewing `#10 <https://github.com/zalando/expan/issues/10>`__
@@ -793,7 +820,7 @@ Changelog <https://github.com/zalando/expan/compare/v0.4.3...v0.4.4>`__
 -  Feature/results and to json refactor
    `#71 <https://github.com/zalando/expan/pull/71>`__
    (`mkolarek <https://github.com/mkolarek>`__)
--  new to\_json() functionality and improved vim support
+-  new to_json() functionality and improved vim support
    `#67 <https://github.com/zalando/expan/pull/67>`__
    (`mkolarek <https://github.com/mkolarek>`__)
 
@@ -826,7 +853,7 @@ Changelog <https://github.com/zalando/expan/compare/v0.4.1...v0.4.2>`__
 
 **Fixed bugs:**
 
--  frequency table in the chi square test doesn't respect the order of
+-  frequency table in the chi square test doesn’t respect the order of
    categories `#56 <https://github.com/zalando/expan/issues/56>`__
 
 **Merged pull requests:**
@@ -854,7 +881,7 @@ Changelog <https://github.com/zalando/expan/compare/v0.4.0...v0.4.1>`__
 -  Feature/octo 545 add consolidate documentation
    `#53 <https://github.com/zalando/expan/pull/53>`__
    (`mkolarek <https://github.com/mkolarek>`__)
--  added os.path.join instead of manual string concatenations with '/'
+-  added os.path.join instead of manual string concatenations with ‘/’
    `#52 <https://github.com/zalando/expan/pull/52>`__
    (`mkolarek <https://github.com/mkolarek>`__)
 -  Feature/octo 958 outlier filtering
@@ -872,7 +899,7 @@ Changelog <https://github.com/zalando/expan/compare/v0.3.4...v0.4.0>`__
 
 **Closed issues:**
 
--  Support 'overall ratio' metrics (e.g. conversion rate/return rate) as
+-  Support ‘overall ratio’ metrics (e.g. conversion rate/return rate) as
    opposed to per-entity ratios
    `#44 <https://github.com/zalando/expan/issues/44>`__
 
@@ -924,7 +951,7 @@ Changelog <https://github.com/zalando/expan/compare/v0.3.2...v0.3.3>`__
 -  Bump version: 0.3.1 → 0.3.2
    `#40 <https://github.com/zalando/expan/pull/40>`__
    (`mkolarek <https://github.com/mkolarek>`__)
--  Revert "Merge pull request #35 from zalando/dev"
+-  Revert “Merge pull request #35 from zalando/dev”
    `#39 <https://github.com/zalando/expan/pull/39>`__
    (`mkolarek <https://github.com/mkolarek>`__)
 -  Merge pull request #35 from zalando/dev
@@ -997,7 +1024,7 @@ Changelog <https://github.com/zalando/expan/compare/v0.2.4...v0.2.5>`__
 
 **Implemented enhancements:**
 
--  Implement \_\_version\_\_
+-  Implement \__version_\_
    `#14 <https://github.com/zalando/expan/issues/14>`__
 
 **Closed issues:**
@@ -1007,7 +1034,7 @@ Changelog <https://github.com/zalando/expan/compare/v0.2.4...v0.2.5>`__
 
 **Merged pull requests:**
 
--  implement expan.\_\_version\_\_
+-  implement expan.__version_\_
    `#19 <https://github.com/zalando/expan/pull/19>`__
    (`pangeran-bottor <https://github.com/pangeran-bottor>`__)
 -  Mainly documentation changes, as well as travis config updates
@@ -1029,7 +1056,7 @@ Changelog <https://github.com/zalando/expan/compare/v0.2.3...v0.2.4>`__
 
 **Closed issues:**
 
--  No module named experiment and test\_data
+-  No module named experiment and test_data
    `#13 <https://github.com/zalando/expan/issues/13>`__
 
 **Merged pull requests:**
@@ -1065,5 +1092,5 @@ Changelog <https://github.com/zalando/expan/compare/v0.2.0...v0.2.1>`__
    `#3 <https://github.com/zalando/expan/pull/3>`__
    (`robertmuil <https://github.com/robertmuil>`__)
 
-\* *This Change Log was automatically generated by
-`github\_changelog\_generator <https://github.com/skywinder/Github-Changelog-Generator>`__*
+\* *This Change Log was automatically generated
+by*\ `github_changelog_generator <https://github.com/skywinder/Github-Changelog-Generator>`__
