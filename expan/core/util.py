@@ -18,7 +18,7 @@ class JsonSerializable(object):
         return self.toJson()
 
 
-def find_value_by_key_with_condition(items, condition_key, condition_value, lookup_key):
+def find_value_by_key_with_condition(items, condition_key, condition_value, lookup_key, tol=None):
     """ Find the value of lookup key where the dictionary contains condition key = condition value.
     
     :param items: list of dictionaries
@@ -31,7 +31,10 @@ def find_value_by_key_with_condition(items, condition_key, condition_value, look
     
     :return: lookup value or found value for the lookup key
     """
-    return [item[lookup_key] for item in items if item[condition_key] == condition_value][0]
+    if tol is None:
+        return [item[lookup_key] for item in items if item[condition_key] == condition_value][0]
+    else:
+        return [item[lookup_key] for item in items if abs(item[condition_key]-condition_value) < tol][0]
 
 
 def is_nan(obj):

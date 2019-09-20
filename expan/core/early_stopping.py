@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 cache_sampling_results = False
 sampling_results = {}  # memorized sampling results
 
+OBRIEN_FLEMING_DIVISION_FACTOR = 100
 
 def obrien_fleming(information_fraction, alpha=0.05):
     """ Calculate an approximation of the O'Brien-Fleming alpha spending function.
@@ -32,6 +33,19 @@ def obrien_fleming(information_fraction, alpha=0.05):
 
     :return: redistributed alpha value at the time point with the given information fraction
     :rtype:  float
+    """
+
+    alpha = alpha/OBRIEN_FLEMING_DIVISION_FACTOR
+    """
+    The following tests needed to be adjusted to take account of this correction:
+    - tests/tests_core/test_early_stopping.py::
+            GroupSequentialTestCases::
+                    test_obrien_fleming
+                    test_group_sequential
+                    test_group_sequential_actual_size_larger_than_estimated
+    - tests_core/test_experiment.py::
+            StatisticalTestTestCases::
+            test_group_sequential
     """
     return (1 - norm.cdf(norm.ppf(1 - alpha / 2) / np.sqrt(information_fraction))) * 2
 

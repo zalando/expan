@@ -37,16 +37,16 @@ class GroupSequentialTestCases(EarlyStoppingTestCase):
         """ Check the O'Brien-Fleming spending function."""
         # Check array as input
         res_1 = es.obrien_fleming(np.linspace(0, 1, 5 + 1)[1:])
-        expected_res = [1.17264468e-05, 1.94191300e-03, 1.13964185e-02, 2.84296308e-02, 5.00000000e-02]
+        expected_res = [7.1054274e-15,3.7219966e-08,7.0016877e-06,9.9583700e-05,5.0000000e-04]
         np.testing.assert_almost_equal(res_1, expected_res)
 
         # Check float as input
         res_2 = es.obrien_fleming(0.5)
-        self.assertAlmostEqual(res_2, 0.005574596680784305)
+        self.assertAlmostEqual(res_2, 8.5431190077756014e-07)
 
         # Check int as input
         res_3 = es.obrien_fleming(1)
-        self.assertAlmostEqual(res_3, 0.05)
+        self.assertAlmostEqual(res_3, 0.0005)
 
     def test_group_sequential(self):
         """ Check the group sequential function."""
@@ -60,10 +60,10 @@ class GroupSequentialTestCases(EarlyStoppingTestCase):
         self.assertAlmostEqual(res.control_statistics.variance,    0.9373337542827797)
 
         self.assertAlmostEqual(res.delta, -0.15887364780635896)
-        value025 = find_value_by_key_with_condition(res.confidence_interval, 'percentile', 2.5, 'value')
-        value975 = find_value_by_key_with_condition(res.confidence_interval, 'percentile', 97.5, 'value')
-        np.testing.assert_almost_equal(value025, -0.24461812530841959, decimal=5)
-        np.testing.assert_almost_equal(value975, -0.07312917030429833, decimal=5)
+        value025 = find_value_by_key_with_condition(res.confidence_interval, 'percentile', 2.5/es.OBRIEN_FLEMING_DIVISION_FACTOR, 'value', 1e-5)
+        value975 = find_value_by_key_with_condition(res.confidence_interval, 'percentile', 100-2.5/es.OBRIEN_FLEMING_DIVISION_FACTOR, 'value', 1e-5)
+        np.testing.assert_almost_equal(value025, -0.31130760395377599, decimal=5)
+        np.testing.assert_almost_equal(value975, -0.0064396916589367081, decimal=5)
 
         self.assertAlmostEqual(res.p,                 0.0002863669955157941)
         self.assertAlmostEqual(res.statistical_power, 0.9529152504960496)
@@ -75,10 +75,10 @@ class GroupSequentialTestCases(EarlyStoppingTestCase):
         """
         res = es.group_sequential(self.rand_s1, self.rand_s2, estimated_sample_size=100)
 
-        value025 = find_value_by_key_with_condition(res.confidence_interval, 'percentile', 2.5, 'value')
-        value975 = find_value_by_key_with_condition(res.confidence_interval, 'percentile', 97.5, 'value')
-        np.testing.assert_almost_equal (value025, -0.24461812530841959, decimal=5)
-        np.testing.assert_almost_equal (value975, -0.07312917030429833, decimal=5)
+        value025 = find_value_by_key_with_condition(res.confidence_interval, 'percentile', 2.5/es.OBRIEN_FLEMING_DIVISION_FACTOR, 'value', tol=1e-5)
+        value975 = find_value_by_key_with_condition(res.confidence_interval, 'percentile', 100-2.5/es.OBRIEN_FLEMING_DIVISION_FACTOR, 'value', tol=1e-5)
+        np.testing.assert_almost_equal (value025, -0.31130760395377599, decimal=5)
+        np.testing.assert_almost_equal (value975, -0.00643969165893670, decimal=5)
 
 
 class BayesFactorTestCases(EarlyStoppingTestCase):
