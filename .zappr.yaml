@@ -5,6 +5,5 @@ approvals:
       from:
         orgs:
           - "zalando"
-        collaborators: true
 X-Zalando-Team: "octopus"
 X-Zalando-Type: code
