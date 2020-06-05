@@ -10,7 +10,6 @@ Development Lead
 Contributors
 ------------
 
-* Aaron McDaid <aaron.mcdaid@zalando.de>
 * Darya Dedik <darya.dedik@zalando.de>
 * Dominic Heger <dominic.heger@zalando.de>
 * Grigory Bordyugov <grigory.bordyugov@zalando.de>
